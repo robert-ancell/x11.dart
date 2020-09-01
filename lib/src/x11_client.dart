@@ -28,9 +28,9 @@ class X11Client {
     buffer.writeCARD16(authorizationProtocol.length);
     buffer.writeCARD16(authorizationProtocolData.length);
     buffer.data.addAll(authorizationProtocol);
-    buffer.pad(authorizationProtocol.length);
+    buffer.skip(pad(authorizationProtocol.length));
     buffer.data.addAll(authorizationProtocolData);
-    buffer.pad(authorizationProtocolData.length);
+    buffer.skip(pad(authorizationProtocolData.length));
     buffer.skip(2);
     _socket.add(buffer.data);
 
@@ -70,7 +70,7 @@ class X11Client {
       var maxKeycode = _buffer.readBYTE();
       _buffer.skip(4);
       var vendor = _buffer.readSTRING8(vendorLength);
-      _buffer.pad(vendorLength);
+      _buffer.skip(pad(vendorLength));
       print('Success: ${vendor}');
     } else if (result == 2) {
       // Authenticate
@@ -89,6 +89,15 @@ class X11Client {
   }
 }
 
+int pad(int length) {
+  var n = 0;
+  while (length % 4 != 0) {
+    length++;
+    n++;
+  }
+  return n;
+}
+
 class X11WriteBuffer {
   final data = <int>[];
 
@@ -99,13 +108,6 @@ class X11WriteBuffer {
   void skip(int length) {
     for (var i = 0; i < length; i++) {
       writeBYTE(0);
-    }
-  }
-
-  int pad(int length) {
-    while (length % 4 != 0) {
-      writeBYTE(0);
-      length++;
     }
   }
 
@@ -144,13 +146,6 @@ class X11ReadBuffer {
   int skip(int count) {
     for (var i = 0; i < count; i++) {
       readBYTE();
-    }
-  }
-
-  int pad(int length) {
-    while (length % 4 != 0) {
-      readBYTE();
-      length++;
     }
   }
 
