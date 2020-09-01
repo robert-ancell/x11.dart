@@ -3,6 +3,66 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+class X11Success {
+  int releaseNumber;
+  int resourceIdBase;
+  int resourceIdMask;
+  int motionBufferSize;
+  int vendorLength;
+  int maximumRequestLength;
+  int rootsCount;
+  int formatCount;
+  int imageByteOrder;
+  int bitmapFormatBitOrder;
+  int bitmapFormatScanlineUnit;
+  int bitmapFormatScanlinePad;
+  int minKeycode;
+  int maxKeycode;
+  String vendor;
+  List<X11Format> pixmapFormats;
+  List<X11Screen> roots;
+}
+
+class X11Format {
+  int depth;
+  int bitsPerPixel;
+  int scanlinePad;
+}
+
+class X11Screen {
+  int window;
+  int defaultColormap;
+  int whitePixel;
+  int blackPixel;
+  int currentInputMasks;
+  int widthInPixels;
+  int heightInPixels;
+  int widthInMillimeters;
+  int heightInMillimeters;
+  int minInstalledMaps;
+  int maxInstalledMaps;
+  int rootVisual;
+  int backingStores;
+  bool saveUnders;
+  int rootDepth;
+  List<X11Depth> allowedDepths;
+}
+
+class X11Depth {
+  int depth;
+  List<X11Visual> visuals;
+}
+
+class X11Visual {
+  int visualId;
+  int class_;
+  int bitsPerRgbValue;
+  int colormapEntries;
+  int redMask;
+  int greenMask;
+  int blueMask;
+}
+
 class X11Client {
   Socket _socket;
   final _buffer = X11ReadBuffer();
@@ -51,27 +111,82 @@ class X11Client {
     } else if (result == 1) {
       // Success
       _buffer.skip(1);
+      var result = X11Success();
       var protocolMajorVersion = _buffer.readCARD16();
       var protocolMinorVersion = _buffer.readCARD16();
-      var length = _buffer.readCARD16();
-      var releaseNumber = _buffer.readCARD32();
-      var resourceIdBase = _buffer.readCARD32();
-      var resourceIdMask = _buffer.readCARD32();
-      var motionBufferSize = _buffer.readCARD32();
+      if (protocolMajorVersion != 11 || protocolMinorVersion != 0) {
+        throw 'Unsupported X versio ${protocolMajorVersion}.${protocolMinorVersion}';
+      }
+      var length = _buffer.readCARD16(); // FIXME: Check this
+      result.releaseNumber = _buffer.readCARD32();
+      result.resourceIdBase = _buffer.readCARD32();
+      result.resourceIdMask = _buffer.readCARD32();
+      result.motionBufferSize = _buffer.readCARD32();
       var vendorLength = _buffer.readCARD16();
-      var maximumRequestLength = _buffer.readCARD16();
-      var nScreens = _buffer.readBYTE();
-      var nFormats = _buffer.readBYTE();
-      var imageByteOrder = _buffer.readBYTE();
-      var bitmapFormatBitOrder = _buffer.readBYTE();
-      var bitmapFormatScanlineUnit = _buffer.readBYTE();
-      var bitmapFormatScanlinePad = _buffer.readBYTE();
-      var minKeycode = _buffer.readBYTE();
-      var maxKeycode = _buffer.readBYTE();
+      result.maximumRequestLength = _buffer.readCARD16();
+      var rootsCount = _buffer.readBYTE();
+      var formatCount = _buffer.readBYTE();
+      result.imageByteOrder = _buffer.readBYTE();
+      result.bitmapFormatBitOrder = _buffer.readBYTE();
+      result.bitmapFormatScanlineUnit = _buffer.readBYTE();
+      result.bitmapFormatScanlinePad = _buffer.readBYTE();
+      result.minKeycode = _buffer.readBYTE();
+      result.maxKeycode = _buffer.readBYTE();
       _buffer.skip(4);
-      var vendor = _buffer.readSTRING8(vendorLength);
+      result.vendor = _buffer.readSTRING8(vendorLength);
       _buffer.skip(pad(vendorLength));
-      print('Success: ${vendor}');
+      result.pixmapFormats = <X11Format>[];
+      for (var i = 0; i < formatCount; i++) {
+        var format = X11Format();
+        format.depth = _buffer.readBYTE();
+        format.bitsPerPixel = _buffer.readBYTE();
+        format.scanlinePad = _buffer.readBYTE();
+        _buffer.skip(5);
+        result.pixmapFormats.add(format);
+      }
+      result.roots = <X11Screen>[];
+      for (var i = 0; i < rootsCount; i++) {
+        var screen = X11Screen();
+        screen.window = _buffer.readCARD32();
+        screen.defaultColormap = _buffer.readCARD32();
+        screen.whitePixel = _buffer.readCARD32();
+        screen.blackPixel = _buffer.readCARD32();
+        screen.currentInputMasks = _buffer.readCARD32();
+        screen.widthInPixels = _buffer.readCARD16();
+        screen.heightInPixels = _buffer.readCARD16();
+        screen.widthInMillimeters = _buffer.readCARD16();
+        screen.heightInMillimeters = _buffer.readCARD16();
+        screen.minInstalledMaps = _buffer.readCARD16();
+        screen.maxInstalledMaps = _buffer.readCARD16();
+        screen.rootVisual = _buffer.readCARD32();
+        screen.backingStores = _buffer.readBYTE();
+        screen.saveUnders = _buffer.readBOOL();
+        screen.rootDepth = _buffer.readBYTE();
+        var allowedDepthsCount = _buffer.readBYTE();
+        screen.allowedDepths = <X11Depth>[];
+        for (var j = 0; j < allowedDepthsCount; j++) {
+          var depth = X11Depth();
+          depth.depth = _buffer.readBYTE();
+          _buffer.skip(1);
+          var visualsCount = _buffer.readCARD16();
+          depth.visuals = <X11Visual>[];
+          for (var k = 0; k < visualsCount; k++) {
+            var visual = X11Visual();
+            visual.visualId = _buffer.readCARD32();
+            visual.class_ = _buffer.readBYTE();
+            visual.bitsPerRgbValue = _buffer.readBYTE();
+            visual.colormapEntries = _buffer.readCARD16();
+            visual.redMask = _buffer.readCARD32();
+            visual.greenMask = _buffer.readCARD32();
+            visual.blueMask = _buffer.readCARD32();
+            _buffer.skip(4);
+            depth.visuals.add(visual);
+          }
+          screen.allowedDepths.add(depth);
+        }
+        result.roots.add(screen);
+      }
+      print('Success: ${result.vendor}');
     } else if (result == 2) {
       // Authenticate
       _buffer.skip(5);
@@ -133,6 +248,10 @@ class X11ReadBuffer {
   int readBYTE() {
     readOffset++;
     return _data[readOffset - 1];
+  }
+
+  bool readBOOL() {
+    return readBYTE() != 0;
   }
 
   ByteBuffer readBytes(int length) {
