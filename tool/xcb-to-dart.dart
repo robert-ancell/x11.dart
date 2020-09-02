@@ -20,6 +20,7 @@ void main(List<String> args) async {
     var reply = request.getElement('reply');
 
     var args = <String>[];
+    var argNames = <String>[];
 
     var fields = request.children
         .where((node) => node is XmlElement)
@@ -39,6 +40,7 @@ void main(List<String> args) async {
         var fieldName = element.getAttribute('name');
 
         if (!refs.contains(fieldName)) {
+          argNames.add(xcbFieldToDartName(fieldName));
           args.add(
               '${xcbTypeToDartType(fieldType)} ${xcbFieldToDartName(fieldName)}');
         }
@@ -46,6 +48,7 @@ void main(List<String> args) async {
         var listType = element.getAttribute('type');
         var listName = element.getAttribute('name');
 
+        argNames.add(xcbFieldToDartName(listName));
         if (listType == 'char') {
           args.add('String ${xcbFieldToDartName(listName)}');
         } else {
@@ -66,10 +69,13 @@ void main(List<String> args) async {
     }
 
     var code = '';
-    code += 'class ${name}Request extends X11Request {\n';
+    code += 'class X11${name}Request extends X11Request {\n';
     for (var arg in args) {
-      code += '  ${arg};\n';
+      code += '  final ${arg};\n';
     }
+    code += '\n';
+    code +=
+        '  X11${name}Request(${argNames.map((name) => 'this.${name}').join(', ')});\n';
     code += '\n';
     code += '  @override\n';
     code += '  void encode(X11WriteBuffer buffer) {\n';
@@ -97,8 +103,12 @@ void main(List<String> args) async {
     code = '';
     code +=
         '  ${returnValue} ${functionName}(${args.join(', ')})${functionSuffix} {\n';
+    code += '    var request = X11${name}Request(${argNames.join(', ')});\n';
+    code += '    var buffer = X11WriteBuffer();\n';
+    code += '    request.encode(buffer);\n';
+    code += '    _sendRequest(buffer.data);\n';
     code += '  }\n';
-    //functions.add(code);
+    functions.add(code);
   }
 
   var module = '';

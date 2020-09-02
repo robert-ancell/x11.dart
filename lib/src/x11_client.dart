@@ -94,10 +94,77 @@ class X11Visual {
       'X11Visual(visualId: ${visualId}, class: ${class_}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: 0x${redMask.toRadixString(16).padLeft(8, '0')}, greenMask: 0x${greenMask.toRadixString(16).padLeft(8, '0')}, blueMask: 0x${blueMask.toRadixString(16).padLeft(8, '0')})';
 }
 
+class X11Request {
+  int encode(X11WriteBuffer buffer) {
+    return 0;
+  }
+}
+
+enum X11WindowClass { copyFromParent, inputOutput, inputOnly }
+
+class X11CreateWindowRequest extends X11Request {
+  final int depth;
+  final int wid;
+  final int parent;
+  final int x;
+  final int y;
+  final int width;
+  final int height;
+  final int borderWidth;
+  final X11WindowClass class_;
+  final int visual;
+  final int valueMask;
+
+  X11CreateWindowRequest(
+      this.depth,
+      this.wid,
+      this.parent,
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.borderWidth,
+      this.class_,
+      this.visual,
+      this.valueMask);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(wid);
+    buffer.writeUint32(parent);
+    buffer.writeInt16(x);
+    buffer.writeInt16(y);
+    buffer.writeUint16(width);
+    buffer.writeUint16(height);
+    buffer.writeUint16(borderWidth);
+    buffer.writeUint16(class_.index);
+    buffer.writeUint32(visual);
+    buffer.writeUint32(valueMask);
+
+    return depth;
+  }
+}
+
+class X11MapWindowRequest extends X11Request {
+  final int window;
+
+  X11MapWindowRequest(this.window);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+
+    return 0;
+  }
+}
+
 class X11Client {
   Socket _socket;
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
+  int _resourceIdBase;
+  int _resourceIdMask;
+  int _resourceCount = 0;
 
   X11Client() {}
 
@@ -128,8 +195,45 @@ class X11Client {
     return _connectCompleter.future;
   }
 
+  int generateId() {
+    var id = _resourceIdBase + _resourceCount;
+    _resourceCount++;
+    return id;
+  }
+
+  void createWindow(int wid,
+      {X11WindowClass class_ = X11WindowClass.inputOutput,
+      int x = 0,
+      int y = 0,
+      int width = 0,
+      int height = 0,
+      int depth = 0,
+      int visual = 0,
+      int parent = 0,
+      int borderWidth = 0,
+      int valueMask = 0}) {
+    var request = X11CreateWindowRequest(depth, wid, parent, x, y, width,
+        height, borderWidth, class_, visual, valueMask);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(1, data, buffer.data);
+  }
+
+  void mapWindow(int window) {
+    var request = X11MapWindowRequest(window);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(8, data, buffer.data);
+  }
+
   void _processData(Uint8List data) {
     _buffer.addAll(data);
+    if (!_connectCompleter.isCompleted) {
+      _processSetup();
+    }
+  }
+
+  void _processSetup() {
     var result = _buffer.readUint8();
     if (result == 0) {
       // Failed
@@ -146,7 +250,7 @@ class X11Client {
       var protocolMajorVersion = _buffer.readUint16();
       var protocolMinorVersion = _buffer.readUint16();
       if (protocolMajorVersion != 11 || protocolMinorVersion != 0) {
-        throw 'Unsupported X versio ${protocolMajorVersion}.${protocolMinorVersion}';
+        throw 'Unsupported X version ${protocolMajorVersion}.${protocolMinorVersion}';
       }
       var length = _buffer.readUint16(); // FIXME: Check this
       result.releaseNumber = _buffer.readUint32();
@@ -219,6 +323,10 @@ class X11Client {
         }
         result.roots.add(screen);
       }
+
+      _resourceIdBase = result.resourceIdBase;
+      _resourceIdMask = result.resourceIdMask;
+
       print('Success: ${result.vendor}');
     } else if (result == 2) {
       // Authenticate
@@ -228,6 +336,16 @@ class X11Client {
       print('Authenticate: ${reason}');
     }
     _connectCompleter.complete();
+    _buffer.flush();
+  }
+
+  void _sendRequest(int opcode, int data, List<int> additionalData) {
+    var buffer = X11WriteBuffer();
+    buffer.writeUint8(opcode);
+    buffer.writeUint8(data);
+    buffer.writeUint16(1 + additionalData.length ~/ 4); // FIXME: Pad to 4 bytes
+    _socket.add(buffer.data);
+    _socket.add(additionalData);
   }
 
   void close() async {
@@ -265,7 +383,19 @@ class X11WriteBuffer {
     data.addAll(bytes.asUint8List());
   }
 
-  void writeString8(String value) {
+  void writeInt16(int value) {
+    var bytes = Uint8List(2).buffer;
+    ByteData.view(bytes).setInt16(0, value, Endian.little);
+    data.addAll(bytes.asUint8List());
+  }
+
+  void writeUint32(int value) {
+    var bytes = Uint8List(4).buffer;
+    ByteData.view(bytes).setUint32(0, value, Endian.little);
+    data.addAll(bytes.asUint8List());
+  }
+
+  void writeString(String value) {
     data.addAll(utf8.encode(value));
   }
 }
@@ -315,5 +445,24 @@ class X11ReadBuffer {
       d.add(readUint8());
     }
     return utf8.decode(d);
+  }
+
+  /// Removes all buffered data.
+  void flush() {
+    _data.removeRange(0, readOffset);
+    readOffset = 0;
+  }
+
+  @override
+  String toString() {
+    var s = '';
+    for (var d in _data) {
+      if (d >= 33 && d <= 126) {
+        s += String.fromCharCode(d);
+      } else {
+        s += '\\' + d.toRadixString(8);
+      }
+    }
+    return "X11ReadBuffer('${s}')";
   }
 }
