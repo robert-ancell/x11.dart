@@ -13,42 +13,46 @@ void main(List<String> args) async {
   var document = XmlDocument.parse(xml);
   var xcb = document.getElement('xcb');
 
+  var classes = <String>[];
   var functions = <String>[];
   for (var request in xcb.findElements('request')) {
     var name = request.getAttribute('name');
-    var fields = request.findElements('field');
-    var lists = request.findElements('list');
     var reply = request.getElement('reply');
 
     var args = <String>[];
 
+    var fields = request.children
+        .where((node) => node is XmlElement)
+        .map((node) => node as XmlElement);
+
     var refs = <String>{};
-    for (var list in lists) {
-      var listType = list.getAttribute('type');
-      var listName = list.getAttribute('name');
+    for (var list in fields.where((e) => e.name.local == 'list')) {
       var fieldref = list.getElement('fieldref');
       if (fieldref != null) {
         refs.add(fieldref.text);
       }
-
-      if (listType == 'char') {
-        args.add('String ${xcbFieldToDartName(listName)}');
-      } else {
-        args.add(
-            'List<${xcbTypeToDartType(listType)}> ${xcbFieldToDartName(listName)}');
-      }
     }
 
-    for (var field in fields) {
-      var fieldType = field.getAttribute('type');
-      var fieldName = field.getAttribute('name');
+    for (var element in fields) {
+      if (element.name.local == 'field') {
+        var fieldType = element.getAttribute('type');
+        var fieldName = element.getAttribute('name');
 
-      if (refs.contains(fieldName)) {
-        continue;
+        if (!refs.contains(fieldName)) {
+          args.add(
+              '${xcbTypeToDartType(fieldType)} ${xcbFieldToDartName(fieldName)}');
+        }
+      } else if (element.name.local == 'list') {
+        var listType = element.getAttribute('type');
+        var listName = element.getAttribute('name');
+
+        if (listType == 'char') {
+          args.add('String ${xcbFieldToDartName(listName)}');
+        } else {
+          args.add(
+              'List<${xcbTypeToDartType(listType)}> ${xcbFieldToDartName(listName)}');
+        }
       }
-
-      args.add(
-          '${xcbTypeToDartType(fieldType)} ${xcbFieldToDartName(fieldName)}');
     }
 
     var functionName = requestNameToFunctionName(name);
@@ -61,14 +65,44 @@ void main(List<String> args) async {
       returnValue = 'void';
     }
 
-    var function = '';
-    function +=
+    var code = '';
+    code += 'class ${name}Request extends X11Request {\n';
+    for (var arg in args) {
+      code += '  ${arg};\n';
+    }
+    code += '\n';
+    code += '  @override\n';
+    code += '  void encode(X11WriteBuffer buffer) {\n';
+    for (var node in request.children.where((node) => node is XmlElement)) {
+      var element = node as XmlElement;
+      if (element.name.local == 'pad') {
+        var count = element.getAttribute('bytes');
+        var align = element.getAttribute('align');
+        if (count != null) {
+          code += '    buffer.skip(${count});\n';
+        } else if (align != null) {
+          code += '    buffer.align(${align});\n';
+        }
+      } else if (element.name.local == 'field') {
+        var fieldType = element.getAttribute('type');
+        var fieldName = element.getAttribute('name');
+        code +=
+            '    buffer.write${xcbTypeToBufferType(fieldType)}(${xcbFieldToDartName(fieldName)});\n';
+      }
+    }
+    code += '  }\n';
+    code += '}\n';
+    classes.add(code);
+
+    code = '';
+    code +=
         '  ${returnValue} ${functionName}(${args.join(', ')})${functionSuffix} {\n';
-    function += '  }\n';
-    functions.add(function);
+    code += '  }\n';
+    //functions.add(code);
   }
 
   var module = '';
+  module += classes.join('\n');
   module += 'class X11Client {\n';
   module += functions.join('\n');
   module += '}';
@@ -99,6 +133,38 @@ String xcbTypeToDartType(String type) {
       type == 'VISUALID' ||
       type == 'WINDOW') {
     return 'int';
+  }
+  return '?${type}?';
+}
+
+String xcbTypeToBufferType(String type) {
+  if (type == 'BOOL') {
+    return 'Bool';
+  } else if (type == 'BYTE' || type == 'CARD8') {
+    return 'Uint8';
+  } else if (type == 'CARD16') {
+    return 'Uint16';
+  } else if (type == 'ATOM' ||
+      type == 'CARD32' ||
+      type == 'COLORMAP' ||
+      type == 'CURSOR' ||
+      type == 'DRAWABLE' ||
+      type == 'FONT' ||
+      type == 'FONTABLE' ||
+      type == 'GCONTEXT' ||
+      type == 'KEYCODE' ||
+      type == 'KEYSYM' ||
+      type == 'PIXMAP' ||
+      type == 'TIMESTAMP' ||
+      type == 'VISUALID' ||
+      type == 'WINDOW') {
+    return 'Uint32';
+  } else if (type == 'INT8') {
+    return 'Int8';
+  } else if (type == 'INT16') {
+    return 'Int16';
+  } else if (type == 'INT32') {
+    return 'Int32';
   }
   return '?${type}?';
 }
