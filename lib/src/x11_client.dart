@@ -3,17 +3,29 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+enum X11ImageByteOrder { lsbFirst, msbFirst }
+
+enum X11BitmapFormatBitOrder { leastSignificant, mostSignificant }
+
+enum X11BackingStore { never, whenMapped, always }
+
+enum X11VisualClass {
+  staticGray,
+  grayScale,
+  staticColor,
+  pseudoColor,
+  trueColor,
+  directColor
+}
+
 class X11Success {
   int releaseNumber;
   int resourceIdBase;
   int resourceIdMask;
   int motionBufferSize;
-  int vendorLength;
   int maximumRequestLength;
-  int rootsCount;
-  int formatCount;
-  int imageByteOrder;
-  int bitmapFormatBitOrder;
+  X11ImageByteOrder imageByteOrder;
+  X11BitmapFormatBitOrder bitmapFormatBitOrder;
   int bitmapFormatScanlineUnit;
   int bitmapFormatScanlinePad;
   int minKeycode;
@@ -21,12 +33,20 @@ class X11Success {
   String vendor;
   List<X11Format> pixmapFormats;
   List<X11Screen> roots;
+
+  @override
+  String toString() =>
+      "X11Success(releaseNumber: ${releaseNumber}, resourceIdBase: 0x${resourceIdBase.toRadixString(16).padLeft(8, '0')}, resourceIdMask: 0x${resourceIdMask.toRadixString(16).padLeft(8, '0')}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, roots: ${roots})";
 }
 
 class X11Format {
   int depth;
   int bitsPerPixel;
   int scanlinePad;
+
+  @override
+  String toString() =>
+      'X11Format(depth: ${depth}, bitsPerPixel: ${bitsPerPixel}, scanlinePad: ${scanlinePad})';
 }
 
 class X11Screen {
@@ -42,25 +62,36 @@ class X11Screen {
   int minInstalledMaps;
   int maxInstalledMaps;
   int rootVisual;
-  int backingStores;
+  X11BackingStore backingStores;
   bool saveUnders;
   int rootDepth;
   List<X11Depth> allowedDepths;
+
+  @override
+  String toString() =>
+      'X11Window(window: ${window}, defaultColormap: ${defaultColormap}, whitePixel: 0x${whitePixel.toRadixString(16).padLeft(8, '0')}, blackPixel: 0x${blackPixel.toRadixString(16).padLeft(8, '0')}, currentInputMasks: 0x${currentInputMasks.toRadixString(16).padLeft(8, '0')}, widthInPixels: ${widthInPixels}, heightInPixels: ${heightInPixels}, widthInMillimeters: ${widthInMillimeters}, heightInMillimeters: ${heightInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
 }
 
 class X11Depth {
   int depth;
   List<X11Visual> visuals;
+
+  @override
+  String toString() => 'X11Depth(depth: ${depth}, visuals: ${visuals})';
 }
 
 class X11Visual {
   int visualId;
-  int class_;
+  X11VisualClass class_;
   int bitsPerRgbValue;
   int colormapEntries;
   int redMask;
   int greenMask;
   int blueMask;
+
+  @override
+  String toString() =>
+      'X11Visual(visualId: ${visualId}, class: ${class_}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: 0x${redMask.toRadixString(16).padLeft(8, '0')}, greenMask: 0x${greenMask.toRadixString(16).padLeft(8, '0')}, blueMask: 0x${blueMask.toRadixString(16).padLeft(8, '0')})';
 }
 
 class X11Client {
@@ -126,8 +157,9 @@ class X11Client {
       result.maximumRequestLength = _buffer.readCARD16();
       var rootsCount = _buffer.readBYTE();
       var formatCount = _buffer.readBYTE();
-      result.imageByteOrder = _buffer.readBYTE();
-      result.bitmapFormatBitOrder = _buffer.readBYTE();
+      result.imageByteOrder = X11ImageByteOrder.values[_buffer.readBYTE()];
+      result.bitmapFormatBitOrder =
+          X11BitmapFormatBitOrder.values[_buffer.readBYTE()];
       result.bitmapFormatScanlineUnit = _buffer.readBYTE();
       result.bitmapFormatScanlinePad = _buffer.readBYTE();
       result.minKeycode = _buffer.readBYTE();
@@ -159,7 +191,7 @@ class X11Client {
         screen.minInstalledMaps = _buffer.readCARD16();
         screen.maxInstalledMaps = _buffer.readCARD16();
         screen.rootVisual = _buffer.readCARD32();
-        screen.backingStores = _buffer.readBYTE();
+        screen.backingStores = X11BackingStore.values[_buffer.readBYTE()];
         screen.saveUnders = _buffer.readBOOL();
         screen.rootDepth = _buffer.readBYTE();
         var allowedDepthsCount = _buffer.readBYTE();
@@ -169,11 +201,12 @@ class X11Client {
           depth.depth = _buffer.readBYTE();
           _buffer.skip(1);
           var visualsCount = _buffer.readCARD16();
+          _buffer.skip(4);
           depth.visuals = <X11Visual>[];
           for (var k = 0; k < visualsCount; k++) {
             var visual = X11Visual();
             visual.visualId = _buffer.readCARD32();
-            visual.class_ = _buffer.readBYTE();
+            visual.class_ = X11VisualClass.values[_buffer.readBYTE()];
             visual.bitsPerRgbValue = _buffer.readBYTE();
             visual.colormapEntries = _buffer.readCARD16();
             visual.redMask = _buffer.readCARD32();
