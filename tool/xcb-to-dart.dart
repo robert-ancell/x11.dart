@@ -17,11 +17,13 @@ void main(List<String> args) async {
   var functions = <String>[];
   for (var request in xcb.findElements('request')) {
     var name = request.getAttribute('name');
-    var opcode = request.getElement('opcode');
+    var opcode = request.getAttribute('opcode');
     var reply = request.getElement('reply');
 
     var args = <String>[];
     var argNames = <String>[];
+    var replyArgs = <String>[];
+    var replyArgNames = <String>[];
 
     var fields = request.children
         .where((node) => node is XmlElement)
@@ -81,26 +83,39 @@ void main(List<String> args) async {
     code += '  @override\n';
     code += '  int encode(X11WriteBuffer buffer) {\n';
     for (var node in request.children.where((node) => node is XmlElement)) {
-      var element = node as XmlElement;
-      if (element.name.local == 'pad') {
-        var count = element.getAttribute('bytes');
-        var align = element.getAttribute('align');
-        if (count != null) {
-          code += '    buffer.skip(${count});\n';
-        } else if (align != null) {
-          code += '    buffer.align(${align});\n';
-        }
-      } else if (element.name.local == 'field') {
-        var fieldType = element.getAttribute('type');
-        var fieldName = element.getAttribute('name');
-        code +=
-            '    buffer.write${xcbTypeToBufferType(fieldType)}(${xcbFieldToDartName(fieldName)});\n';
+      var call = makeWriteCall(node as XmlElement);
+      if (call != null) {
+        code += '    ${call};\n';
       }
     }
     code += '    return 0; // FIXME: Return first element\n';
     code += '  }\n';
     code += '}\n';
     classes.add(code);
+
+    if (reply != null) {
+      code = '';
+      code += 'class X11${name}Reply extends X11Reply {\n';
+      for (var arg in replyArgs) {
+        code += '  final ${arg};\n';
+      }
+      code += '\n';
+      code +=
+          '  X11${name}Reply(${replyArgNames.map((name) => 'this.${name}').join(', ')});\n';
+      code += '\n';
+      code += '  @override\n';
+      code += '  int encode(X11WriteBuffer buffer) {\n';
+      for (var node in request.children.where((node) => node is XmlElement)) {
+        var call = makeWriteCall(node as XmlElement);
+        if (call != null) {
+          code += '    ${call};\n';
+        }
+      }
+      code += '    return 0; // FIXME: Return first element\n';
+      code += '  }\n';
+      code += '}\n';
+      classes.add(code);
+    }
 
     code = '';
     code +=
@@ -120,6 +135,22 @@ void main(List<String> args) async {
   module += '}';
 
   print(module);
+}
+
+String makeWriteCall(XmlElement element) {
+  if (element.name.local == 'pad') {
+    var count = element.getAttribute('bytes');
+    var align = element.getAttribute('align');
+    if (count != null) {
+      return 'buffer.skip(${count})';
+    } else if (align != null) {
+      return 'buffer.align(${align})';
+    }
+  } else if (element.name.local == 'field') {
+    var fieldType = element.getAttribute('type');
+    var fieldName = element.getAttribute('name');
+    return 'buffer.write${xcbTypeToBufferType(fieldType)}(${xcbFieldToDartName(fieldName)})';
+  }
 }
 
 String xcbTypeToDartType(String type) {

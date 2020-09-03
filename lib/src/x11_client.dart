@@ -38,6 +38,8 @@ enum X11Error {
   implementation
 }
 
+enum X11ChangePropertyMode { replace, prepend, append }
+
 class X11Success {
   int releaseNumber;
   int resourceIdBase;
@@ -115,6 +117,12 @@ class X11Visual {
 }
 
 class X11Request {
+  int encode(X11WriteBuffer buffer) {
+    return 0;
+  }
+}
+
+class X11Reply {
   int encode(X11WriteBuffer buffer) {
     return 0;
   }
@@ -428,7 +436,7 @@ class X11GetWindowAttributesRequest extends X11Request {
   }
 }
 
-class X11GetWindowAttributesReply {}
+class X11GetWindowAttributesReply extends X11Reply {}
 
 class X11DestroyWindowRequest extends X11Request {
   final int window;
@@ -623,7 +631,7 @@ class X11GetGeometryRequest extends X11Request {
   }
 }
 
-class X11GetGeometryReply {}
+class X11GetGeometryReply extends X11Reply {}
 
 class X11QueryTreeRequest extends X11Request {
   final int window;
@@ -637,7 +645,7 @@ class X11QueryTreeRequest extends X11Request {
   }
 }
 
-class X11QueryTreeReply {}
+class X11QueryTreeReply extends X11Reply {}
 
 class X11InternAtomRequest extends X11Request {
   final String name;
@@ -655,7 +663,18 @@ class X11InternAtomRequest extends X11Request {
   }
 }
 
-class X11InternAtomReply {}
+class X11InternAtomReply extends X11Reply {
+  final int atom;
+
+  X11InternAtomReply(this.atom);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(atom);
+    buffer.skip(20);
+    return 0;
+  }
+}
 
 class X11GetAtomNameRequest extends X11Request {
   final int atom;
@@ -669,7 +688,57 @@ class X11GetAtomNameRequest extends X11Request {
   }
 }
 
-class X11GetAtomNameReply {}
+class X11GetAtomNameReply extends X11Reply {}
+
+class X11ChangePropertyRequest extends X11Request {
+  final int window;
+  final X11ChangePropertyMode mode;
+  final int property;
+  final int type;
+  final int format;
+  final List<int> data;
+
+  X11ChangePropertyRequest(
+      this.window, this.mode, this.property, this.type, this.format, this.data);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    buffer.writeUint32(property);
+    buffer.writeUint32(type);
+    buffer.writeUint8(format);
+    buffer.skip(3);
+    buffer.writeUint32(data.length);
+    if (format == 8) {
+      for (var d in data) {
+        buffer.writeUint8(d);
+      }
+    } else if (format == 16) {
+      for (var d in data) {
+        buffer.writeUint16(d);
+      }
+    } else if (format == 32) {
+      for (var d in data) {
+        buffer.writeUint32(d);
+      }
+    }
+    return mode.index;
+  }
+}
+
+class X11DeletePropertyRequest extends X11Request {
+  final int window;
+  final int property;
+
+  X11DeletePropertyRequest(this.window, this.property);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    buffer.writeUint32(property);
+    return 0;
+  }
+}
 
 class X11Client {
   Socket _socket;
@@ -679,6 +748,77 @@ class X11Client {
   int _resourceIdMask;
   int _resourceCount = 0;
   List<X11Screen> roots;
+
+  final Map<String, int> atoms = {
+    'PRIMARY': 1,
+    'SECONDARY': 2,
+    'ARC': 3,
+    'ATOM': 4,
+    'BITMAP': 5,
+    'CARDINAL': 6,
+    'COLORMAP': 7,
+    'CURSOR': 8,
+    'CUT_BUFFER0': 9,
+    'CUT_BUFFER1': 10,
+    'CUT_BUFFER2': 11,
+    'CUT_BUFFER3': 12,
+    'CUT_BUFFER4': 13,
+    'CUT_BUFFER5': 14,
+    'CUT_BUFFER6': 15,
+    'CUT_BUFFER7': 16,
+    'DRAWABLE': 17,
+    'FONT': 18,
+    'INTEGER': 19,
+    'PIXMAP': 20,
+    'POINT': 21,
+    'RECTANGLE': 22,
+    'RESOURCE_MANAGER': 23,
+    'RGB_COLOR_MAP': 24,
+    'RGB_BEST_MAP': 25,
+    'RGB_BLUE_MAP': 26,
+    'RGB_DEFAULT_MAP': 27,
+    'RGB_GRAY_MAP': 28,
+    'RGB_GREEN_MAP': 29,
+    'RGB_RED_MAP': 30,
+    'STRING': 31,
+    'VISUALID': 32,
+    'WINDOW': 33,
+    'WM_COMMAND': 34,
+    'WM_HINTS': 35,
+    'WM_CLIENT_MACHINE': 36,
+    'WM_ICON_NAME': 37,
+    'WM_ICON_SIZE': 38,
+    'WM_NAME': 39,
+    'WM_NORMAL_HINTS': 40,
+    'WM_SIZE_HINTS': 41,
+    'WM_ZOOM_HINTS': 42,
+    'MIN_SPACE': 43,
+    'NORM_SPACE': 44,
+    'MAX_SPACE': 45,
+    'END_SPACE': 46,
+    'SUPERSCRIPT_X': 47,
+    'SUPERSCRIPT_Y': 48,
+    'SUBSCRIPT_X': 49,
+    'SUBSCRIPT_Y': 50,
+    'UNDERLINE_POSITION': 51,
+    'UNDERLINE_THICKNESS': 52,
+    'STRIKEOUT_ASCENT': 53,
+    'STRIKEOUT_DESCENT': 54,
+    'ITALIC_ANGLE': 55,
+    'X_HEIGHT': 56,
+    'QUAD_WIDTH': 57,
+    'WEIGHT': 58,
+    'POINT_SIZE': 59,
+    'RESOLUTION': 60,
+    'COPYRIGHT': 61,
+    'NOTICE': 62,
+    'FONT_NAME': 63,
+    'FAMILY_NAME': 64,
+    'FULL_NAME': 65,
+    'CAP_HEIGHT': 66,
+    'WM_CLASS': 67,
+    'WM_TRANSIENT_FOR': 68
+  };
 
   X11Client() {}
 
@@ -907,8 +1047,11 @@ class X11Client {
     _sendRequest(15, data, buffer.data);
   }
 
-  Future<X11InternAtomReply> internAtom(String name,
-      {bool onlyIfExists = false}) async {
+  Future<int> internAtom(String name, {bool onlyIfExists = false}) async {
+    var id = atoms[name];
+    if (id != null) {
+      return id;
+    }
     var request = X11InternAtomRequest(name, onlyIfExists);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
@@ -920,6 +1063,43 @@ class X11Client {
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
     _sendRequest(17, data, buffer.data);
+  }
+
+  void changePropertyUint8(int window, int property, int type, List<int> value,
+      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
+    _changeProperty(window, property, type, 8, value, mode: mode);
+  }
+
+  void changePropertyUint16(int window, int property, int type, List<int> value,
+      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
+    _changeProperty(window, property, type, 16, value, mode: mode);
+  }
+
+  void changePropertyUint32(int window, int property, int type, List<int> value,
+      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
+    _changeProperty(window, property, type, 32, value, mode: mode);
+  }
+
+  void changePropertyString(int window, int property, int type, String value,
+      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
+    _changeProperty(window, property, type, 8, utf8.encode(value), mode: mode);
+  }
+
+  void _changeProperty(
+      int window, int property, int type, int format, List<int> value,
+      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
+    var request =
+        X11ChangePropertyRequest(window, mode, property, type, format, value);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(18, data, buffer.data);
+  }
+
+  void deleteProperty(int window, int property) {
+    var request = X11DeletePropertyRequest(window, property);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(19, data, buffer.data);
   }
 
   void _processData(Uint8List data) {
