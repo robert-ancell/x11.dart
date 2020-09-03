@@ -18,6 +18,26 @@ enum X11VisualClass {
   directColor
 }
 
+enum X11Error {
+  none,
+  request,
+  value,
+  window,
+  pixmap,
+  atom,
+  cursor,
+  match,
+  drawable,
+  access,
+  alloc,
+  colormap,
+  gContext,
+  idChoice,
+  name,
+  length,
+  implementation
+}
+
 class X11Success {
   int releaseNumber;
   int resourceIdBase;
@@ -165,6 +185,7 @@ class X11Client {
   int _resourceIdBase;
   int _resourceIdMask;
   int _resourceCount = 0;
+  List<X11Screen> roots;
 
   X11Client() {}
 
@@ -201,7 +222,7 @@ class X11Client {
     return id;
   }
 
-  void createWindow(int wid,
+  void createWindow(int wid, int parent,
       {X11WindowClass class_ = X11WindowClass.inputOutput,
       int x = 0,
       int y = 0,
@@ -209,7 +230,6 @@ class X11Client {
       int height = 0,
       int depth = 0,
       int visual = 0,
-      int parent = 0,
       int borderWidth = 0,
       int valueMask = 0}) {
     var request = X11CreateWindowRequest(depth, wid, parent, x, y, width,
@@ -228,31 +248,45 @@ class X11Client {
 
   void _processData(Uint8List data) {
     _buffer.addAll(data);
-    if (!_connectCompleter.isCompleted) {
-      _processSetup();
+    var haveMessage = true;
+    while (haveMessage) {
+      if (!_connectCompleter.isCompleted) {
+        haveMessage = _processSetup();
+      } else {
+        haveMessage = _processMessage();
+      }
     }
   }
 
-  void _processSetup() {
+  bool _processSetup() {
+    if (_buffer.remaining < 8) {
+      return false;
+    }
+
+    var startOffset = _buffer.readOffset;
+
     var result = _buffer.readUint8();
+    var data = _buffer.readUint8();
+    var protocolMajorVersion = _buffer.readUint16();
+    var protocolMinorVersion = _buffer.readUint16();
+    var length = _buffer.readUint16();
+
+    if (_buffer.remaining < length * 4) {
+      _buffer.readOffset = startOffset;
+      return false;
+    }
+
     if (result == 0) {
       // Failed
-      var reasonLength = _buffer.readUint8();
-      var protocolMajorVersion = _buffer.readUint16();
-      var protocolMinorVersion = _buffer.readUint16();
-      var length = _buffer.readUint16();
+      var reasonLength = data;
       var reason = _buffer.readString(reasonLength);
       print('Failed: ${reason}');
     } else if (result == 1) {
       // Success
-      _buffer.skip(1);
       var result = X11Success();
-      var protocolMajorVersion = _buffer.readUint16();
-      var protocolMinorVersion = _buffer.readUint16();
       if (protocolMajorVersion != 11 || protocolMinorVersion != 0) {
         throw 'Unsupported X version ${protocolMajorVersion}.${protocolMinorVersion}';
       }
-      var length = _buffer.readUint16(); // FIXME: Check this
       result.releaseNumber = _buffer.readUint32();
       result.resourceIdBase = _buffer.readUint32();
       result.resourceIdMask = _buffer.readUint32();
@@ -326,17 +360,58 @@ class X11Client {
 
       _resourceIdBase = result.resourceIdBase;
       _resourceIdMask = result.resourceIdMask;
+      roots = result.roots;
 
       print('Success: ${result.vendor}');
     } else if (result == 2) {
       // Authenticate
-      _buffer.skip(5);
-      var length = _buffer.readUint16();
       var reason = _buffer.readString(length ~/ 4);
       print('Authenticate: ${reason}');
     }
+
     _connectCompleter.complete();
     _buffer.flush();
+
+    return true;
+  }
+
+  bool _processMessage() {
+    if (_buffer.remaining < 32) {
+      return false;
+    }
+
+    var startOffset = _buffer.readOffset;
+
+    var reply = _buffer.readUint8();
+
+    if (reply == 0) {
+      var code = X11Error.values[_buffer.readUint8()];
+      var sequenceNumber = _buffer.readUint16();
+      var resourceId = _buffer.readUint32();
+      var minorOpcode = _buffer.readUint16();
+      var majorOpcode = _buffer.readUint8();
+      _buffer.skip(21);
+      print(
+          '${code} sequence=${sequenceNumber} opcode=${majorOpcode}.${minorOpcode}');
+    } else if (reply == 1) {
+      var data = _buffer.readUint8();
+      var sequenceNumber = _buffer.readUint16();
+      var length = _buffer.readUint32();
+      if (_buffer.remaining < 24 + length * 4) {
+        _buffer.readOffset = startOffset;
+        return false;
+      }
+      var additionalData = _buffer.readBytes(24 + length * 4);
+      print('Reply ${sequenceNumber}');
+    } else {
+      var code = reply;
+      _buffer.skip(1);
+      var sequenceNumber = _buffer.readUint16();
+      _buffer.skip(26);
+      print('Event ${reply} ${sequenceNumber}');
+    }
+
+    return true;
   }
 
   void _sendRequest(int opcode, int data, List<int> additionalData) {
@@ -401,8 +476,16 @@ class X11WriteBuffer {
 }
 
 class X11ReadBuffer {
+  /// Data in the buffer.
   final _data = <int>[];
+
+  /// Read position.
   int readOffset = 0;
+
+  /// Number of bytes remaining in the buffer.
+  int get remaining {
+    return _data.length - readOffset;
+  }
 
   void addAll(Iterable<int> value) {
     _data.addAll(value);
