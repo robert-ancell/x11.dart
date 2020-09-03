@@ -4,7 +4,7 @@ version: 0.0.0-dev.1
 description:
   A native Dart implementation of the X window system protocol, version 11 (X11).
 
-homepage: https://github.com/robert.ancell/x11.dart
+homepage: https://github.com/robert-ancell/x11.dart
 
 environment:
   sdk: '>=2.7.2 <3.0.0'
