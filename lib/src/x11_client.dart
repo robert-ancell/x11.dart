@@ -18,8 +18,7 @@ enum X11VisualClass {
   directColor
 }
 
-enum X11Error {
-  none,
+enum X11ErrorCode {
   request,
   value,
   window,
@@ -36,6 +35,34 @@ enum X11Error {
   name,
   length,
   implementation
+}
+
+enum X11EventMask {
+  keyPress,
+  keyRelease,
+  buttonPress,
+  buttonRelease,
+  enterWindow,
+  leaveWindow,
+  pointerMotion,
+  pointerMotionH,
+  button1Motion,
+  button2Motion,
+  button3Motion,
+  button4Motion,
+  button5Motion,
+  buttonMotion,
+  keymapState,
+  exposure,
+  visibilityChange,
+  structureNotify,
+  resizeRedirect,
+  substructureNotify,
+  substructureRedirect,
+  focusChange,
+  propertyChange,
+  colormapChange,
+  ownerGrabButton
 }
 
 enum X11ChangePropertyMode { replace, prepend, append }
@@ -123,6 +150,37 @@ class X11Request {
 }
 
 class X11Reply {
+  int encode(X11WriteBuffer buffer) {
+    return 0;
+  }
+}
+
+class X11Error {
+  final X11ErrorCode code;
+  final int sequenceNumber;
+  final int resourceId;
+  final int majorOpcode;
+  final int minorOpcode;
+
+  X11Error(this.code, this.sequenceNumber, this.resourceId, this.majorOpcode,
+      this.minorOpcode);
+
+  factory X11Error.fromBuffer(X11ReadBuffer buffer) {
+    var code = X11ErrorCode.values[buffer.readUint8() + 1];
+    var sequenceNumber = buffer.readUint16();
+    var resourceId = buffer.readUint32();
+    var minorOpcode = buffer.readUint16();
+    var majorOpcode = buffer.readUint8();
+    buffer.skip(21);
+    return X11Error(code, sequenceNumber, resourceId, majorOpcode, minorOpcode);
+  }
+
+  @override
+  String toString() =>
+      'X11Error(code: ${code}, sequenceNumber: ${sequenceNumber}, resourceId: ${resourceId}, majorOpcode: ${majorOpcode}, minorOpcode: ${minorOpcode})';
+}
+
+class X11Event {
   int encode(X11WriteBuffer buffer) {
     return 0;
   }
@@ -740,6 +798,357 @@ class X11DeletePropertyRequest extends X11Request {
   }
 }
 
+class X11CreatePixmapRequest extends X11Request {
+  final int pid;
+  final int drawable;
+  final int width;
+  final int height;
+  final int depth;
+
+  X11CreatePixmapRequest(
+      this.pid, this.drawable, this.width, this.height, this.depth);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(pid);
+    buffer.writeUint32(drawable);
+    buffer.writeUint16(width);
+    buffer.writeUint16(height);
+    return depth;
+  }
+}
+
+class X11FreePixmapRequest extends X11Request {
+  final int pixmap;
+
+  X11FreePixmapRequest(this.pixmap);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(pixmap);
+    return 0;
+  }
+}
+
+class X11CreateGCRequest extends X11Request {
+  final int cid;
+  final int drawable;
+  final int function;
+  final int planeMask;
+  final int foreground;
+  final int background;
+  final int lineWidth;
+  final int lineStyle;
+  final int capStyle;
+  final int joinStyle;
+  final int fillStyle;
+  final int fillRule;
+  final int tile;
+  final int stipple;
+  final int tileStippleXOrigin;
+  final int tileStippleYOrigin;
+  final int font;
+  final int subwindowMode;
+  final bool graphicsExposures;
+  final int clipXOorigin;
+  final int clipYOorigin;
+  final int clipMask;
+  final int dashOffset;
+  final int dashes;
+  final int arcMode;
+
+  X11CreateGCRequest(this.cid, this.drawable,
+      {this.function,
+      this.planeMask,
+      this.foreground,
+      this.background,
+      this.lineWidth,
+      this.lineStyle,
+      this.capStyle,
+      this.joinStyle,
+      this.fillStyle,
+      this.fillRule,
+      this.tile,
+      this.stipple,
+      this.tileStippleXOrigin,
+      this.tileStippleYOrigin,
+      this.font,
+      this.subwindowMode,
+      this.graphicsExposures,
+      this.clipXOorigin,
+      this.clipYOorigin,
+      this.clipMask,
+      this.dashOffset,
+      this.dashes,
+      this.arcMode});
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(cid);
+    buffer.writeUint32(drawable);
+    var valueMask = 0;
+    if (function != null) {
+      valueMask |= 0x000001;
+    }
+    if (planeMask != null) {
+      valueMask |= 0x000002;
+    }
+    if (foreground != null) {
+      valueMask |= 0x000004;
+    }
+    if (background != null) {
+      valueMask |= 0x000008;
+    }
+    if (lineWidth != null) {
+      valueMask |= 0x000010;
+    }
+    if (lineStyle != null) {
+      valueMask |= 0x000020;
+    }
+    if (capStyle != null) {
+      valueMask |= 0x000040;
+    }
+    if (joinStyle != null) {
+      valueMask |= 0x000080;
+    }
+    if (fillStyle != null) {
+      valueMask |= 0x000100;
+    }
+    if (fillRule != null) {
+      valueMask |= 0x000200;
+    }
+    if (tile != null) {
+      valueMask |= 0x000400;
+    }
+    if (stipple != null) {
+      valueMask |= 0x000800;
+    }
+    if (tileStippleXOrigin != null) {
+      valueMask |= 0x001000;
+    }
+    if (tileStippleYOrigin != null) {
+      valueMask |= 0x002000;
+    }
+    if (font != null) {
+      valueMask |= 0x004000;
+    }
+    if (subwindowMode != null) {
+      valueMask |= 0x008000;
+    }
+    if (graphicsExposures != null) {
+      valueMask |= 0x010000;
+    }
+    if (clipXOorigin != null) {
+      valueMask |= 0x020000;
+    }
+    if (clipYOorigin != null) {
+      valueMask |= 0x040000;
+    }
+    if (clipMask != null) {
+      valueMask |= 0x080000;
+    }
+    if (dashOffset != null) {
+      valueMask |= 0x100000;
+    }
+    if (dashes != null) {
+      valueMask |= 0x200000;
+    }
+    if (arcMode != null) {
+      valueMask |= 0x400000;
+    }
+    buffer.writeUint32(valueMask);
+    if (function != null) {
+      buffer.writeUint8(function);
+      buffer.skip(3);
+    }
+    if (planeMask != null) {
+      buffer.writeUint32(planeMask);
+    }
+    if (foreground != null) {
+      buffer.writeUint32(foreground);
+    }
+    if (background != null) {
+      buffer.writeUint32(background);
+    }
+    if (lineWidth != null) {
+      buffer.writeUint16(lineWidth);
+      buffer.skip(2);
+    }
+    if (lineStyle != null) {
+      buffer.writeUint8(lineStyle);
+      buffer.skip(3);
+    }
+    if (capStyle != null) {
+      buffer.writeUint8(capStyle);
+      buffer.skip(3);
+    }
+    if (joinStyle != null) {
+      buffer.writeUint8(joinStyle);
+      buffer.skip(3);
+    }
+    if (fillStyle != null) {
+      buffer.writeUint8(fillStyle);
+      buffer.skip(3);
+    }
+    if (fillRule != null) {
+      buffer.writeUint32(fillRule);
+    }
+    if (tile != null) {
+      buffer.writeUint32(tile);
+    }
+    if (stipple != null) {
+      buffer.writeUint32(stipple);
+    }
+    if (tileStippleXOrigin != null) {
+      buffer.writeUint16(tileStippleXOrigin);
+      buffer.skip(2);
+    }
+    if (tileStippleYOrigin != null) {
+      buffer.writeUint16(tileStippleYOrigin);
+      buffer.skip(2);
+    }
+    if (font != null) {
+      buffer.writeUint32(font);
+    }
+    if (subwindowMode != null) {
+      buffer.writeUint8(subwindowMode);
+      buffer.skip(3);
+    }
+    if (graphicsExposures != null) {
+      buffer.writeUint8(graphicsExposures ? 1 : 0);
+      buffer.skip(3);
+    }
+    if (clipXOorigin != null) {
+      buffer.writeInt16(clipXOorigin);
+      buffer.skip(2);
+    }
+    if (clipYOorigin != null) {
+      buffer.writeInt16(clipYOorigin);
+      buffer.skip(2);
+    }
+    if (clipMask != null) {
+      buffer.writeUint32(clipMask);
+    }
+    if (dashOffset != null) {
+      buffer.writeUint16(dashOffset);
+      buffer.skip(2);
+    }
+    if (dashes != null) {
+      buffer.writeUint8(dashes);
+      buffer.skip(3);
+    }
+    if (arcMode != null) {
+      buffer.writeUint8(arcMode);
+      buffer.skip(3);
+    }
+    return 0;
+  }
+}
+
+class X11ClearAreaRequest extends X11Request {
+  final int window;
+  final int x;
+  final int y;
+  final int width;
+  final int height;
+  final bool exposures;
+
+  X11ClearAreaRequest(
+      this.window, this.x, this.y, this.width, this.height, this.exposures);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    buffer.writeInt16(x);
+    buffer.writeInt16(y);
+    buffer.writeUint16(width);
+    buffer.writeUint16(height);
+    return exposures ? 1 : 0;
+  }
+}
+
+class X11KeyPress extends X11Event {}
+
+class X11KeyRelease extends X11Event {}
+
+class X11ButtonPress extends X11Event {}
+
+class X11ButtonRelease extends X11Event {}
+
+class X11MotionNotify extends X11Event {}
+
+class X11EnterNotify extends X11Event {}
+
+class X11LeaveNotify extends X11Event {}
+
+class X11FocusIn extends X11Event {}
+
+class X11FocusOut extends X11Event {}
+
+class X11KeymapNotify extends X11Event {}
+
+class X11Expose extends X11Event {
+  int window;
+  int x;
+  int y;
+  int width;
+  int height;
+  int count;
+
+  X11Expose(this.window, this.x, this.y, this.width, this.height, this.count);
+
+  factory X11Expose.fromBuffer(X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var x = buffer.readUint16();
+    var y = buffer.readUint16();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    var count = buffer.readUint16();
+    buffer.skip(14);
+    return X11Expose(window, x, y, width, height, count);
+  }
+
+  @override
+  String toString() =>
+      'X11Expose(window: 0x${window.toRadixString(16).padLeft(8, '0')}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, count: ${count})';
+}
+
+class X11GraphicsExposure extends X11Event {}
+
+class X11NoExposure extends X11Event {}
+
+class X11VisibilityNotify extends X11Event {}
+
+class X11CreateNotify extends X11Event {}
+
+class X11DestroyNotify extends X11Event {}
+
+class X11UnmapNotify extends X11Event {}
+
+class X11MapNotify extends X11Event {}
+
+class X11MapRequest extends X11Event {}
+
+class X11ReparentNotify extends X11Event {}
+
+class X11ConfigureNotify extends X11Event {}
+
+class X11ConfigureRequest extends X11Event {}
+
+class X11GravityNotify extends X11Event {}
+
+class X11UnknownEvent extends X11Event {
+  X11UnknownEvent();
+
+  factory X11UnknownEvent.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(26);
+    return X11UnknownEvent();
+  }
+
+  @override
+  String toString() => 'X11UnknownEvent()';
+}
+
 class X11Client {
   Socket _socket;
   final _buffer = X11ReadBuffer();
@@ -748,6 +1157,11 @@ class X11Client {
   int _resourceIdMask;
   int _resourceCount = 0;
   List<X11Screen> roots;
+  final _errorStreamController = StreamController<X11Error>();
+  final _eventStreamController = StreamController<X11Event>();
+
+  Stream<X11Error> get errorStream => _errorStreamController.stream;
+  Stream<X11Event> get eventStream => _eventStreamController.stream;
 
   final Map<String, int> atoms = {
     'PRIMARY': 1,
@@ -875,10 +1289,17 @@ class X11Client {
       int backingPixel = null,
       int overrideRedirect = null,
       int saveUnder = null,
-      int eventMask = null,
+      Set<X11EventMask> eventMask = null,
       int doNotPropagateMask = null,
       int colormap = null,
       int cursor = null}) {
+    int eventMaskValue = null;
+    if (eventMask != null) {
+      eventMaskValue = 0;
+      for (var event in eventMask) {
+        eventMaskValue |= 1 << event.index;
+      }
+    }
     var request = X11CreateWindowRequest(wid, parent,
         depth: depth,
         x: x,
@@ -899,7 +1320,7 @@ class X11Client {
         backingPixel: backingPixel,
         overrideRedirect: overrideRedirect,
         saveUnder: saveUnder,
-        eventMask: eventMask,
+        eventMask: eventMaskValue,
         doNotPropagateMask: doNotPropagateMask,
         colormap: colormap,
         cursor: cursor);
@@ -1102,6 +1523,85 @@ class X11Client {
     _sendRequest(19, data, buffer.data);
   }
 
+  void createPixmap(int pid, int drawable, int width, int height, int depth) {
+    var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(53, data, buffer.data);
+  }
+
+  void freePixmap(int pixmap) {
+    var request = X11FreePixmapRequest(pixmap);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(54, data, buffer.data);
+  }
+
+  void createGC(int cid, int drawable,
+      {int function = null,
+      int planeMask = null,
+      int foreground = null,
+      int background = null,
+      int lineWidth = null,
+      int lineStyle = null,
+      int capStyle = null,
+      int joinStyle = null,
+      int fillStyle = null,
+      int fillRule = null,
+      int tile = null,
+      int stipple = null,
+      int tileStippleXOrigin = null,
+      int tileStippleYOrigin = null,
+      int font = null,
+      int subwindowMode = null,
+      bool graphicsExposures = null,
+      int clipXOorigin = null,
+      int clipYOorigin = null,
+      int clipMask = null,
+      int dashOffset = null,
+      int dashes = null,
+      int arcMode = null}) {
+    var request = X11CreateGCRequest(cid, drawable,
+        function: function,
+        planeMask: planeMask,
+        foreground: foreground,
+        background: background,
+        lineWidth: lineWidth,
+        lineStyle: lineStyle,
+        capStyle: capStyle,
+        joinStyle: joinStyle,
+        fillStyle: fillStyle,
+        fillRule: fillRule,
+        tile: tile,
+        stipple: stipple,
+        tileStippleXOrigin: tileStippleXOrigin,
+        tileStippleYOrigin: tileStippleYOrigin,
+        font: font,
+        subwindowMode: subwindowMode,
+        graphicsExposures: graphicsExposures,
+        clipXOorigin: clipXOorigin,
+        clipYOorigin: clipYOorigin,
+        clipMask: clipMask,
+        dashOffset: dashOffset,
+        dashes: dashes,
+        arcMode: arcMode);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(55, data, buffer.data);
+  }
+
+  void clearArea(int window,
+      {int x = 0,
+      int y = 0,
+      int width = 0,
+      int height = 0,
+      bool exposures = false}) {
+    var request = X11ClearAreaRequest(window, x, y, width, height, exposures);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(61, data, buffer.data);
+  }
+
   void _processData(Uint8List data) {
     _buffer.addAll(data);
     var haveMessage = true;
@@ -1241,14 +1741,8 @@ class X11Client {
     var reply = _buffer.readUint8();
 
     if (reply == 0) {
-      var code = X11Error.values[_buffer.readUint8()];
-      var sequenceNumber = _buffer.readUint16();
-      var resourceId = _buffer.readUint32();
-      var minorOpcode = _buffer.readUint16();
-      var majorOpcode = _buffer.readUint8();
-      _buffer.skip(21);
-      print(
-          '${code} sequence=${sequenceNumber} opcode=${majorOpcode}.${minorOpcode}');
+      var error = X11Error.fromBuffer(_buffer);
+      _errorStreamController.add(error);
     } else if (reply == 1) {
       var data = _buffer.readUint8();
       var sequenceNumber = _buffer.readUint16();
@@ -1263,9 +1757,16 @@ class X11Client {
       var code = reply;
       _buffer.skip(1);
       var sequenceNumber = _buffer.readUint16();
-      _buffer.skip(26);
-      print('Event ${reply} ${sequenceNumber}');
+      X11Event event;
+      if (code == 12) {
+        event = X11Expose.fromBuffer(_buffer);
+      } else {
+        event = X11UnknownEvent.fromBuffer(_buffer);
+      }
+      _eventStreamController.add(event);
     }
+
+    _buffer.flush();
 
     return true;
   }
