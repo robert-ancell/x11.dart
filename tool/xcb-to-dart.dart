@@ -80,6 +80,17 @@ void main(List<String> args) async {
     code +=
         '  X11${name}Request(${argNames.map((name) => 'this.${name}').join(', ')});\n';
     code += '\n';
+    code +=
+        '  factory X11${name}Request.fromBuffer(int data, X11ReadBuffer buffer) {\n';
+    for (var node in request.children.where((node) => node is XmlElement)) {
+      var call = makeReadCall(node as XmlElement);
+      if (call != null) {
+        code += '    ${call};\n';
+      }
+    }
+    code += '    return X11${name}Request(${argNames.join(', ')});\n';
+    code += '  }\n';
+    code += '\n';
     code += '  @override\n';
     code += '  int encode(X11WriteBuffer buffer) {\n';
     for (var node in request.children.where((node) => node is XmlElement)) {
@@ -135,6 +146,22 @@ void main(List<String> args) async {
   module += '}';
 
   print(module);
+}
+
+String makeReadCall(XmlElement element) {
+  if (element.name.local == 'pad') {
+    var count = element.getAttribute('bytes');
+    var align = element.getAttribute('align');
+    if (count != null) {
+      return 'buffer.skip(${count})';
+    } else if (align != null) {
+      return 'buffer.align(${align})';
+    }
+  } else if (element.name.local == 'field') {
+    var fieldType = element.getAttribute('type');
+    var fieldName = element.getAttribute('name');
+    return 'var ${xcbFieldToDartName(fieldName)} = buffer.read${xcbTypeToBufferType(fieldType)}()';
+  }
 }
 
 String makeWriteCall(XmlElement element) {

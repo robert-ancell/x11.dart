@@ -189,13 +189,13 @@ class X11Event {
 enum X11WindowClass { copyFromParent, inputOutput, inputOnly }
 
 class X11CreateWindowRequest extends X11Request {
-  final int depth;
   final int wid;
   final int parent;
   final int x;
   final int y;
   final int width;
   final int height;
+  final int depth;
   final int borderWidth;
   final X11WindowClass class_;
   final int visual;
@@ -216,11 +216,11 @@ class X11CreateWindowRequest extends X11Request {
   final int cursor;
 
   X11CreateWindowRequest(this.wid, this.parent,
-      {this.depth,
-      this.x,
+      {this.x,
       this.y,
       this.width,
       this.height,
+      this.depth,
       this.borderWidth,
       this.class_,
       this.visual,
@@ -239,6 +239,104 @@ class X11CreateWindowRequest extends X11Request {
       this.doNotPropagateMask,
       this.colormap,
       this.cursor});
+
+  factory X11CreateWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var wid = buffer.readUint32();
+    var parent = buffer.readUint32();
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    var depth = data;
+    var borderWidth = buffer.readUint16();
+    var class_ = X11WindowClass.values[buffer.readUint16()];
+    var visual = buffer.readUint32();
+    var valueMask = buffer.readUint32();
+    int backgroundPixmap = null;
+    if ((valueMask & 0x0001) != 0) {
+      backgroundPixmap = buffer.readUint32();
+    }
+    int backgroundPixel = null;
+    if ((valueMask & 0x0002) != 0) {
+      backgroundPixel = buffer.readUint32();
+    }
+    int borderPixmap = null;
+    if ((valueMask & 0x0004) != 0) {
+      borderPixmap = buffer.readUint32();
+    }
+    int borderPixel = null;
+    if ((valueMask & 0x0008) != 0) {
+      borderPixel = buffer.readUint32();
+    }
+    int bitGravity = null;
+    if ((valueMask & 0x0010) != 0) {
+      bitGravity = buffer.readUint32();
+    }
+    int winGravity = null;
+    if ((valueMask & 0x0020) != 0) {
+      winGravity = buffer.readUint32();
+    }
+    int backingStore = null;
+    if ((valueMask & 0x0040) != 0) {
+      backingStore = buffer.readUint32();
+    }
+    int backingPlanes = null;
+    if ((valueMask & 0x0080) != 0) {
+      backingPlanes = buffer.readUint32();
+    }
+    int backingPixel = null;
+    if ((valueMask & 0x0100) != 0) {
+      backingPixel = buffer.readUint32();
+    }
+    int overrideRedirect = null;
+    if ((valueMask & 0x0200) != 0) {
+      overrideRedirect = buffer.readUint32();
+    }
+    int saveUnder = null;
+    if ((valueMask & 0x0400) != 0) {
+      saveUnder = buffer.readUint32();
+    }
+    int eventMask = null;
+    if ((valueMask & 0x0800) != 0) {
+      eventMask = buffer.readUint32();
+    }
+    int doNotPropagateMask = null;
+    if ((valueMask & 0x1000) != 0) {
+      doNotPropagateMask = buffer.readUint32();
+    }
+    int colormap = null;
+    if ((valueMask & 0x2000) != 0) {
+      colormap = buffer.readUint32();
+    }
+    int cursor = null;
+    if ((valueMask & 0x4000) != 0) {
+      cursor = buffer.readUint32();
+    }
+    return X11CreateWindowRequest(wid, parent,
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        depth: depth,
+        borderWidth: borderWidth,
+        class_: class_,
+        visual: visual,
+        backgroundPixmap: backgroundPixmap,
+        backgroundPixel: backgroundPixel,
+        borderPixmap: borderPixmap,
+        borderPixel: borderPixel,
+        bitGravity: bitGravity,
+        winGravity: winGravity,
+        backingStore: backingStore,
+        backingPlanes: backingPlanes,
+        backingPixel: backingPixel,
+        overrideRedirect: overrideRedirect,
+        saveUnder: saveUnder,
+        eventMask: eventMask,
+        doNotPropagateMask: doNotPropagateMask,
+        colormap: colormap,
+        cursor: cursor);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -487,6 +585,12 @@ class X11GetWindowAttributesRequest extends X11Request {
 
   X11GetWindowAttributesRequest(this.window);
 
+  factory X11GetWindowAttributesRequest.fromBuffer(
+      int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    return X11GetWindowAttributesRequest(window);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(window);
@@ -501,6 +605,11 @@ class X11DestroyWindowRequest extends X11Request {
 
   X11DestroyWindowRequest(this.window);
 
+  factory X11DestroyWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    return X11DestroyWindowRequest(window);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(window);
@@ -512,6 +621,12 @@ class X11DestroySubwindowsRequest extends X11Request {
   final int window;
 
   X11DestroySubwindowsRequest(this.window);
+
+  factory X11DestroySubwindowsRequest.fromBuffer(
+      int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    return X11DestroySubwindowsRequest(window);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -525,6 +640,12 @@ class X11ChangeSaveSetRequest extends X11Request {
   final int mode;
 
   X11ChangeSaveSetRequest(this.window, this.mode);
+
+  factory X11ChangeSaveSetRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var mode = data;
+    return X11ChangeSaveSetRequest(window, mode);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -541,6 +662,14 @@ class X11ReparentWindowRequest extends X11Request {
 
   X11ReparentWindowRequest(this.window, this.parent, this.x, this.y);
 
+  factory X11ReparentWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var parent = buffer.readUint32();
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    return X11ReparentWindowRequest(window, parent, x, y);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(window);
@@ -556,6 +685,11 @@ class X11MapWindowRequest extends X11Request {
 
   X11MapWindowRequest(this.window);
 
+  factory X11MapWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    return X11MapWindowRequest(window);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(window);
@@ -567,6 +701,11 @@ class X11MapSubwindowsRequest extends X11Request {
   final int window;
 
   X11MapSubwindowsRequest(this.window);
+
+  factory X11MapSubwindowsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    return X11MapSubwindowsRequest(window);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -580,6 +719,11 @@ class X11UnmapWindowRequest extends X11Request {
 
   X11UnmapWindowRequest(this.window);
 
+  factory X11UnmapWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    return X11UnmapWindowRequest(window);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(window);
@@ -591,6 +735,11 @@ class X11UnmapSubwindowsRequest extends X11Request {
   final int window;
 
   X11UnmapSubwindowsRequest(this.window);
+
+  factory X11UnmapSubwindowsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    return X11UnmapSubwindowsRequest(window);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -609,8 +758,56 @@ class X11ConfigureWindowRequest extends X11Request {
   final int sibling;
   final int stackMode;
 
-  X11ConfigureWindowRequest(this.window, this.x, this.y, this.width,
-      this.height, this.borderWidth, this.sibling, this.stackMode);
+  X11ConfigureWindowRequest(this.window,
+      {this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.borderWidth,
+      this.sibling,
+      this.stackMode});
+
+  factory X11ConfigureWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var valueMask = buffer.readUint16();
+    buffer.skip(2);
+    int x = null;
+    if ((valueMask & 0x01) != 0) {
+      x = buffer.readUint32();
+    }
+    int y = null;
+    if ((valueMask & 0x02) != 0) {
+      y = buffer.readUint32();
+    }
+    int width = null;
+    if ((valueMask & 0x04) != 0) {
+      width = buffer.readUint32();
+    }
+    int height = null;
+    if ((valueMask & 0x08) != 0) {
+      height = buffer.readUint32();
+    }
+    int borderWidth = null;
+    if ((valueMask & 0x10) != 0) {
+      borderWidth = buffer.readUint32();
+    }
+    int sibling = null;
+    if ((valueMask & 0x20) != 0) {
+      sibling = buffer.readUint32();
+    }
+    int stackMode = null;
+    if ((valueMask & 0x40) != 0) {
+      stackMode = buffer.readUint32();
+    }
+    return X11ConfigureWindowRequest(window,
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        borderWidth: borderWidth,
+        sibling: sibling,
+        stackMode: stackMode);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -670,6 +867,12 @@ class X11CirculateWindowRequest extends X11Request {
 
   X11CirculateWindowRequest(this.window, this.direction);
 
+  factory X11CirculateWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var direction = data;
+    return X11CirculateWindowRequest(window, direction);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(window);
@@ -681,6 +884,11 @@ class X11GetGeometryRequest extends X11Request {
   final int drawable;
 
   X11GetGeometryRequest(this.drawable);
+
+  factory X11GetGeometryRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var drawable = buffer.readUint32();
+    return X11GetGeometryRequest(drawable);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -696,6 +904,11 @@ class X11QueryTreeRequest extends X11Request {
 
   X11QueryTreeRequest(this.window);
 
+  factory X11QueryTreeRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    return X11QueryTreeRequest(window);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(window);
@@ -710,6 +923,15 @@ class X11InternAtomRequest extends X11Request {
   final bool onlyIfExists;
 
   X11InternAtomRequest(this.name, this.onlyIfExists);
+
+  factory X11InternAtomRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var nameLength = buffer.readUint16();
+    buffer.skip(2);
+    var name = buffer.readString(nameLength);
+    buffer.skip(pad(nameLength));
+    var onlyIfExists = data != 0;
+    return X11InternAtomRequest(name, onlyIfExists);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -739,6 +961,11 @@ class X11GetAtomNameRequest extends X11Request {
 
   X11GetAtomNameRequest(this.atom);
 
+  factory X11GetAtomNameRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var atom = buffer.readUint32();
+    return X11GetAtomNameRequest(atom);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(atom);
@@ -754,10 +981,36 @@ class X11ChangePropertyRequest extends X11Request {
   final int property;
   final int type;
   final int format;
-  final List<int> data;
+  final List<int> data; // FIXME: make utf-8 getter
 
   X11ChangePropertyRequest(
       this.window, this.mode, this.property, this.type, this.format, this.data);
+
+  factory X11ChangePropertyRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var mode = X11ChangePropertyMode.values[data];
+    var property = buffer.readUint32();
+    var type = buffer.readUint32();
+    var format = buffer.readUint8();
+    buffer.skip(3);
+    var dataLength = buffer.readUint32();
+    var data_ = <int>[];
+    if (format == 8) {
+      for (var i = 0; i < dataLength; i++) {
+        data_.add(buffer.readUint8());
+      }
+    } else if (format == 16) {
+      for (var i = 0; i < dataLength; i++) {
+        data_.add(buffer.readUint16());
+      }
+    } else if (format == 32) {
+      for (var i = 0; i < dataLength; i++) {
+        data_.add(buffer.readUint32());
+      }
+    }
+    return X11ChangePropertyRequest(
+        window, mode, property, type, format, data_);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -790,6 +1043,12 @@ class X11DeletePropertyRequest extends X11Request {
 
   X11DeletePropertyRequest(this.window, this.property);
 
+  factory X11DeletePropertyRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var property = buffer.readUint32();
+    return X11DeletePropertyRequest(window, property);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(window);
@@ -808,6 +1067,15 @@ class X11CreatePixmapRequest extends X11Request {
   X11CreatePixmapRequest(
       this.pid, this.drawable, this.width, this.height, this.depth);
 
+  factory X11CreatePixmapRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var pid = buffer.readUint32();
+    var drawable = buffer.readUint32();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    var depth = data;
+    return X11CreatePixmapRequest(pid, drawable, width, height, depth);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(pid);
@@ -822,6 +1090,11 @@ class X11FreePixmapRequest extends X11Request {
   final int pixmap;
 
   X11FreePixmapRequest(this.pixmap);
+
+  factory X11FreePixmapRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var pixmap = buffer.readUint32();
+    return X11FreePixmapRequest(pixmap);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -881,6 +1154,13 @@ class X11CreateGCRequest extends X11Request {
       this.dashOffset,
       this.dashes,
       this.arcMode});
+
+  factory X11CreateGCRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var cid = buffer.readUint32();
+    var drawable = buffer.readUint32();
+    var valueMask = buffer.readUint32(); // FIXME
+    return X11CreateGCRequest(cid, drawable);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -1055,6 +1335,16 @@ class X11ClearAreaRequest extends X11Request {
 
   X11ClearAreaRequest(
       this.window, this.x, this.y, this.width, this.height, this.exposures);
+
+  factory X11ClearAreaRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    var exposures = data != 0;
+    return X11ClearAreaRequest(window, x, y, width, height, exposures);
+  }
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -1301,11 +1591,11 @@ class X11Client {
       }
     }
     var request = X11CreateWindowRequest(wid, parent,
-        depth: depth,
         x: x,
         y: y,
         width: width,
         height: height,
+        depth: depth,
         borderWidth: borderWidth,
         class_: class_,
         visual: visual,
@@ -1439,8 +1729,14 @@ class X11Client {
       borderWidth = null,
       sibling = null,
       stackMode = null}) {
-    var request = X11ConfigureWindowRequest(
-        window, x, y, width, height, borderWidth, sibling, stackMode);
+    var request = X11ConfigureWindowRequest(window,
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        borderWidth: borderWidth,
+        sibling: sibling,
+        stackMode: stackMode);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
     _sendRequest(12, data, buffer.data);
@@ -1873,6 +2169,10 @@ class X11ReadBuffer {
 
   int readUint16() {
     return ByteData.view(readBytes(2)).getUint16(0, Endian.little);
+  }
+
+  int readInt16() {
+    return ByteData.view(readBytes(2)).getInt16(0, Endian.little);
   }
 
   int readUint32() {
