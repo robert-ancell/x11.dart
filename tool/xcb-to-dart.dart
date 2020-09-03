@@ -17,6 +17,7 @@ void main(List<String> args) async {
   var functions = <String>[];
   for (var request in xcb.findElements('request')) {
     var name = request.getAttribute('name');
+    var opcode = request.getElement('opcode');
     var reply = request.getElement('reply');
 
     var args = <String>[];
@@ -78,7 +79,7 @@ void main(List<String> args) async {
         '  X11${name}Request(${argNames.map((name) => 'this.${name}').join(', ')});\n';
     code += '\n';
     code += '  @override\n';
-    code += '  void encode(X11WriteBuffer buffer) {\n';
+    code += '  int encode(X11WriteBuffer buffer) {\n';
     for (var node in request.children.where((node) => node is XmlElement)) {
       var element = node as XmlElement;
       if (element.name.local == 'pad') {
@@ -96,6 +97,7 @@ void main(List<String> args) async {
             '    buffer.write${xcbTypeToBufferType(fieldType)}(${xcbFieldToDartName(fieldName)});\n';
       }
     }
+    code += '    return 0; // FIXME: Return first element\n';
     code += '  }\n';
     code += '}\n';
     classes.add(code);
@@ -105,8 +107,8 @@ void main(List<String> args) async {
         '  ${returnValue} ${functionName}(${args.join(', ')})${functionSuffix} {\n';
     code += '    var request = X11${name}Request(${argNames.join(', ')});\n';
     code += '    var buffer = X11WriteBuffer();\n';
-    code += '    request.encode(buffer);\n';
-    code += '    _sendRequest(buffer.data);\n';
+    code += '    var data = request.encode(buffer);\n';
+    code += '    _sendRequest(${opcode}, data, buffer.data);\n';
     code += '  }\n';
     functions.add(code);
   }

@@ -133,12 +133,24 @@ class X11CreateWindowRequest extends X11Request {
   final int borderWidth;
   final X11WindowClass class_;
   final int visual;
-  final int valueMask;
+  final int backgroundPixmap;
+  final int backgroundPixel;
+  final int borderPixmap;
+  final int borderPixel;
+  final int bitGravity;
+  final int winGravity;
+  final int backingStore;
+  final int backingPlanes;
+  final int backingPixel;
+  final int overrideRedirect;
+  final int saveUnder;
+  final int eventMask;
+  final int doNotPropagateMask;
+  final int colormap;
+  final int cursor;
 
-  X11CreateWindowRequest(
-      this.depth,
-      this.wid,
-      this.parent,
+  X11CreateWindowRequest(this.wid, this.parent,
+      {this.depth,
       this.x,
       this.y,
       this.width,
@@ -146,7 +158,21 @@ class X11CreateWindowRequest extends X11Request {
       this.borderWidth,
       this.class_,
       this.visual,
-      this.valueMask);
+      this.backgroundPixmap,
+      this.backgroundPixel,
+      this.borderPixmap,
+      this.borderPixel,
+      this.bitGravity,
+      this.winGravity,
+      this.backingStore,
+      this.backingPlanes,
+      this.backingPixel,
+      this.overrideRedirect,
+      this.saveUnder,
+      this.eventMask,
+      this.doNotPropagateMask,
+      this.colormap,
+      this.cursor});
 
   @override
   int encode(X11WriteBuffer buffer) {
@@ -159,9 +185,303 @@ class X11CreateWindowRequest extends X11Request {
     buffer.writeUint16(borderWidth);
     buffer.writeUint16(class_.index);
     buffer.writeUint32(visual);
+    var valueMask = 0;
+    if (backgroundPixmap != null) {
+      valueMask |= 0x0001;
+    }
+    if (backgroundPixel != null) {
+      valueMask |= 0x0002;
+    }
+    if (borderPixmap != null) {
+      valueMask |= 0x0004;
+    }
+    if (borderPixel != null) {
+      valueMask |= 0x0008;
+    }
+    if (bitGravity != null) {
+      valueMask |= 0x0010;
+    }
+    if (winGravity != null) {
+      valueMask |= 0x0020;
+    }
+    if (backingStore != null) {
+      valueMask |= 0x0040;
+    }
+    if (backingPlanes != null) {
+      valueMask |= 0x0080;
+    }
+    if (backingPixel != null) {
+      valueMask |= 0x0100;
+    }
+    if (overrideRedirect != null) {
+      valueMask |= 0x0200;
+    }
+    if (saveUnder != null) {
+      valueMask |= 0x0400;
+    }
+    if (eventMask != null) {
+      valueMask |= 0x0800;
+    }
+    if (doNotPropagateMask != null) {
+      valueMask |= 0x1000;
+    }
+    if (colormap != null) {
+      valueMask |= 0x2000;
+    }
+    if (cursor != null) {
+      valueMask |= 0x4000;
+    }
     buffer.writeUint32(valueMask);
+    if (backgroundPixmap != null) {
+      buffer.writeUint32(backgroundPixmap);
+    }
+    if (backgroundPixel != null) {
+      buffer.writeUint32(backgroundPixel);
+    }
+    if (borderPixmap != null) {
+      buffer.writeUint32(borderPixmap);
+    }
+    if (borderPixel != null) {
+      buffer.writeUint32(borderPixel);
+    }
+    if (bitGravity != null) {
+      buffer.writeUint32(bitGravity);
+    }
+    if (winGravity != null) {
+      buffer.writeUint32(winGravity);
+    }
+    if (backingStore != null) {
+      buffer.writeUint32(backingStore);
+    }
+    if (backingPlanes != null) {
+      buffer.writeUint32(backingPlanes);
+    }
+    if (backingPixel != null) {
+      buffer.writeUint32(backingPixel);
+    }
+    if (overrideRedirect != null) {
+      buffer.writeUint32(overrideRedirect);
+    }
+    if (saveUnder != null) {
+      buffer.writeUint32(saveUnder);
+    }
+    if (eventMask != null) {
+      buffer.writeUint32(eventMask);
+    }
+    if (doNotPropagateMask != null) {
+      buffer.writeUint32(doNotPropagateMask);
+    }
+    if (colormap != null) {
+      buffer.writeUint32(colormap);
+    }
+    if (cursor != null) {
+      buffer.writeUint32(cursor);
+    }
 
     return depth;
+  }
+}
+
+class X11ChangeWindowAttributesRequest extends X11Request {
+  final int window;
+  final int backgroundPixmap;
+  final int backgroundPixel;
+  final int borderPixmap;
+  final int borderPixel;
+  final int bitGravity;
+  final int winGravity;
+  final int backingStore;
+  final int backingPlanes;
+  final int backingPixel;
+  final int overrideRedirect;
+  final int saveUnder;
+  final int eventMask;
+  final int doNotPropagateMask;
+  final int colormap;
+  final int cursor;
+
+  X11ChangeWindowAttributesRequest(this.window,
+      {this.backgroundPixmap,
+      this.backgroundPixel,
+      this.borderPixmap,
+      this.borderPixel,
+      this.bitGravity,
+      this.winGravity,
+      this.backingStore,
+      this.backingPlanes,
+      this.backingPixel,
+      this.overrideRedirect,
+      this.saveUnder,
+      this.eventMask,
+      this.doNotPropagateMask,
+      this.colormap,
+      this.cursor});
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    var valueMask = 0;
+    if (backgroundPixmap != null) {
+      valueMask |= 0x0001;
+    }
+    if (backgroundPixel != null) {
+      valueMask |= 0x0002;
+    }
+    if (borderPixmap != null) {
+      valueMask |= 0x0004;
+    }
+    if (borderPixel != null) {
+      valueMask |= 0x0008;
+    }
+    if (bitGravity != null) {
+      valueMask |= 0x0010;
+    }
+    if (winGravity != null) {
+      valueMask |= 0x0020;
+    }
+    if (backingStore != null) {
+      valueMask |= 0x0040;
+    }
+    if (backingPlanes != null) {
+      valueMask |= 0x0080;
+    }
+    if (backingPixel != null) {
+      valueMask |= 0x0100;
+    }
+    if (overrideRedirect != null) {
+      valueMask |= 0x0200;
+    }
+    if (saveUnder != null) {
+      valueMask |= 0x0400;
+    }
+    if (eventMask != null) {
+      valueMask |= 0x0800;
+    }
+    if (doNotPropagateMask != null) {
+      valueMask |= 0x1000;
+    }
+    if (colormap != null) {
+      valueMask |= 0x2000;
+    }
+    if (cursor != null) {
+      valueMask |= 0x4000;
+    }
+    buffer.writeUint32(valueMask);
+    if (backgroundPixmap != null) {
+      buffer.writeUint32(backgroundPixmap);
+    }
+    if (backgroundPixel != null) {
+      buffer.writeUint32(backgroundPixel);
+    }
+    if (borderPixmap != null) {
+      buffer.writeUint32(borderPixmap);
+    }
+    if (borderPixel != null) {
+      buffer.writeUint32(borderPixel);
+    }
+    if (bitGravity != null) {
+      buffer.writeUint32(bitGravity);
+    }
+    if (winGravity != null) {
+      buffer.writeUint32(winGravity);
+    }
+    if (backingStore != null) {
+      buffer.writeUint32(backingStore);
+    }
+    if (backingPlanes != null) {
+      buffer.writeUint32(backingPlanes);
+    }
+    if (backingPixel != null) {
+      buffer.writeUint32(backingPixel);
+    }
+    if (overrideRedirect != null) {
+      buffer.writeUint32(overrideRedirect);
+    }
+    if (saveUnder != null) {
+      buffer.writeUint32(saveUnder);
+    }
+    if (eventMask != null) {
+      buffer.writeUint32(eventMask);
+    }
+    if (doNotPropagateMask != null) {
+      buffer.writeUint32(doNotPropagateMask);
+    }
+    if (colormap != null) {
+      buffer.writeUint32(colormap);
+    }
+    if (cursor != null) {
+      buffer.writeUint32(cursor);
+    }
+    return 0;
+  }
+}
+
+class X11GetWindowAttributesRequest extends X11Request {
+  final int window;
+
+  X11GetWindowAttributesRequest(this.window);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return 0;
+  }
+}
+
+class X11GetWindowAttributesReply {}
+
+class X11DestroyWindowRequest extends X11Request {
+  final int window;
+
+  X11DestroyWindowRequest(this.window);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return 0;
+  }
+}
+
+class X11DestroySubwindowsRequest extends X11Request {
+  final int window;
+
+  X11DestroySubwindowsRequest(this.window);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return 0;
+  }
+}
+
+class X11ChangeSaveSetRequest extends X11Request {
+  final int window;
+  final int mode;
+
+  X11ChangeSaveSetRequest(this.window, this.mode);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return mode;
+  }
+}
+
+class X11ReparentWindowRequest extends X11Request {
+  final int window;
+  final int parent;
+  final int x;
+  final int y;
+
+  X11ReparentWindowRequest(this.window, this.parent, this.x, this.y);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    buffer.writeUint32(parent);
+    buffer.writeInt16(x);
+    buffer.writeInt16(y);
+    return 0;
   }
 }
 
@@ -173,10 +493,183 @@ class X11MapWindowRequest extends X11Request {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(window);
-
     return 0;
   }
 }
+
+class X11MapSubwindowsRequest extends X11Request {
+  final int window;
+
+  X11MapSubwindowsRequest(this.window);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return 0;
+  }
+}
+
+class X11UnmapWindowRequest extends X11Request {
+  final int window;
+
+  X11UnmapWindowRequest(this.window);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return 0;
+  }
+}
+
+class X11UnmapSubwindowsRequest extends X11Request {
+  final int window;
+
+  X11UnmapSubwindowsRequest(this.window);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return 0;
+  }
+}
+
+class X11ConfigureWindowRequest extends X11Request {
+  final int window;
+  final int x;
+  final int y;
+  final int width;
+  final int height;
+  final int borderWidth;
+  final int sibling;
+  final int stackMode;
+
+  X11ConfigureWindowRequest(this.window, this.x, this.y, this.width,
+      this.height, this.borderWidth, this.sibling, this.stackMode);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    var valueMask = 0;
+    if (x != null) {
+      valueMask |= 0x01;
+    }
+    if (y != null) {
+      valueMask |= 0x02;
+    }
+    if (width != null) {
+      valueMask |= 0x04;
+    }
+    if (height != null) {
+      valueMask |= 0x08;
+    }
+    if (borderWidth != null) {
+      valueMask |= 0x10;
+    }
+    if (sibling != null) {
+      valueMask |= 0x20;
+    }
+    if (stackMode != null) {
+      valueMask |= 0x40;
+    }
+    buffer.writeUint16(valueMask);
+    buffer.skip(2);
+    if (x != null) {
+      buffer.writeUint32(x);
+    }
+    if (y != null) {
+      buffer.writeUint32(y);
+    }
+    if (width != null) {
+      buffer.writeUint32(width);
+    }
+    if (height != null) {
+      buffer.writeUint32(height);
+    }
+    if (borderWidth != null) {
+      buffer.writeUint32(borderWidth);
+    }
+    if (sibling != null) {
+      buffer.writeUint32(sibling);
+    }
+    if (stackMode != null) {
+      buffer.writeUint32(stackMode);
+    }
+    return 0;
+  }
+}
+
+class X11CirculateWindowRequest extends X11Request {
+  final int window;
+  final int direction;
+
+  X11CirculateWindowRequest(this.window, this.direction);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return direction;
+  }
+}
+
+class X11GetGeometryRequest extends X11Request {
+  final int drawable;
+
+  X11GetGeometryRequest(this.drawable);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(drawable);
+    return 0;
+  }
+}
+
+class X11GetGeometryReply {}
+
+class X11QueryTreeRequest extends X11Request {
+  final int window;
+
+  X11QueryTreeRequest(this.window);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return 0;
+  }
+}
+
+class X11QueryTreeReply {}
+
+class X11InternAtomRequest extends X11Request {
+  final String name;
+  final bool onlyIfExists;
+
+  X11InternAtomRequest(this.name, this.onlyIfExists);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint16(name.length);
+    buffer.skip(2);
+    buffer.writeString(name);
+    buffer.skip(pad(name.length));
+    return onlyIfExists ? 1 : 0;
+  }
+}
+
+class X11InternAtomReply {}
+
+class X11GetAtomNameRequest extends X11Request {
+  final int atom;
+
+  X11GetAtomNameRequest(this.atom);
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(atom);
+    return 0;
+  }
+}
+
+class X11GetAtomNameReply {}
 
 class X11Client {
   Socket _socket;
@@ -231,12 +724,122 @@ class X11Client {
       int depth = 0,
       int visual = 0,
       int borderWidth = 0,
-      int valueMask = 0}) {
-    var request = X11CreateWindowRequest(depth, wid, parent, x, y, width,
-        height, borderWidth, class_, visual, valueMask);
+      int backgroundPixmap = null,
+      int backgroundPixel = null,
+      int borderPixmap = null,
+      int borderPixel = null,
+      int bitGravity = null,
+      int winGravity = null,
+      int backingStore = null,
+      int backingPlanes = null,
+      int backingPixel = null,
+      int overrideRedirect = null,
+      int saveUnder = null,
+      int eventMask = null,
+      int doNotPropagateMask = null,
+      int colormap = null,
+      int cursor = null}) {
+    var request = X11CreateWindowRequest(wid, parent,
+        depth: depth,
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        borderWidth: borderWidth,
+        class_: class_,
+        visual: visual,
+        backgroundPixmap: backgroundPixmap,
+        backgroundPixel: backgroundPixel,
+        borderPixmap: borderPixmap,
+        borderPixel: borderPixel,
+        bitGravity: bitGravity,
+        winGravity: winGravity,
+        backingStore: backingStore,
+        backingPlanes: backingPlanes,
+        backingPixel: backingPixel,
+        overrideRedirect: overrideRedirect,
+        saveUnder: saveUnder,
+        eventMask: eventMask,
+        doNotPropagateMask: doNotPropagateMask,
+        colormap: colormap,
+        cursor: cursor);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
     _sendRequest(1, data, buffer.data);
+  }
+
+  void changeWindowAttributes(int window,
+      {int borderWidth = 0,
+      int backgroundPixmap = null,
+      int backgroundPixel = null,
+      int borderPixmap = null,
+      int borderPixel = null,
+      int bitGravity = null,
+      int winGravity = null,
+      int backingStore = null,
+      int backingPlanes = null,
+      int backingPixel = null,
+      int overrideRedirect = null,
+      int saveUnder = null,
+      int eventMask = null,
+      int doNotPropagateMask = null,
+      int colormap = null,
+      int cursor = null}) {
+    var request = X11ChangeWindowAttributesRequest(window,
+        backgroundPixmap: backgroundPixmap,
+        backgroundPixel: backgroundPixel,
+        borderPixmap: borderPixmap,
+        borderPixel: borderPixel,
+        bitGravity: bitGravity,
+        winGravity: winGravity,
+        backingStore: backingStore,
+        backingPlanes: backingPlanes,
+        backingPixel: backingPixel,
+        overrideRedirect: overrideRedirect,
+        saveUnder: saveUnder,
+        eventMask: eventMask,
+        doNotPropagateMask: doNotPropagateMask,
+        colormap: colormap,
+        cursor: cursor);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(2, data, buffer.data);
+  }
+
+  Future<X11GetWindowAttributesReply> getWindowAttributes(int window) async {
+    var request = X11GetWindowAttributesRequest(window);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(3, data, buffer.data);
+  }
+
+  void destroyWindow(int window) {
+    var request = X11DestroyWindowRequest(window);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var data = request.encode(buffer);
+    _sendRequest(4, data, buffer.data);
+  }
+
+  void destroySubwindows(int window) {
+    var request = X11DestroySubwindowsRequest(window);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(5, data, buffer.data);
+  }
+
+  void changeSaveSet(int window, int mode) {
+    var request = X11ChangeSaveSetRequest(window, mode);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(6, data, buffer.data);
+  }
+
+  void reparentWindow(int window, int parent, {int x = 0, int y = 0}) {
+    var request = X11ReparentWindowRequest(window, parent, x, y);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(7, data, buffer.data);
   }
 
   void mapWindow(int window) {
@@ -244,6 +847,79 @@ class X11Client {
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
     _sendRequest(8, data, buffer.data);
+  }
+
+  void mapSubwindows(int window) {
+    var request = X11MapSubwindowsRequest(window);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(9, data, buffer.data);
+  }
+
+  void unmapWindow(int window) {
+    var request = X11UnmapWindowRequest(window);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(10, data, buffer.data);
+  }
+
+  void unmapSubwindows(int window) {
+    var request = X11UnmapSubwindowsRequest(window);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(11, data, buffer.data);
+  }
+
+  void configureWindow(int window,
+      {x = null,
+      y = null,
+      width = null,
+      height = null,
+      borderWidth = null,
+      sibling = null,
+      stackMode = null}) {
+    var request = X11ConfigureWindowRequest(
+        window, x, y, width, height, borderWidth, sibling, stackMode);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(12, data, buffer.data);
+  }
+
+  void circulateWindow(int window, int direction) {
+    // FIXME: enum
+    var request = X11CirculateWindowRequest(window, direction);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(13, data, buffer.data);
+  }
+
+  Future<X11GetGeometryReply> getGeometry(int drawable) async {
+    var request = X11GetGeometryRequest(drawable);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(14, data, buffer.data);
+  }
+
+  Future<X11QueryTreeReply> queryTree(int window) async {
+    var request = X11QueryTreeRequest(window);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(15, data, buffer.data);
+  }
+
+  Future<X11InternAtomReply> internAtom(String name,
+      {bool onlyIfExists = false}) async {
+    var request = X11InternAtomRequest(name, onlyIfExists);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(16, data, buffer.data);
+  }
+
+  Future<X11GetAtomNameReply> getAtomName(int atom) async {
+    var request = X11GetAtomNameRequest(atom);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(17, data, buffer.data);
   }
 
   void _processData(Uint8List data) {
