@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+String _formatId(int id) {
+  return '0x' + id.toRadixString(16).padLeft(8, '0');
+}
+
 enum X11ImageByteOrder { lsbFirst, msbFirst }
 
 enum X11BitmapFormatBitOrder { leastSignificant, mostSignificant }
@@ -85,7 +89,7 @@ class X11Success {
 
   @override
   String toString() =>
-      "X11Success(releaseNumber: ${releaseNumber}, resourceIdBase: 0x${resourceIdBase.toRadixString(16).padLeft(8, '0')}, resourceIdMask: 0x${resourceIdMask.toRadixString(16).padLeft(8, '0')}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, roots: ${roots})";
+      "X11Success(releaseNumber: ${releaseNumber}, resourceIdBase: ${_formatId(resourceIdBase)}, resourceIdMask: ${_formatId(resourceIdMask)}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, roots: ${roots})";
 }
 
 class X11Format {
@@ -118,7 +122,7 @@ class X11Screen {
 
   @override
   String toString() =>
-      'X11Window(window: ${window}, defaultColormap: ${defaultColormap}, whitePixel: 0x${whitePixel.toRadixString(16).padLeft(8, '0')}, blackPixel: 0x${blackPixel.toRadixString(16).padLeft(8, '0')}, currentInputMasks: 0x${currentInputMasks.toRadixString(16).padLeft(8, '0')}, widthInPixels: ${widthInPixels}, heightInPixels: ${heightInPixels}, widthInMillimeters: ${widthInMillimeters}, heightInMillimeters: ${heightInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
+      'X11Window(window: ${window}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatId(whitePixel)}, blackPixel: ${_formatId(blackPixel)}, currentInputMasks: ${_formatId(currentInputMasks)}, widthInPixels: ${widthInPixels}, heightInPixels: ${heightInPixels}, widthInMillimeters: ${widthInMillimeters}, heightInMillimeters: ${heightInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
 }
 
 class X11Depth {
@@ -140,7 +144,7 @@ class X11Visual {
 
   @override
   String toString() =>
-      'X11Visual(visualId: ${visualId}, class: ${class_}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: 0x${redMask.toRadixString(16).padLeft(8, '0')}, greenMask: 0x${greenMask.toRadixString(16).padLeft(8, '0')}, blueMask: 0x${blueMask.toRadixString(16).padLeft(8, '0')})';
+      'X11Visual(visualId: ${visualId}, class: ${class_}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: ${_formatId(redMask)}, greenMask: ${_formatId(greenMask)}, blueMask: ${_formatId(blueMask)})';
 }
 
 class X11Request {
@@ -600,7 +604,96 @@ class X11GetWindowAttributesRequest extends X11Request {
   }
 }
 
-class X11GetWindowAttributesReply extends X11Reply {}
+class X11GetWindowAttributesReply extends X11Reply {
+  final int backingStore;
+  final int visual;
+  final int class_;
+  final int bitGravity;
+  final int winGravity;
+  final int backingPlanes;
+  final int backingPixel;
+  final bool saveUnder;
+  final bool mapIsInstalled;
+  final int mapState;
+  final bool overrideRedirect;
+  final int colormap;
+  final int allEventMasks; // FIXME: set
+  final int yourEventMask; // FIXME: set
+  final int doNotPropagateMask; // FIXME: set
+
+  X11GetWindowAttributesReply(
+      {this.backingStore,
+      this.visual,
+      this.class_,
+      this.bitGravity,
+      this.winGravity,
+      this.backingPlanes,
+      this.backingPixel,
+      this.saveUnder,
+      this.mapIsInstalled,
+      this.mapState,
+      this.overrideRedirect,
+      this.colormap,
+      this.allEventMasks,
+      this.yourEventMask,
+      this.doNotPropagateMask});
+
+  factory X11GetWindowAttributesReply.fromBuffer(
+      int data, X11ReadBuffer buffer) {
+    var backingStore = data;
+    var visual = buffer.readUint32();
+    var class_ = buffer.readUint16();
+    var bitGravity = buffer.readUint8();
+    var winGravity = buffer.readUint8();
+    var backingPlanes = buffer.readUint32();
+    var backingPixel = buffer.readUint32();
+    var saveUnder = buffer.readBool();
+    var mapIsInstalled = buffer.readBool();
+    var mapState = buffer.readUint8();
+    var overrideRedirect = buffer.readBool();
+    var colormap = buffer.readUint32();
+    var allEventMasks = buffer.readUint32();
+    var yourEventMask = buffer.readUint32();
+    var doNotPropagateMask = buffer.readUint16();
+    buffer.skip(2);
+    return X11GetWindowAttributesReply(
+        backingStore: backingStore,
+        visual: visual,
+        class_: class_,
+        bitGravity: bitGravity,
+        winGravity: winGravity,
+        backingPlanes: backingPlanes,
+        backingPixel: backingPixel,
+        saveUnder: saveUnder,
+        mapIsInstalled: mapIsInstalled,
+        mapState: mapState,
+        overrideRedirect: overrideRedirect,
+        colormap: colormap,
+        allEventMasks: allEventMasks,
+        yourEventMask: yourEventMask,
+        doNotPropagateMask: doNotPropagateMask);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(visual);
+    buffer.writeUint16(class_);
+    buffer.writeUint8(bitGravity);
+    buffer.writeUint8(winGravity);
+    buffer.writeUint32(backingPlanes);
+    buffer.writeUint32(backingPixel);
+    buffer.writeBool(saveUnder);
+    buffer.writeBool(mapIsInstalled);
+    buffer.writeUint8(mapState);
+    buffer.writeBool(overrideRedirect);
+    buffer.writeUint32(colormap);
+    buffer.writeUint32(allEventMasks);
+    buffer.writeUint32(yourEventMask);
+    buffer.writeUint16(doNotPropagateMask);
+    buffer.skip(2);
+    return backingStore;
+  }
+}
 
 class X11DestroyWindowRequest extends X11Request {
   final int window;
@@ -899,7 +992,42 @@ class X11GetGeometryRequest extends X11Request {
   }
 }
 
-class X11GetGeometryReply extends X11Reply {}
+class X11GetGeometryReply extends X11Reply {
+  final int root;
+  final int x;
+  final int y;
+  final int width;
+  final int height;
+  final int depth;
+  final int borderWidth;
+
+  X11GetGeometryReply(this.root, this.x, this.y, this.width, this.height,
+      this.depth, this.borderWidth);
+
+  factory X11GetGeometryReply.fromBuffer(int data, X11ReadBuffer buffer) {
+    var root = buffer.readUint32();
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    var depth = data;
+    var borderWidth = buffer.readUint16();
+    buffer.skip(10);
+    return X11GetGeometryReply(root, x, y, width, height, depth, borderWidth);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(root);
+    buffer.writeInt16(x);
+    buffer.writeInt16(y);
+    buffer.writeUint16(width);
+    buffer.writeUint16(height);
+    buffer.writeUint16(borderWidth);
+    buffer.skip(10);
+    return depth;
+  }
+}
 
 class X11QueryTreeRequest extends X11Request {
   final int window;
@@ -918,7 +1046,41 @@ class X11QueryTreeRequest extends X11Request {
   }
 }
 
-class X11QueryTreeReply extends X11Reply {}
+class X11QueryTreeReply extends X11Reply {
+  final int root;
+  final int parent;
+  final List<int> children;
+
+  X11QueryTreeReply(this.root, this.parent, this.children);
+
+  factory X11QueryTreeReply.fromBuffer(int data, X11ReadBuffer buffer) {
+    var root = buffer.readUint32();
+    var parent = buffer.readUint32();
+    var children = <int>[];
+    var childrenLength = buffer.readUint16();
+    buffer.skip(14);
+    for (var i = 0; i < childrenLength; i++) {
+      children.add(buffer.readUint32());
+    }
+    return X11QueryTreeReply(root, parent, children);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(root);
+    buffer.writeUint32(parent);
+    buffer.writeUint16(children.length);
+    buffer.skip(14);
+    for (var window in children) {
+      buffer.writeUint32(window);
+    }
+    return 0;
+  }
+
+  @override
+  String toString() =>
+      'X11QueryTreeReply(root: ${_formatId(root)}, parent: ${_formatId(parent)}, children: ${children.map((window) => _formatId(window)).toList()})';
+}
 
 class X11InternAtomRequest extends X11Request {
   final String name;
@@ -1323,7 +1485,7 @@ class X11CreateGCRequest extends X11Request {
       buffer.skip(3);
     }
     if (graphicsExposures != null) {
-      buffer.writeUint8(graphicsExposures ? 1 : 0);
+      buffer.writeBool(graphicsExposures);
       buffer.skip(3);
     }
     if (clipXOorigin != null) {
@@ -1349,6 +1511,55 @@ class X11CreateGCRequest extends X11Request {
       buffer.writeUint8(arcMode);
       buffer.skip(3);
     }
+    return 0;
+  }
+}
+
+class X11SetDashesRequest extends X11Request {
+  final int gc;
+  final int dashOffset;
+  final List<int> dashes;
+
+  X11SetDashesRequest(this.gc, this.dashOffset, this.dashes);
+
+  factory X11SetDashesRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var gc = buffer.readUint32();
+    var dashOffset = buffer.readUint16();
+    var dashesLength = buffer.readUint16();
+    var dashes = <int>[];
+    for (var i = 0; i < dashesLength; i++) {
+      dashes.add(buffer.readUint8());
+    }
+    buffer.skip(pad(dashesLength));
+    return X11SetDashesRequest(gc, dashOffset, dashes);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(gc);
+    buffer.writeUint16(dashOffset);
+    buffer.writeUint16(dashes.length);
+    for (var dash in dashes) {
+      buffer.writeUint8(dash);
+    }
+    buffer.skip(pad(dashes.length));
+    return 0;
+  }
+}
+
+class X11FreeGCRequest extends X11Request {
+  final int gc;
+
+  X11FreeGCRequest(this.gc);
+
+  factory X11FreeGCRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var gc = buffer.readUint32();
+    return X11FreeGCRequest(gc);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(gc);
     return 0;
   }
 }
@@ -1382,6 +1593,261 @@ class X11ClearAreaRequest extends X11Request {
     buffer.writeUint16(width);
     buffer.writeUint16(height);
     return exposures ? 1 : 0;
+  }
+}
+
+class X11CopyAreaRequest extends X11Request {
+  final int srcDrawable;
+  final int dstDrawable;
+  final int gc;
+  final int srcX;
+  final int srcY;
+  final int dstX;
+  final int dstY;
+  final int width;
+  final int height;
+
+  X11CopyAreaRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcX,
+      this.srcY, this.dstX, this.dstY, this.width, this.height);
+
+  factory X11CopyAreaRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var srcDrawable = buffer.readUint32();
+    var dstDrawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var srcX = buffer.readInt16();
+    var srcY = buffer.readInt16();
+    var dstX = buffer.readInt16();
+    var dstY = buffer.readInt16();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    return X11CopyAreaRequest(
+        srcDrawable, dstDrawable, gc, srcX, srcY, dstX, dstY, width, height);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(srcDrawable);
+    buffer.writeUint32(dstDrawable);
+    buffer.writeUint32(gc);
+    buffer.writeInt16(srcX);
+    buffer.writeInt16(srcY);
+    buffer.writeInt16(dstX);
+    buffer.writeInt16(dstY);
+    buffer.writeUint16(width);
+    buffer.writeUint16(height);
+    return 0;
+  }
+}
+
+class X11CopyPlaneRequest extends X11Request {
+  final int srcDrawable;
+  final int dstDrawable;
+  final int gc;
+  final int srcX;
+  final int srcY;
+  final int dstX;
+  final int dstY;
+  final int width;
+  final int height;
+  final int bitPlane;
+
+  X11CopyPlaneRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcX,
+      this.srcY, this.dstX, this.dstY, this.width, this.height, this.bitPlane);
+
+  factory X11CopyPlaneRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var srcDrawable = buffer.readUint32();
+    var dstDrawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var srcX = buffer.readInt16();
+    var srcY = buffer.readInt16();
+    var dstX = buffer.readInt16();
+    var dstY = buffer.readInt16();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    var bitPlane = buffer.readUint32();
+    return X11CopyPlaneRequest(srcDrawable, dstDrawable, gc, srcX, srcY, dstX,
+        dstY, width, height, bitPlane);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(srcDrawable);
+    buffer.writeUint32(dstDrawable);
+    buffer.writeUint32(gc);
+    buffer.writeInt16(srcX);
+    buffer.writeInt16(srcY);
+    buffer.writeInt16(dstX);
+    buffer.writeInt16(dstY);
+    buffer.writeUint16(width);
+    buffer.writeUint16(height);
+    buffer.writeUint32(bitPlane);
+    return 0;
+  }
+}
+
+class X11CreateColormapRequest extends X11Request {
+  final int alloc;
+  final int mid;
+  final int window;
+  final int visual;
+
+  X11CreateColormapRequest(this.alloc, this.mid, this.window, this.visual);
+
+  factory X11CreateColormapRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var alloc = data;
+    var mid = buffer.readUint32();
+    var window = buffer.readUint32();
+    var visual = buffer.readUint32();
+    return X11CreateColormapRequest(alloc, mid, window, visual);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(mid);
+    buffer.writeUint32(window);
+    buffer.writeUint32(visual);
+    return alloc;
+  }
+}
+
+class X11FreeColormapRequest extends X11Request {
+  final int cmap;
+
+  X11FreeColormapRequest(this.cmap);
+
+  factory X11FreeColormapRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var cmap = buffer.readUint32();
+    return X11FreeColormapRequest(cmap);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(cmap);
+    return 0;
+  }
+}
+
+class X11QueryExtensionRequest extends X11Request {
+  final String name;
+
+  X11QueryExtensionRequest(this.name);
+
+  factory X11QueryExtensionRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var nameLength = buffer.readUint16();
+    buffer.skip(2);
+    var name = buffer.readString(nameLength);
+    return X11QueryExtensionRequest(name);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint16(name.length);
+    buffer.skip(2);
+    buffer.writeString(name);
+    buffer.skip(pad(name.length));
+    return 0;
+  }
+}
+
+class X11QueryExtensionReply extends X11Reply {
+  final bool present;
+  final int majorOpcode;
+  final int firstEvent;
+  final int firstError;
+
+  X11QueryExtensionReply(
+      this.present, this.majorOpcode, this.firstEvent, this.firstError);
+
+  factory X11QueryExtensionReply.fromBuffer(int data, X11ReadBuffer buffer) {
+    var present = data != 0;
+    var majorOpcode = buffer.readUint8();
+    var firstEvent = buffer.readUint8();
+    var firstError = buffer.readUint8();
+    return X11QueryExtensionReply(present, majorOpcode, firstEvent, firstError);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(majorOpcode);
+    buffer.writeUint8(firstEvent);
+    buffer.writeUint8(firstError);
+    return present ? 1 : 0;
+  }
+}
+
+class X11ListExtensionsRequest extends X11Request {
+  X11ListExtensionsRequest();
+
+  factory X11ListExtensionsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    return X11ListExtensionsRequest();
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    return 0;
+  }
+}
+
+class X11ListExtensionsReply extends X11Reply {
+  final List<String> names;
+
+  X11ListExtensionsReply(this.names);
+
+  factory X11ListExtensionsReply.fromBuffer(int data, X11ReadBuffer buffer) {
+    var namesLength = data;
+    buffer.skip(24);
+    var names = <String>[];
+    for (var i = 0; i < namesLength; i++) {
+      var nameLength = buffer.readUint8();
+      names.add(buffer.readString(nameLength));
+    }
+    return X11ListExtensionsReply(names);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.skip(24);
+    var totalLength = 0;
+    for (var name in names) {
+      buffer.writeUint8(name.length);
+      buffer.writeString(name);
+      totalLength += 1 + name.length;
+    }
+    buffer.skip(pad(totalLength));
+    return names.length;
+  }
+}
+
+class X11BellRequest extends X11Request {
+  final int percent;
+
+  X11BellRequest(this.percent);
+
+  factory X11BellRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var percent = data; // FIXME Int8
+    return X11BellRequest(percent);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    return percent; // FIXME: Int8
+  }
+}
+
+class X11KillClientRequest extends X11Request {
+  final int resource;
+
+  X11KillClientRequest(this.resource);
+
+  factory X11KillClientRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var resource = buffer.readUint32();
+    return X11KillClientRequest(resource);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(resource);
+    return 0;
   }
 }
 
@@ -1428,7 +1894,7 @@ class X11Expose extends X11Event {
 
   @override
   String toString() =>
-      'X11Expose(window: 0x${window.toRadixString(16).padLeft(8, '0')}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, count: ${count})';
+      'X11Expose(window: ${_formatId(window)}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, count: ${count})';
 }
 
 class X11GraphicsExposure extends X11Event {}
@@ -1696,12 +2162,18 @@ class X11Client {
     _sendRequest(2, data, buffer.data);
   }
 
-  // FIXME(rober-ancell): Future<X11GetWindowAttributesReply>
-  void getWindowAttributes(int window) {
+  Future<X11GetWindowAttributesReply> getWindowAttributes(int window) {
     var request = X11GetWindowAttributesRequest(window);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
-    _sendRequest(3, data, buffer.data);
+    var sequenceNumber = _sendRequest(3, data, buffer.data);
+    return _awaitReply(3, sequenceNumber)
+        .then<X11GetWindowAttributesReply>((response) {
+      if (response is X11GetWindowAttributesReply) {
+        return response;
+      }
+      throw 'Failed to get window attributes'; // FIXME: Better error
+    });
   }
 
   void destroyWindow(int window) {
@@ -1784,20 +2256,31 @@ class X11Client {
     _sendRequest(13, data, buffer.data);
   }
 
-  // FIXME(robert-ancell): Future<X11GetGeometryReply>
-  void getGeometry(int drawable) {
+  Future<X11GetGeometryReply> getGeometry(int drawable) {
     var request = X11GetGeometryRequest(drawable);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
-    _sendRequest(14, data, buffer.data);
+    var sequenceNumber = _sendRequest(14, data, buffer.data);
+    return _awaitReply(14, sequenceNumber)
+        .then<X11GetGeometryReply>((response) {
+      if (response is X11GetGeometryReply) {
+        return response;
+      }
+      throw 'Failed to query tree'; // FIXME: Better error
+    });
   }
 
-  // FIXME(robert-ancell): Future<X11QueryTreeReply>
-  void queryTree(int window) {
+  Future<X11QueryTreeReply> queryTree(int window) {
     var request = X11QueryTreeRequest(window);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
-    _sendRequest(15, data, buffer.data);
+    var sequenceNumber = _sendRequest(15, data, buffer.data);
+    return _awaitReply(15, sequenceNumber).then<X11QueryTreeReply>((response) {
+      if (response is X11QueryTreeReply) {
+        return response;
+      }
+      throw 'Failed to query tree'; // FIXME: Better error
+    });
   }
 
   Future<int> internAtom(String name, {bool onlyIfExists = false}) async {
@@ -1935,6 +2418,20 @@ class X11Client {
     _sendRequest(55, data, buffer.data);
   }
 
+  void setDashes(int gc, int dashOffset, List<int> dashes) {
+    var request = X11SetDashesRequest(gc, dashOffset, dashes);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(58, data, buffer.data);
+  }
+
+  void freeGC(int gc) {
+    var request = X11FreeGCRequest(gc);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(60, data, buffer.data);
+  }
+
   void clearArea(int window,
       {int x = 0,
       int y = 0,
@@ -1945,6 +2442,61 @@ class X11Client {
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
     _sendRequest(61, data, buffer.data);
+  }
+
+  void createColormap(int alloc, int mid, int window, int visual) {
+    var request = X11CreateColormapRequest(alloc, mid, window, visual);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(78, data, buffer.data);
+  }
+
+  void freeColormap(int cmap) {
+    var request = X11FreeColormapRequest(cmap);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(79, data, buffer.data);
+  }
+
+  Future<X11QueryExtensionReply> queryExtension(String name) async {
+    var request = X11QueryExtensionRequest(name);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    var sequenceNumber = _sendRequest(98, data, buffer.data);
+    return _awaitReply(98, sequenceNumber)
+        .then<X11QueryExtensionReply>((response) {
+      if (response is X11QueryExtensionReply) {
+        return response;
+      }
+      throw 'Failed to query extension'; // FIXME: Better error
+    });
+  }
+
+  Future<List<String>> listExtensions() async {
+    var request = X11ListExtensionsRequest();
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    var sequenceNumber = _sendRequest(99, data, buffer.data);
+    return _awaitReply(99, sequenceNumber).then<List<String>>((response) {
+      if (response is X11ListExtensionsReply) {
+        return response.names;
+      }
+      throw 'Failed to list extensions'; // FIXME: Better error
+    });
+  }
+
+  void bell(int percent) {
+    var request = X11BellRequest(percent);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(104, data, buffer.data);
+  }
+
+  void killClient(int resource) {
+    var request = X11KillClientRequest(resource);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(113, data, buffer.data);
   }
 
   void _processData(Uint8List data) {
@@ -2108,10 +2660,20 @@ class X11Client {
       var handler = _requests[sequenceNumber];
       if (handler != null) {
         X11Response response;
-        if (handler.opcode == 16) {
+        if (handler.opcode == 3) {
+          response = X11GetWindowAttributesReply.fromBuffer(data, readBuffer);
+        } else if (handler.opcode == 14) {
+          response = X11GetGeometryReply.fromBuffer(data, readBuffer);
+        } else if (handler.opcode == 15) {
+          response = X11QueryTreeReply.fromBuffer(data, readBuffer);
+        } else if (handler.opcode == 16) {
           response = X11InternAtomReply.fromBuffer(data, readBuffer);
         } else if (handler.opcode == 17) {
           response = X11GetAtomNameReply.fromBuffer(data, readBuffer);
+        } else if (handler.opcode == 98) {
+          response = X11QueryExtensionReply.fromBuffer(data, readBuffer);
+        } else if (handler.opcode == 99) {
+          response = X11ListExtensionsReply.fromBuffer(data, readBuffer);
         }
         handler.respond(response);
         _requests.remove(sequenceNumber);
@@ -2177,6 +2739,10 @@ class X11WriteBuffer {
 
   void writeUint8(int value) {
     data.add(value);
+  }
+
+  void writeBool(bool value) {
+    writeUint8(value ? 1 : 0);
   }
 
   void skip(int length) {
