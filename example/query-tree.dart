@@ -9,6 +9,7 @@ void main() async {
   }
 
   void printChildren(List<int> children, [String indent = '']) async {
+    var wmNameAtom = await client.internAtom('WM_NAME');
     for (var window in children) {
       var geometry = await client.getGeometry(window);
       var attributes = await client.getWindowAttributes(window);
@@ -19,6 +20,10 @@ void main() async {
       }
       print(
           '${indent}0x${formatId(window)} ${geometry.x},${geometry.y} ${geometry.width}x${geometry.height} ${attributes.class_} ${propertyNames.join(', ')}');
+      var wmName = await client.getPropertyString(window, wmNameAtom);
+      if (wmName != null) {
+        print('  ${indent} "${wmName}"');
+      }
       var tree = await client.queryTree(window);
       await printChildren(tree.children, indent + '  ');
     }

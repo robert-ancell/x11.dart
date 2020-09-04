@@ -1247,6 +1247,95 @@ class X11DeletePropertyRequest extends X11Request {
   }
 }
 
+class X11GetPropertyRequest extends X11Request {
+  final int window;
+  final int property;
+  final int type;
+  final int longOffset;
+  final int longLength;
+  final bool delete;
+
+  X11GetPropertyRequest(this.window, this.property, this.type, this.longOffset,
+      this.longLength, this.delete);
+
+  factory X11GetPropertyRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var property = buffer.readUint32();
+    var type = buffer.readUint32();
+    var longOffset = buffer.readUint32();
+    var longLength = buffer.readUint32();
+    var delete = data != 0;
+    return X11GetPropertyRequest(
+        window, property, type, longOffset, longLength, delete);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    buffer.writeUint32(property);
+    buffer.writeUint32(type);
+    buffer.writeUint32(longOffset);
+    buffer.writeUint32(longLength);
+    return delete ? 1 : 0;
+  }
+}
+
+class X11GetPropertyReply extends X11Reply {
+  final int type;
+  final int format;
+  final List<int> value;
+  final int bytesAfter;
+
+  X11GetPropertyReply(this.type, this.format, this.value, this.bytesAfter);
+
+  factory X11GetPropertyReply.fromBuffer(int data, X11ReadBuffer buffer) {
+    var type = buffer.readUint32();
+    var format = data;
+    var bytesAfter = buffer.readUint32();
+    var valueLength = buffer.readUint32();
+    buffer.skip(12);
+    var value = <int>[];
+    if (format == 8) {
+      for (var i = 0; i < valueLength; i++) {
+        value.add(buffer.readUint8());
+      }
+    } else if (format == 16) {
+      for (var i = 0; i < valueLength; i += 2) {
+        value.add(buffer.readUint16());
+      }
+    } else if (format == 32) {
+      for (var i = 0; i < valueLength; i += 4) {
+        value.add(buffer.readUint32());
+      }
+    }
+    buffer.skip(pad(valueLength * format ~/ 8));
+    return X11GetPropertyReply(type, format, value, bytesAfter);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(type);
+    buffer.writeUint32(bytesAfter);
+    buffer.writeUint32(value.length * format ~/ 8);
+    buffer.skip(12);
+    if (format == 8) {
+      for (var e in value) {
+        buffer.writeUint8(e);
+      }
+    } else if (format == 16) {
+      for (var e in value) {
+        buffer.writeUint16(e);
+      }
+    } else if (format == 32) {
+      for (var e in value) {
+        buffer.writeUint32(e);
+      }
+    }
+    buffer.skip(pad(value.length * format ~/ 8));
+    return format;
+  }
+}
+
 class X11ListPropertiesRequest extends X11Request {
   final int window;
 
@@ -2394,6 +2483,35 @@ class X11Client {
     _sendRequest(19, data, buffer.data);
   }
 
+  Future<X11GetPropertyReply> getProperty(int window, int property,
+      {int type = 0,
+      int longOffset = 0,
+      int longLength = 4294967295,
+      bool delete = false}) async {
+    var request = X11GetPropertyRequest(
+        window, property, type, longOffset, longLength, delete);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    var sequenceNumber = _sendRequest(20, data, buffer.data);
+    return _awaitReply(20, sequenceNumber)
+        .then<X11GetPropertyReply>((response) {
+      if (response is X11GetPropertyReply) {
+        return response;
+      }
+      throw 'Failed to get property'; // FIXME: Better error
+    });
+  }
+
+  Future<String> getPropertyString(int window, int property) async {
+    var stringAtom = await internAtom('STRING');
+    var reply = await getProperty(window, property, type: stringAtom);
+    if (reply.format == 8) {
+      return utf8.decode(reply.value);
+    } else {
+      return null;
+    }
+  }
+
   Future<List<int>> listProperties(int window) async {
     var request = X11ListPropertiesRequest(window);
     var buffer = X11WriteBuffer();
@@ -2726,6 +2844,8 @@ class X11Client {
           response = X11InternAtomReply.fromBuffer(data, readBuffer);
         } else if (handler.opcode == 17) {
           response = X11GetAtomNameReply.fromBuffer(data, readBuffer);
+        } else if (handler.opcode == 20) {
+          response = X11GetPropertyReply.fromBuffer(data, readBuffer);
         } else if (handler.opcode == 21) {
           response = X11ListPropertiesReply.fromBuffer(data, readBuffer);
         } else if (handler.opcode == 98) {
