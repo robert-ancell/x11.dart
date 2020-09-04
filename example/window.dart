@@ -18,6 +18,6 @@ void main() async {
       backgroundPixel: 0x00000000);
   var wmNameAtom = await client.internAtom('WM_NAME');
   var stringAtom = await client.internAtom('STRING');
-  client.changePropertyString(id, wmNameAtom, stringAtom, "x11.dart");
+  client.changePropertyString(id, wmNameAtom, stringAtom, 'x11.dart');
   client.mapWindow(id);
 }

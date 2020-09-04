@@ -254,63 +254,63 @@ class X11CreateWindowRequest extends X11Request {
     var class_ = X11WindowClass.values[buffer.readUint16()];
     var visual = buffer.readUint32();
     var valueMask = buffer.readUint32();
-    int backgroundPixmap = null;
+    int backgroundPixmap;
     if ((valueMask & 0x0001) != 0) {
       backgroundPixmap = buffer.readUint32();
     }
-    int backgroundPixel = null;
+    int backgroundPixel;
     if ((valueMask & 0x0002) != 0) {
       backgroundPixel = buffer.readUint32();
     }
-    int borderPixmap = null;
+    int borderPixmap;
     if ((valueMask & 0x0004) != 0) {
       borderPixmap = buffer.readUint32();
     }
-    int borderPixel = null;
+    int borderPixel;
     if ((valueMask & 0x0008) != 0) {
       borderPixel = buffer.readUint32();
     }
-    int bitGravity = null;
+    int bitGravity;
     if ((valueMask & 0x0010) != 0) {
       bitGravity = buffer.readUint32();
     }
-    int winGravity = null;
+    int winGravity;
     if ((valueMask & 0x0020) != 0) {
       winGravity = buffer.readUint32();
     }
-    int backingStore = null;
+    int backingStore;
     if ((valueMask & 0x0040) != 0) {
       backingStore = buffer.readUint32();
     }
-    int backingPlanes = null;
+    int backingPlanes;
     if ((valueMask & 0x0080) != 0) {
       backingPlanes = buffer.readUint32();
     }
-    int backingPixel = null;
+    int backingPixel;
     if ((valueMask & 0x0100) != 0) {
       backingPixel = buffer.readUint32();
     }
-    int overrideRedirect = null;
+    int overrideRedirect;
     if ((valueMask & 0x0200) != 0) {
       overrideRedirect = buffer.readUint32();
     }
-    int saveUnder = null;
+    int saveUnder;
     if ((valueMask & 0x0400) != 0) {
       saveUnder = buffer.readUint32();
     }
-    int eventMask = null;
+    int eventMask;
     if ((valueMask & 0x0800) != 0) {
       eventMask = buffer.readUint32();
     }
-    int doNotPropagateMask = null;
+    int doNotPropagateMask;
     if ((valueMask & 0x1000) != 0) {
       doNotPropagateMask = buffer.readUint32();
     }
-    int colormap = null;
+    int colormap;
     if ((valueMask & 0x2000) != 0) {
       colormap = buffer.readUint32();
     }
-    int cursor = null;
+    int cursor;
     if ((valueMask & 0x4000) != 0) {
       cursor = buffer.readUint32();
     }
@@ -773,31 +773,31 @@ class X11ConfigureWindowRequest extends X11Request {
     var window = buffer.readUint32();
     var valueMask = buffer.readUint16();
     buffer.skip(2);
-    int x = null;
+    int x;
     if ((valueMask & 0x01) != 0) {
       x = buffer.readUint32();
     }
-    int y = null;
+    int y;
     if ((valueMask & 0x02) != 0) {
       y = buffer.readUint32();
     }
-    int width = null;
+    int width;
     if ((valueMask & 0x04) != 0) {
       width = buffer.readUint32();
     }
-    int height = null;
+    int height;
     if ((valueMask & 0x08) != 0) {
       height = buffer.readUint32();
     }
-    int borderWidth = null;
+    int borderWidth;
     if ((valueMask & 0x10) != 0) {
       borderWidth = buffer.readUint32();
     }
-    int sibling = null;
+    int sibling;
     if ((valueMask & 0x20) != 0) {
       sibling = buffer.readUint32();
     }
-    int stackMode = null;
+    int stackMode;
     if ((valueMask & 0x40) != 0) {
       stackMode = buffer.readUint32();
     }
@@ -1186,7 +1186,7 @@ class X11CreateGCRequest extends X11Request {
   factory X11CreateGCRequest.fromBuffer(int data, X11ReadBuffer buffer) {
     var cid = buffer.readUint32();
     var drawable = buffer.readUint32();
-    var valueMask = buffer.readUint32(); // FIXME
+    buffer.readUint32(); // FIXME valueMask
     return X11CreateGCRequest(cid, drawable);
   }
 
@@ -1483,7 +1483,6 @@ class X11Client {
   final _connectCompleter = Completer();
   int _sequenceNumber = 0;
   int _resourceIdBase;
-  int _resourceIdMask;
   int _resourceCount = 0;
   List<X11Screen> roots;
   final _errorStreamController = StreamController<X11Error>();
@@ -1564,7 +1563,7 @@ class X11Client {
     'WM_TRANSIENT_FOR': 68
   };
 
-  X11Client() {}
+  X11Client();
 
   void connect() async {
     //var display = Platform.environment['DISPLAY'];
@@ -1608,22 +1607,22 @@ class X11Client {
       int depth = 0,
       int visual = 0,
       int borderWidth = 0,
-      int backgroundPixmap = null,
-      int backgroundPixel = null,
-      int borderPixmap = null,
-      int borderPixel = null,
-      int bitGravity = null,
-      int winGravity = null,
-      int backingStore = null,
-      int backingPlanes = null,
-      int backingPixel = null,
-      int overrideRedirect = null,
-      int saveUnder = null,
-      Set<X11EventMask> eventMask = null,
-      int doNotPropagateMask = null,
-      int colormap = null,
-      int cursor = null}) {
-    int eventMaskValue = null;
+      int backgroundPixmap,
+      int backgroundPixel,
+      int borderPixmap,
+      int borderPixel,
+      int bitGravity,
+      int winGravity,
+      int backingStore,
+      int backingPlanes,
+      int backingPixel,
+      int overrideRedirect,
+      int saveUnder,
+      Set<X11EventMask> eventMask,
+      int doNotPropagateMask,
+      int colormap,
+      int cursor}) {
+    int eventMaskValue;
     if (eventMask != null) {
       eventMaskValue = 0;
       for (var event in eventMask) {
@@ -1661,21 +1660,21 @@ class X11Client {
 
   void changeWindowAttributes(int window,
       {int borderWidth = 0,
-      int backgroundPixmap = null,
-      int backgroundPixel = null,
-      int borderPixmap = null,
-      int borderPixel = null,
-      int bitGravity = null,
-      int winGravity = null,
-      int backingStore = null,
-      int backingPlanes = null,
-      int backingPixel = null,
-      int overrideRedirect = null,
-      int saveUnder = null,
-      int eventMask = null,
-      int doNotPropagateMask = null,
-      int colormap = null,
-      int cursor = null}) {
+      int backgroundPixmap,
+      int backgroundPixel,
+      int borderPixmap,
+      int borderPixel,
+      int bitGravity,
+      int winGravity,
+      int backingStore,
+      int backingPlanes,
+      int backingPixel,
+      int overrideRedirect,
+      int saveUnder,
+      int eventMask,
+      int doNotPropagateMask,
+      int colormap,
+      int cursor}) {
     var request = X11ChangeWindowAttributesRequest(window,
         backgroundPixmap: backgroundPixmap,
         backgroundPixel: backgroundPixel,
@@ -1697,7 +1696,8 @@ class X11Client {
     _sendRequest(2, data, buffer.data);
   }
 
-  Future<X11GetWindowAttributesReply> getWindowAttributes(int window) async {
+  // FIXME(rober-ancell): Future<X11GetWindowAttributesReply>
+  void getWindowAttributes(int window) {
     var request = X11GetWindowAttributesRequest(window);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
@@ -1762,13 +1762,7 @@ class X11Client {
   }
 
   void configureWindow(int window,
-      {x = null,
-      y = null,
-      width = null,
-      height = null,
-      borderWidth = null,
-      sibling = null,
-      stackMode = null}) {
+      {x, y, width, height, borderWidth, sibling, stackMode}) {
     var request = X11ConfigureWindowRequest(window,
         x: x,
         y: y,
@@ -1790,14 +1784,16 @@ class X11Client {
     _sendRequest(13, data, buffer.data);
   }
 
-  Future<X11GetGeometryReply> getGeometry(int drawable) async {
+  // FIXME(robert-ancell): Future<X11GetGeometryReply>
+  void getGeometry(int drawable) {
     var request = X11GetGeometryRequest(drawable);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
     _sendRequest(14, data, buffer.data);
   }
 
-  Future<X11QueryTreeReply> queryTree(int window) async {
+  // FIXME(robert-ancell): Future<X11QueryTreeReply>
+  void queryTree(int window) {
     var request = X11QueryTreeRequest(window);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
@@ -1817,6 +1813,7 @@ class X11Client {
       if (response is X11InternAtomReply) {
         return response.atom;
       }
+      return null; // FIXME(robert-ancell): Throw error?
     });
   }
 
@@ -1829,6 +1826,8 @@ class X11Client {
       if (response is X11GetAtomNameReply) {
         return response.name;
       }
+      // Only error would be the atom doesn't exist - return null in this case.
+      return null;
     });
   }
 
@@ -1884,29 +1883,29 @@ class X11Client {
   }
 
   void createGC(int cid, int drawable,
-      {int function = null,
-      int planeMask = null,
-      int foreground = null,
-      int background = null,
-      int lineWidth = null,
-      int lineStyle = null,
-      int capStyle = null,
-      int joinStyle = null,
-      int fillStyle = null,
-      int fillRule = null,
-      int tile = null,
-      int stipple = null,
-      int tileStippleXOrigin = null,
-      int tileStippleYOrigin = null,
-      int font = null,
-      int subwindowMode = null,
-      bool graphicsExposures = null,
-      int clipXOorigin = null,
-      int clipYOorigin = null,
-      int clipMask = null,
-      int dashOffset = null,
-      int dashes = null,
-      int arcMode = null}) {
+      {int function,
+      int planeMask,
+      int foreground,
+      int background,
+      int lineWidth,
+      int lineStyle,
+      int capStyle,
+      int joinStyle,
+      int fillStyle,
+      int fillRule,
+      int tile,
+      int stipple,
+      int tileStippleXOrigin,
+      int tileStippleYOrigin,
+      int font,
+      int subwindowMode,
+      bool graphicsExposures,
+      int clipXOorigin,
+      int clipYOorigin,
+      int clipMask,
+      int dashOffset,
+      int dashes,
+      int arcMode}) {
     var request = X11CreateGCRequest(cid, drawable,
         function: function,
         planeMask: planeMask,
@@ -2061,7 +2060,6 @@ class X11Client {
       }
 
       _resourceIdBase = result.resourceIdBase;
-      _resourceIdMask = result.resourceIdMask;
       roots = result.roots;
 
       print('Success: ${result.vendor}');
@@ -2121,7 +2119,7 @@ class X11Client {
     } else {
       var code = reply;
       _buffer.skip(1);
-      var sequenceNumber = _buffer.readUint16();
+      _buffer.readUint16(); // FIXME(robert-ancell): sequenceNumber
       X11Event event;
       if (code == 12) {
         event = X11Expose.fromBuffer(_buffer);
@@ -2247,7 +2245,7 @@ class X11ReadBuffer {
     return bytes.buffer;
   }
 
-  int skip(int count) {
+  void skip(int count) {
     for (var i = 0; i < count; i++) {
       readUint8();
     }
