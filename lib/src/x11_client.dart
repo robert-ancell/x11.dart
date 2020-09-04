@@ -2757,6 +2757,24 @@ class X11Client {
     _sendRequest(61, data, buffer.data);
   }
 
+  void copyArea(int srcDrawable, int dstDrawable, int gc, int srcX, int srcY,
+      int dstX, int dstY, int width, int height) {
+    var request = X11CopyAreaRequest(
+        srcDrawable, dstDrawable, gc, srcX, srcY, dstX, dstY, width, height);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(62, data, buffer.data);
+  }
+
+  void copyPlane(int srcDrawable, int dstDrawable, int gc, int srcX, int srcY,
+      int dstX, int dstY, int width, int height, int bitPlane) {
+    var request = X11CopyPlaneRequest(srcDrawable, dstDrawable, gc, srcX, srcY,
+        dstX, dstY, width, height, bitPlane);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(63, data, buffer.data);
+  }
+
   void createColormap(int alloc, int mid, int window, int visual) {
     var request = X11CreateColormapRequest(alloc, mid, window, visual);
     var buffer = X11WriteBuffer();
