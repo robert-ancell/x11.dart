@@ -607,7 +607,7 @@ class X11GetWindowAttributesRequest extends X11Request {
 class X11GetWindowAttributesReply extends X11Reply {
   final int backingStore;
   final int visual;
-  final int class_;
+  final X11WindowClass class_;
   final int bitGravity;
   final int winGravity;
   final int backingPlanes;
@@ -642,7 +642,7 @@ class X11GetWindowAttributesReply extends X11Reply {
       int data, X11ReadBuffer buffer) {
     var backingStore = data;
     var visual = buffer.readUint32();
-    var class_ = buffer.readUint16();
+    var class_ = X11WindowClass.values[buffer.readUint16()];
     var bitGravity = buffer.readUint8();
     var winGravity = buffer.readUint8();
     var backingPlanes = buffer.readUint32();
@@ -677,7 +677,7 @@ class X11GetWindowAttributesReply extends X11Reply {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(visual);
-    buffer.writeUint16(class_);
+    buffer.writeUint16(class_.index);
     buffer.writeUint8(bitGravity);
     buffer.writeUint8(winGravity);
     buffer.writeUint32(backingPlanes);

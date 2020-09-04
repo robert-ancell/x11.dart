@@ -11,8 +11,9 @@ void main() async {
   void printChildren(List<int> children, [String indent = '']) async {
     for (var window in children) {
       var geometry = await client.getGeometry(window);
+      var attributes = await client.getWindowAttributes(window);
       print(
-          '${indent}0x${formatId(window)} ${geometry.x},${geometry.y} ${geometry.width}x${geometry.height}');
+          '${indent}0x${formatId(window)} ${geometry.x},${geometry.y} ${geometry.width}x${geometry.height} ${attributes.class_}');
       var tree = await client.queryTree(window);
       await printChildren(tree.children, indent + '  ');
     }
