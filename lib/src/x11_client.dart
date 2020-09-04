@@ -1983,6 +1983,37 @@ class X11KillClientRequest extends X11Request {
   }
 }
 
+class X11RotatePropertiesRequest extends X11Request {
+  final int window;
+  final int delta;
+  final List<int> atoms;
+
+  X11RotatePropertiesRequest(this.window, this.delta, this.atoms);
+
+  factory X11RotatePropertiesRequest.fromBuffer(
+      int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var atomsLength = buffer.readUint16();
+    var delta = buffer.readInt16();
+    var atoms = <int>[];
+    for (var i = 0; i < atomsLength; i++) {
+      atoms.add(buffer.readUint32());
+    }
+    return X11RotatePropertiesRequest(window, delta, atoms);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    buffer.writeUint16(atoms.length);
+    buffer.writeInt16(delta);
+    for (var atom in atoms) {
+      buffer.writeUint32(atom);
+    }
+    return 0;
+  }
+}
+
 class X11KeyPress extends X11Event {}
 
 class X11KeyRelease extends X11Event {}
@@ -2671,6 +2702,13 @@ class X11Client {
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
     _sendRequest(113, data, buffer.data);
+  }
+
+  void rotateProperties(int window, int delta, List<int> atoms) {
+    var request = X11RotatePropertiesRequest(window, delta, atoms);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(114, data, buffer.data);
   }
 
   void _processData(Uint8List data) {
