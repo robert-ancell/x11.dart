@@ -1247,6 +1247,49 @@ class X11DeletePropertyRequest extends X11Request {
   }
 }
 
+class X11ListPropertiesRequest extends X11Request {
+  final int window;
+
+  X11ListPropertiesRequest(this.window);
+
+  factory X11ListPropertiesRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    return X11ListPropertiesRequest(window);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(window);
+    return 0;
+  }
+}
+
+class X11ListPropertiesReply extends X11Reply {
+  final List<int> atoms;
+
+  X11ListPropertiesReply(this.atoms);
+
+  factory X11ListPropertiesReply.fromBuffer(int data, X11ReadBuffer buffer) {
+    var atomsLength = buffer.readUint16();
+    buffer.skip(22);
+    var atoms = <int>[];
+    for (var i = 0; i < atomsLength; i++) {
+      atoms.add(buffer.readUint32());
+    }
+    return X11ListPropertiesReply(atoms);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint16(atoms.length);
+    buffer.skip(22);
+    for (var atom in atoms) {
+      buffer.writeUint32(atom);
+    }
+    return 0;
+  }
+}
+
 class X11CreatePixmapRequest extends X11Request {
   final int pid;
   final int drawable;
@@ -2351,6 +2394,19 @@ class X11Client {
     _sendRequest(19, data, buffer.data);
   }
 
+  Future<List<int>> listProperties(int window) async {
+    var request = X11ListPropertiesRequest(window);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    var sequenceNumber = _sendRequest(21, data, buffer.data);
+    return _awaitReply(21, sequenceNumber).then<List<int>>((response) {
+      if (response is X11ListPropertiesReply) {
+        return response.atoms;
+      }
+      throw 'Failed to list properties'; // FIXME: Better error
+    });
+  }
+
   void createPixmap(int pid, int drawable, int width, int height, int depth) {
     var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
     var buffer = X11WriteBuffer();
@@ -2670,6 +2726,8 @@ class X11Client {
           response = X11InternAtomReply.fromBuffer(data, readBuffer);
         } else if (handler.opcode == 17) {
           response = X11GetAtomNameReply.fromBuffer(data, readBuffer);
+        } else if (handler.opcode == 21) {
+          response = X11ListPropertiesReply.fromBuffer(data, readBuffer);
         } else if (handler.opcode == 98) {
           response = X11QueryExtensionReply.fromBuffer(data, readBuffer);
         } else if (handler.opcode == 99) {

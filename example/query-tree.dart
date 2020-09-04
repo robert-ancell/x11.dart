@@ -12,8 +12,13 @@ void main() async {
     for (var window in children) {
       var geometry = await client.getGeometry(window);
       var attributes = await client.getWindowAttributes(window);
+      var properties = await client.listProperties(window);
+      var propertyNames = <String>[];
+      for (var atom in properties) {
+        propertyNames.add(await client.getAtomName(atom));
+      }
       print(
-          '${indent}0x${formatId(window)} ${geometry.x},${geometry.y} ${geometry.width}x${geometry.height} ${attributes.class_}');
+          '${indent}0x${formatId(window)} ${geometry.x},${geometry.y} ${geometry.width}x${geometry.height} ${attributes.class_} ${propertyNames.join(', ')}');
       var tree = await client.queryTree(window);
       await printChildren(tree.children, indent + '  ');
     }
