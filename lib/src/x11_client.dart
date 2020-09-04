@@ -133,6 +133,26 @@ class X11Depth {
   String toString() => 'X11Depth(depth: ${depth}, visuals: ${visuals})';
 }
 
+enum X11HostFamily {
+  internet,
+  decnet,
+  chaos,
+  unused3,
+  unused4,
+  serverInterpreted,
+  internetV6
+}
+
+class X11Host {
+  final X11HostFamily family;
+  final List<int> address;
+
+  X11Host(this.family, this.address);
+
+  @override
+  String toString() => 'X11Host(family: ${family}, address: ${address})';
+}
+
 class X11Visual {
   int visualId;
   X11VisualClass class_;
@@ -1966,6 +1986,94 @@ class X11BellRequest extends X11Request {
   }
 }
 
+class X11ChangeHostsRequest extends X11Request {
+  final int mode;
+  final int family;
+  final List<int> address;
+
+  X11ChangeHostsRequest(this.mode, this.family, this.address);
+
+  factory X11ChangeHostsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    var mode = data;
+    var family = buffer.readUint8();
+    buffer.skip(1);
+    var addressLength = buffer.readUint16();
+    var address = <int>[];
+    for (var i = 0; i < addressLength; i++) {
+      address.add(buffer.readUint8());
+    }
+    buffer.skip(pad(addressLength));
+    return X11ChangeHostsRequest(mode, family, address);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(family);
+    buffer.skip(1);
+    buffer.writeUint16(address.length);
+    for (var e in address) {
+      buffer.writeUint8(e);
+    }
+    buffer.skip(pad(address.length));
+    return mode;
+  }
+}
+
+class X11ListHostsRequest extends X11Request {
+  X11ListHostsRequest();
+
+  factory X11ListHostsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+    return X11ListHostsRequest();
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    return 0;
+  }
+}
+
+class X11ListHostsReply extends X11Reply {
+  final int mode;
+  final List<X11Host> hosts;
+
+  X11ListHostsReply(this.mode, this.hosts);
+
+  factory X11ListHostsReply.fromBuffer(int data, X11ReadBuffer buffer) {
+    var mode = data;
+    var hostsLength = buffer.readUint16();
+    buffer.skip(22);
+    var hosts = <X11Host>[];
+    for (var i = 0; i < hostsLength; i++) {
+      var family = X11HostFamily.values[buffer.readUint8()];
+      buffer.skip(1);
+      var addressLength = buffer.readUint16();
+      var address = <int>[];
+      for (var j = 0; j < addressLength; j++) {
+        address.add(buffer.readUint8());
+      }
+      buffer.skip(pad(addressLength));
+      hosts.add(X11Host(family, address));
+    }
+    return X11ListHostsReply(mode, hosts);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint16(hosts.length);
+    buffer.skip(22);
+    for (var host in hosts) {
+      buffer.writeUint8(host.family.index);
+      buffer.skip(1);
+      buffer.writeUint16(host.address.length);
+      for (var e in host.address) {
+        buffer.writeUint8(e);
+      }
+      buffer.skip(pad(host.address.length));
+    }
+    return mode;
+  }
+}
+
 class X11KillClientRequest extends X11Request {
   final int resource;
 
@@ -2697,6 +2805,26 @@ class X11Client {
     _sendRequest(104, data, buffer.data);
   }
 
+  void changeHosts(int mode, int family, List<int> address) {
+    var request = X11ChangeHostsRequest(mode, family, address);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(109, data, buffer.data);
+  }
+
+  Future<X11ListHostsReply> listHosts() async {
+    var request = X11ListHostsRequest();
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    var sequenceNumber = _sendRequest(110, data, buffer.data);
+    return _awaitReply(110, sequenceNumber).then<X11ListHostsReply>((response) {
+      if (response is X11ListHostsReply) {
+        return response;
+      }
+      throw 'Failed to list hosts'; // FIXME: Better error
+    });
+  }
+
   void killClient(int resource) {
     var request = X11KillClientRequest(resource);
     var buffer = X11WriteBuffer();
@@ -2890,6 +3018,8 @@ class X11Client {
           response = X11QueryExtensionReply.fromBuffer(data, readBuffer);
         } else if (handler.opcode == 99) {
           response = X11ListExtensionsReply.fromBuffer(data, readBuffer);
+        } else if (handler.opcode == 110) {
+          response = X11ListHostsReply.fromBuffer(data, readBuffer);
         }
         handler.respond(response);
         _requests.remove(sequenceNumber);
