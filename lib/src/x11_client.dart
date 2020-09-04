@@ -149,13 +149,15 @@ class X11Request {
   }
 }
 
-class X11Reply {
+class X11Response {}
+
+class X11Reply extends X11Response {
   int encode(X11WriteBuffer buffer) {
     return 0;
   }
 }
 
-class X11Error {
+class X11Error extends X11Response {
   final X11ErrorCode code;
   final int sequenceNumber;
   final int resourceId;
@@ -948,6 +950,11 @@ class X11InternAtomReply extends X11Reply {
 
   X11InternAtomReply(this.atom);
 
+  factory X11InternAtomReply.fromBuffer(int data, X11ReadBuffer buffer) {
+    var atom = buffer.readUint32();
+    return X11InternAtomReply(atom);
+  }
+
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint32(atom);
@@ -973,7 +980,28 @@ class X11GetAtomNameRequest extends X11Request {
   }
 }
 
-class X11GetAtomNameReply extends X11Reply {}
+class X11GetAtomNameReply extends X11Reply {
+  final String name;
+
+  X11GetAtomNameReply(this.name);
+
+  factory X11GetAtomNameReply.fromBuffer(int data, X11ReadBuffer buffer) {
+    var nameLength = buffer.readUint16();
+    buffer.skip(22);
+    var name = buffer.readString(nameLength);
+    buffer.skip(pad(nameLength));
+    return X11GetAtomNameReply(name);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint16(name.length);
+    buffer.skip(22);
+    buffer.writeString(name);
+    buffer.skip(pad(name.length));
+    return 0;
+  }
+}
 
 class X11ChangePropertyRequest extends X11Request {
   final int window;
@@ -1439,16 +1467,28 @@ class X11UnknownEvent extends X11Event {
   String toString() => 'X11UnknownEvent()';
 }
 
+class _RequestHandler {
+  final int opcode;
+  final completer = Completer<X11Response>();
+
+  _RequestHandler(this.opcode);
+
+  Future<X11Response> get future => completer.future;
+  void respond(X11Response response) => completer.complete(response);
+}
+
 class X11Client {
   Socket _socket;
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
+  int _sequenceNumber = 0;
   int _resourceIdBase;
   int _resourceIdMask;
   int _resourceCount = 0;
   List<X11Screen> roots;
   final _errorStreamController = StreamController<X11Error>();
   final _eventStreamController = StreamController<X11Event>();
+  final _requests = <int, _RequestHandler>{};
 
   Stream<X11Error> get errorStream => _errorStreamController.stream;
   Stream<X11Event> get eventStream => _eventStreamController.stream;
@@ -1772,14 +1812,24 @@ class X11Client {
     var request = X11InternAtomRequest(name, onlyIfExists);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
-    _sendRequest(16, data, buffer.data);
+    var sequenceNumber = _sendRequest(16, data, buffer.data);
+    return _awaitReply(16, sequenceNumber).then<int>((response) {
+      if (response is X11InternAtomReply) {
+        return response.atom;
+      }
+    });
   }
 
-  Future<X11GetAtomNameReply> getAtomName(int atom) async {
+  Future<String> getAtomName(int atom) async {
     var request = X11GetAtomNameRequest(atom);
     var buffer = X11WriteBuffer();
     var data = request.encode(buffer);
-    _sendRequest(17, data, buffer.data);
+    var sequenceNumber = _sendRequest(17, data, buffer.data);
+    return _awaitReply(17, sequenceNumber).then<String>((response) {
+      if (response is X11GetAtomNameReply) {
+        return response.name;
+      }
+    });
   }
 
   void changePropertyUint8(int window, int property, int type, List<int> value,
@@ -1900,12 +1950,12 @@ class X11Client {
 
   void _processData(Uint8List data) {
     _buffer.addAll(data);
-    var haveMessage = true;
-    while (haveMessage) {
+    var haveResponse = true;
+    while (haveResponse) {
       if (!_connectCompleter.isCompleted) {
-        haveMessage = _processSetup();
+        haveResponse = _processSetup();
       } else {
-        haveMessage = _processMessage();
+        haveResponse = _processResponse();
       }
     }
   }
@@ -2027,7 +2077,7 @@ class X11Client {
     return true;
   }
 
-  bool _processMessage() {
+  bool _processResponse() {
     if (_buffer.remaining < 32) {
       return false;
     }
@@ -2038,7 +2088,13 @@ class X11Client {
 
     if (reply == 0) {
       var error = X11Error.fromBuffer(_buffer);
-      _errorStreamController.add(error);
+      var handler = _requests[error.sequenceNumber];
+      if (handler != null) {
+        handler.respond(error);
+        _requests.remove(error.sequenceNumber);
+      } else {
+        _errorStreamController.add(error);
+      }
     } else if (reply == 1) {
       var data = _buffer.readUint8();
       var sequenceNumber = _buffer.readUint16();
@@ -2047,8 +2103,21 @@ class X11Client {
         _buffer.readOffset = startOffset;
         return false;
       }
-      var additionalData = _buffer.readBytes(24 + length * 4);
-      print('Reply ${sequenceNumber}');
+      var readBuffer = X11ReadBuffer();
+      for (var i = 0; i < 24 + length * 4; i++) {
+        readBuffer.add(_buffer.readUint8());
+      }
+      var handler = _requests[sequenceNumber];
+      if (handler != null) {
+        X11Response response;
+        if (handler.opcode == 16) {
+          response = X11InternAtomReply.fromBuffer(data, readBuffer);
+        } else if (handler.opcode == 17) {
+          response = X11GetAtomNameReply.fromBuffer(data, readBuffer);
+        }
+        handler.respond(response);
+        _requests.remove(sequenceNumber);
+      }
     } else {
       var code = reply;
       _buffer.skip(1);
@@ -2067,13 +2136,26 @@ class X11Client {
     return true;
   }
 
-  void _sendRequest(int opcode, int data, List<int> additionalData) {
+  int _sendRequest(int opcode, int data, List<int> additionalData) {
+    _sequenceNumber++;
+    if (_sequenceNumber >= 65536) {
+      _sequenceNumber = 0;
+    }
+
     var buffer = X11WriteBuffer();
     buffer.writeUint8(opcode);
     buffer.writeUint8(data);
     buffer.writeUint16(1 + additionalData.length ~/ 4); // FIXME: Pad to 4 bytes
     _socket.add(buffer.data);
     _socket.add(additionalData);
+
+    return _sequenceNumber;
+  }
+
+  Future<X11Response> _awaitReply(int opcode, int sequenceNumber) {
+    var handler = _RequestHandler(opcode);
+    _requests[sequenceNumber] = handler;
+    return handler.future;
   }
 
   void close() async {
@@ -2138,6 +2220,10 @@ class X11ReadBuffer {
   /// Number of bytes remaining in the buffer.
   int get remaining {
     return _data.length - readOffset;
+  }
+
+  void add(int value) {
+    _data.add(value);
   }
 
   void addAll(Iterable<int> value) {
