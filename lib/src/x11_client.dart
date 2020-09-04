@@ -2953,8 +2953,6 @@ class X11Client {
 
       _resourceIdBase = result.resourceIdBase;
       roots = result.roots;
-
-      print('Success: ${result.vendor}');
     } else if (result == 2) {
       // Authenticate
       var reason = _buffer.readString(length ~/ 4);
