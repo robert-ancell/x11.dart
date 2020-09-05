@@ -188,6 +188,7 @@ class X11Error extends X11Response {
       this.minorOpcode);
 
   factory X11Error.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var code = X11ErrorCode.values[buffer.readUint8() + 1];
     var sequenceNumber = buffer.readUint16();
     var resourceId = buffer.readUint32();
@@ -260,14 +261,14 @@ class X11CreateWindowRequest extends X11Request {
       this.colormap,
       this.cursor});
 
-  factory X11CreateWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11CreateWindowRequest.fromBuffer(X11ReadBuffer buffer) {
+    var depth = buffer.readUint8();
     var wid = buffer.readUint32();
     var parent = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    var depth = data;
     var borderWidth = buffer.readUint16();
     var class_ = X11WindowClass.values[buffer.readUint16()];
     var visual = buffer.readUint32();
@@ -606,6 +607,7 @@ class X11GetWindowAttributesRequest extends X11Request {
 
   factory X11GetWindowAttributesRequest.fromBuffer(
       int data, X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     return X11GetWindowAttributesRequest(window);
   }
@@ -651,9 +653,8 @@ class X11GetWindowAttributesReply extends X11Reply {
       this.yourEventMask,
       this.doNotPropagateMask});
 
-  factory X11GetWindowAttributesReply.fromBuffer(
-      int data, X11ReadBuffer buffer) {
-    var backingStore = data;
+  factory X11GetWindowAttributesReply.fromBuffer(X11ReadBuffer buffer) {
+    var backingStore = buffer.readUint8();
     var visual = buffer.readUint32();
     var class_ = X11WindowClass.values[buffer.readUint16()];
     var bitGravity = buffer.readUint8();
@@ -713,7 +714,8 @@ class X11DestroyWindowRequest extends X11Request {
 
   X11DestroyWindowRequest(this.window);
 
-  factory X11DestroyWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11DestroyWindowRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     return X11DestroyWindowRequest(window);
   }
@@ -732,6 +734,7 @@ class X11DestroySubwindowsRequest extends X11Request {
 
   factory X11DestroySubwindowsRequest.fromBuffer(
       int data, X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     return X11DestroySubwindowsRequest(window);
   }
@@ -749,9 +752,9 @@ class X11ChangeSaveSetRequest extends X11Request {
 
   X11ChangeSaveSetRequest(this.window, this.mode);
 
-  factory X11ChangeSaveSetRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11ChangeSaveSetRequest.fromBuffer(X11ReadBuffer buffer) {
+    var mode = buffer.readUint8();
     var window = buffer.readUint32();
-    var mode = data;
     return X11ChangeSaveSetRequest(window, mode);
   }
 
@@ -770,7 +773,8 @@ class X11ReparentWindowRequest extends X11Request {
 
   X11ReparentWindowRequest(this.window, this.parent, this.x, this.y);
 
-  factory X11ReparentWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11ReparentWindowRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     var parent = buffer.readUint32();
     var x = buffer.readInt16();
@@ -793,7 +797,8 @@ class X11MapWindowRequest extends X11Request {
 
   X11MapWindowRequest(this.window);
 
-  factory X11MapWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11MapWindowRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     return X11MapWindowRequest(window);
   }
@@ -810,7 +815,8 @@ class X11MapSubwindowsRequest extends X11Request {
 
   X11MapSubwindowsRequest(this.window);
 
-  factory X11MapSubwindowsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11MapSubwindowsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     return X11MapSubwindowsRequest(window);
   }
@@ -827,7 +833,8 @@ class X11UnmapWindowRequest extends X11Request {
 
   X11UnmapWindowRequest(this.window);
 
-  factory X11UnmapWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11UnmapWindowRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     return X11UnmapWindowRequest(window);
   }
@@ -844,7 +851,8 @@ class X11UnmapSubwindowsRequest extends X11Request {
 
   X11UnmapSubwindowsRequest(this.window);
 
-  factory X11UnmapSubwindowsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11UnmapSubwindowsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     return X11UnmapSubwindowsRequest(window);
   }
@@ -875,7 +883,8 @@ class X11ConfigureWindowRequest extends X11Request {
       this.sibling,
       this.stackMode});
 
-  factory X11ConfigureWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11ConfigureWindowRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     var valueMask = buffer.readUint16();
     buffer.skip(2);
@@ -975,9 +984,9 @@ class X11CirculateWindowRequest extends X11Request {
 
   X11CirculateWindowRequest(this.window, this.direction);
 
-  factory X11CirculateWindowRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11CirculateWindowRequest.fromBuffer(X11ReadBuffer buffer) {
+    var direction = buffer.readUint8();
     var window = buffer.readUint32();
-    var direction = data;
     return X11CirculateWindowRequest(window, direction);
   }
 
@@ -993,7 +1002,8 @@ class X11GetGeometryRequest extends X11Request {
 
   X11GetGeometryRequest(this.drawable);
 
-  factory X11GetGeometryRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11GetGeometryRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var drawable = buffer.readUint32();
     return X11GetGeometryRequest(drawable);
   }
@@ -1017,13 +1027,13 @@ class X11GetGeometryReply extends X11Reply {
   X11GetGeometryReply(this.root, this.x, this.y, this.width, this.height,
       this.depth, this.borderWidth);
 
-  factory X11GetGeometryReply.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11GetGeometryReply.fromBuffer(X11ReadBuffer buffer) {
+    var depth = buffer.readUint8();
     var root = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    var depth = data;
     var borderWidth = buffer.readUint16();
     buffer.skip(10);
     return X11GetGeometryReply(root, x, y, width, height, depth, borderWidth);
@@ -1047,7 +1057,8 @@ class X11QueryTreeRequest extends X11Request {
 
   X11QueryTreeRequest(this.window);
 
-  factory X11QueryTreeRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11QueryTreeRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     return X11QueryTreeRequest(window);
   }
@@ -1066,7 +1077,8 @@ class X11QueryTreeReply extends X11Reply {
 
   X11QueryTreeReply(this.root, this.parent, this.children);
 
-  factory X11QueryTreeReply.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11QueryTreeReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var root = buffer.readUint32();
     var parent = buffer.readUint32();
     var children = <int>[];
@@ -1101,12 +1113,12 @@ class X11InternAtomRequest extends X11Request {
 
   X11InternAtomRequest(this.name, this.onlyIfExists);
 
-  factory X11InternAtomRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11InternAtomRequest.fromBuffer(X11ReadBuffer buffer) {
+    var onlyIfExists = buffer.readBool();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString(nameLength);
     buffer.skip(pad(nameLength));
-    var onlyIfExists = data != 0;
     return X11InternAtomRequest(name, onlyIfExists);
   }
 
@@ -1125,7 +1137,8 @@ class X11InternAtomReply extends X11Reply {
 
   X11InternAtomReply(this.atom);
 
-  factory X11InternAtomReply.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11InternAtomReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var atom = buffer.readUint32();
     return X11InternAtomReply(atom);
   }
@@ -1143,7 +1156,8 @@ class X11GetAtomNameRequest extends X11Request {
 
   X11GetAtomNameRequest(this.atom);
 
-  factory X11GetAtomNameRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11GetAtomNameRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var atom = buffer.readUint32();
     return X11GetAtomNameRequest(atom);
   }
@@ -1160,7 +1174,8 @@ class X11GetAtomNameReply extends X11Reply {
 
   X11GetAtomNameReply(this.name);
 
-  factory X11GetAtomNameReply.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11GetAtomNameReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var nameLength = buffer.readUint16();
     buffer.skip(22);
     var name = buffer.readString(nameLength);
@@ -1189,9 +1204,9 @@ class X11ChangePropertyRequest extends X11Request {
   X11ChangePropertyRequest(
       this.window, this.mode, this.property, this.type, this.format, this.data);
 
-  factory X11ChangePropertyRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11ChangePropertyRequest.fromBuffer(X11ReadBuffer buffer) {
+    var mode = X11ChangePropertyMode.values[buffer.readUint8()];
     var window = buffer.readUint32();
-    var mode = X11ChangePropertyMode.values[data];
     var property = buffer.readUint32();
     var type = buffer.readUint32();
     var format = buffer.readUint8();
@@ -1246,7 +1261,8 @@ class X11DeletePropertyRequest extends X11Request {
 
   X11DeletePropertyRequest(this.window, this.property);
 
-  factory X11DeletePropertyRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11DeletePropertyRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     var property = buffer.readUint32();
     return X11DeletePropertyRequest(window, property);
@@ -1271,13 +1287,13 @@ class X11GetPropertyRequest extends X11Request {
   X11GetPropertyRequest(this.window, this.property, this.type, this.longOffset,
       this.longLength, this.delete);
 
-  factory X11GetPropertyRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11GetPropertyRequest.fromBuffer(X11ReadBuffer buffer) {
+    var delete = buffer.readBool();
     var window = buffer.readUint32();
     var property = buffer.readUint32();
     var type = buffer.readUint32();
     var longOffset = buffer.readUint32();
     var longLength = buffer.readUint32();
-    var delete = data != 0;
     return X11GetPropertyRequest(
         window, property, type, longOffset, longLength, delete);
   }
@@ -1301,9 +1317,9 @@ class X11GetPropertyReply extends X11Reply {
 
   X11GetPropertyReply(this.type, this.format, this.value, this.bytesAfter);
 
-  factory X11GetPropertyReply.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11GetPropertyReply.fromBuffer(X11ReadBuffer buffer) {
+    var format = buffer.readUint8();
     var type = buffer.readUint32();
-    var format = data;
     var bytesAfter = buffer.readUint32();
     var valueLength = buffer.readUint32();
     buffer.skip(12);
@@ -1354,7 +1370,8 @@ class X11ListPropertiesRequest extends X11Request {
 
   X11ListPropertiesRequest(this.window);
 
-  factory X11ListPropertiesRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11ListPropertiesRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     return X11ListPropertiesRequest(window);
   }
@@ -1371,7 +1388,8 @@ class X11ListPropertiesReply extends X11Reply {
 
   X11ListPropertiesReply(this.atoms);
 
-  factory X11ListPropertiesReply.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11ListPropertiesReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var atomsLength = buffer.readUint16();
     buffer.skip(22);
     var atoms = <int>[];
@@ -1402,12 +1420,12 @@ class X11CreatePixmapRequest extends X11Request {
   X11CreatePixmapRequest(
       this.pid, this.drawable, this.width, this.height, this.depth);
 
-  factory X11CreatePixmapRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11CreatePixmapRequest.fromBuffer(X11ReadBuffer buffer) {
+    var depth = buffer.readUint8();
     var pid = buffer.readUint32();
     var drawable = buffer.readUint32();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    var depth = data;
     return X11CreatePixmapRequest(pid, drawable, width, height, depth);
   }
 
@@ -1426,7 +1444,8 @@ class X11FreePixmapRequest extends X11Request {
 
   X11FreePixmapRequest(this.pixmap);
 
-  factory X11FreePixmapRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11FreePixmapRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var pixmap = buffer.readUint32();
     return X11FreePixmapRequest(pixmap);
   }
@@ -1490,7 +1509,8 @@ class X11CreateGCRequest extends X11Request {
       this.dashes,
       this.arcMode});
 
-  factory X11CreateGCRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11CreateGCRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var cid = buffer.readUint32();
     var drawable = buffer.readUint32();
     buffer.readUint32(); // FIXME valueMask
@@ -1667,7 +1687,8 @@ class X11SetDashesRequest extends X11Request {
 
   X11SetDashesRequest(this.gc, this.dashOffset, this.dashes);
 
-  factory X11SetDashesRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11SetDashesRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var gc = buffer.readUint32();
     var dashOffset = buffer.readUint16();
     var dashesLength = buffer.readUint16();
@@ -1697,7 +1718,8 @@ class X11FreeGCRequest extends X11Request {
 
   X11FreeGCRequest(this.gc);
 
-  factory X11FreeGCRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11FreeGCRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var gc = buffer.readUint32();
     return X11FreeGCRequest(gc);
   }
@@ -1720,13 +1742,13 @@ class X11ClearAreaRequest extends X11Request {
   X11ClearAreaRequest(
       this.window, this.x, this.y, this.width, this.height, this.exposures);
 
-  factory X11ClearAreaRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11ClearAreaRequest.fromBuffer(X11ReadBuffer buffer) {
+    var exposures = buffer.readBool();
     var window = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    var exposures = data != 0;
     return X11ClearAreaRequest(window, x, y, width, height, exposures);
   }
 
@@ -1755,7 +1777,8 @@ class X11CopyAreaRequest extends X11Request {
   X11CopyAreaRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcX,
       this.srcY, this.dstX, this.dstY, this.width, this.height);
 
-  factory X11CopyAreaRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11CopyAreaRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var srcDrawable = buffer.readUint32();
     var dstDrawable = buffer.readUint32();
     var gc = buffer.readUint32();
@@ -1799,7 +1822,8 @@ class X11CopyPlaneRequest extends X11Request {
   X11CopyPlaneRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcX,
       this.srcY, this.dstX, this.dstY, this.width, this.height, this.bitPlane);
 
-  factory X11CopyPlaneRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11CopyPlaneRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var srcDrawable = buffer.readUint32();
     var dstDrawable = buffer.readUint32();
     var gc = buffer.readUint32();
@@ -1838,8 +1862,8 @@ class X11CreateColormapRequest extends X11Request {
 
   X11CreateColormapRequest(this.alloc, this.mid, this.window, this.visual);
 
-  factory X11CreateColormapRequest.fromBuffer(int data, X11ReadBuffer buffer) {
-    var alloc = data;
+  factory X11CreateColormapRequest.fromBuffer(X11ReadBuffer buffer) {
+    var alloc = buffer.readUint8();
     var mid = buffer.readUint32();
     var window = buffer.readUint32();
     var visual = buffer.readUint32();
@@ -1860,7 +1884,8 @@ class X11FreeColormapRequest extends X11Request {
 
   X11FreeColormapRequest(this.cmap);
 
-  factory X11FreeColormapRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11FreeColormapRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var cmap = buffer.readUint32();
     return X11FreeColormapRequest(cmap);
   }
@@ -1877,7 +1902,8 @@ class X11QueryExtensionRequest extends X11Request {
 
   X11QueryExtensionRequest(this.name);
 
-  factory X11QueryExtensionRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11QueryExtensionRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString(nameLength);
@@ -1903,8 +1929,8 @@ class X11QueryExtensionReply extends X11Reply {
   X11QueryExtensionReply(
       this.present, this.majorOpcode, this.firstEvent, this.firstError);
 
-  factory X11QueryExtensionReply.fromBuffer(int data, X11ReadBuffer buffer) {
-    var present = data != 0;
+  factory X11QueryExtensionReply.fromBuffer(X11ReadBuffer buffer) {
+    var present = buffer.readBool();
     var majorOpcode = buffer.readUint8();
     var firstEvent = buffer.readUint8();
     var firstError = buffer.readUint8();
@@ -1923,7 +1949,8 @@ class X11QueryExtensionReply extends X11Reply {
 class X11ListExtensionsRequest extends X11Request {
   X11ListExtensionsRequest();
 
-  factory X11ListExtensionsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11ListExtensionsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     return X11ListExtensionsRequest();
   }
 
@@ -1938,8 +1965,8 @@ class X11ListExtensionsReply extends X11Reply {
 
   X11ListExtensionsReply(this.names);
 
-  factory X11ListExtensionsReply.fromBuffer(int data, X11ReadBuffer buffer) {
-    var namesLength = data;
+  factory X11ListExtensionsReply.fromBuffer(X11ReadBuffer buffer) {
+    var namesLength = buffer.readUint8();
     buffer.skip(24);
     var names = <String>[];
     for (var i = 0; i < namesLength; i++) {
@@ -1968,8 +1995,8 @@ class X11BellRequest extends X11Request {
 
   X11BellRequest(this.percent);
 
-  factory X11BellRequest.fromBuffer(int data, X11ReadBuffer buffer) {
-    var percent = data; // FIXME Int8
+  factory X11BellRequest.fromBuffer(X11ReadBuffer buffer) {
+    var percent = buffer.readInt8();
     return X11BellRequest(percent);
   }
 
@@ -1986,8 +2013,8 @@ class X11ChangeHostsRequest extends X11Request {
 
   X11ChangeHostsRequest(this.mode, this.family, this.address);
 
-  factory X11ChangeHostsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
-    var mode = data;
+  factory X11ChangeHostsRequest.fromBuffer(X11ReadBuffer buffer) {
+    var mode = buffer.readUint8();
     var family = buffer.readUint8();
     buffer.skip(1);
     var addressLength = buffer.readUint16();
@@ -2015,7 +2042,8 @@ class X11ChangeHostsRequest extends X11Request {
 class X11ListHostsRequest extends X11Request {
   X11ListHostsRequest();
 
-  factory X11ListHostsRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11ListHostsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     return X11ListHostsRequest();
   }
 
@@ -2031,8 +2059,8 @@ class X11ListHostsReply extends X11Reply {
 
   X11ListHostsReply(this.mode, this.hosts);
 
-  factory X11ListHostsReply.fromBuffer(int data, X11ReadBuffer buffer) {
-    var mode = data;
+  factory X11ListHostsReply.fromBuffer(X11ReadBuffer buffer) {
+    var mode = buffer.readUint8();
     var hostsLength = buffer.readUint16();
     buffer.skip(22);
     var hosts = <X11Host>[];
@@ -2072,7 +2100,8 @@ class X11KillClientRequest extends X11Request {
 
   X11KillClientRequest(this.resource);
 
-  factory X11KillClientRequest.fromBuffer(int data, X11ReadBuffer buffer) {
+  factory X11KillClientRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var resource = buffer.readUint32();
     return X11KillClientRequest(resource);
   }
@@ -2091,8 +2120,8 @@ class X11RotatePropertiesRequest extends X11Request {
 
   X11RotatePropertiesRequest(this.window, this.delta, this.atoms);
 
-  factory X11RotatePropertiesRequest.fromBuffer(
-      int data, X11ReadBuffer buffer) {
+  factory X11RotatePropertiesRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var window = buffer.readUint32();
     var atomsLength = buffer.readUint16();
     var delta = buffer.readInt16();
@@ -2995,14 +3024,14 @@ class X11Client {
         _errorStreamController.add(error);
       }
     } else if (reply == 1) {
-      var data = _buffer.readUint8();
+      var readBuffer = X11ReadBuffer();
+      readBuffer.add(_buffer.readUint8());
       var sequenceNumber = _buffer.readUint16();
       var length = _buffer.readUint32();
       if (_buffer.remaining < 24 + length * 4) {
         _buffer.readOffset = startOffset;
         return false;
       }
-      var readBuffer = X11ReadBuffer();
       for (var i = 0; i < 24 + length * 4; i++) {
         readBuffer.add(_buffer.readUint8());
       }
@@ -3010,25 +3039,25 @@ class X11Client {
       if (handler != null) {
         X11Response response;
         if (handler.opcode == 3) {
-          response = X11GetWindowAttributesReply.fromBuffer(data, readBuffer);
+          response = X11GetWindowAttributesReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 14) {
-          response = X11GetGeometryReply.fromBuffer(data, readBuffer);
+          response = X11GetGeometryReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 15) {
-          response = X11QueryTreeReply.fromBuffer(data, readBuffer);
+          response = X11QueryTreeReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 16) {
-          response = X11InternAtomReply.fromBuffer(data, readBuffer);
+          response = X11InternAtomReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 17) {
-          response = X11GetAtomNameReply.fromBuffer(data, readBuffer);
+          response = X11GetAtomNameReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 20) {
-          response = X11GetPropertyReply.fromBuffer(data, readBuffer);
+          response = X11GetPropertyReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 21) {
-          response = X11ListPropertiesReply.fromBuffer(data, readBuffer);
+          response = X11ListPropertiesReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 98) {
-          response = X11QueryExtensionReply.fromBuffer(data, readBuffer);
+          response = X11QueryExtensionReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 99) {
-          response = X11ListExtensionsReply.fromBuffer(data, readBuffer);
+          response = X11ListExtensionsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 110) {
-          response = X11ListHostsReply.fromBuffer(data, readBuffer);
+          response = X11ListHostsReply.fromBuffer(readBuffer);
         }
         handler.respond(response);
         _requests.remove(sequenceNumber);
@@ -3159,6 +3188,10 @@ class X11ReadBuffer {
   int readUint8() {
     readOffset++;
     return _data[readOffset - 1];
+  }
+
+  int readInt8() {
+    return ByteData.view(readBytes(1)).getInt8(0);
   }
 
   bool readBool() {
