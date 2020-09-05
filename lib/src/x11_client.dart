@@ -2195,6 +2195,112 @@ class X11CopyPlaneRequest extends X11Request {
   }
 }
 
+class X11PolyPointRequest extends X11Request {
+  final int drawable;
+  final int gc;
+  final List<X11Point> points;
+  final int coordinateMode;
+
+  X11PolyPointRequest(this.drawable, this.gc, this.points,
+      {this.coordinateMode = 0});
+
+  factory X11PolyPointRequest.fromBuffer(X11ReadBuffer buffer) {
+    var coordinateMode = buffer.readUint8();
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var points = <X11Point>[];
+    while (buffer.remaining > 0) {
+      var x = buffer.readInt16();
+      var y = buffer.readInt16();
+      points.add(X11Point(x, y));
+    }
+    return X11PolyPointRequest(drawable, gc, points,
+        coordinateMode: coordinateMode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(coordinateMode);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    for (var point in points) {
+      buffer.writeInt16(point.x);
+      buffer.writeInt16(point.y);
+    }
+  }
+}
+
+class X11PolyLineRequest extends X11Request {
+  final int drawable;
+  final int gc;
+  final List<X11Point> points;
+  final int coordinateMode;
+
+  X11PolyLineRequest(this.drawable, this.gc, this.points,
+      {this.coordinateMode = 0});
+
+  factory X11PolyLineRequest.fromBuffer(X11ReadBuffer buffer) {
+    var coordinateMode = buffer.readUint8();
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var points = <X11Point>[];
+    while (buffer.remaining > 0) {
+      var x = buffer.readInt16();
+      var y = buffer.readInt16();
+      points.add(X11Point(x, y));
+    }
+    return X11PolyLineRequest(drawable, gc, points,
+        coordinateMode: coordinateMode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(coordinateMode);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    for (var point in points) {
+      buffer.writeInt16(point.x);
+      buffer.writeInt16(point.y);
+    }
+  }
+}
+
+class X11PolyRectangleRequest extends X11Request {
+  final int drawable;
+  final int gc;
+  final List<X11Rectangle> rectangles;
+
+  X11PolyRectangleRequest(this.drawable, this.gc, this.rectangles);
+
+  factory X11PolyRectangleRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var rectangles = <X11Rectangle>[];
+    while (buffer.remaining > 0) {
+      var x = buffer.readInt16();
+      var y = buffer.readInt16();
+      var width = buffer.readUint16();
+      var height = buffer.readUint16();
+      rectangles.add(X11Rectangle(x, y, width, height));
+    }
+    return X11PolyRectangleRequest(drawable, gc, rectangles);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    for (var rectangle in rectangles) {
+      buffer.writeInt16(rectangle.x);
+      buffer.writeInt16(rectangle.y);
+      buffer.writeUint16(rectangle.width);
+      buffer.writeUint16(rectangle.height);
+    }
+  }
+}
+
 class X11CreateColormapRequest extends X11Request {
   final int alloc;
   final int mid;
@@ -3813,6 +3919,31 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     _sendRequest(63, buffer.data);
+  }
+
+  int polyPoint(int drawable, int gc, List<X11Point> points,
+      {int coordinateMode = 0}) {
+    var request = X11PolyPointRequest(drawable, gc, points,
+        coordinateMode: coordinateMode);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(64, buffer.data);
+  }
+
+  int polyLine(int drawable, int gc, List<X11Point> points,
+      {int coordinateMode = 0}) {
+    var request = X11PolyLineRequest(drawable, gc, points,
+        coordinateMode: coordinateMode);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(65, buffer.data);
+  }
+
+  int polyRectangle(int drawable, int gc, List<X11Rectangle> rectangles) {
+    var request = X11PolyRectangleRequest(drawable, gc, rectangles);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(67, buffer.data);
   }
 
   void createColormap(int alloc, int mid, int window, int visual) {
