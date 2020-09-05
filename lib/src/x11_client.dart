@@ -3228,6 +3228,38 @@ class X11ListHostsReply extends X11Reply {
   }
 }
 
+class X11SetAccessControlRequest extends X11Request {
+  final int mode;
+
+  X11SetAccessControlRequest(this.mode);
+
+  factory X11SetAccessControlRequest.fromBuffer(X11ReadBuffer buffer) {
+    var mode = buffer.readUint8();
+    return X11SetAccessControlRequest(mode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(mode);
+  }
+}
+
+class X11SetCloseDownModeRequest extends X11Request {
+  final int mode;
+
+  X11SetCloseDownModeRequest(this.mode);
+
+  factory X11SetCloseDownModeRequest.fromBuffer(X11ReadBuffer buffer) {
+    var mode = buffer.readUint8();
+    return X11SetCloseDownModeRequest(mode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(mode);
+  }
+}
+
 class X11KillClientRequest extends X11Request {
   final int resource;
 
@@ -4258,6 +4290,20 @@ class X11Client {
       }
       throw 'Failed to list hosts'; // FIXME: Better error
     });
+  }
+
+  void setAccessControl(int mode) {
+    var request = X11SetAccessControlRequest(mode);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    _sendRequest(111, buffer.data);
+  }
+
+  void setCloseDownMode(int mode) {
+    var request = X11SetCloseDownModeRequest(mode);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    _sendRequest(112, buffer.data);
   }
 
   void killClient(int resource) {
