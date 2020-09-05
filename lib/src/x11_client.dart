@@ -3,8 +3,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-String _formatId(int id) {
+String _formatHex32(int id) {
   return '0x' + id.toRadixString(16).padLeft(8, '0');
+}
+
+String _formatId(int id) {
+  return _formatHex32(id);
+}
+
+String _formatPixel(int pixel) {
+  return _formatHex32(pixel);
 }
 
 enum X11ImageByteOrder { lsbFirst, msbFirst }
@@ -92,6 +100,21 @@ class X11Success {
       "X11Success(releaseNumber: ${releaseNumber}, resourceIdBase: ${_formatId(resourceIdBase)}, resourceIdMask: ${_formatId(resourceIdMask)}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, roots: ${roots})";
 }
 
+class X11ColorItem {
+  int pixel;
+  X11Rgb color;
+  bool doRed;
+  bool doGreen;
+  bool doBlue;
+
+  X11ColorItem(this.pixel, this.color,
+      {this.doRed = true, this.doGreen = true, this.doBlue = true});
+
+  @override
+  String toString() =>
+      'X11ColorItem(pixel: ${_formatPixel(pixel)}, color: ${color}, doRed: ${doRed}, doGreen: ${doGreen}, doBlue: ${doBlue})';
+}
+
 class X11Format {
   int depth;
   int bitsPerPixel;
@@ -151,6 +174,17 @@ class X11Host {
 
   @override
   String toString() => 'X11Host(family: ${family}, address: ${address})';
+}
+
+class X11Rgb {
+  final int red;
+  final int green;
+  final int blue;
+
+  X11Rgb(this.red, this.green, this.blue);
+
+  @override
+  String toString() => 'X11Rgb(red: ${red}, green: ${green}, blue: ${blue})';
 }
 
 class X11Visual {
@@ -2247,6 +2281,506 @@ class X11ListInstalledColormapsReply extends X11Reply {
   }
 }
 
+class X11AllocColorRequest extends X11Request {
+  final int cmap;
+  final X11Rgb color;
+
+  X11AllocColorRequest(this.cmap, this.color);
+
+  factory X11AllocColorRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cmap = buffer.readUint32();
+    var red = buffer.readUint16();
+    var green = buffer.readUint16();
+    var blue = buffer.readUint16();
+    buffer.skip(2);
+    return X11AllocColorRequest(cmap, X11Rgb(red, green, blue));
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cmap);
+    buffer.writeUint16(color.red);
+    buffer.writeUint16(color.green);
+    buffer.writeUint16(color.blue);
+    buffer.skip(2);
+  }
+}
+
+class X11AllocColorReply extends X11Reply {
+  final int pixel;
+  final X11Rgb color;
+
+  X11AllocColorReply(this.pixel, this.color);
+
+  factory X11AllocColorReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var red = buffer.readUint16();
+    var green = buffer.readUint16();
+    var blue = buffer.readUint16();
+    buffer.skip(2);
+    var pixel = buffer.readUint32();
+    return X11AllocColorReply(pixel, X11Rgb(red, green, blue));
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(color.red);
+    buffer.writeUint16(color.green);
+    buffer.writeUint16(color.blue);
+    buffer.skip(2);
+    buffer.writeUint32(pixel);
+  }
+}
+
+class X11AllocNamedColorRequest extends X11Request {
+  final int cmap;
+  final String name;
+
+  X11AllocNamedColorRequest(this.cmap, this.name);
+
+  factory X11AllocNamedColorRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cmap = buffer.readUint32();
+    var nameLength = buffer.readUint16();
+    buffer.skip(2);
+    var name = buffer.readString(nameLength);
+    buffer.skip(pad(nameLength));
+    return X11AllocNamedColorRequest(cmap, name);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cmap);
+    buffer.writeUint16(name.length);
+    buffer.skip(2);
+    buffer.writeString(name);
+    buffer.skip(pad(name.length));
+  }
+}
+
+class X11AllocNamedColorReply extends X11Reply {
+  final int pixel;
+  final X11Rgb exact;
+  final X11Rgb visual;
+
+  X11AllocNamedColorReply(this.pixel, this.exact, this.visual);
+
+  factory X11AllocNamedColorReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var pixel = buffer.readUint32();
+    var exactRed = buffer.readUint16();
+    var exactGreen = buffer.readUint16();
+    var exactBlue = buffer.readUint16();
+    var visualRed = buffer.readUint16();
+    var visualGreen = buffer.readUint16();
+    var visualBlue = buffer.readUint16();
+    return X11AllocNamedColorReply(
+        pixel,
+        X11Rgb(exactRed, exactGreen, exactBlue),
+        X11Rgb(visualRed, visualGreen, visualBlue));
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(pixel);
+    buffer.writeUint16(exact.red);
+    buffer.writeUint16(exact.green);
+    buffer.writeUint16(exact.blue);
+    buffer.writeUint16(visual.red);
+    buffer.writeUint16(visual.green);
+    buffer.writeUint16(visual.blue);
+  }
+}
+
+class X11AllocColorCellsRequest extends X11Request {
+  final int cmap;
+  final int colors;
+  final int planes;
+  final bool contiguous;
+
+  X11AllocColorCellsRequest(this.cmap, this.colors,
+      {this.planes = 0, this.contiguous = false});
+
+  factory X11AllocColorCellsRequest.fromBuffer(X11ReadBuffer buffer) {
+    var contiguous = buffer.readBool();
+    var cmap = buffer.readUint32();
+    var colors = buffer.readUint16();
+    var planes = buffer.readUint16();
+    return X11AllocColorCellsRequest(cmap, colors,
+        planes: planes, contiguous: contiguous);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(contiguous);
+    buffer.writeUint32(cmap);
+    buffer.writeUint16(colors);
+    buffer.writeUint16(planes);
+  }
+}
+
+class X11AllocColorCellsReply extends X11Reply {
+  final List<int> pixels;
+  final List<int> masks;
+
+  X11AllocColorCellsReply(this.pixels, this.masks);
+
+  factory X11AllocColorCellsReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var pixelsLength = buffer.readUint16();
+    var masksLength = buffer.readUint16();
+    buffer.skip(20);
+    var pixels = <int>[];
+    for (var i = 0; i < pixelsLength; i++) {
+      pixels.add(buffer.readUint32());
+    }
+    var masks = <int>[];
+    for (var i = 0; i < masksLength; i++) {
+      masks.add(buffer.readUint32());
+    }
+    return X11AllocColorCellsReply(pixels, masks);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(pixels.length);
+    buffer.writeUint16(masks.length);
+    buffer.skip(20);
+    for (var pixel in pixels) {
+      buffer.writeUint32(pixel);
+    }
+    for (var mask in masks) {
+      buffer.writeUint32(mask);
+    }
+  }
+}
+
+class X11AllocColorPlanesRequest extends X11Request {
+  final int cmap;
+  final int colors;
+  final int reds;
+  final int greens;
+  final int blues;
+  final bool contiguous;
+
+  X11AllocColorPlanesRequest(this.cmap, this.colors,
+      {this.reds = 0,
+      this.greens = 0,
+      this.blues = 0,
+      this.contiguous = false});
+
+  factory X11AllocColorPlanesRequest.fromBuffer(X11ReadBuffer buffer) {
+    var contiguous = buffer.readBool();
+    var cmap = buffer.readUint32();
+    var colors = buffer.readUint16();
+    var reds = buffer.readUint16();
+    var greens = buffer.readUint16();
+    var blues = buffer.readUint16();
+    return X11AllocColorPlanesRequest(cmap, colors,
+        reds: reds, greens: greens, blues: blues, contiguous: contiguous);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(contiguous);
+    buffer.writeUint32(cmap);
+    buffer.writeUint16(colors);
+    buffer.writeUint16(reds);
+    buffer.writeUint16(greens);
+    buffer.writeUint16(blues);
+  }
+}
+
+class X11AllocColorPlanesReply extends X11Reply {
+  final List<int> pixels;
+  final int redMask;
+  final int greenMask;
+  final int blueMask;
+
+  X11AllocColorPlanesReply(
+      this.pixels, this.redMask, this.greenMask, this.blueMask);
+
+  factory X11AllocColorPlanesReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var pixelsLength = buffer.readUint16();
+    buffer.skip(2);
+    var redMask = buffer.readUint32();
+    var greenMask = buffer.readUint32();
+    var blueMask = buffer.readUint32();
+    buffer.skip(8);
+    var pixels = <int>[];
+    for (var i = 0; i < pixelsLength; i++) {
+      pixels.add(buffer.readUint32());
+    }
+    return X11AllocColorPlanesReply(pixels, redMask, greenMask, blueMask);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(pixels.length);
+    buffer.skip(2);
+    buffer.writeUint32(redMask);
+    buffer.writeUint32(greenMask);
+    buffer.writeUint32(blueMask);
+    buffer.skip(8);
+    for (var pixel in pixels) {
+      buffer.writeUint32(pixel);
+    }
+  }
+}
+
+class X11FreeColorsRequest extends X11Request {
+  final int cmap;
+  final List<int> pixels;
+  final int planeMask;
+
+  X11FreeColorsRequest(this.cmap, this.pixels, this.planeMask);
+
+  factory X11FreeColorsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cmap = buffer.readUint32();
+    var planeMask = buffer.readUint32();
+    var pixels = <int>[];
+    while (buffer.remaining > 0) {
+      pixels.add(buffer.readUint32());
+    }
+    return X11FreeColorsRequest(cmap, pixels, planeMask);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cmap);
+    buffer.writeUint32(planeMask);
+    for (var pixel in pixels) {
+      buffer.writeUint32(pixel);
+    }
+  }
+}
+
+class X11StoreColorsRequest extends X11Request {
+  final int cmap;
+  final List<X11ColorItem> items;
+
+  X11StoreColorsRequest(this.cmap, this.items);
+
+  factory X11StoreColorsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cmap = buffer.readUint32();
+    var items = <X11ColorItem>[];
+    while (buffer.remaining > 0) {
+      var pixel = buffer.readUint32();
+      var red = buffer.readUint16();
+      var green = buffer.readUint16();
+      var blue = buffer.readUint16();
+      var flags = buffer.readUint8();
+      var doRed = (flags & 0x1) != 0;
+      var doGreen = (flags & 0x2) != 0;
+      var doBlue = (flags & 0x4) != 0;
+      buffer.skip(1);
+      items.add(X11ColorItem(pixel, X11Rgb(red, green, blue),
+          doRed: doRed, doGreen: doGreen, doBlue: doBlue));
+    }
+    return X11StoreColorsRequest(cmap, items);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cmap);
+    for (var item in items) {
+      buffer.writeUint32(item.pixel);
+      buffer.writeUint16(item.color.red);
+      buffer.writeUint16(item.color.green);
+      buffer.writeUint16(item.color.blue);
+      var flags = 0;
+      if (item.doRed) {
+        flags |= 0x1;
+      }
+      if (item.doGreen) {
+        flags |= 0x2;
+      }
+      if (item.doBlue) {
+        flags |= 0x4;
+      }
+      buffer.writeUint8(flags);
+      buffer.skip(1);
+    }
+  }
+}
+
+class X11StoreNamedColorRequest extends X11Request {
+  final int cmap;
+  final int pixel;
+  final String name;
+  final bool doRed;
+  final bool doGreen;
+  final bool doBlue;
+
+  X11StoreNamedColorRequest(this.cmap, this.pixel, this.name,
+      {this.doRed = true, this.doGreen = true, this.doBlue = true});
+
+  factory X11StoreNamedColorRequest.fromBuffer(X11ReadBuffer buffer) {
+    var flags = buffer.readUint8();
+    var doRed = (flags & 0x1) != 0;
+    var doGreen = (flags & 0x2) != 0;
+    var doBlue = (flags & 0x4) != 0;
+    var cmap = buffer.readUint32();
+    var pixel = buffer.readUint32();
+    var nameLength = buffer.readUint16();
+    buffer.skip(2);
+    var name = buffer.readString(nameLength);
+    buffer.skip(pad(nameLength));
+    return X11StoreNamedColorRequest(cmap, pixel, name,
+        doRed: doRed, doGreen: doGreen, doBlue: doBlue);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    var flags = 0;
+    if (doRed) {
+      flags |= 0x1;
+    }
+    if (doGreen) {
+      flags |= 0x2;
+    }
+    if (doBlue) {
+      flags |= 0x4;
+    }
+    buffer.writeUint8(flags);
+    buffer.writeUint32(cmap);
+    buffer.writeUint32(pixel);
+    buffer.writeUint16(name.length);
+    buffer.skip(2);
+    buffer.writeString(name);
+    buffer.skip(pad(name.length));
+  }
+}
+
+class X11QueryColorsRequest extends X11Request {
+  final int cmap;
+  final List<int> pixels;
+
+  X11QueryColorsRequest(this.cmap, this.pixels);
+
+  factory X11QueryColorsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cmap = buffer.readUint32();
+    var pixels = <int>[];
+    while (buffer.remaining > 0) {
+      pixels.add(buffer.readUint32());
+    }
+    return X11QueryColorsRequest(cmap, pixels);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cmap);
+    for (var pixel in pixels) {
+      buffer.writeUint32(pixel);
+    }
+  }
+}
+
+class X11QueryColorsReply extends X11Reply {
+  final List<X11Rgb> colors;
+
+  X11QueryColorsReply(this.colors);
+
+  factory X11QueryColorsReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var colorsLength = buffer.readUint16();
+    buffer.skip(22);
+    var colors = <X11Rgb>[];
+    for (var i = 0; i < colorsLength; i++) {
+      var red = buffer.readUint16();
+      var green = buffer.readUint16();
+      var blue = buffer.readUint16();
+      buffer.skip(2);
+      colors.add(X11Rgb(red, green, blue));
+    }
+    return X11QueryColorsReply(colors);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(colors.length);
+    buffer.skip(22);
+    for (var color in colors) {
+      buffer.writeUint16(color.red);
+      buffer.writeUint16(color.green);
+      buffer.writeUint16(color.blue);
+      buffer.skip(2);
+    }
+  }
+}
+
+class X11LookupColorRequest extends X11Request {
+  final int cmap;
+  final String name;
+
+  X11LookupColorRequest(this.cmap, this.name);
+
+  factory X11LookupColorRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cmap = buffer.readUint32();
+    var nameLength = buffer.readUint16();
+    buffer.skip(2);
+    var name = buffer.readString(nameLength);
+    buffer.skip(pad(nameLength));
+    return X11LookupColorRequest(cmap, name);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cmap);
+    buffer.writeUint16(name.length);
+    buffer.skip(2);
+    buffer.writeString(name);
+    buffer.skip(pad(name.length));
+  }
+}
+
+class X11LookupColorReply extends X11Reply {
+  final X11Rgb exact;
+  final X11Rgb visual;
+
+  X11LookupColorReply(this.exact, this.visual);
+
+  factory X11LookupColorReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var exactRed = buffer.readUint16();
+    var exactGreen = buffer.readUint16();
+    var exactBlue = buffer.readUint16();
+    var visualRed = buffer.readUint16();
+    var visualGreen = buffer.readUint16();
+    var visualBlue = buffer.readUint16();
+    return X11LookupColorReply(X11Rgb(exactRed, exactGreen, exactBlue),
+        X11Rgb(visualRed, visualGreen, visualBlue));
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(exact.red);
+    buffer.writeUint16(exact.green);
+    buffer.writeUint16(exact.blue);
+    buffer.writeUint16(visual.red);
+    buffer.writeUint16(visual.green);
+    buffer.writeUint16(visual.blue);
+  }
+}
+
 class X11QueryExtensionRequest extends X11Request {
   final String name;
 
@@ -3267,6 +3801,118 @@ class X11Client {
     });
   }
 
+  Future<X11AllocColorReply> allocColor(int cmap, X11Rgb color) async {
+    var request = X11AllocColorRequest(cmap, color);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(84, buffer.data);
+    return _awaitReply(84, sequenceNumber).then<X11AllocColorReply>((response) {
+      if (response is X11AllocColorReply) {
+        return response;
+      }
+      throw 'Failed to AllocColor'; // FIXME: Better error
+    });
+  }
+
+  Future<X11AllocNamedColorReply> allocNamedColor(int cmap, String name) async {
+    var request = X11AllocNamedColorRequest(cmap, name);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(85, buffer.data);
+    return _awaitReply(85, sequenceNumber)
+        .then<X11AllocNamedColorReply>((response) {
+      if (response is X11AllocNamedColorReply) {
+        return response;
+      }
+      throw 'Failed to AllocNamedColor'; // FIXME: Better error
+    });
+  }
+
+  Future<X11AllocColorCellsReply> allocColorCells(int cmap, int colors,
+      {int planes = 0, bool contiguous = false}) async {
+    var request = X11AllocColorCellsRequest(cmap, colors,
+        planes: planes, contiguous: contiguous);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(86, buffer.data);
+    return _awaitReply(86, sequenceNumber)
+        .then<X11AllocColorCellsReply>((response) {
+      if (response is X11AllocColorCellsReply) {
+        return response;
+      }
+      throw 'Failed to AllocColorCells'; // FIXME: Better error
+    });
+  }
+
+  Future<X11AllocColorPlanesReply> allocColorPlanes(int cmap, int colors,
+      {int reds = 0,
+      int greens = 0,
+      int blues = 0,
+      bool contiguous = false}) async {
+    var request = X11AllocColorPlanesRequest(cmap, colors,
+        reds: reds, greens: greens, blues: blues, contiguous: contiguous);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(87, buffer.data);
+    return _awaitReply(87, sequenceNumber)
+        .then<X11AllocColorPlanesReply>((response) {
+      if (response is X11AllocColorPlanesReply) {
+        return response;
+      }
+      throw 'Failed to AllocColorPlanes'; // FIXME: Better error
+    });
+  }
+
+  int freeColors(int cmap, List<int> pixels, int planeMask) {
+    var request = X11FreeColorsRequest(cmap, pixels, planeMask);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(88, buffer.data);
+  }
+
+  int storeColors(int cmap, List<X11ColorItem> items) {
+    var request = X11StoreColorsRequest(cmap, items);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(89, buffer.data);
+  }
+
+  int storeNamedColor(int cmap, int pixel, String name,
+      {doRed = true, doGreen = true, doBlue = true}) {
+    var request = X11StoreNamedColorRequest(cmap, pixel, name,
+        doRed: doRed, doGreen: doGreen, doBlue: doBlue);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(90, buffer.data);
+  }
+
+  Future<List<X11Rgb>> queryColors(int cmap, List<int> pixels) async {
+    var request = X11QueryColorsRequest(cmap, pixels);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(91, buffer.data);
+    return _awaitReply(91, sequenceNumber).then<List<X11Rgb>>((response) {
+      if (response is X11QueryColorsReply) {
+        return response.colors;
+      }
+      throw 'Failed to QueryColors'; // FIXME: Better error
+    });
+  }
+
+  Future<X11LookupColorReply> lookupColor(int cmap, String name) async {
+    var request = X11LookupColorRequest(cmap, name);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(92, buffer.data);
+    return _awaitReply(92, sequenceNumber)
+        .then<X11LookupColorReply>((response) {
+      if (response is X11LookupColorReply) {
+        return response;
+      }
+      throw 'Failed to LookupColor'; // FIXME: Better error
+    });
+  }
+
   Future<X11QueryExtensionReply> queryExtension(String name) async {
     var request = X11QueryExtensionRequest(name);
     var buffer = X11WriteBuffer();
@@ -3514,6 +4160,18 @@ class X11Client {
           response = X11GrabPointerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 83) {
           response = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 84) {
+          response = X11AllocColorReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 85) {
+          response = X11AllocNamedColorReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 86) {
+          response = X11AllocColorCellsReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 87) {
+          response = X11AllocColorPlanesReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 91) {
+          response = X11QueryColorsReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 92) {
+          response = X11LookupColorReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 98) {
           response = X11QueryExtensionReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 99) {
