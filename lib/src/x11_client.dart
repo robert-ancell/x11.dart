@@ -2268,6 +2268,8 @@ class X11PolyLineRequest extends X11Request {
   }
 }
 
+// FIXME(robert-ancell): X11PolySegment
+
 class X11PolyRectangleRequest extends X11Request {
   final int drawable;
   final int gc;
@@ -2303,6 +2305,85 @@ class X11PolyRectangleRequest extends X11Request {
     }
   }
 }
+
+// FIXME(robert-ancell): X11PolyArc
+
+class X11FillPolyRequest extends X11Request {
+  final int drawable;
+  final int gc;
+  final List<X11Point> points;
+  final int shape;
+  final int coordinateMode;
+
+  X11FillPolyRequest(this.drawable, this.gc, this.points,
+      {this.shape = 0, this.coordinateMode = 0});
+
+  factory X11FillPolyRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var shape = buffer.readUint8();
+    var coordinateMode = buffer.readUint8();
+    buffer.skip(2);
+    var points = <X11Point>[];
+    while (buffer.remaining > 0) {
+      var x = buffer.readInt16();
+      var y = buffer.readInt16();
+      points.add(X11Point(x, y));
+    }
+    return X11FillPolyRequest(drawable, gc, points,
+        shape: shape, coordinateMode: coordinateMode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(coordinateMode);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    for (var point in points) {
+      buffer.writeInt16(point.x);
+      buffer.writeInt16(point.y);
+    }
+  }
+}
+
+class X11PolyFillRectangleRequest extends X11Request {
+  final int drawable;
+  final int gc;
+  final List<X11Rectangle> rectangles;
+
+  X11PolyFillRectangleRequest(this.drawable, this.gc, this.rectangles);
+
+  factory X11PolyFillRectangleRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var rectangles = <X11Rectangle>[];
+    while (buffer.remaining > 0) {
+      var x = buffer.readInt16();
+      var y = buffer.readInt16();
+      var width = buffer.readUint16();
+      var height = buffer.readUint16();
+      rectangles.add(X11Rectangle(x, y, width, height));
+    }
+    return X11PolyFillRectangleRequest(drawable, gc, rectangles);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    for (var rectangle in rectangles) {
+      buffer.writeInt16(rectangle.x);
+      buffer.writeInt16(rectangle.y);
+      buffer.writeUint16(rectangle.width);
+      buffer.writeUint16(rectangle.height);
+    }
+  }
+}
+
+// FIXME(robert-ancell): X11PolyFillArc
 
 class X11CreateColormapRequest extends X11Request {
   final int alloc;
@@ -3947,6 +4028,22 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(67, buffer.data);
+  }
+
+  int fillPoly(int drawable, int gc, List<X11Point> points,
+      {int shape = 0, int coordinateMode = 0}) {
+    var request = X11FillPolyRequest(drawable, gc, points,
+        shape: shape, coordinateMode: coordinateMode);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(69, buffer.data);
+  }
+
+  int polyFillRectangle(int drawable, int gc, List<X11Rectangle> rectangles) {
+    var request = X11PolyFillRectangleRequest(drawable, gc, rectangles);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(70, buffer.data);
   }
 
   void createColormap(int alloc, int mid, int window, int visual) {
