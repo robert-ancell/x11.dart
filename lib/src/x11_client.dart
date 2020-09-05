@@ -1073,11 +1073,15 @@ class X11GetGeometryRequest extends X11Request {
 
 class X11GetGeometryReply extends X11Reply {
   final int root;
-  final X11Rectangle area;
+  final int x;
+  final int y;
+  final int width;
+  final int height;
   final int depth;
   final int borderWidth;
 
-  X11GetGeometryReply(this.root, this.area, this.depth, this.borderWidth);
+  X11GetGeometryReply(this.root, this.x, this.y, this.width, this.height,
+      this.depth, this.borderWidth);
 
   factory X11GetGeometryReply.fromBuffer(X11ReadBuffer buffer) {
     var depth = buffer.readUint8();
@@ -1088,18 +1092,17 @@ class X11GetGeometryReply extends X11Reply {
     var height = buffer.readUint16();
     var borderWidth = buffer.readUint16();
     buffer.skip(10);
-    return X11GetGeometryReply(
-        root, X11Rectangle(x, y, width, height), depth, borderWidth);
+    return X11GetGeometryReply(root, x, y, width, height, depth, borderWidth);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(depth);
     buffer.writeUint32(root);
-    buffer.writeInt16(area.x);
-    buffer.writeInt16(area.y);
-    buffer.writeUint16(area.width);
-    buffer.writeUint16(area.height);
+    buffer.writeInt16(x);
+    buffer.writeInt16(y);
+    buffer.writeUint16(width);
+    buffer.writeUint16(height);
     buffer.writeUint16(borderWidth);
     buffer.skip(10);
   }
@@ -3214,9 +3217,9 @@ class X11FocusOut extends X11Event {}
 class X11KeymapNotify extends X11Event {}
 
 class X11Expose extends X11Event {
-  int window;
-  X11Rectangle area;
-  int count;
+  final int window;
+  final X11Rectangle area;
+  final int count;
 
   X11Expose(this.window, this.area, this.count);
 
