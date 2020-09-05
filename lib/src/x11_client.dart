@@ -1410,6 +1410,162 @@ class X11ListPropertiesReply extends X11Reply {
   }
 }
 
+class X11GrabPointerRequest extends X11Request {
+  final int grabWindow;
+  final bool ownerEvents;
+  final int eventMask;
+  final int pointerMode;
+  final int keyboardMode;
+  final int confineTo;
+  final int cursor;
+  final int time;
+
+  X11GrabPointerRequest(
+      this.grabWindow,
+      this.ownerEvents,
+      this.eventMask,
+      this.pointerMode,
+      this.keyboardMode,
+      this.confineTo,
+      this.cursor,
+      this.time);
+
+  factory X11GrabPointerRequest.fromBuffer(X11ReadBuffer buffer) {
+    var ownerEvents = buffer.readBool();
+    var grabWindow = buffer.readUint32();
+    var eventMask = buffer.readUint16();
+    var pointerMode = buffer.readUint8();
+    var keyboardMode = buffer.readUint8();
+    var confineTo = buffer.readUint32();
+    var cursor = buffer.readUint32();
+    var time = buffer.readUint32();
+    return X11GrabPointerRequest(grabWindow, ownerEvents, eventMask,
+        pointerMode, keyboardMode, confineTo, cursor, time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(ownerEvents);
+    buffer.writeUint32(grabWindow);
+    buffer.writeUint16(eventMask);
+    buffer.writeUint8(pointerMode);
+    buffer.writeUint8(keyboardMode);
+    buffer.writeUint32(confineTo);
+    buffer.writeUint32(cursor);
+    buffer.writeUint32(time);
+  }
+}
+
+class X11GrabPointerReply extends X11Reply {
+  final int status;
+
+  X11GrabPointerReply(this.status);
+
+  factory X11GrabPointerReply.fromBuffer(X11ReadBuffer buffer) {
+    var status = buffer.readUint8();
+    return X11GrabPointerReply(status);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(status);
+  }
+}
+
+class X11UngrabPointerRequest extends X11Request {
+  final int time;
+
+  X11UngrabPointerRequest(this.time);
+
+  factory X11UngrabPointerRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var time = buffer.readUint32();
+    return X11UngrabPointerRequest(time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(time);
+  }
+}
+
+class X11GrabButtonRequest extends X11Request {
+  final int grabWindow;
+  final bool ownerEvents;
+  final int eventMask;
+  final int pointerMode;
+  final int keyboardMode;
+  final int confineTo;
+  final int cursor;
+  final int button;
+  final int modifiers;
+
+  X11GrabButtonRequest(
+      this.grabWindow,
+      this.ownerEvents,
+      this.eventMask,
+      this.pointerMode,
+      this.keyboardMode,
+      this.confineTo,
+      this.cursor,
+      this.button,
+      this.modifiers);
+
+  factory X11GrabButtonRequest.fromBuffer(X11ReadBuffer buffer) {
+    var ownerEvents = buffer.readBool();
+    var grabWindow = buffer.readUint32();
+    var eventMask = buffer.readUint16();
+    var pointerMode = buffer.readUint8();
+    var keyboardMode = buffer.readUint8();
+    var confineTo = buffer.readUint32();
+    var cursor = buffer.readUint32();
+    var button = buffer.readUint8();
+    buffer.skip(1);
+    var modifiers = buffer.readUint16();
+    return X11GrabButtonRequest(grabWindow, ownerEvents, eventMask, pointerMode,
+        keyboardMode, confineTo, cursor, button, modifiers);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(ownerEvents);
+    buffer.writeUint32(grabWindow);
+    buffer.writeUint16(eventMask);
+    buffer.writeUint8(pointerMode);
+    buffer.writeUint8(keyboardMode);
+    buffer.writeUint32(confineTo);
+    buffer.writeUint32(cursor);
+    buffer.writeUint8(button);
+    buffer.skip(1);
+    buffer.writeUint16(modifiers);
+  }
+}
+
+class X11UngrabButtonRequest extends X11Request {
+  final int grabWindow;
+  final int button;
+  final int modifiers;
+
+  X11UngrabButtonRequest(this.grabWindow, this.button, this.modifiers);
+
+  factory X11UngrabButtonRequest.fromBuffer(X11ReadBuffer buffer) {
+    var button = buffer.readUint8();
+    var grabWindow = buffer.readUint32();
+    var modifiers = buffer.readUint16();
+    buffer.skip(2);
+    return X11UngrabButtonRequest(grabWindow, button, modifiers);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(button);
+    buffer.writeUint32(grabWindow);
+    buffer.writeUint16(modifiers);
+    buffer.skip(2);
+  }
+}
+
 class X11CreatePixmapRequest extends X11Request {
   final int pid;
   final int drawable;
@@ -1894,6 +2050,108 @@ class X11FreeColormapRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(cmap);
+  }
+}
+
+class X11CopyColormapAndFreeRequest extends X11Request {
+  final int mid;
+  final int srcCmap;
+
+  X11CopyColormapAndFreeRequest(this.mid, this.srcCmap);
+
+  factory X11CopyColormapAndFreeRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var mid = buffer.readUint32();
+    var srcCmap = buffer.readUint32();
+    return X11CopyColormapAndFreeRequest(mid, srcCmap);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(mid);
+    buffer.writeUint32(srcCmap);
+  }
+}
+
+class X11InstallColormapRequest extends X11Request {
+  final int cmap;
+
+  X11InstallColormapRequest(this.cmap);
+
+  factory X11InstallColormapRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cmap = buffer.readUint32();
+    return X11InstallColormapRequest(cmap);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cmap);
+  }
+}
+
+class X11UninstallColormapRequest extends X11Request {
+  final int cmap;
+
+  X11UninstallColormapRequest(this.cmap);
+
+  factory X11UninstallColormapRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cmap = buffer.readUint32();
+    return X11UninstallColormapRequest(cmap);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cmap);
+  }
+}
+
+class X11ListInstalledColormapsRequest extends X11Request {
+  final int window;
+
+  X11ListInstalledColormapsRequest(this.window);
+
+  factory X11ListInstalledColormapsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var window = buffer.readUint32();
+    return X11ListInstalledColormapsRequest(window);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(window);
+  }
+}
+
+class X11ListInstalledColormapsReply extends X11Reply {
+  final List<int> cmaps;
+
+  X11ListInstalledColormapsReply(this.cmaps);
+
+  factory X11ListInstalledColormapsReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cmapsLength = buffer.readUint16();
+    buffer.skip(22);
+    var cmaps = <int>[];
+    for (var i = 0; i < cmapsLength; i++) {
+      cmaps.add(buffer.readUint32());
+    }
+    return X11ListInstalledColormapsReply(cmaps);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(cmaps.length);
+    buffer.skip(22);
+    for (var cmap in cmaps) {
+      buffer.writeUint32(cmap);
+    }
   }
 }
 
@@ -2686,6 +2944,49 @@ class X11Client {
     });
   }
 
+  Future<int> grabPointer(int grabWindow, bool ownerEvents, int eventMask,
+      int pointerMode, int keyboardMode,
+      {int time = 0, int confineTo = 0, int cursor = 0}) async {
+    var request = X11GrabPointerRequest(grabWindow, ownerEvents, eventMask,
+        pointerMode, keyboardMode, confineTo, cursor, time);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    var sequenceNumber = _sendRequest(26, buffer.data);
+    return _awaitReply(26, sequenceNumber).then<int>((response) {
+      if (response is X11GrabPointerReply) {
+        return response.status;
+      }
+      throw 'Failed to grab pointer'; // FIXME: Better error
+    });
+  }
+
+  void ungrabPointer({int time = 0}) {
+    var request = X11UngrabPointerRequest(time);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(27, buffer.data);
+  }
+
+  void grabButton(int grabWindow, bool ownerEvents, int eventMask,
+      int pointerMode, int keyboardMode,
+      {int button = 0,
+      int modifiers = 0x8000,
+      int confineTo = 0,
+      int cursor = 0}) {
+    var request = X11GrabButtonRequest(grabWindow, ownerEvents, eventMask,
+        pointerMode, keyboardMode, confineTo, cursor, button, modifiers);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(28, buffer.data);
+  }
+
+  void ungrabButton(int grabWindow, {int button = 0, int modifiers = 0x8000}) {
+    var request = X11UngrabButtonRequest(grabWindow, button, modifiers);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(29, buffer.data);
+  }
+
   void createPixmap(int pid, int drawable, int width, int height, int depth) {
     var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
     var buffer = X11WriteBuffer();
@@ -2809,6 +3110,40 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     _sendRequest(79, buffer.data);
+  }
+
+  void copyColormapAndFree(int mid, int srcCmap) {
+    var request = X11CopyColormapAndFreeRequest(mid, srcCmap);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(80, buffer.data);
+  }
+
+  void installColormap(int cmap) {
+    var request = X11InstallColormapRequest(cmap);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(81, buffer.data);
+  }
+
+  void uninstallColormap(int cmap) {
+    var request = X11UninstallColormapRequest(cmap);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    _sendRequest(82, buffer.data);
+  }
+
+  Future<List<int>> listInstalledColormaps(int window) async {
+    var request = X11ListInstalledColormapsRequest(window);
+    var buffer = X11WriteBuffer();
+    var data = request.encode(buffer);
+    var sequenceNumber = _sendRequest(83, buffer.data);
+    return _awaitReply(83, sequenceNumber).then<List<int>>((response) {
+      if (response is X11ListInstalledColormapsReply) {
+        return response.cmaps;
+      }
+      throw 'Failed to list installed colormaps'; // FIXME: Better error
+    });
   }
 
   Future<X11QueryExtensionReply> queryExtension(String name) async {
@@ -3052,6 +3387,10 @@ class X11Client {
           response = X11GetPropertyReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 21) {
           response = X11ListPropertiesReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 26) {
+          response = X11GrabPointerReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 83) {
+          response = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 98) {
           response = X11QueryExtensionReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 99) {
