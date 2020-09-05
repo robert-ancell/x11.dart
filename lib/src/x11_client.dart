@@ -168,17 +168,13 @@ class X11Visual {
 }
 
 class X11Request {
-  int encode(X11WriteBuffer buffer) {
-    return 0;
-  }
+  void encode(X11WriteBuffer buffer) {}
 }
 
 class X11Response {}
 
 class X11Reply extends X11Response {
-  int encode(X11WriteBuffer buffer) {
-    return 0;
-  }
+  void encode(X11WriteBuffer buffer) {}
 }
 
 class X11Error extends X11Response {
@@ -207,9 +203,7 @@ class X11Error extends X11Response {
 }
 
 class X11Event {
-  int encode(X11WriteBuffer buffer) {
-    return 0;
-  }
+  void encode(X11WriteBuffer buffer) {}
 }
 
 enum X11WindowClass { copyFromParent, inputOutput, inputOnly }
@@ -365,7 +359,8 @@ class X11CreateWindowRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(depth);
     buffer.writeUint32(wid);
     buffer.writeUint32(parent);
     buffer.writeInt16(x);
@@ -467,8 +462,6 @@ class X11CreateWindowRequest extends X11Request {
     if (cursor != null) {
       buffer.writeUint32(cursor);
     }
-
-    return depth;
   }
 }
 
@@ -508,7 +501,8 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       this.cursor});
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
     var valueMask = 0;
     if (backgroundPixmap != null) {
@@ -602,7 +596,6 @@ class X11ChangeWindowAttributesRequest extends X11Request {
     if (cursor != null) {
       buffer.writeUint32(cursor);
     }
-    return 0;
   }
 }
 
@@ -618,9 +611,9 @@ class X11GetWindowAttributesRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
-    return 0;
   }
 }
 
@@ -695,7 +688,8 @@ class X11GetWindowAttributesReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(backingStore);
     buffer.writeUint32(visual);
     buffer.writeUint16(class_.index);
     buffer.writeUint8(bitGravity);
@@ -711,7 +705,6 @@ class X11GetWindowAttributesReply extends X11Reply {
     buffer.writeUint32(yourEventMask);
     buffer.writeUint16(doNotPropagateMask);
     buffer.skip(2);
-    return backingStore;
   }
 }
 
@@ -726,9 +719,9 @@ class X11DestroyWindowRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
-    return 0;
   }
 }
 
@@ -744,9 +737,9 @@ class X11DestroySubwindowsRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
-    return 0;
   }
 }
 
@@ -763,9 +756,9 @@ class X11ChangeSaveSetRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(mode);
     buffer.writeUint32(window);
-    return mode;
   }
 }
 
@@ -786,12 +779,12 @@ class X11ReparentWindowRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
     buffer.writeUint32(parent);
     buffer.writeInt16(x);
     buffer.writeInt16(y);
-    return 0;
   }
 }
 
@@ -806,9 +799,9 @@ class X11MapWindowRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
-    return 0;
   }
 }
 
@@ -823,9 +816,9 @@ class X11MapSubwindowsRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
-    return 0;
   }
 }
 
@@ -840,9 +833,9 @@ class X11UnmapWindowRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
-    return 0;
   }
 }
 
@@ -857,9 +850,9 @@ class X11UnmapSubwindowsRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
-    return 0;
   }
 }
 
@@ -925,7 +918,8 @@ class X11ConfigureWindowRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
     var valueMask = 0;
     if (x != null) {
@@ -972,7 +966,6 @@ class X11ConfigureWindowRequest extends X11Request {
     if (stackMode != null) {
       buffer.writeUint32(stackMode);
     }
-    return 0;
   }
 }
 
@@ -989,9 +982,9 @@ class X11CirculateWindowRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(direction);
     buffer.writeUint32(window);
-    return direction;
   }
 }
 
@@ -1006,9 +999,9 @@ class X11GetGeometryRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(drawable);
-    return 0;
   }
 }
 
@@ -1037,7 +1030,8 @@ class X11GetGeometryReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(depth);
     buffer.writeUint32(root);
     buffer.writeInt16(x);
     buffer.writeInt16(y);
@@ -1045,7 +1039,6 @@ class X11GetGeometryReply extends X11Reply {
     buffer.writeUint16(height);
     buffer.writeUint16(borderWidth);
     buffer.skip(10);
-    return depth;
   }
 }
 
@@ -1060,9 +1053,9 @@ class X11QueryTreeRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
-    return 0;
   }
 }
 
@@ -1086,7 +1079,8 @@ class X11QueryTreeReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(root);
     buffer.writeUint32(parent);
     buffer.writeUint16(children.length);
@@ -1094,7 +1088,6 @@ class X11QueryTreeReply extends X11Reply {
     for (var window in children) {
       buffer.writeUint32(window);
     }
-    return 0;
   }
 
   @override
@@ -1118,12 +1111,12 @@ class X11InternAtomRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(onlyIfExists);
     buffer.writeUint16(name.length);
     buffer.skip(2);
     buffer.writeString(name);
     buffer.skip(pad(name.length));
-    return onlyIfExists ? 1 : 0;
   }
 }
 
@@ -1138,10 +1131,10 @@ class X11InternAtomReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(atom);
     buffer.skip(20);
-    return 0;
   }
 }
 
@@ -1156,9 +1149,9 @@ class X11GetAtomNameRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(atom);
-    return 0;
   }
 }
 
@@ -1176,12 +1169,12 @@ class X11GetAtomNameReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint16(name.length);
     buffer.skip(22);
     buffer.writeString(name);
     buffer.skip(pad(name.length));
-    return 0;
   }
 }
 
@@ -1223,7 +1216,8 @@ class X11ChangePropertyRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(mode.index);
     buffer.writeUint32(window);
     buffer.writeUint32(property);
     buffer.writeUint32(type);
@@ -1243,7 +1237,6 @@ class X11ChangePropertyRequest extends X11Request {
         buffer.writeUint32(d);
       }
     }
-    return mode.index;
   }
 }
 
@@ -1260,10 +1253,10 @@ class X11DeletePropertyRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
     buffer.writeUint32(property);
-    return 0;
   }
 }
 
@@ -1290,13 +1283,13 @@ class X11GetPropertyRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(delete);
     buffer.writeUint32(window);
     buffer.writeUint32(property);
     buffer.writeUint32(type);
     buffer.writeUint32(longOffset);
     buffer.writeUint32(longLength);
-    return delete ? 1 : 0;
   }
 }
 
@@ -1333,7 +1326,8 @@ class X11GetPropertyReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(format);
     buffer.writeUint32(type);
     buffer.writeUint32(bytesAfter);
     buffer.writeUint32(value.length * format ~/ 8);
@@ -1352,7 +1346,6 @@ class X11GetPropertyReply extends X11Reply {
       }
     }
     buffer.skip(pad(value.length * format ~/ 8));
-    return format;
   }
 }
 
@@ -1367,9 +1360,9 @@ class X11ListPropertiesRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
-    return 0;
   }
 }
 
@@ -1389,13 +1382,13 @@ class X11ListPropertiesReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint16(atoms.length);
     buffer.skip(22);
     for (var atom in atoms) {
       buffer.writeUint32(atom);
     }
-    return 0;
   }
 }
 
@@ -1419,12 +1412,12 @@ class X11CreatePixmapRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(depth);
     buffer.writeUint32(pid);
     buffer.writeUint32(drawable);
     buffer.writeUint16(width);
     buffer.writeUint16(height);
-    return depth;
   }
 }
 
@@ -1439,9 +1432,9 @@ class X11FreePixmapRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(pixmap);
-    return 0;
   }
 }
 
@@ -1505,7 +1498,8 @@ class X11CreateGCRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(cid);
     buffer.writeUint32(drawable);
     var valueMask = 0;
@@ -1663,7 +1657,6 @@ class X11CreateGCRequest extends X11Request {
       buffer.writeUint8(arcMode);
       buffer.skip(3);
     }
-    return 0;
   }
 }
 
@@ -1687,7 +1680,8 @@ class X11SetDashesRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(gc);
     buffer.writeUint16(dashOffset);
     buffer.writeUint16(dashes.length);
@@ -1695,7 +1689,6 @@ class X11SetDashesRequest extends X11Request {
       buffer.writeUint8(dash);
     }
     buffer.skip(pad(dashes.length));
-    return 0;
   }
 }
 
@@ -1710,9 +1703,9 @@ class X11FreeGCRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(gc);
-    return 0;
   }
 }
 
@@ -1738,13 +1731,13 @@ class X11ClearAreaRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(exposures);
     buffer.writeUint32(window);
     buffer.writeInt16(x);
     buffer.writeInt16(y);
     buffer.writeUint16(width);
     buffer.writeUint16(height);
-    return exposures ? 1 : 0;
   }
 }
 
@@ -1777,7 +1770,8 @@ class X11CopyAreaRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(srcDrawable);
     buffer.writeUint32(dstDrawable);
     buffer.writeUint32(gc);
@@ -1787,7 +1781,6 @@ class X11CopyAreaRequest extends X11Request {
     buffer.writeInt16(dstY);
     buffer.writeUint16(width);
     buffer.writeUint16(height);
-    return 0;
   }
 }
 
@@ -1822,7 +1815,8 @@ class X11CopyPlaneRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(srcDrawable);
     buffer.writeUint32(dstDrawable);
     buffer.writeUint32(gc);
@@ -1833,7 +1827,6 @@ class X11CopyPlaneRequest extends X11Request {
     buffer.writeUint16(width);
     buffer.writeUint16(height);
     buffer.writeUint32(bitPlane);
-    return 0;
   }
 }
 
@@ -1854,11 +1847,11 @@ class X11CreateColormapRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(alloc);
     buffer.writeUint32(mid);
     buffer.writeUint32(window);
     buffer.writeUint32(visual);
-    return alloc;
   }
 }
 
@@ -1873,9 +1866,9 @@ class X11FreeColormapRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(cmap);
-    return 0;
   }
 }
 
@@ -1892,12 +1885,12 @@ class X11QueryExtensionRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint16(name.length);
     buffer.skip(2);
     buffer.writeString(name);
     buffer.skip(pad(name.length));
-    return 0;
   }
 }
 
@@ -1919,11 +1912,11 @@ class X11QueryExtensionReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(present);
     buffer.writeUint8(majorOpcode);
     buffer.writeUint8(firstEvent);
     buffer.writeUint8(firstError);
-    return present ? 1 : 0;
   }
 }
 
@@ -1935,8 +1928,8 @@ class X11ListExtensionsRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
-    return 0;
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
   }
 }
 
@@ -1957,7 +1950,8 @@ class X11ListExtensionsReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(names.length);
     buffer.skip(24);
     var totalLength = 0;
     for (var name in names) {
@@ -1966,7 +1960,6 @@ class X11ListExtensionsReply extends X11Reply {
       totalLength += 1 + name.length;
     }
     buffer.skip(pad(totalLength));
-    return names.length;
   }
 }
 
@@ -1981,8 +1974,8 @@ class X11BellRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
-    return percent; // FIXME: Int8
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeInt8(percent);
   }
 }
 
@@ -2007,7 +2000,8 @@ class X11ChangeHostsRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(mode);
     buffer.writeUint8(family);
     buffer.skip(1);
     buffer.writeUint16(address.length);
@@ -2015,7 +2009,6 @@ class X11ChangeHostsRequest extends X11Request {
       buffer.writeUint8(e);
     }
     buffer.skip(pad(address.length));
-    return mode;
   }
 }
 
@@ -2027,8 +2020,8 @@ class X11ListHostsRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
-    return 0;
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
   }
 }
 
@@ -2058,7 +2051,8 @@ class X11ListHostsReply extends X11Reply {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(mode);
     buffer.writeUint16(hosts.length);
     buffer.skip(22);
     for (var host in hosts) {
@@ -2070,7 +2064,6 @@ class X11ListHostsReply extends X11Reply {
       }
       buffer.skip(pad(host.address.length));
     }
-    return mode;
   }
 }
 
@@ -2085,9 +2078,9 @@ class X11KillClientRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(resource);
-    return 0;
   }
 }
 
@@ -2111,14 +2104,14 @@ class X11RotatePropertiesRequest extends X11Request {
   }
 
   @override
-  int encode(X11WriteBuffer buffer) {
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeUint32(window);
     buffer.writeUint16(atoms.length);
     buffer.writeInt16(delta);
     for (var atom in atoms) {
       buffer.writeUint32(atom);
     }
-    return 0;
   }
 }
 
@@ -2391,8 +2384,8 @@ class X11Client {
         colormap: colormap,
         cursor: cursor);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(1, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(1, buffer.data);
   }
 
   void changeWindowAttributes(int window,
@@ -2429,15 +2422,15 @@ class X11Client {
         colormap: colormap,
         cursor: cursor);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(2, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(2, buffer.data);
   }
 
   Future<X11GetWindowAttributesReply> getWindowAttributes(int window) {
     var request = X11GetWindowAttributesRequest(window);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(3, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(3, buffer.data);
     return _awaitReply(3, sequenceNumber)
         .then<X11GetWindowAttributesReply>((response) {
       if (response is X11GetWindowAttributesReply) {
@@ -2451,57 +2444,57 @@ class X11Client {
     var request = X11DestroyWindowRequest(window);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    var data = request.encode(buffer);
-    _sendRequest(4, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(4, buffer.data);
   }
 
   void destroySubwindows(int window) {
     var request = X11DestroySubwindowsRequest(window);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(5, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(5, buffer.data);
   }
 
   void changeSaveSet(int window, int mode) {
     var request = X11ChangeSaveSetRequest(window, mode);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(6, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(6, buffer.data);
   }
 
   void reparentWindow(int window, int parent, {int x = 0, int y = 0}) {
     var request = X11ReparentWindowRequest(window, parent, x, y);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(7, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(7, buffer.data);
   }
 
   void mapWindow(int window) {
     var request = X11MapWindowRequest(window);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(8, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(8, buffer.data);
   }
 
   void mapSubwindows(int window) {
     var request = X11MapSubwindowsRequest(window);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(9, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(9, buffer.data);
   }
 
   void unmapWindow(int window) {
     var request = X11UnmapWindowRequest(window);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(10, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(10, buffer.data);
   }
 
   void unmapSubwindows(int window) {
     var request = X11UnmapSubwindowsRequest(window);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(11, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(11, buffer.data);
   }
 
   void configureWindow(int window,
@@ -2515,23 +2508,23 @@ class X11Client {
         sibling: sibling,
         stackMode: stackMode);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(12, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(12, buffer.data);
   }
 
   void circulateWindow(int window, int direction) {
     // FIXME: enum
     var request = X11CirculateWindowRequest(window, direction);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(13, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(13, buffer.data);
   }
 
   Future<X11GetGeometryReply> getGeometry(int drawable) {
     var request = X11GetGeometryRequest(drawable);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(14, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(14, buffer.data);
     return _awaitReply(14, sequenceNumber)
         .then<X11GetGeometryReply>((response) {
       if (response is X11GetGeometryReply) {
@@ -2544,8 +2537,8 @@ class X11Client {
   Future<X11QueryTreeReply> queryTree(int window) {
     var request = X11QueryTreeRequest(window);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(15, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(15, buffer.data);
     return _awaitReply(15, sequenceNumber).then<X11QueryTreeReply>((response) {
       if (response is X11QueryTreeReply) {
         return response;
@@ -2561,8 +2554,8 @@ class X11Client {
     }
     var request = X11InternAtomRequest(name, onlyIfExists);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(16, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(16, buffer.data);
     return _awaitReply(16, sequenceNumber).then<int>((response) {
       if (response is X11InternAtomReply) {
         return response.atom;
@@ -2574,8 +2567,8 @@ class X11Client {
   Future<String> getAtomName(int atom) async {
     var request = X11GetAtomNameRequest(atom);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(17, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(17, buffer.data);
     return _awaitReply(17, sequenceNumber).then<String>((response) {
       if (response is X11GetAtomNameReply) {
         return response.name;
@@ -2611,15 +2604,15 @@ class X11Client {
     var request =
         X11ChangePropertyRequest(window, mode, property, type, format, value);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(18, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(18, buffer.data);
   }
 
   void deleteProperty(int window, int property) {
     var request = X11DeletePropertyRequest(window, property);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(19, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(19, buffer.data);
   }
 
   Future<X11GetPropertyReply> getProperty(int window, int property,
@@ -2630,8 +2623,8 @@ class X11Client {
     var request = X11GetPropertyRequest(
         window, property, type, longOffset, longLength, delete);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(20, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(20, buffer.data);
     return _awaitReply(20, sequenceNumber)
         .then<X11GetPropertyReply>((response) {
       if (response is X11GetPropertyReply) {
@@ -2654,8 +2647,8 @@ class X11Client {
   Future<List<int>> listProperties(int window) async {
     var request = X11ListPropertiesRequest(window);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(21, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(21, buffer.data);
     return _awaitReply(21, sequenceNumber).then<List<int>>((response) {
       if (response is X11ListPropertiesReply) {
         return response.atoms;
@@ -2667,15 +2660,15 @@ class X11Client {
   void createPixmap(int pid, int drawable, int width, int height, int depth) {
     var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(53, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(53, buffer.data);
   }
 
   void freePixmap(int pixmap) {
     var request = X11FreePixmapRequest(pixmap);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(54, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(54, buffer.data);
   }
 
   void createGC(int cid, int drawable,
@@ -2727,22 +2720,22 @@ class X11Client {
         dashes: dashes,
         arcMode: arcMode);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(55, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(55, buffer.data);
   }
 
   void setDashes(int gc, int dashOffset, List<int> dashes) {
     var request = X11SetDashesRequest(gc, dashOffset, dashes);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(58, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(58, buffer.data);
   }
 
   void freeGC(int gc) {
     var request = X11FreeGCRequest(gc);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(60, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(60, buffer.data);
   }
 
   void clearArea(int window,
@@ -2753,8 +2746,8 @@ class X11Client {
       bool exposures = false}) {
     var request = X11ClearAreaRequest(window, x, y, width, height, exposures);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(61, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(61, buffer.data);
   }
 
   void copyArea(int srcDrawable, int dstDrawable, int gc, int srcX, int srcY,
@@ -2762,8 +2755,8 @@ class X11Client {
     var request = X11CopyAreaRequest(
         srcDrawable, dstDrawable, gc, srcX, srcY, dstX, dstY, width, height);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(62, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(62, buffer.data);
   }
 
   void copyPlane(int srcDrawable, int dstDrawable, int gc, int srcX, int srcY,
@@ -2771,29 +2764,29 @@ class X11Client {
     var request = X11CopyPlaneRequest(srcDrawable, dstDrawable, gc, srcX, srcY,
         dstX, dstY, width, height, bitPlane);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(63, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(63, buffer.data);
   }
 
   void createColormap(int alloc, int mid, int window, int visual) {
     var request = X11CreateColormapRequest(alloc, mid, window, visual);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(78, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(78, buffer.data);
   }
 
   void freeColormap(int cmap) {
     var request = X11FreeColormapRequest(cmap);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(79, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(79, buffer.data);
   }
 
   Future<X11QueryExtensionReply> queryExtension(String name) async {
     var request = X11QueryExtensionRequest(name);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(98, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(98, buffer.data);
     return _awaitReply(98, sequenceNumber)
         .then<X11QueryExtensionReply>((response) {
       if (response is X11QueryExtensionReply) {
@@ -2806,8 +2799,8 @@ class X11Client {
   Future<List<String>> listExtensions() async {
     var request = X11ListExtensionsRequest();
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(99, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(99, buffer.data);
     return _awaitReply(99, sequenceNumber).then<List<String>>((response) {
       if (response is X11ListExtensionsReply) {
         return response.names;
@@ -2819,22 +2812,22 @@ class X11Client {
   void bell(int percent) {
     var request = X11BellRequest(percent);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(104, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(104, buffer.data);
   }
 
   void changeHosts(int mode, int family, List<int> address) {
     var request = X11ChangeHostsRequest(mode, family, address);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(109, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(109, buffer.data);
   }
 
   Future<X11ListHostsReply> listHosts() async {
     var request = X11ListHostsRequest();
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    var sequenceNumber = _sendRequest(110, data, buffer.data);
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(110, buffer.data);
     return _awaitReply(110, sequenceNumber).then<X11ListHostsReply>((response) {
       if (response is X11ListHostsReply) {
         return response;
@@ -2846,15 +2839,15 @@ class X11Client {
   void killClient(int resource) {
     var request = X11KillClientRequest(resource);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(113, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(113, buffer.data);
   }
 
   void rotateProperties(int window, int delta, List<int> atoms) {
     var request = X11RotatePropertiesRequest(window, delta, atoms);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
-    _sendRequest(114, data, buffer.data);
+    request.encode(buffer);
+    _sendRequest(114, buffer.data);
   }
 
   void _processData(Uint8List data) {
@@ -3058,18 +3051,19 @@ class X11Client {
     return true;
   }
 
-  int _sendRequest(int opcode, int data, List<int> additionalData) {
+  int _sendRequest(int opcode, List<int> data) {
     _sequenceNumber++;
     if (_sequenceNumber >= 65536) {
       _sequenceNumber = 0;
     }
 
+    // In a quirk of X11 there is a one byte field in the header that we take from the data.
     var buffer = X11WriteBuffer();
     buffer.writeUint8(opcode);
-    buffer.writeUint8(data);
-    buffer.writeUint16(1 + additionalData.length ~/ 4); // FIXME: Pad to 4 bytes
+    buffer.writeUint8(data[0]);
+    buffer.writeUint16(1 + (data.length - 1) ~/ 4); // FIXME: Pad to 4 bytes
     _socket.add(buffer.data);
-    _socket.add(additionalData);
+    _socket.add(data.sublist(1));
 
     return _sequenceNumber;
   }
@@ -3101,6 +3095,12 @@ class X11WriteBuffer {
 
   void writeUint8(int value) {
     data.add(value);
+  }
+
+  void writeInt8(int value) {
+    var bytes = Uint8List(1).buffer;
+    ByteData.view(bytes).setInt8(0, value);
+    data.addAll(bytes.asUint8List());
   }
 
   void writeBool(bool value) {
