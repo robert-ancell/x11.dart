@@ -1410,6 +1410,98 @@ class X11ListPropertiesReply extends X11Reply {
   }
 }
 
+class X11SetSelectionOwnerRequest extends X11Request {
+  final int selection;
+  final int owner;
+  final int time;
+
+  X11SetSelectionOwnerRequest(this.selection, this.owner, {this.time = 0});
+
+  factory X11SetSelectionOwnerRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var owner = buffer.readUint32();
+    var selection = buffer.readUint32();
+    var time = buffer.readUint32();
+    return X11SetSelectionOwnerRequest(selection, owner, time: time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(owner);
+    buffer.writeUint32(selection);
+    buffer.writeUint32(time);
+  }
+}
+
+class X11GetSelectionOwnerRequest extends X11Request {
+  final int selection;
+
+  X11GetSelectionOwnerRequest(this.selection);
+
+  factory X11GetSelectionOwnerRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var selection = buffer.readUint32();
+    return X11GetSelectionOwnerRequest(selection);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(selection);
+  }
+}
+
+class X11GetSelectionOwnerReply extends X11Reply {
+  final int owner;
+
+  X11GetSelectionOwnerReply(this.owner);
+
+  factory X11GetSelectionOwnerReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var owner = buffer.readUint32();
+    return X11GetSelectionOwnerReply(owner);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(owner);
+  }
+}
+
+class X11ConvertSelectionRequest extends X11Request {
+  final int selection;
+  final int requestor;
+  final int target;
+  final int property;
+  final int time;
+
+  X11ConvertSelectionRequest(this.selection, this.requestor, this.target,
+      {this.property = 0, this.time = 0});
+
+  factory X11ConvertSelectionRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var requestor = buffer.readUint32();
+    var selection = buffer.readUint32();
+    var target = buffer.readUint32();
+    var property = buffer.readUint32();
+    var time = buffer.readUint32();
+    return X11ConvertSelectionRequest(selection, requestor, target,
+        property: property, time: time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(requestor);
+    buffer.writeUint32(selection);
+    buffer.writeUint32(target);
+    buffer.writeUint32(property);
+    buffer.writeUint32(time);
+  }
+}
+
 class X11GrabPointerRequest extends X11Request {
   final int grabWindow;
   final bool ownerEvents;
@@ -2944,13 +3036,42 @@ class X11Client {
     });
   }
 
+  void setSelectionOwner(int selection, int owner, {int time = 0}) {
+    var request = X11SetSelectionOwnerRequest(selection, owner, time: time);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    _sendRequest(22, buffer.data);
+  }
+
+  Future<int> getSelectionOwner(int selection) async {
+    var request = X11GetSelectionOwnerRequest(selection);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(23, buffer.data);
+    return _awaitReply(23, sequenceNumber).then<int>((response) {
+      if (response is X11GetSelectionOwnerReply) {
+        return response.owner;
+      }
+      throw 'Failed to GetSelectionOwner'; // FIXME: Better error
+    });
+  }
+
+  void convertSelection(int selection, int requestor, int target,
+      {int property = 0, int time = 0}) {
+    var request = X11ConvertSelectionRequest(selection, requestor, target,
+        property: property, time: time);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    _sendRequest(24, buffer.data);
+  }
+
   Future<int> grabPointer(int grabWindow, bool ownerEvents, int eventMask,
       int pointerMode, int keyboardMode,
       {int time = 0, int confineTo = 0, int cursor = 0}) async {
     var request = X11GrabPointerRequest(grabWindow, ownerEvents, eventMask,
         pointerMode, keyboardMode, confineTo, cursor, time);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
+    request.encode(buffer);
     var sequenceNumber = _sendRequest(26, buffer.data);
     return _awaitReply(26, sequenceNumber).then<int>((response) {
       if (response is X11GrabPointerReply) {
@@ -2963,7 +3084,7 @@ class X11Client {
   void ungrabPointer({int time = 0}) {
     var request = X11UngrabPointerRequest(time);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
+    request.encode(buffer);
     _sendRequest(27, buffer.data);
   }
 
@@ -2976,14 +3097,14 @@ class X11Client {
     var request = X11GrabButtonRequest(grabWindow, ownerEvents, eventMask,
         pointerMode, keyboardMode, confineTo, cursor, button, modifiers);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
+    request.encode(buffer);
     _sendRequest(28, buffer.data);
   }
 
   void ungrabButton(int grabWindow, {int button = 0, int modifiers = 0x8000}) {
     var request = X11UngrabButtonRequest(grabWindow, button, modifiers);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
+    request.encode(buffer);
     _sendRequest(29, buffer.data);
   }
 
@@ -3115,28 +3236,28 @@ class X11Client {
   void copyColormapAndFree(int mid, int srcCmap) {
     var request = X11CopyColormapAndFreeRequest(mid, srcCmap);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
+    request.encode(buffer);
     _sendRequest(80, buffer.data);
   }
 
   void installColormap(int cmap) {
     var request = X11InstallColormapRequest(cmap);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
+    request.encode(buffer);
     _sendRequest(81, buffer.data);
   }
 
   void uninstallColormap(int cmap) {
     var request = X11UninstallColormapRequest(cmap);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
+    request.encode(buffer);
     _sendRequest(82, buffer.data);
   }
 
   Future<List<int>> listInstalledColormaps(int window) async {
     var request = X11ListInstalledColormapsRequest(window);
     var buffer = X11WriteBuffer();
-    var data = request.encode(buffer);
+    request.encode(buffer);
     var sequenceNumber = _sendRequest(83, buffer.data);
     return _awaitReply(83, sequenceNumber).then<List<int>>((response) {
       if (response is X11ListInstalledColormapsReply) {
@@ -3387,6 +3508,8 @@ class X11Client {
           response = X11GetPropertyReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 21) {
           response = X11ListPropertiesReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 23) {
+          response = X11GetSelectionOwnerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 26) {
           response = X11GrabPointerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 83) {
