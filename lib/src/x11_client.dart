@@ -176,6 +176,29 @@ class X11Host {
   String toString() => 'X11Host(family: ${family}, address: ${address})';
 }
 
+class X11Point {
+  final int x;
+  final int y;
+
+  const X11Point(this.x, this.y);
+
+  @override
+  String toString() => 'X11Point(x: ${x}, y: ${y})';
+}
+
+class X11Rectangle {
+  final int x;
+  final int y;
+  final int width;
+  final int height;
+
+  const X11Rectangle(this.x, this.y, this.width, this.height);
+
+  @override
+  String toString() =>
+      'X11Rectangle(x: ${x}, y: ${y}, width: ${width}, height: ${height})';
+}
+
 class X11Rgb {
   final int red;
   final int green;
@@ -271,14 +294,14 @@ class X11CreateWindowRequest extends X11Request {
   final int cursor;
 
   X11CreateWindowRequest(this.wid, this.parent,
-      {this.x,
-      this.y,
-      this.width,
-      this.height,
-      this.depth,
-      this.borderWidth,
-      this.class_,
-      this.visual,
+      {this.x = 0,
+      this.y = 0,
+      this.width = 0,
+      this.height = 0,
+      this.depth = 0,
+      this.class_ = X11WindowClass.inputOutput,
+      this.visual = 0,
+      this.borderWidth = 0,
       this.backgroundPixmap,
       this.backgroundPixel,
       this.borderPixmap,
@@ -373,9 +396,9 @@ class X11CreateWindowRequest extends X11Request {
         width: width,
         height: height,
         depth: depth,
-        borderWidth: borderWidth,
         class_: class_,
         visual: visual,
+        borderWidth: borderWidth,
         backgroundPixmap: backgroundPixmap,
         backgroundPixel: backgroundPixel,
         borderPixmap: borderPixmap,
@@ -802,10 +825,9 @@ class X11ChangeSaveSetRequest extends X11Request {
 class X11ReparentWindowRequest extends X11Request {
   final int window;
   final int parent;
-  final int x;
-  final int y;
+  final X11Point position;
 
-  X11ReparentWindowRequest(this.window, this.parent, this.x, this.y);
+  X11ReparentWindowRequest(this.window, this.parent, this.position);
 
   factory X11ReparentWindowRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -813,7 +835,7 @@ class X11ReparentWindowRequest extends X11Request {
     var parent = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
-    return X11ReparentWindowRequest(window, parent, x, y);
+    return X11ReparentWindowRequest(window, parent, X11Point(x, y));
   }
 
   @override
@@ -821,8 +843,8 @@ class X11ReparentWindowRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
     buffer.writeUint32(parent);
-    buffer.writeInt16(x);
-    buffer.writeInt16(y);
+    buffer.writeInt16(position.x);
+    buffer.writeInt16(position.y);
   }
 }
 
@@ -1051,15 +1073,11 @@ class X11GetGeometryRequest extends X11Request {
 
 class X11GetGeometryReply extends X11Reply {
   final int root;
-  final int x;
-  final int y;
-  final int width;
-  final int height;
+  final X11Rectangle area;
   final int depth;
   final int borderWidth;
 
-  X11GetGeometryReply(this.root, this.x, this.y, this.width, this.height,
-      this.depth, this.borderWidth);
+  X11GetGeometryReply(this.root, this.area, this.depth, this.borderWidth);
 
   factory X11GetGeometryReply.fromBuffer(X11ReadBuffer buffer) {
     var depth = buffer.readUint8();
@@ -1070,17 +1088,18 @@ class X11GetGeometryReply extends X11Reply {
     var height = buffer.readUint16();
     var borderWidth = buffer.readUint16();
     buffer.skip(10);
-    return X11GetGeometryReply(root, x, y, width, height, depth, borderWidth);
+    return X11GetGeometryReply(
+        root, X11Rectangle(x, y, width, height), depth, borderWidth);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(depth);
     buffer.writeUint32(root);
-    buffer.writeInt16(x);
-    buffer.writeInt16(y);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeInt16(area.x);
+    buffer.writeInt16(area.y);
+    buffer.writeUint16(area.width);
+    buffer.writeUint16(area.height);
     buffer.writeUint16(borderWidth);
     buffer.skip(10);
   }
@@ -1536,6 +1555,8 @@ class X11ConvertSelectionRequest extends X11Request {
   }
 }
 
+// FIXME(robert-ancell): X11SendEventRequest
+
 class X11GrabPointerRequest extends X11Request {
   final int grabWindow;
   final bool ownerEvents;
@@ -1962,6 +1983,8 @@ class X11CreateGCRequest extends X11Request {
   }
 }
 
+// FIXME(robert-ancell): X11ChangeGCRequest
+
 class X11SetDashesRequest extends X11Request {
   final int gc;
   final int dashOffset;
@@ -1995,6 +2018,48 @@ class X11SetDashesRequest extends X11Request {
   }
 }
 
+class X11SetClipRectanglesRequest extends X11Request {
+  final int gc;
+  final X11Point clipOrigin;
+  final List<X11Rectangle> rectangles;
+  final int ordering;
+
+  X11SetClipRectanglesRequest(this.gc, this.clipOrigin, this.rectangles,
+      {this.ordering = 0});
+
+  factory X11SetClipRectanglesRequest.fromBuffer(X11ReadBuffer buffer) {
+    var ordering = buffer.readUint8();
+    var gc = buffer.readUint32();
+    var clipXOrigin = buffer.readInt16();
+    var clipYOrigin = buffer.readInt16();
+    var rectangles = <X11Rectangle>[];
+    while (buffer.remaining > 0) {
+      var x = buffer.readInt16();
+      var y = buffer.readInt16();
+      var width = buffer.readUint16();
+      var height = buffer.readUint16();
+      rectangles.add(X11Rectangle(x, y, width, height));
+    }
+    return X11SetClipRectanglesRequest(
+        gc, X11Point(clipXOrigin, clipYOrigin), rectangles,
+        ordering: ordering);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(ordering);
+    buffer.writeUint32(gc);
+    buffer.writeInt16(clipOrigin.x);
+    buffer.writeInt16(clipOrigin.y);
+    for (var rectangle in rectangles) {
+      buffer.writeInt16(rectangle.x);
+      buffer.writeInt16(rectangle.y);
+      buffer.writeUint16(rectangle.width);
+      buffer.writeUint16(rectangle.height);
+    }
+  }
+}
+
 class X11FreeGCRequest extends X11Request {
   final int gc;
 
@@ -2015,14 +2080,10 @@ class X11FreeGCRequest extends X11Request {
 
 class X11ClearAreaRequest extends X11Request {
   final int window;
-  final int x;
-  final int y;
-  final int width;
-  final int height;
+  final X11Rectangle area;
   final bool exposures;
 
-  X11ClearAreaRequest(
-      this.window, this.x, this.y, this.width, this.height, this.exposures);
+  X11ClearAreaRequest(this.window, this.area, {this.exposures = false});
 
   factory X11ClearAreaRequest.fromBuffer(X11ReadBuffer buffer) {
     var exposures = buffer.readBool();
@@ -2031,17 +2092,18 @@ class X11ClearAreaRequest extends X11Request {
     var y = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11ClearAreaRequest(window, x, y, width, height, exposures);
+    return X11ClearAreaRequest(window, X11Rectangle(x, y, width, height),
+        exposures: exposures);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(exposures);
     buffer.writeUint32(window);
-    buffer.writeInt16(x);
-    buffer.writeInt16(y);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeInt16(area.x);
+    buffer.writeInt16(area.y);
+    buffer.writeUint16(area.width);
+    buffer.writeUint16(area.height);
   }
 }
 
@@ -2049,15 +2111,11 @@ class X11CopyAreaRequest extends X11Request {
   final int srcDrawable;
   final int dstDrawable;
   final int gc;
-  final int srcX;
-  final int srcY;
-  final int dstX;
-  final int dstY;
-  final int width;
-  final int height;
+  final X11Rectangle srcArea;
+  final X11Point dstPosition;
 
-  X11CopyAreaRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcX,
-      this.srcY, this.dstX, this.dstY, this.width, this.height);
+  X11CopyAreaRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcArea,
+      this.dstPosition);
 
   factory X11CopyAreaRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -2070,8 +2128,8 @@ class X11CopyAreaRequest extends X11Request {
     var dstY = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11CopyAreaRequest(
-        srcDrawable, dstDrawable, gc, srcX, srcY, dstX, dstY, width, height);
+    return X11CopyAreaRequest(srcDrawable, dstDrawable, gc,
+        X11Rectangle(srcX, srcY, width, height), X11Point(dstX, dstY));
   }
 
   @override
@@ -2080,12 +2138,12 @@ class X11CopyAreaRequest extends X11Request {
     buffer.writeUint32(srcDrawable);
     buffer.writeUint32(dstDrawable);
     buffer.writeUint32(gc);
-    buffer.writeInt16(srcX);
-    buffer.writeInt16(srcY);
-    buffer.writeInt16(dstX);
-    buffer.writeInt16(dstY);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeInt16(srcArea.x);
+    buffer.writeInt16(srcArea.y);
+    buffer.writeInt16(dstPosition.x);
+    buffer.writeInt16(dstPosition.y);
+    buffer.writeUint16(srcArea.width);
+    buffer.writeUint16(srcArea.height);
   }
 }
 
@@ -2093,16 +2151,12 @@ class X11CopyPlaneRequest extends X11Request {
   final int srcDrawable;
   final int dstDrawable;
   final int gc;
-  final int srcX;
-  final int srcY;
-  final int dstX;
-  final int dstY;
-  final int width;
-  final int height;
+  final X11Rectangle srcArea;
+  final X11Point dstPosition;
   final int bitPlane;
 
-  X11CopyPlaneRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcX,
-      this.srcY, this.dstX, this.dstY, this.width, this.height, this.bitPlane);
+  X11CopyPlaneRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcArea,
+      this.dstPosition, this.bitPlane);
 
   factory X11CopyPlaneRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -2116,8 +2170,13 @@ class X11CopyPlaneRequest extends X11Request {
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     var bitPlane = buffer.readUint32();
-    return X11CopyPlaneRequest(srcDrawable, dstDrawable, gc, srcX, srcY, dstX,
-        dstY, width, height, bitPlane);
+    return X11CopyPlaneRequest(
+        srcDrawable,
+        dstDrawable,
+        gc,
+        X11Rectangle(srcX, srcY, width, height),
+        X11Point(dstX, dstY),
+        bitPlane);
   }
 
   @override
@@ -2126,12 +2185,12 @@ class X11CopyPlaneRequest extends X11Request {
     buffer.writeUint32(srcDrawable);
     buffer.writeUint32(dstDrawable);
     buffer.writeUint32(gc);
-    buffer.writeInt16(srcX);
-    buffer.writeInt16(srcY);
-    buffer.writeInt16(dstX);
-    buffer.writeInt16(dstY);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeInt16(srcArea.x);
+    buffer.writeInt16(srcArea.y);
+    buffer.writeInt16(dstPosition.x);
+    buffer.writeInt16(dstPosition.y);
+    buffer.writeUint16(srcArea.width);
+    buffer.writeUint16(srcArea.height);
     buffer.writeUint32(bitPlane);
   }
 }
@@ -3050,13 +3109,10 @@ class X11KeymapNotify extends X11Event {}
 
 class X11Expose extends X11Event {
   int window;
-  int x;
-  int y;
-  int width;
-  int height;
+  X11Rectangle area;
   int count;
 
-  X11Expose(this.window, this.x, this.y, this.width, this.height, this.count);
+  X11Expose(this.window, this.area, this.count);
 
   factory X11Expose.fromBuffer(X11ReadBuffer buffer) {
     var window = buffer.readUint32();
@@ -3066,12 +3122,12 @@ class X11Expose extends X11Event {
     var height = buffer.readUint16();
     var count = buffer.readUint16();
     buffer.skip(14);
-    return X11Expose(window, x, y, width, height, count);
+    return X11Expose(window, X11Rectangle(x, y, width, height), count);
   }
 
   @override
   String toString() =>
-      'X11Expose(window: ${_formatId(window)}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, count: ${count})';
+      'X11Expose(window: ${_formatId(window)}, area: ${area}, count: ${count})';
 }
 
 class X11GraphicsExposure extends X11Event {}
@@ -3375,8 +3431,9 @@ class X11Client {
     _sendRequest(6, buffer.data);
   }
 
-  void reparentWindow(int window, int parent, {int x = 0, int y = 0}) {
-    var request = X11ReparentWindowRequest(window, parent, x, y);
+  void reparentWindow(int window, int parent,
+      {X11Point position = const X11Point(0, 0)}) {
+    var request = X11ReparentWindowRequest(window, parent, position);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     _sendRequest(7, buffer.data);
@@ -3716,6 +3773,16 @@ class X11Client {
     _sendRequest(58, buffer.data);
   }
 
+  void setClipRectangles(
+      int gc, X11Point clipOrigin, List<X11Rectangle> rectangles,
+      {int ordering = 0}) {
+    var request = X11SetClipRectanglesRequest(gc, clipOrigin, rectangles,
+        ordering: ordering);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    _sendRequest(59, buffer.data);
+  }
+
   void freeGC(int gc) {
     var request = X11FreeGCRequest(gc);
     var buffer = X11WriteBuffer();
@@ -3723,31 +3790,26 @@ class X11Client {
     _sendRequest(60, buffer.data);
   }
 
-  void clearArea(int window,
-      {int x = 0,
-      int y = 0,
-      int width = 0,
-      int height = 0,
-      bool exposures = false}) {
-    var request = X11ClearAreaRequest(window, x, y, width, height, exposures);
+  void clearArea(int window, X11Rectangle area, {bool exposures = false}) {
+    var request = X11ClearAreaRequest(window, area, exposures: exposures);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     _sendRequest(61, buffer.data);
   }
 
-  void copyArea(int srcDrawable, int dstDrawable, int gc, int srcX, int srcY,
-      int dstX, int dstY, int width, int height) {
-    var request = X11CopyAreaRequest(
-        srcDrawable, dstDrawable, gc, srcX, srcY, dstX, dstY, width, height);
+  void copyArea(int srcDrawable, int dstDrawable, int gc, X11Rectangle srcArea,
+      X11Point dstPosition) {
+    var request =
+        X11CopyAreaRequest(srcDrawable, dstDrawable, gc, srcArea, dstPosition);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     _sendRequest(62, buffer.data);
   }
 
-  void copyPlane(int srcDrawable, int dstDrawable, int gc, int srcX, int srcY,
-      int dstX, int dstY, int width, int height, int bitPlane) {
-    var request = X11CopyPlaneRequest(srcDrawable, dstDrawable, gc, srcX, srcY,
-        dstX, dstY, width, height, bitPlane);
+  void copyPlane(int srcDrawable, int dstDrawable, int gc, X11Rectangle srcArea,
+      X11Point dstPosition, int width, int height, int bitPlane) {
+    var request = X11CopyPlaneRequest(
+        srcDrawable, dstDrawable, gc, srcArea, dstPosition, bitPlane);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     _sendRequest(63, buffer.data);

@@ -6,7 +6,7 @@ void main() async {
 
   client.eventStream.listen((event) {
     if (event is X11Expose) {
-      client.clearArea(event.window);
+      client.clearArea(event.window, event.area);
     }
   });
 
