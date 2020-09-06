@@ -1777,22 +1777,28 @@ class X11GrabServerRequest extends X11Request {
   X11GrabServerRequest();
 
   factory X11GrabServerRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     return X11GrabServerRequest();
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {}
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
 }
 
 class X11UngrabServerRequest extends X11Request {
   X11UngrabServerRequest();
 
   factory X11UngrabServerRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     return X11UngrabServerRequest();
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {}
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
 }
 
 class X11QueryPointerRequest extends X11Request {
@@ -1957,11 +1963,14 @@ class X11QueryKeymapRequest extends X11Request {
   X11QueryKeymapRequest();
 
   factory X11QueryKeymapRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     return X11QueryKeymapRequest();
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {}
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
 }
 
 class X11QueryKeymapReply extends X11Reply {
@@ -2070,11 +2079,7 @@ class X11ListFontsReply extends X11Reply {
     buffer.skip(1);
     var namesLength = buffer.readUint16();
     buffer.skip(22);
-    var names = <String>[];
-    for (var i = 0; i < namesLength; i++) {
-      var nameLength = buffer.readUint8();
-      names.add(buffer.readString(nameLength));
-    }
+    var names = buffer.readListOfString(namesLength);
     return X11ListFontsReply(names);
   }
 
@@ -2083,21 +2088,69 @@ class X11ListFontsReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(names.length);
     buffer.skip(22);
-    var totalLength = 0;
-    for (var name in names) {
-      buffer.writeUint8(name.length);
-      buffer.writeString(name);
-      totalLength += 1 + name.length;
-    }
-    buffer.skip(pad(totalLength));
+    buffer.writeListOfString(names);
   }
 }
 
 // FIXME(robert-ancell): ListFontsWithInfo
 
-// FIXME(robert-ancell): SetFontPath
+class X11SetFontPathRequest extends X11Request {
+  final List<String> path;
 
-// FIXME(robert-ancell): GetFontPath
+  X11SetFontPathRequest(this.path);
+
+  factory X11SetFontPathRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var pathLength = buffer.readUint16();
+    buffer.skip(2);
+    var path = buffer.readListOfString(pathLength);
+    return X11SetFontPathRequest(path);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(path.length);
+    buffer.skip(2);
+    buffer.writeListOfString(path);
+  }
+}
+
+class X11GetFontPathRequest extends X11Request {
+  X11GetFontPathRequest();
+
+  factory X11GetFontPathRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    return X11GetFontPathRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
+}
+
+class X11GetFontPathReply extends X11Reply {
+  final List<String> path;
+
+  X11GetFontPathReply(this.path);
+
+  factory X11GetFontPathReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var pathLength = buffer.readUint16();
+    buffer.skip(22);
+    var path = buffer.readListOfString(pathLength);
+    return X11GetFontPathReply(path);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(path.length);
+    buffer.skip(22);
+    buffer.writeListOfString(path);
+  }
+}
 
 class X11CreatePixmapRequest extends X11Request {
   final int pid;
@@ -4265,11 +4318,7 @@ class X11ListExtensionsReply extends X11Reply {
   factory X11ListExtensionsReply.fromBuffer(X11ReadBuffer buffer) {
     var namesLength = buffer.readUint8();
     buffer.skip(24);
-    var names = <String>[];
-    for (var i = 0; i < namesLength; i++) {
-      var nameLength = buffer.readUint8();
-      names.add(buffer.readString(nameLength));
-    }
+    var names = buffer.readListOfString(namesLength);
     return X11ListExtensionsReply(names);
   }
 
@@ -4277,13 +4326,7 @@ class X11ListExtensionsReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(names.length);
     buffer.skip(24);
-    var totalLength = 0;
-    for (var name in names) {
-      buffer.writeUint8(name.length);
-      buffer.writeString(name);
-      totalLength += 1 + name.length;
-    }
-    buffer.skip(pad(totalLength));
+    buffer.writeListOfString(names);
   }
 }
 
@@ -4503,11 +4546,14 @@ class X11NoOperationRequest extends X11Request {
   X11NoOperationRequest();
 
   factory X11NoOperationRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     return X11NoOperationRequest();
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {}
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
 }
 
 class X11KeyPress extends X11Event {}
@@ -5225,6 +5271,26 @@ class X11Client {
     });
   }
 
+  int setFontPath(List<String> path) {
+    var request = X11SetFontPathRequest(path);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(51, buffer.data);
+  }
+
+  Future<List<String>> getFontPath() async {
+    var request = X11GetFontPathRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(52, buffer.data);
+    return _awaitReply(52, sequenceNumber).then<List<String>>((response) {
+      if (response is X11GetFontPathReply) {
+        return response.path;
+      }
+      throw 'Failed to GetFontPath'; // FIXME: Better error
+    });
+  }
+
   int createPixmap(int pid, int drawable, int width, int height, int depth) {
     var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
     var buffer = X11WriteBuffer();
@@ -5932,6 +5998,8 @@ class X11Client {
           response = X11QueryKeymapReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 49) {
           response = X11ListFontsReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 52) {
+          response = X11GetFontPathReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 83) {
           response = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 84) {
@@ -6057,6 +6125,16 @@ class X11WriteBuffer {
   void writeString(String value) {
     data.addAll(utf8.encode(value));
   }
+
+  void writeListOfString(List<String> values) {
+    var totalLength = 0;
+    for (var value in values) {
+      writeUint8(value.length);
+      writeString(value);
+      totalLength += 1 + value.length;
+    }
+    skip(pad(totalLength));
+  }
 }
 
 class X11ReadBuffer {
@@ -6124,6 +6202,19 @@ class X11ReadBuffer {
       d.add(readUint8());
     }
     return utf8.decode(d);
+  }
+
+  List<String> readListOfString(int length) {
+    var values = <String>[];
+    var totalLength = 0;
+    for (var i = 0; i < length; i++) {
+      var valueLength = readUint8();
+      values.add(readString(valueLength));
+      totalLength += 1 + valueLength;
+    }
+    skip(pad(totalLength));
+
+    return values;
   }
 
   /// Removes all buffered data.
