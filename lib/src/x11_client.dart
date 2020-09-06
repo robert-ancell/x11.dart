@@ -1744,6 +1744,106 @@ class X11UngrabButtonRequest extends X11Request {
   }
 }
 
+class X11AllowEventsRequest extends X11Request {
+  final int mode;
+  final int time;
+
+  X11AllowEventsRequest(this.mode, {this.time = 0});
+
+  factory X11AllowEventsRequest.fromBuffer(X11ReadBuffer buffer) {
+    var mode = buffer.readUint8();
+    var time = buffer.readUint32();
+    return X11AllowEventsRequest(mode, time: time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(mode);
+    buffer.writeUint32(time);
+  }
+}
+
+class X11GrabServerRequest extends X11Request {
+  X11GrabServerRequest();
+
+  factory X11GrabServerRequest.fromBuffer(X11ReadBuffer buffer) {
+    return X11GrabServerRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {}
+}
+
+class X11UngrabServerRequest extends X11Request {
+  X11UngrabServerRequest();
+
+  factory X11UngrabServerRequest.fromBuffer(X11ReadBuffer buffer) {
+    return X11UngrabServerRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {}
+}
+
+class X11QueryPointerRequest extends X11Request {
+  final int window;
+
+  X11QueryPointerRequest(this.window);
+
+  factory X11QueryPointerRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var window = buffer.readUint32();
+    return X11QueryPointerRequest(window);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(window);
+  }
+}
+
+class X11QueryPointerReply extends X11Reply {
+  final int root;
+  final int child;
+  final int rootX;
+  final int rootY;
+  final int winX;
+  final int winY;
+  final int mask;
+  final bool sameScreen;
+
+  X11QueryPointerReply(this.root, this.child, this.rootX, this.rootY, this.winX,
+      this.winY, this.mask, this.sameScreen);
+
+  factory X11QueryPointerReply.fromBuffer(X11ReadBuffer buffer) {
+    var sameScreen = buffer.readBool();
+    var root = buffer.readUint32();
+    var child = buffer.readUint32();
+    var rootX = buffer.readInt16();
+    var rootY = buffer.readInt16();
+    var winX = buffer.readInt16();
+    var winY = buffer.readInt16();
+    var mask = buffer.readUint16();
+    buffer.skip(2);
+    return X11QueryPointerReply(
+        root, child, rootX, rootY, winX, winY, mask, sameScreen);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(sameScreen);
+    buffer.writeUint32(root);
+    buffer.writeUint32(child);
+    buffer.writeInt16(rootX);
+    buffer.writeInt16(rootY);
+    buffer.writeInt16(winX);
+    buffer.writeInt16(winY);
+    buffer.writeUint16(mask);
+    buffer.skip(2);
+  }
+}
+
 class X11CreatePixmapRequest extends X11Request {
   final int pid;
   final int drawable;
@@ -4071,6 +4171,41 @@ class X11Client {
     _sendRequest(29, buffer.data);
   }
 
+  int allowEvents(int mode, {int time = 0}) {
+    var request = X11AllowEventsRequest(mode, time: time);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(35, buffer.data);
+  }
+
+  int grabServer() {
+    var request = X11GrabServerRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(36, buffer.data);
+  }
+
+  int ungrabServer() {
+    var request = X11UngrabServerRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(37, buffer.data);
+  }
+
+  Future<X11QueryPointerReply> queryPointer(int window) async {
+    var request = X11QueryPointerRequest(window);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(38, buffer.data);
+    return _awaitReply(38, sequenceNumber)
+        .then<X11QueryPointerReply>((response) {
+      if (response is X11QueryPointerReply) {
+        return response;
+      }
+      throw 'Failed to QueryPointer'; // FIXME: Better error
+    });
+  }
+
   void createPixmap(int pid, int drawable, int width, int height, int depth) {
     var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
     var buffer = X11WriteBuffer();
@@ -4668,6 +4803,8 @@ class X11Client {
           response = X11GetSelectionOwnerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 26) {
           response = X11GrabPointerReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 38) {
+          response = X11QueryPointerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 83) {
           response = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 84) {
