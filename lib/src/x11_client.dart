@@ -4720,7 +4720,7 @@ class X11Client {
     return id;
   }
 
-  void createWindow(int wid, int parent,
+  int createWindow(int wid, int parent,
       {X11WindowClass class_ = X11WindowClass.inputOutput,
       int x = 0,
       int y = 0,
@@ -4777,10 +4777,10 @@ class X11Client {
         cursor: cursor);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(1, buffer.data);
+    return _sendRequest(1, buffer.data);
   }
 
-  void changeWindowAttributes(int window,
+  int changeWindowAttributes(int window,
       {int borderWidth = 0,
       int backgroundPixmap,
       int backgroundPixel,
@@ -4815,7 +4815,7 @@ class X11Client {
         cursor: cursor);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(2, buffer.data);
+    return _sendRequest(2, buffer.data);
   }
 
   Future<X11GetWindowAttributesReply> getWindowAttributes(int window) {
@@ -4832,65 +4832,65 @@ class X11Client {
     });
   }
 
-  void destroyWindow(int window) {
+  int destroyWindow(int window) {
     var request = X11DestroyWindowRequest(window);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     request.encode(buffer);
-    _sendRequest(4, buffer.data);
+    return _sendRequest(4, buffer.data);
   }
 
-  void destroySubwindows(int window) {
+  int destroySubwindows(int window) {
     var request = X11DestroySubwindowsRequest(window);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(5, buffer.data);
+    return _sendRequest(5, buffer.data);
   }
 
-  void changeSaveSet(int window, int mode) {
+  int changeSaveSet(int window, int mode) {
     var request = X11ChangeSaveSetRequest(window, mode);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(6, buffer.data);
+    return _sendRequest(6, buffer.data);
   }
 
-  void reparentWindow(int window, int parent,
+  int reparentWindow(int window, int parent,
       {X11Point position = const X11Point(0, 0)}) {
     var request = X11ReparentWindowRequest(window, parent, position);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(7, buffer.data);
+    return _sendRequest(7, buffer.data);
   }
 
-  void mapWindow(int window) {
+  int mapWindow(int window) {
     var request = X11MapWindowRequest(window);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(8, buffer.data);
+    return _sendRequest(8, buffer.data);
   }
 
-  void mapSubwindows(int window) {
+  int mapSubwindows(int window) {
     var request = X11MapSubwindowsRequest(window);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(9, buffer.data);
+    return _sendRequest(9, buffer.data);
   }
 
-  void unmapWindow(int window) {
+  int unmapWindow(int window) {
     var request = X11UnmapWindowRequest(window);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(10, buffer.data);
+    return _sendRequest(10, buffer.data);
   }
 
-  void unmapSubwindows(int window) {
+  int unmapSubwindows(int window) {
     var request = X11UnmapSubwindowsRequest(window);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(11, buffer.data);
+    return _sendRequest(11, buffer.data);
   }
 
-  void configureWindow(int window,
+  int configureWindow(int window,
       {x, y, width, height, borderWidth, sibling, stackMode}) {
     var request = X11ConfigureWindowRequest(window,
         x: x,
@@ -4902,15 +4902,15 @@ class X11Client {
         stackMode: stackMode);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(12, buffer.data);
+    return _sendRequest(12, buffer.data);
   }
 
-  void circulateWindow(int window, int direction) {
+  int circulateWindow(int window, int direction) {
     // FIXME: enum
     var request = X11CirculateWindowRequest(window, direction);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(13, buffer.data);
+    return _sendRequest(13, buffer.data);
   }
 
   Future<X11GetGeometryReply> getGeometry(int drawable) {
@@ -4971,41 +4971,42 @@ class X11Client {
     });
   }
 
-  void changePropertyUint8(int window, int property, int type, List<int> value,
+  int changePropertyUint8(int window, int property, int type, List<int> value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
-    _changeProperty(window, property, type, 8, value, mode: mode);
+    return _changeProperty(window, property, type, 8, value, mode: mode);
   }
 
-  void changePropertyUint16(int window, int property, int type, List<int> value,
+  int changePropertyUint16(int window, int property, int type, List<int> value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
-    _changeProperty(window, property, type, 16, value, mode: mode);
+    return _changeProperty(window, property, type, 16, value, mode: mode);
   }
 
-  void changePropertyUint32(int window, int property, int type, List<int> value,
+  int changePropertyUint32(int window, int property, int type, List<int> value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
-    _changeProperty(window, property, type, 32, value, mode: mode);
+    return _changeProperty(window, property, type, 32, value, mode: mode);
   }
 
-  void changePropertyString(int window, int property, int type, String value,
+  int changePropertyString(int window, int property, int type, String value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
-    _changeProperty(window, property, type, 8, utf8.encode(value), mode: mode);
+    return _changeProperty(window, property, type, 8, utf8.encode(value),
+        mode: mode);
   }
 
-  void _changeProperty(
+  int _changeProperty(
       int window, int property, int type, int format, List<int> value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
     var request =
         X11ChangePropertyRequest(window, mode, property, type, format, value);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(18, buffer.data);
+    return _sendRequest(18, buffer.data);
   }
 
-  void deleteProperty(int window, int property) {
+  int deleteProperty(int window, int property) {
     var request = X11DeletePropertyRequest(window, property);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(19, buffer.data);
+    return _sendRequest(19, buffer.data);
   }
 
   Future<X11GetPropertyReply> getProperty(int window, int property,
@@ -5050,11 +5051,11 @@ class X11Client {
     });
   }
 
-  void setSelectionOwner(int selection, int owner, {int time = 0}) {
+  int setSelectionOwner(int selection, int owner, {int time = 0}) {
     var request = X11SetSelectionOwnerRequest(selection, owner, time: time);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(22, buffer.data);
+    return _sendRequest(22, buffer.data);
   }
 
   Future<int> getSelectionOwner(int selection) async {
@@ -5070,13 +5071,13 @@ class X11Client {
     });
   }
 
-  void convertSelection(int selection, int requestor, int target,
+  int convertSelection(int selection, int requestor, int target,
       {int property = 0, int time = 0}) {
     var request = X11ConvertSelectionRequest(selection, requestor, target,
         property: property, time: time);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(24, buffer.data);
+    return _sendRequest(24, buffer.data);
   }
 
   Future<int> grabPointer(int grabWindow, bool ownerEvents, int eventMask,
@@ -5095,14 +5096,14 @@ class X11Client {
     });
   }
 
-  void ungrabPointer({int time = 0}) {
+  int ungrabPointer({int time = 0}) {
     var request = X11UngrabPointerRequest(time);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(27, buffer.data);
+    return _sendRequest(27, buffer.data);
   }
 
-  void grabButton(int grabWindow, bool ownerEvents, int eventMask,
+  int grabButton(int grabWindow, bool ownerEvents, int eventMask,
       int pointerMode, int keyboardMode,
       {int button = 0,
       int modifiers = 0x8000,
@@ -5112,14 +5113,14 @@ class X11Client {
         pointerMode, keyboardMode, confineTo, cursor, button, modifiers);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(28, buffer.data);
+    return _sendRequest(28, buffer.data);
   }
 
-  void ungrabButton(int grabWindow, {int button = 0, int modifiers = 0x8000}) {
+  int ungrabButton(int grabWindow, {int button = 0, int modifiers = 0x8000}) {
     var request = X11UngrabButtonRequest(grabWindow, button, modifiers);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(29, buffer.data);
+    return _sendRequest(29, buffer.data);
   }
 
   int allowEvents(int mode, {int time = 0}) {
@@ -5224,21 +5225,21 @@ class X11Client {
     });
   }
 
-  void createPixmap(int pid, int drawable, int width, int height, int depth) {
+  int createPixmap(int pid, int drawable, int width, int height, int depth) {
     var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(53, buffer.data);
+    return _sendRequest(53, buffer.data);
   }
 
-  void freePixmap(int pixmap) {
+  int freePixmap(int pixmap) {
     var request = X11FreePixmapRequest(pixmap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(54, buffer.data);
+    return _sendRequest(54, buffer.data);
   }
 
-  void createGC(int cid, int drawable,
+  int createGC(int cid, int drawable,
       {int function,
       int planeMask,
       int foreground,
@@ -5288,7 +5289,7 @@ class X11Client {
         arcMode: arcMode);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(55, buffer.data);
+    return _sendRequest(55, buffer.data);
   }
 
   int changeGC(int gc,
@@ -5351,53 +5352,53 @@ class X11Client {
     return _sendRequest(57, buffer.data);
   }
 
-  void setDashes(int gc, int dashOffset, List<int> dashes) {
+  int setDashes(int gc, int dashOffset, List<int> dashes) {
     var request = X11SetDashesRequest(gc, dashOffset, dashes);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(58, buffer.data);
+    return _sendRequest(58, buffer.data);
   }
 
-  void setClipRectangles(
+  int setClipRectangles(
       int gc, X11Point clipOrigin, List<X11Rectangle> rectangles,
       {int ordering = 0}) {
     var request = X11SetClipRectanglesRequest(gc, clipOrigin, rectangles,
         ordering: ordering);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(59, buffer.data);
+    return _sendRequest(59, buffer.data);
   }
 
-  void freeGC(int gc) {
+  int freeGC(int gc) {
     var request = X11FreeGCRequest(gc);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(60, buffer.data);
+    return _sendRequest(60, buffer.data);
   }
 
-  void clearArea(int window, X11Rectangle area, {bool exposures = false}) {
+  int clearArea(int window, X11Rectangle area, {bool exposures = false}) {
     var request = X11ClearAreaRequest(window, area, exposures: exposures);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(61, buffer.data);
+    return _sendRequest(61, buffer.data);
   }
 
-  void copyArea(int srcDrawable, int dstDrawable, int gc, X11Rectangle srcArea,
+  int copyArea(int srcDrawable, int dstDrawable, int gc, X11Rectangle srcArea,
       X11Point dstPosition) {
     var request =
         X11CopyAreaRequest(srcDrawable, dstDrawable, gc, srcArea, dstPosition);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(62, buffer.data);
+    return _sendRequest(62, buffer.data);
   }
 
-  void copyPlane(int srcDrawable, int dstDrawable, int gc, X11Rectangle srcArea,
+  int copyPlane(int srcDrawable, int dstDrawable, int gc, X11Rectangle srcArea,
       X11Point dstPosition, int width, int height, int bitPlane) {
     var request = X11CopyPlaneRequest(
         srcDrawable, dstDrawable, gc, srcArea, dstPosition, bitPlane);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(63, buffer.data);
+    return _sendRequest(63, buffer.data);
   }
 
   int polyPoint(int drawable, int gc, List<X11Point> points,
@@ -5462,39 +5463,39 @@ class X11Client {
     return _sendRequest(71, buffer.data);
   }
 
-  void createColormap(int alloc, int mid, int window, int visual) {
+  int createColormap(int alloc, int mid, int window, int visual) {
     var request = X11CreateColormapRequest(alloc, mid, window, visual);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(78, buffer.data);
+    return _sendRequest(78, buffer.data);
   }
 
-  void freeColormap(int cmap) {
+  int freeColormap(int cmap) {
     var request = X11FreeColormapRequest(cmap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(79, buffer.data);
+    return _sendRequest(79, buffer.data);
   }
 
-  void copyColormapAndFree(int mid, int srcCmap) {
+  int copyColormapAndFree(int mid, int srcCmap) {
     var request = X11CopyColormapAndFreeRequest(mid, srcCmap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(80, buffer.data);
+    return _sendRequest(80, buffer.data);
   }
 
-  void installColormap(int cmap) {
+  int installColormap(int cmap) {
     var request = X11InstallColormapRequest(cmap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(81, buffer.data);
+    return _sendRequest(81, buffer.data);
   }
 
-  void uninstallColormap(int cmap) {
+  int uninstallColormap(int cmap) {
     var request = X11UninstallColormapRequest(cmap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(82, buffer.data);
+    return _sendRequest(82, buffer.data);
   }
 
   Future<List<int>> listInstalledColormaps(int window) async {
@@ -5684,18 +5685,18 @@ class X11Client {
     });
   }
 
-  void bell(int percent) {
+  int bell(int percent) {
     var request = X11BellRequest(percent);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(104, buffer.data);
+    return _sendRequest(104, buffer.data);
   }
 
-  void changeHosts(int mode, int family, List<int> address) {
+  int changeHosts(int mode, int family, List<int> address) {
     var request = X11ChangeHostsRequest(mode, family, address);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(109, buffer.data);
+    return _sendRequest(109, buffer.data);
   }
 
   Future<X11ListHostsReply> listHosts() async {
@@ -5711,32 +5712,32 @@ class X11Client {
     });
   }
 
-  void setAccessControl(int mode) {
+  int setAccessControl(int mode) {
     var request = X11SetAccessControlRequest(mode);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(111, buffer.data);
+    return _sendRequest(111, buffer.data);
   }
 
-  void setCloseDownMode(int mode) {
+  int setCloseDownMode(int mode) {
     var request = X11SetCloseDownModeRequest(mode);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(112, buffer.data);
+    return _sendRequest(112, buffer.data);
   }
 
-  void killClient(int resource) {
+  int killClient(int resource) {
     var request = X11KillClientRequest(resource);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(113, buffer.data);
+    return _sendRequest(113, buffer.data);
   }
 
-  void rotateProperties(int window, int delta, List<int> atoms) {
+  int rotateProperties(int window, int delta, List<int> atoms) {
     var request = X11RotatePropertiesRequest(window, delta, atoms);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
-    _sendRequest(114, buffer.data);
+    return _sendRequest(114, buffer.data);
   }
 
   int noOperation() {
