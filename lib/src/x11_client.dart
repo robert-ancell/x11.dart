@@ -1937,6 +1937,10 @@ class X11WarpPointerRequest extends X11Request {
   }
 }
 
+// FIXME(robert-ancell): SetInputFocus
+
+// FIXME(robert-ancell): GetInputFocus
+
 class X11QueryKeymapRequest extends X11Request {
   X11QueryKeymapRequest();
 
@@ -2015,6 +2019,69 @@ class X11CloseFontRequest extends X11Request {
     buffer.writeUint32(font);
   }
 }
+
+// FIXME(robert-ancell): QueryFont
+
+// FIXME(robert-ancell): QueryTextExtents
+
+class X11ListFontsRequest extends X11Request {
+  final String pattern;
+  final int maxNames;
+
+  X11ListFontsRequest({this.pattern = '*', this.maxNames = 65535});
+
+  factory X11ListFontsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var maxNames = buffer.readUint16();
+    var patternLength = buffer.readUint16();
+    var pattern = buffer.readString(patternLength);
+    buffer.skip(pad(patternLength));
+    return X11ListFontsRequest(pattern: pattern, maxNames: maxNames);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(maxNames);
+    buffer.writeUint16(pattern.length);
+    buffer.writeString(pattern);
+    buffer.skip(pad(pattern.length));
+  }
+}
+
+class X11ListFontsReply extends X11Reply {
+  final List<String> names;
+
+  X11ListFontsReply(this.names);
+
+  factory X11ListFontsReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var namesLength = buffer.readUint16();
+    buffer.skip(22);
+    var names = <String>[];
+    for (var i = 0; i < namesLength; i++) {
+      var nameLength = buffer.readUint8();
+      names.add(buffer.readString(nameLength));
+    }
+    return X11ListFontsReply(names);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(names.length);
+    buffer.skip(22);
+    var totalLength = 0;
+    for (var name in names) {
+      buffer.writeUint8(name.length);
+      buffer.writeString(name);
+      totalLength += 1 + name.length;
+    }
+    buffer.skip(pad(totalLength));
+  }
+}
+
+// FIXME(robert-ancell): ListFontsWithInfo
 
 class X11CreatePixmapRequest extends X11Request {
   final int pid;
@@ -4431,6 +4498,20 @@ class X11Client {
     return _sendRequest(46, buffer.data);
   }
 
+  Future<List<String>> listFonts(
+      {String pattern = '*', int maxNames = 65535}) async {
+    var request = X11ListFontsRequest(pattern: pattern, maxNames: maxNames);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(49, buffer.data);
+    return _awaitReply(49, sequenceNumber).then<List<String>>((response) {
+      if (response is X11ListFontsReply) {
+        return response.names;
+      }
+      throw 'Failed to ListFonts'; // FIXME: Better error
+    });
+  }
+
   void createPixmap(int pid, int drawable, int width, int height, int depth) {
     var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
     var buffer = X11WriteBuffer();
@@ -5034,6 +5115,8 @@ class X11Client {
           response = X11TranslateCoordinatesReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 44) {
           response = X11QueryKeymapReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 49) {
+          response = X11ListFontsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 83) {
           response = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 84) {
