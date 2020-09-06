@@ -1844,6 +1844,99 @@ class X11QueryPointerReply extends X11Reply {
   }
 }
 
+class X11TranslateCoordinatesRequest extends X11Request {
+  final int srcWindow;
+  final X11Point src;
+  final int dstWindow;
+
+  X11TranslateCoordinatesRequest(this.srcWindow, this.src, this.dstWindow);
+
+  factory X11TranslateCoordinatesRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var srcWindow = buffer.readUint32();
+    var dstWindow = buffer.readUint32();
+    var srcX = buffer.readInt16();
+    var srcY = buffer.readInt16();
+    return X11TranslateCoordinatesRequest(
+        srcWindow, X11Point(srcX, srcY), dstWindow);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(srcWindow);
+    buffer.writeUint32(dstWindow);
+    buffer.writeInt16(src.x);
+    buffer.writeInt16(src.y);
+  }
+}
+
+class X11TranslateCoordinatesReply extends X11Reply {
+  final int child;
+  final X11Point dst;
+  final bool sameScreen;
+
+  X11TranslateCoordinatesReply(this.child, this.dst, {this.sameScreen = true});
+
+  factory X11TranslateCoordinatesReply.fromBuffer(X11ReadBuffer buffer) {
+    var sameScreen = buffer.readBool();
+    var child = buffer.readUint32();
+    var dstX = buffer.readInt16();
+    var dstY = buffer.readInt16();
+    return X11TranslateCoordinatesReply(child, X11Point(dstX, dstY),
+        sameScreen: sameScreen);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(sameScreen);
+    buffer.writeUint32(child);
+    buffer.writeInt16(dst.x);
+    buffer.writeInt16(dst.y);
+  }
+}
+
+class X11WarpPointerRequest extends X11Request {
+  final X11Point dst;
+  final int srcWindow;
+  final int dstWindow;
+  final X11Rectangle src;
+
+  X11WarpPointerRequest(this.dst,
+      {this.dstWindow = 0,
+      this.srcWindow = 0,
+      this.src = const X11Rectangle(0, 0, 0, 0)});
+
+  factory X11WarpPointerRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var srcWindow = buffer.readUint32();
+    var dstWindow = buffer.readUint32();
+    var srcX = buffer.readInt16();
+    var srcY = buffer.readInt16();
+    var srcWidth = buffer.readUint16();
+    var srcHeight = buffer.readUint16();
+    var dstX = buffer.readInt16();
+    var dstY = buffer.readInt16();
+    return X11WarpPointerRequest(X11Point(dstX, dstY),
+        dstWindow: dstWindow,
+        srcWindow: srcWindow,
+        src: X11Rectangle(srcX, srcY, srcWidth, srcHeight));
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(srcWindow);
+    buffer.writeUint32(dstWindow);
+    buffer.writeInt16(src.x);
+    buffer.writeInt16(src.y);
+    buffer.writeUint16(src.width);
+    buffer.writeUint16(src.height);
+    buffer.writeInt16(dst.x);
+    buffer.writeInt16(dst.y);
+  }
+}
+
 class X11CreatePixmapRequest extends X11Request {
   final int pid;
   final int drawable;
@@ -4206,6 +4299,32 @@ class X11Client {
     });
   }
 
+  Future<X11TranslateCoordinatesReply> translateCoordinates(
+      int srcWindow, X11Point src, int dstWindow) async {
+    var request = X11TranslateCoordinatesRequest(srcWindow, src, dstWindow);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(40, buffer.data);
+    return _awaitReply(40, sequenceNumber)
+        .then<X11TranslateCoordinatesReply>((response) {
+      if (response is X11TranslateCoordinatesReply) {
+        return response;
+      }
+      throw 'Failed to TranslateCoordinates'; // FIXME: Better error
+    });
+  }
+
+  int warpPointer(X11Point dst,
+      {int dstWindow = 0,
+      int srcWindow = 0,
+      X11Rectangle src = const X11Rectangle(0, 0, 0, 0)}) {
+    var request = X11WarpPointerRequest(dst,
+        dstWindow: dstWindow, srcWindow: srcWindow, src: src);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(41, buffer.data);
+  }
+
   void createPixmap(int pid, int drawable, int width, int height, int depth) {
     var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
     var buffer = X11WriteBuffer();
@@ -4805,6 +4924,8 @@ class X11Client {
           response = X11GrabPointerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 38) {
           response = X11QueryPointerReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 40) {
+          response = X11TranslateCoordinatesReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 83) {
           response = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 84) {
