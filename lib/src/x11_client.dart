@@ -1744,6 +1744,16 @@ class X11UngrabButtonRequest extends X11Request {
   }
 }
 
+// FIXME(robert-ancell): ChangeActivePointerGrab
+
+// FIXME(robert-ancell): GrabKeyboard
+
+// FIXME(robert-ancell): UngrabKeyboard
+
+// FIXME(robert-ancell): GrabKey
+
+// FIXME(robert-ancell): UngrabKey
+
 class X11AllowEventsRequest extends X11Request {
   final int mode;
   final int time;
@@ -1843,6 +1853,8 @@ class X11QueryPointerReply extends X11Reply {
     buffer.skip(2);
   }
 }
+
+// FIXME(robert-ancell): GetMotionEvents
 
 class X11TranslateCoordinatesRequest extends X11Request {
   final int srcWindow;
@@ -2082,6 +2094,10 @@ class X11ListFontsReply extends X11Reply {
 }
 
 // FIXME(robert-ancell): ListFontsWithInfo
+
+// FIXME(robert-ancell): SetFontPath
+
+// FIXME(robert-ancell): GetFontPath
 
 class X11CreatePixmapRequest extends X11Request {
   final int pid;
@@ -2353,7 +2369,9 @@ class X11CreateGCRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): X11ChangeGCRequest
+// FIXME(robert-ancell): ChangeGC
+
+// FIXME(robert-ancell): CopyGC
 
 class X11SetDashesRequest extends X11Request {
   final int gc;
@@ -2862,17 +2880,17 @@ class X11PolyFillArcRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): X11PutImage
+// FIXME(robert-ancell): PutImage
 
-// FIXME(robert-ancell): X11GetImage
+// FIXME(robert-ancell): GetImage
 
-// FIXME(robert-ancell): X11PolyText8
+// FIXME(robert-ancell): PolyText8
 
-// FIXME(robert-ancell): X11PolyText16
+// FIXME(robert-ancell): PolyText16
 
-// FIXME(robert-ancell): X11ImageText8
+// FIXME(robert-ancell): ImageText8
 
-// FIXME(robert-ancell): X11ImageText16
+// FIXME(robert-ancell): ImageText16
 
 class X11CreateColormapRequest extends X11Request {
   final int alloc;
@@ -3519,6 +3537,163 @@ class X11LookupColorReply extends X11Reply {
   }
 }
 
+class X11CreateCursorRequest extends X11Request {
+  final int cid;
+  final int source;
+  final int mask;
+  final X11Rgb fore;
+  final X11Rgb back;
+  final X11Point hotspot;
+
+  X11CreateCursorRequest(
+      this.cid, this.source, this.fore, this.back, this.hotspot,
+      {this.mask = 0});
+
+  factory X11CreateCursorRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cid = buffer.readUint32();
+    var source = buffer.readUint32();
+    var mask = buffer.readUint32();
+    var foreRed = buffer.readUint16();
+    var foreGreen = buffer.readUint16();
+    var foreBlue = buffer.readUint16();
+    var backRed = buffer.readUint16();
+    var backGreen = buffer.readUint16();
+    var backBlue = buffer.readUint16();
+    var x = buffer.readUint16();
+    var y = buffer.readUint16();
+    return X11CreateCursorRequest(
+        cid,
+        source,
+        X11Rgb(foreRed, foreGreen, foreBlue),
+        X11Rgb(backRed, backGreen, backBlue),
+        X11Point(x, y),
+        mask: mask);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cid);
+    buffer.writeUint32(source);
+    buffer.writeUint32(mask);
+    buffer.writeUint16(fore.red);
+    buffer.writeUint16(fore.green);
+    buffer.writeUint16(fore.blue);
+    buffer.writeUint16(back.red);
+    buffer.writeUint16(back.green);
+    buffer.writeUint16(back.blue);
+    buffer.writeUint16(hotspot.x);
+    buffer.writeUint16(hotspot.y);
+  }
+}
+
+class X11CreateGlyphCursorRequest extends X11Request {
+  final int cid;
+  final int sourceFont;
+  final int sourceChar;
+  final int maskFont;
+  final int maskChar;
+  final X11Rgb fore;
+  final X11Rgb back;
+
+  X11CreateGlyphCursorRequest(
+      this.cid, this.sourceFont, this.sourceChar, this.fore, this.back,
+      {this.maskFont = 0, this.maskChar = 0});
+
+  factory X11CreateGlyphCursorRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cid = buffer.readUint32();
+    var sourceFont = buffer.readUint32();
+    var maskFont = buffer.readUint32();
+    var sourceChar = buffer.readUint16();
+    var maskChar = buffer.readUint16();
+    var foreRed = buffer.readUint16();
+    var foreGreen = buffer.readUint16();
+    var foreBlue = buffer.readUint16();
+    var backRed = buffer.readUint16();
+    var backGreen = buffer.readUint16();
+    var backBlue = buffer.readUint16();
+    return X11CreateGlyphCursorRequest(
+        cid,
+        sourceFont,
+        sourceChar,
+        X11Rgb(foreRed, foreGreen, foreBlue),
+        X11Rgb(backRed, backGreen, backBlue),
+        maskFont: maskFont,
+        maskChar: maskChar);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cid);
+    buffer.writeUint32(sourceFont);
+    buffer.writeUint32(maskFont);
+    buffer.writeUint16(sourceChar);
+    buffer.writeUint16(maskChar);
+    buffer.writeUint16(fore.red);
+    buffer.writeUint16(fore.green);
+    buffer.writeUint16(fore.blue);
+    buffer.writeUint16(back.red);
+    buffer.writeUint16(back.green);
+    buffer.writeUint16(back.blue);
+  }
+}
+
+class X11FreeCursorRequest extends X11Request {
+  final int cursor;
+
+  X11FreeCursorRequest(this.cursor);
+
+  factory X11FreeCursorRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cursor = buffer.readUint32();
+    return X11FreeCursorRequest(cursor);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cursor);
+  }
+}
+
+class X11RecolorCursorRequest extends X11Request {
+  final int cursor;
+  final X11Rgb fore;
+  final X11Rgb back;
+
+  X11RecolorCursorRequest(this.cursor, this.fore, this.back);
+
+  factory X11RecolorCursorRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cursor = buffer.readUint32();
+    var foreRed = buffer.readUint16();
+    var foreGreen = buffer.readUint16();
+    var foreBlue = buffer.readUint16();
+    var backRed = buffer.readUint16();
+    var backGreen = buffer.readUint16();
+    var backBlue = buffer.readUint16();
+    return X11RecolorCursorRequest(cursor, X11Rgb(foreRed, foreGreen, foreBlue),
+        X11Rgb(backRed, backGreen, backBlue));
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cursor);
+    buffer.writeUint16(fore.red);
+    buffer.writeUint16(fore.green);
+    buffer.writeUint16(fore.blue);
+    buffer.writeUint16(back.red);
+    buffer.writeUint16(back.green);
+    buffer.writeUint16(back.blue);
+  }
+}
+
+// FIXME(robert-ancell): QueryBestSize
+
 class X11QueryExtensionRequest extends X11Request {
   final String name;
 
@@ -3612,6 +3787,14 @@ class X11ListExtensionsReply extends X11Reply {
   }
 }
 
+// FIXME(robert-ancell): ChangeKeyboardMapping
+
+// FIXME(robert-ancell): GetKeyboardMapping
+
+// FIXME(robert-ancell): ChangeKeyboardControl
+
+// FIXME(robert-ancell): GetKeyboardControl
+
 class X11BellRequest extends X11Request {
   final int percent;
 
@@ -3627,6 +3810,14 @@ class X11BellRequest extends X11Request {
     buffer.writeInt8(percent);
   }
 }
+
+// FIXME(robert-ancell): ChangePointerControl
+
+// FIXME(robert-ancell): GetPointerControl
+
+// FIXME(robert-ancell): SetScreenSaver
+
+// FIXME(robert-ancell): GetScreenSaver
 
 class X11ChangeHostsRequest extends X11Request {
   final int mode;
@@ -3796,6 +3987,27 @@ class X11RotatePropertiesRequest extends X11Request {
       buffer.writeUint32(atom);
     }
   }
+}
+
+// FIXME(robert-ancell): ForceScreenSaver
+
+// FIXME(robert-ancell): SetPointerMapping
+
+// FIXME(robert-ancell): GetPointerMapping
+
+// FIXME(robert-ancell): SetModifierMapping
+
+// FIXME(robert-ancell): GetModifierMapping
+
+class X11NoOperationRequest extends X11Request {
+  X11NoOperationRequest();
+
+  factory X11NoOperationRequest.fromBuffer(X11ReadBuffer buffer) {
+    return X11NoOperationRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {}
 }
 
 class X11KeyPress extends X11Event {}
@@ -4850,6 +5062,40 @@ class X11Client {
     });
   }
 
+  int createCursor(int cid, int source, X11Rgb fore, X11Rgb back, X11Point hotspot,
+      {int mask = 0}) {
+    var request =
+        X11CreateCursorRequest(cid, source, fore, back, hotspot, mask: mask);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(93, buffer.data);
+  }
+
+  int createGlyphCursor(
+      int cid, int sourceFont, int sourceChar, X11Rgb fore, X11Rgb back,
+      {int maskFont = 0, int maskChar = 0}) {
+    var request = X11CreateGlyphCursorRequest(
+        cid, sourceFont, sourceChar, fore, back,
+        maskFont: maskFont, maskChar: maskChar);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(94, buffer.data);
+  }
+
+  int freeCursor(int cursor) {
+    var request = X11FreeCursorRequest(cursor);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(95, buffer.data);
+  }
+
+  int recolorCursor(int cursor, X11Rgb fore, X11Rgb back) {
+    var request = X11RecolorCursorRequest(cursor, fore, back);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(96, buffer.data);
+  }
+
   Future<X11QueryExtensionReply> queryExtension(String name) async {
     var request = X11QueryExtensionRequest(name);
     var buffer = X11WriteBuffer();
@@ -4930,6 +5176,13 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     _sendRequest(114, buffer.data);
+  }
+
+  int noOperation() {
+    var request = X11NoOperationRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(127, buffer.data);
   }
 
   void _processData(Uint8List data) {
