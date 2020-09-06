@@ -1586,7 +1586,7 @@ class X11ConvertSelectionRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): X11SendEventRequest
+// FIXME(robert-ancell): SendEvent
 
 class X11GrabPointerRequest extends X11Request {
   final int grabWindow;
@@ -2202,8 +2202,138 @@ class X11CreateGCRequest extends X11Request {
     buffer.skip(1);
     var cid = buffer.readUint32();
     var drawable = buffer.readUint32();
-    buffer.readUint32(); // FIXME valueMask
-    return X11CreateGCRequest(cid, drawable);
+    var valueMask = buffer.readUint32();
+    int function;
+    if ((valueMask & 0x000001) != 0) {
+      function = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int planeMask;
+    if ((valueMask & 0x000002) != 0) {
+      planeMask = buffer.readUint32();
+    }
+    int foreground;
+    if ((valueMask & 0x000004) != 0) {
+      foreground = buffer.readUint32();
+    }
+    int background;
+    if ((valueMask & 0x000008) != 0) {
+      background = buffer.readUint32();
+    }
+    int lineWidth;
+    if ((valueMask & 0x000010) != 0) {
+      lineWidth = buffer.readUint16();
+      buffer.skip(2);
+    }
+    int lineStyle;
+    if ((valueMask & 0x000020) != 0) {
+      lineStyle = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int capStyle;
+    if ((valueMask & 0x000040) != 0) {
+      capStyle = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int joinStyle;
+    if ((valueMask & 0x000080) != 0) {
+      joinStyle = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int fillStyle;
+    if ((valueMask & 0x00100) != 0) {
+      fillStyle = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int fillRule;
+    if ((valueMask & 0x00200) != 0) {
+      fillRule = buffer.readUint32();
+    }
+    int tile;
+    if ((valueMask & 0x00400) != 0) {
+      tile = buffer.readUint32();
+    }
+    int stipple;
+    if ((valueMask & 0x00800) != 0) {
+      stipple = buffer.readUint32();
+    }
+    int tileStippleXOrigin;
+    if ((valueMask & 0x001000) != 0) {
+      tileStippleXOrigin = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int tileStippleYOrigin;
+    if ((valueMask & 0x002000) != 0) {
+      tileStippleYOrigin = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int font;
+    if ((valueMask & 0x004000) != 0) {
+      font = buffer.readUint32();
+    }
+    int subwindowMode;
+    if ((valueMask & 0x008000) != 0) {
+      subwindowMode = buffer.readUint8();
+      buffer.skip(3);
+    }
+    bool graphicsExposures;
+    if ((valueMask & 0x010000) != 0) {
+      graphicsExposures = buffer.readBool();
+      buffer.skip(3);
+    }
+    int clipXOorigin;
+    if ((valueMask & 0x020000) != 0) {
+      clipXOorigin = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int clipYOorigin;
+    if ((valueMask & 0x040000) != 0) {
+      clipYOorigin = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int clipMask;
+    if ((valueMask & 0x080000) != 0) {
+      clipMask = buffer.readUint32();
+    }
+    int dashOffset;
+    if ((valueMask & 0x100000) != 0) {
+      dashOffset = buffer.readUint16();
+      buffer.skip(2);
+    }
+    int dashes;
+    if ((valueMask & 0x200000) != 0) {
+      dashes = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int arcMode;
+    if ((valueMask & 0x400000) != 0) {
+      arcMode = buffer.readUint8();
+      buffer.skip(3);
+    }
+    return X11CreateGCRequest(cid, drawable,
+        function: function,
+        planeMask: planeMask,
+        foreground: foreground,
+        background: background,
+        lineWidth: lineWidth,
+        lineStyle: lineStyle,
+        capStyle: capStyle,
+        joinStyle: joinStyle,
+        fillStyle: fillStyle,
+        fillRule: fillRule,
+        tile: tile,
+        stipple: stipple,
+        tileStippleXOrigin: tileStippleXOrigin,
+        tileStippleYOrigin: tileStippleYOrigin,
+        font: font,
+        subwindowMode: subwindowMode,
+        graphicsExposures: graphicsExposures,
+        clipXOorigin: clipXOorigin,
+        clipYOorigin: clipYOorigin,
+        clipMask: clipMask,
+        dashOffset: dashOffset,
+        dashes: dashes,
+        arcMode: arcMode);
   }
 
   @override
@@ -2211,6 +2341,356 @@ class X11CreateGCRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(cid);
     buffer.writeUint32(drawable);
+    var valueMask = 0;
+    if (function != null) {
+      valueMask |= 0x000001;
+    }
+    if (planeMask != null) {
+      valueMask |= 0x000002;
+    }
+    if (foreground != null) {
+      valueMask |= 0x000004;
+    }
+    if (background != null) {
+      valueMask |= 0x000008;
+    }
+    if (lineWidth != null) {
+      valueMask |= 0x000010;
+    }
+    if (lineStyle != null) {
+      valueMask |= 0x000020;
+    }
+    if (capStyle != null) {
+      valueMask |= 0x000040;
+    }
+    if (joinStyle != null) {
+      valueMask |= 0x000080;
+    }
+    if (fillStyle != null) {
+      valueMask |= 0x000100;
+    }
+    if (fillRule != null) {
+      valueMask |= 0x000200;
+    }
+    if (tile != null) {
+      valueMask |= 0x000400;
+    }
+    if (stipple != null) {
+      valueMask |= 0x000800;
+    }
+    if (tileStippleXOrigin != null) {
+      valueMask |= 0x001000;
+    }
+    if (tileStippleYOrigin != null) {
+      valueMask |= 0x002000;
+    }
+    if (font != null) {
+      valueMask |= 0x004000;
+    }
+    if (subwindowMode != null) {
+      valueMask |= 0x008000;
+    }
+    if (graphicsExposures != null) {
+      valueMask |= 0x010000;
+    }
+    if (clipXOorigin != null) {
+      valueMask |= 0x020000;
+    }
+    if (clipYOorigin != null) {
+      valueMask |= 0x040000;
+    }
+    if (clipMask != null) {
+      valueMask |= 0x080000;
+    }
+    if (dashOffset != null) {
+      valueMask |= 0x100000;
+    }
+    if (dashes != null) {
+      valueMask |= 0x200000;
+    }
+    if (arcMode != null) {
+      valueMask |= 0x400000;
+    }
+    buffer.writeUint32(valueMask);
+    if (function != null) {
+      buffer.writeUint8(function);
+      buffer.skip(3);
+    }
+    if (planeMask != null) {
+      buffer.writeUint32(planeMask);
+    }
+    if (foreground != null) {
+      buffer.writeUint32(foreground);
+    }
+    if (background != null) {
+      buffer.writeUint32(background);
+    }
+    if (lineWidth != null) {
+      buffer.writeUint16(lineWidth);
+      buffer.skip(2);
+    }
+    if (lineStyle != null) {
+      buffer.writeUint8(lineStyle);
+      buffer.skip(3);
+    }
+    if (capStyle != null) {
+      buffer.writeUint8(capStyle);
+      buffer.skip(3);
+    }
+    if (joinStyle != null) {
+      buffer.writeUint8(joinStyle);
+      buffer.skip(3);
+    }
+    if (fillStyle != null) {
+      buffer.writeUint8(fillStyle);
+      buffer.skip(3);
+    }
+    if (fillRule != null) {
+      buffer.writeUint32(fillRule);
+    }
+    if (tile != null) {
+      buffer.writeUint32(tile);
+    }
+    if (stipple != null) {
+      buffer.writeUint32(stipple);
+    }
+    if (tileStippleXOrigin != null) {
+      buffer.writeInt16(tileStippleXOrigin);
+      buffer.skip(2);
+    }
+    if (tileStippleYOrigin != null) {
+      buffer.writeInt16(tileStippleYOrigin);
+      buffer.skip(2);
+    }
+    if (font != null) {
+      buffer.writeUint32(font);
+    }
+    if (subwindowMode != null) {
+      buffer.writeUint8(subwindowMode);
+      buffer.skip(3);
+    }
+    if (graphicsExposures != null) {
+      buffer.writeBool(graphicsExposures);
+      buffer.skip(3);
+    }
+    if (clipXOorigin != null) {
+      buffer.writeInt16(clipXOorigin);
+      buffer.skip(2);
+    }
+    if (clipYOorigin != null) {
+      buffer.writeInt16(clipYOorigin);
+      buffer.skip(2);
+    }
+    if (clipMask != null) {
+      buffer.writeUint32(clipMask);
+    }
+    if (dashOffset != null) {
+      buffer.writeUint16(dashOffset);
+      buffer.skip(2);
+    }
+    if (dashes != null) {
+      buffer.writeUint8(dashes);
+      buffer.skip(3);
+    }
+    if (arcMode != null) {
+      buffer.writeUint8(arcMode);
+      buffer.skip(3);
+    }
+  }
+}
+
+class X11ChangeGCRequest extends X11Request {
+  final int gc;
+  final int function;
+  final int planeMask;
+  final int foreground;
+  final int background;
+  final int lineWidth;
+  final int lineStyle;
+  final int capStyle;
+  final int joinStyle;
+  final int fillStyle;
+  final int fillRule;
+  final int tile;
+  final int stipple;
+  final int tileStippleXOrigin;
+  final int tileStippleYOrigin;
+  final int font;
+  final int subwindowMode;
+  final bool graphicsExposures;
+  final int clipXOorigin;
+  final int clipYOorigin;
+  final int clipMask;
+  final int dashOffset;
+  final int dashes;
+  final int arcMode;
+
+  X11ChangeGCRequest(this.gc,
+      {this.function,
+      this.planeMask,
+      this.foreground,
+      this.background,
+      this.lineWidth,
+      this.lineStyle,
+      this.capStyle,
+      this.joinStyle,
+      this.fillStyle,
+      this.fillRule,
+      this.tile,
+      this.stipple,
+      this.tileStippleXOrigin,
+      this.tileStippleYOrigin,
+      this.font,
+      this.subwindowMode,
+      this.graphicsExposures,
+      this.clipXOorigin,
+      this.clipYOorigin,
+      this.clipMask,
+      this.dashOffset,
+      this.dashes,
+      this.arcMode});
+
+  factory X11ChangeGCRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var gc = buffer.readUint32();
+    var valueMask = buffer.readUint32();
+    int function;
+    if ((valueMask & 0x000001) != 0) {
+      function = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int planeMask;
+    if ((valueMask & 0x000002) != 0) {
+      planeMask = buffer.readUint32();
+    }
+    int foreground;
+    if ((valueMask & 0x000004) != 0) {
+      foreground = buffer.readUint32();
+    }
+    int background;
+    if ((valueMask & 0x000008) != 0) {
+      background = buffer.readUint32();
+    }
+    int lineWidth;
+    if ((valueMask & 0x000010) != 0) {
+      lineWidth = buffer.readUint16();
+      buffer.skip(2);
+    }
+    int lineStyle;
+    if ((valueMask & 0x000020) != 0) {
+      lineStyle = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int capStyle;
+    if ((valueMask & 0x000040) != 0) {
+      capStyle = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int joinStyle;
+    if ((valueMask & 0x000080) != 0) {
+      joinStyle = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int fillStyle;
+    if ((valueMask & 0x00100) != 0) {
+      fillStyle = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int fillRule;
+    if ((valueMask & 0x00200) != 0) {
+      fillRule = buffer.readUint32();
+    }
+    int tile;
+    if ((valueMask & 0x00400) != 0) {
+      tile = buffer.readUint32();
+    }
+    int stipple;
+    if ((valueMask & 0x00800) != 0) {
+      stipple = buffer.readUint32();
+    }
+    int tileStippleXOrigin;
+    if ((valueMask & 0x001000) != 0) {
+      tileStippleXOrigin = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int tileStippleYOrigin;
+    if ((valueMask & 0x002000) != 0) {
+      tileStippleYOrigin = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int font;
+    if ((valueMask & 0x004000) != 0) {
+      font = buffer.readUint32();
+    }
+    int subwindowMode;
+    if ((valueMask & 0x008000) != 0) {
+      subwindowMode = buffer.readUint8();
+      buffer.skip(3);
+    }
+    bool graphicsExposures;
+    if ((valueMask & 0x010000) != 0) {
+      graphicsExposures = buffer.readBool();
+      buffer.skip(3);
+    }
+    int clipXOorigin;
+    if ((valueMask & 0x020000) != 0) {
+      clipXOorigin = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int clipYOorigin;
+    if ((valueMask & 0x040000) != 0) {
+      clipYOorigin = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int clipMask;
+    if ((valueMask & 0x080000) != 0) {
+      clipMask = buffer.readUint32();
+    }
+    int dashOffset;
+    if ((valueMask & 0x100000) != 0) {
+      dashOffset = buffer.readUint16();
+      buffer.skip(2);
+    }
+    int dashes;
+    if ((valueMask & 0x200000) != 0) {
+      dashes = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int arcMode;
+    if ((valueMask & 0x400000) != 0) {
+      arcMode = buffer.readUint8();
+      buffer.skip(3);
+    }
+    return X11ChangeGCRequest(gc,
+        function: function,
+        planeMask: planeMask,
+        foreground: foreground,
+        background: background,
+        lineWidth: lineWidth,
+        lineStyle: lineStyle,
+        capStyle: capStyle,
+        joinStyle: joinStyle,
+        fillStyle: fillStyle,
+        fillRule: fillRule,
+        tile: tile,
+        stipple: stipple,
+        tileStippleXOrigin: tileStippleXOrigin,
+        tileStippleYOrigin: tileStippleYOrigin,
+        font: font,
+        subwindowMode: subwindowMode,
+        graphicsExposures: graphicsExposures,
+        clipXOorigin: clipXOorigin,
+        clipYOorigin: clipYOorigin,
+        clipMask: clipMask,
+        dashOffset: dashOffset,
+        dashes: dashes,
+        arcMode: arcMode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(gc);
     var valueMask = 0;
     if (function != null) {
       valueMask |= 0x000001;
@@ -2369,9 +2849,29 @@ class X11CreateGCRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): ChangeGC
+class X11CopyGCRequest extends X11Request {
+  final int srcGc;
+  final int dstGc;
+  final int valueMask;
 
-// FIXME(robert-ancell): CopyGC
+  X11CopyGCRequest(this.srcGc, this.dstGc, this.valueMask);
+
+  factory X11CopyGCRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var srcGc = buffer.readUint32();
+    var dstGc = buffer.readUint32();
+    var valueMask = buffer.readUint32();
+    return X11CopyGCRequest(srcGc, dstGc, valueMask);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(srcGc);
+    buffer.writeUint32(dstGc);
+    buffer.writeUint32(valueMask);
+  }
+}
 
 class X11SetDashesRequest extends X11Request {
   final int gc;
@@ -4791,6 +5291,66 @@ class X11Client {
     _sendRequest(55, buffer.data);
   }
 
+  int changeGC(int gc,
+      {int function,
+      int planeMask,
+      int foreground,
+      int background,
+      int lineWidth,
+      int lineStyle,
+      int capStyle,
+      int joinStyle,
+      int fillStyle,
+      int fillRule,
+      int tile,
+      int stipple,
+      int tileStippleXOrigin,
+      int tileStippleYOrigin,
+      int font,
+      int subwindowMode,
+      bool graphicsExposures,
+      int clipXOorigin,
+      int clipYOorigin,
+      int clipMask,
+      int dashOffset,
+      int dashes,
+      int arcMode}) {
+    var request = X11ChangeGCRequest(gc,
+        function: function,
+        planeMask: planeMask,
+        foreground: foreground,
+        background: background,
+        lineWidth: lineWidth,
+        lineStyle: lineStyle,
+        capStyle: capStyle,
+        joinStyle: joinStyle,
+        fillStyle: fillStyle,
+        fillRule: fillRule,
+        tile: tile,
+        stipple: stipple,
+        tileStippleXOrigin: tileStippleXOrigin,
+        tileStippleYOrigin: tileStippleYOrigin,
+        font: font,
+        subwindowMode: subwindowMode,
+        graphicsExposures: graphicsExposures,
+        clipXOorigin: clipXOorigin,
+        clipYOorigin: clipYOorigin,
+        clipMask: clipMask,
+        dashOffset: dashOffset,
+        dashes: dashes,
+        arcMode: arcMode);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(56, buffer.data);
+  }
+
+  int copyGC(int srcGc, int dstGc, int valueMask) {
+    var request = X11CopyGCRequest(srcGc, dstGc, valueMask);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(57, buffer.data);
+  }
+
   void setDashes(int gc, int dashOffset, List<int> dashes) {
     var request = X11SetDashesRequest(gc, dashOffset, dashes);
     var buffer = X11WriteBuffer();
@@ -5062,7 +5622,8 @@ class X11Client {
     });
   }
 
-  int createCursor(int cid, int source, X11Rgb fore, X11Rgb back, X11Point hotspot,
+  int createCursor(
+      int cid, int source, X11Rgb fore, X11Rgb back, X11Point hotspot,
       {int mask = 0}) {
     var request =
         X11CreateCursorRequest(cid, source, fore, back, hotspot, mask: mask);
