@@ -1937,6 +1937,85 @@ class X11WarpPointerRequest extends X11Request {
   }
 }
 
+class X11QueryKeymapRequest extends X11Request {
+  X11QueryKeymapRequest();
+
+  factory X11QueryKeymapRequest.fromBuffer(X11ReadBuffer buffer) {
+    return X11QueryKeymapRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {}
+}
+
+class X11QueryKeymapReply extends X11Reply {
+  final List<int> keys;
+
+  X11QueryKeymapReply(this.keys);
+
+  factory X11QueryKeymapReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var keys = <int>[];
+    for (var i = 0; i < 32; i++) {
+      keys.add(buffer.readUint8());
+    }
+    return X11QueryKeymapReply(keys);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    for (var key in keys) {
+      buffer.writeUint8(key);
+    }
+  }
+}
+
+class X11OpenFontRequest extends X11Request {
+  final int fid;
+  final String name;
+
+  X11OpenFontRequest(this.fid, this.name);
+
+  factory X11OpenFontRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var fid = buffer.readUint32();
+    var nameLength = buffer.readUint16();
+    buffer.skip(2);
+    var name = buffer.readString(nameLength);
+    buffer.skip(pad(nameLength));
+    return X11OpenFontRequest(fid, name);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(fid);
+    buffer.writeUint16(name.length);
+    buffer.skip(2);
+    buffer.writeString(name);
+    buffer.skip(pad(name.length));
+  }
+}
+
+class X11CloseFontRequest extends X11Request {
+  final int font;
+
+  X11CloseFontRequest(this.font);
+
+  factory X11CloseFontRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var font = buffer.readUint32();
+    return X11CloseFontRequest(font);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(font);
+  }
+}
+
 class X11CreatePixmapRequest extends X11Request {
   final int pid;
   final int drawable;
@@ -4325,6 +4404,33 @@ class X11Client {
     return _sendRequest(41, buffer.data);
   }
 
+  Future<List<int>> queryKeymap() async {
+    var request = X11QueryKeymapRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(44, buffer.data);
+    return _awaitReply(44, sequenceNumber).then<List<int>>((response) {
+      if (response is X11QueryKeymapReply) {
+        return response.keys;
+      }
+      throw 'Failed to QueryKeymap'; // FIXME: Better error
+    });
+  }
+
+  int openFont(int fid, String name) {
+    var request = X11OpenFontRequest(fid, name);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(45, buffer.data);
+  }
+
+  int closeFont(int font) {
+    var request = X11CloseFontRequest(font);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(46, buffer.data);
+  }
+
   void createPixmap(int pid, int drawable, int width, int height, int depth) {
     var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
     var buffer = X11WriteBuffer();
@@ -4926,6 +5032,8 @@ class X11Client {
           response = X11QueryPointerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 40) {
           response = X11TranslateCoordinatesReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 44) {
+          response = X11QueryKeymapReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 83) {
           response = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 84) {
