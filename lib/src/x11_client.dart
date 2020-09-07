@@ -1950,9 +1950,57 @@ class X11WarpPointerRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): SetInputFocus
+class X11SetInputFocusRequest extends X11Request {
+  final int focus;
+  final int revertTo;
+  final int time;
 
-// FIXME(robert-ancell): GetInputFocus
+  X11SetInputFocusRequest(this.focus, {this.revertTo = 0, this.time = 0});
+
+  factory X11SetInputFocusRequest.fromBuffer(X11ReadBuffer buffer) {
+    var revertTo = buffer.readUint8();
+    var focus = buffer.readUint32();
+    var time = buffer.readUint32();
+    return X11SetInputFocusRequest(focus, revertTo: revertTo, time: time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(revertTo);
+    buffer.writeUint32(focus);
+    buffer.writeUint32(time);
+  }
+}
+
+class X11GetInputFocusRequest extends X11Request {
+  X11GetInputFocusRequest();
+
+  factory X11GetInputFocusRequest.fromBuffer(X11ReadBuffer buffer) {
+    return X11GetInputFocusRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {}
+}
+
+class X11GetInputFocusReply extends X11Reply {
+  final int focus;
+  final int revertTo;
+
+  X11GetInputFocusReply(this.focus, {this.revertTo = 0});
+
+  factory X11GetInputFocusReply.fromBuffer(X11ReadBuffer buffer) {
+    var revertTo = buffer.readUint8();
+    var focus = buffer.readUint32();
+    return X11GetInputFocusReply(focus, revertTo: revertTo);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(revertTo);
+    buffer.writeUint32(focus);
+  }
+}
 
 class X11QueryKeymapRequest extends X11Request {
   X11QueryKeymapRequest();
@@ -6461,6 +6509,28 @@ class X11Client {
     return _sendRequest(41, buffer.data);
   }
 
+  int setInputFocus(int focus, {int revertTo = 0, int time = 0}) {
+    var request =
+        X11SetInputFocusRequest(focus, revertTo: revertTo, time: time);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(42, buffer.data);
+  }
+
+  Future<X11GetInputFocusReply> getInputFocus() async {
+    var request = X11GetInputFocusRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(43, buffer.data);
+    return _awaitReply(43, sequenceNumber)
+        .then<X11GetInputFocusReply>((response) {
+      if (response is X11GetInputFocusReply) {
+        return response;
+      }
+      throw response;
+    });
+  }
+
   Future<List<int>> queryKeymap() async {
     var request = X11QueryKeymapRequest();
     var buffer = X11WriteBuffer();
@@ -7261,6 +7331,8 @@ class X11Client {
           reply = X11QueryPointerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 40) {
           reply = X11TranslateCoordinatesReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 43) {
+          reply = X11GetInputFocusReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 44) {
           reply = X11QueryKeymapReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 49) {
