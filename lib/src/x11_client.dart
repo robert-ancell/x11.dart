@@ -6298,14 +6298,14 @@ class X11UnknownEvent extends X11Event {
   String toString() => 'X11UnknownEvent(code: ${code})';
 }
 
-class _RequestHandler {
+class _RequestHandler<T> {
   final int opcode;
-  final completer = Completer<X11Reply>();
+  final completer = Completer<T>();
 
   _RequestHandler(this.opcode);
 
-  Future<X11Reply> get future => completer.future;
-  void reply(X11Reply reply) => completer.complete(reply);
+  Future<T> get future => completer.future;
+  void reply(T reply) => completer.complete(reply);
   void replyError(X11Error error) => completer.completeError(error);
 }
 
@@ -6533,8 +6533,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(3, buffer.data);
-    return (await _awaitReply(3, sequenceNumber))
-        as X11GetWindowAttributesReply;
+    return _awaitReply<X11GetWindowAttributesReply>(3, sequenceNumber);
   }
 
   int destroyWindow(int window) {
@@ -6623,7 +6622,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(14, buffer.data);
-    return (await _awaitReply(14, sequenceNumber)) as X11GetGeometryReply;
+    return _awaitReply<X11GetGeometryReply>(14, sequenceNumber);
   }
 
   Future<X11QueryTreeReply> queryTree(int window) async {
@@ -6631,7 +6630,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(15, buffer.data);
-    return (await _awaitReply(15, sequenceNumber)) as X11QueryTreeReply;
+    return _awaitReply<X11QueryTreeReply>(15, sequenceNumber);
   }
 
   Future<int> internAtom(String name, {bool onlyIfExists = false}) async {
@@ -6643,7 +6642,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(16, buffer.data);
-    return ((await _awaitReply(16, sequenceNumber)) as X11InternAtomReply).atom;
+    var reply = await _awaitReply<X11InternAtomReply>(16, sequenceNumber);
+    return reply.atom;
   }
 
   Future<String> getAtomName(int atom) async {
@@ -6651,8 +6651,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(17, buffer.data);
-    return ((await _awaitReply(17, sequenceNumber)) as X11GetAtomNameReply)
-        .name;
+    var reply = await _awaitReply<X11GetAtomNameReply>(17, sequenceNumber);
+    return reply.name;
   }
 
   int changePropertyUint8(int window, int property, int type, List<int> value,
@@ -6703,7 +6703,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(20, buffer.data);
-    return (await _awaitReply(20, sequenceNumber)) as X11GetPropertyReply;
+    return _awaitReply<X11GetPropertyReply>(20, sequenceNumber);
   }
 
   Future<String> getPropertyString(int window, int property) async {
@@ -6721,8 +6721,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(21, buffer.data);
-    return ((await _awaitReply(21, sequenceNumber)) as X11ListPropertiesReply)
-        .atoms;
+    var reply = await _awaitReply<X11ListPropertiesReply>(21, sequenceNumber);
+    return reply.atoms;
   }
 
   int setSelectionOwner(int selection, int owner, {int time = 0}) {
@@ -6737,9 +6737,9 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(23, buffer.data);
-    return ((await _awaitReply(23, sequenceNumber))
-            as X11GetSelectionOwnerReply)
-        .owner;
+    var reply =
+        await _awaitReply<X11GetSelectionOwnerReply>(23, sequenceNumber);
+    return reply.owner;
   }
 
   int convertSelection(int selection, int requestor, int target,
@@ -6770,8 +6770,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(26, buffer.data);
-    return ((await _awaitReply(26, sequenceNumber)) as X11GrabPointerReply)
-        .status;
+    var reply = await _awaitReply<X11GrabPointerReply>(26, sequenceNumber);
+    return reply.status;
   }
 
   int ungrabPointer({int time = 0}) {
@@ -6827,7 +6827,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(38, buffer.data);
-    return (await _awaitReply(38, sequenceNumber)) as X11QueryPointerReply;
+    return _awaitReply<X11QueryPointerReply>(38, sequenceNumber);
   }
 
   Future<X11TranslateCoordinatesReply> translateCoordinates(
@@ -6836,8 +6836,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(40, buffer.data);
-    return (await _awaitReply(40, sequenceNumber))
-        as X11TranslateCoordinatesReply;
+    return _awaitReply<X11TranslateCoordinatesReply>(40, sequenceNumber);
   }
 
   int warpPointer(X11Point dst,
@@ -6864,7 +6863,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(43, buffer.data);
-    return (await _awaitReply(43, sequenceNumber)) as X11GetInputFocusReply;
+    return _awaitReply<X11GetInputFocusReply>(43, sequenceNumber);
   }
 
   Future<List<int>> queryKeymap() async {
@@ -6872,8 +6871,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(44, buffer.data);
-    return ((await _awaitReply(44, sequenceNumber)) as X11QueryKeymapReply)
-        .keys;
+    var reply = await _awaitReply<X11QueryKeymapReply>(44, sequenceNumber);
+    return reply.keys;
   }
 
   int openFont(int fid, String name) {
@@ -6895,7 +6894,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(47, buffer.data);
-    return (await _awaitReply(47, sequenceNumber)) as X11QueryFontReply;
+    return _awaitReply<X11QueryFontReply>(47, sequenceNumber);
   }
 
   Future<List<String>> listFonts(
@@ -6904,12 +6903,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(49, buffer.data);
-    return _awaitReply(49, sequenceNumber).then<List<String>>((response) {
-      if (response is X11ListFontsReply) {
-        return response.names;
-      }
-      throw response;
-    });
+    var reply = await _awaitReply<X11ListFontsReply>(49, sequenceNumber);
+    return reply.names;
   }
 
   int setFontPath(List<String> path) {
@@ -6924,8 +6919,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(52, buffer.data);
-    return ((await _awaitReply(52, sequenceNumber)) as X11GetFontPathReply)
-        .path;
+    var reply = await _awaitReply<X11GetFontPathReply>(52, sequenceNumber);
+    return reply.path;
   }
 
   int createPixmap(int pid, int drawable, int width, int height, int depth) {
@@ -7220,9 +7215,9 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(83, buffer.data);
-    return ((await _awaitReply(83, sequenceNumber))
-            as X11ListInstalledColormapsReply)
-        .cmaps;
+    var reply =
+        await _awaitReply<X11ListInstalledColormapsReply>(83, sequenceNumber);
+    return reply.cmaps;
   }
 
   Future<X11AllocColorReply> allocColor(int cmap, X11Rgb color) async {
@@ -7230,7 +7225,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(84, buffer.data);
-    return (await _awaitReply(84, sequenceNumber)) as X11AllocColorReply;
+    return _awaitReply<X11AllocColorReply>(84, sequenceNumber);
   }
 
   Future<X11AllocNamedColorReply> allocNamedColor(int cmap, String name) async {
@@ -7238,7 +7233,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(85, buffer.data);
-    return (await _awaitReply(85, sequenceNumber)) as X11AllocNamedColorReply;
+    return _awaitReply<X11AllocNamedColorReply>(85, sequenceNumber);
   }
 
   Future<X11AllocColorCellsReply> allocColorCells(int cmap, int colors,
@@ -7248,7 +7243,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(86, buffer.data);
-    return (await _awaitReply(86, sequenceNumber)) as X11AllocColorCellsReply;
+    return _awaitReply<X11AllocColorCellsReply>(86, sequenceNumber);
   }
 
   Future<X11AllocColorPlanesReply> allocColorPlanes(int cmap, int colors,
@@ -7261,7 +7256,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(87, buffer.data);
-    return (await _awaitReply(87, sequenceNumber)) as X11AllocColorPlanesReply;
+    return _awaitReply<X11AllocColorPlanesReply>(87, sequenceNumber);
   }
 
   int freeColors(int cmap, List<int> pixels, int planeMask) {
@@ -7292,8 +7287,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(91, buffer.data);
-    return ((await _awaitReply(91, sequenceNumber)) as X11QueryColorsReply)
-        .colors;
+    var reply = await _awaitReply<X11QueryColorsReply>(91, sequenceNumber);
+    return reply.colors;
   }
 
   Future<X11LookupColorReply> lookupColor(int cmap, String name) async {
@@ -7301,7 +7296,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(92, buffer.data);
-    return (await _awaitReply(92, sequenceNumber)) as X11LookupColorReply;
+    return _awaitReply<X11LookupColorReply>(92, sequenceNumber);
   }
 
   int createCursor(
@@ -7344,7 +7339,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(98, buffer.data);
-    return (await _awaitReply(98, sequenceNumber)) as X11QueryExtensionReply;
+    return _awaitReply<X11QueryExtensionReply>(98, sequenceNumber);
   }
 
   Future<List<String>> listExtensions() async {
@@ -7352,8 +7347,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(99, buffer.data);
-    return ((await _awaitReply(99, sequenceNumber)) as X11ListExtensionsReply)
-        .names;
+    var reply = await _awaitReply<X11ListExtensionsReply>(99, sequenceNumber);
+    return reply.names;
   }
 
   int bell(int percent) {
@@ -7383,7 +7378,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(108, buffer.data);
-    return (await _awaitReply(108, sequenceNumber)) as X11GetScreenSaverReply;
+    return _awaitReply<X11GetScreenSaverReply>(108, sequenceNumber);
   }
 
   int changeHosts(int mode, int family, List<int> address) {
@@ -7398,7 +7393,7 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(110, buffer.data);
-    return (await _awaitReply(110, sequenceNumber)) as X11ListHostsReply;
+    return _awaitReply<X11ListHostsReply>(110, sequenceNumber);
   }
 
   int setAccessControl(int mode) {
@@ -7694,8 +7689,8 @@ class X11Client {
     return _sequenceNumber;
   }
 
-  Future<X11Reply> _awaitReply(int opcode, int sequenceNumber) {
-    var handler = _RequestHandler(opcode);
+  Future<T> _awaitReply<T>(int opcode, int sequenceNumber) {
+    var handler = _RequestHandler<T>(opcode);
     _requests[sequenceNumber] = handler;
     return handler.future;
   }
