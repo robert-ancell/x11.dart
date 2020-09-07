@@ -286,7 +286,81 @@ class X11Error {
 }
 
 class X11Event {
-  void encode(X11WriteBuffer buffer) {}
+  X11Event();
+
+  factory X11Event.fromBuffer(int code, X11ReadBuffer buffer) {
+    if (code == 2) {
+      return X11KeyPressEvent.fromBuffer(buffer);
+    } else if (code == 3) {
+      return X11KeyReleaseEvent.fromBuffer(buffer);
+    } else if (code == 4) {
+      return X11ButtonPressEvent.fromBuffer(buffer);
+    } else if (code == 5) {
+      return X11ButtonReleaseEvent.fromBuffer(buffer);
+    } else if (code == 6) {
+      return X11MotionNotifyEvent.fromBuffer(buffer);
+    } else if (code == 7) {
+      return X11EnterNotifyEvent.fromBuffer(buffer);
+    } else if (code == 8) {
+      return X11LeaveNotifyEvent.fromBuffer(buffer);
+    } else if (code == 9) {
+      return X11FocusInEvent.fromBuffer(buffer);
+    } else if (code == 10) {
+      return X11FocusOutEvent.fromBuffer(buffer);
+    } else if (code == 11) {
+      return X11KeymapNotifyEvent.fromBuffer(buffer);
+    } else if (code == 12) {
+      return X11ExposeEvent.fromBuffer(buffer);
+    } else if (code == 13) {
+      return X11GraphicsExposureEvent.fromBuffer(buffer);
+    } else if (code == 14) {
+      return X11NoExposureEvent.fromBuffer(buffer);
+    } else if (code == 15) {
+      return X11VisibilityNotifyEvent.fromBuffer(buffer);
+    } else if (code == 16) {
+      return X11CreateNotifyEvent.fromBuffer(buffer);
+    } else if (code == 17) {
+      return X11DestroyNotifyEvent.fromBuffer(buffer);
+    } else if (code == 18) {
+      return X11UnmapNotifyEvent.fromBuffer(buffer);
+    } else if (code == 19) {
+      return X11MapNotifyEvent.fromBuffer(buffer);
+    } else if (code == 20) {
+      return X11MapRequestEvent.fromBuffer(buffer);
+    } else if (code == 21) {
+      return X11ReparentNotifyEvent.fromBuffer(buffer);
+    } else if (code == 22) {
+      return X11ConfigureNotifyEvent.fromBuffer(buffer);
+    } else if (code == 23) {
+      return X11ConfigureRequestEvent.fromBuffer(buffer);
+    } else if (code == 24) {
+      return X11GravityNotifyEvent.fromBuffer(buffer);
+    } else if (code == 25) {
+      return X11ResizeRequestEvent.fromBuffer(buffer);
+    } else if (code == 26) {
+      return X11CirculateNotifyEvent.fromBuffer(buffer);
+    } else if (code == 27) {
+      return X11CirculateRequestEvent.fromBuffer(buffer);
+    } else if (code == 28) {
+      return X11PropertyNotifyEvent.fromBuffer(buffer);
+    } else if (code == 29) {
+      return X11SelectionClearEvent.fromBuffer(buffer);
+    } else if (code == 30) {
+      return X11SelectionRequestEvent.fromBuffer(buffer);
+    } else if (code == 31) {
+      return X11SelectionNotifyEvent.fromBuffer(buffer);
+    } else if (code == 32) {
+      return X11ColormapNotifyEvent.fromBuffer(buffer);
+      /*} else if (code == 33) {
+        return X11ClientMessageEvent.fromBuffer(buffer);*/
+    } else if (code == 34) {
+      return X11MappingNotifyEvent.fromBuffer(buffer);
+    } else {
+      return X11UnknownEvent.fromBuffer(buffer);
+    }
+  }
+
+  int encode(X11WriteBuffer buffer) {}
 }
 
 enum X11WindowClass { copyFromParent, inputOutput, inputOnly }
@@ -1583,7 +1657,50 @@ class X11ConvertSelectionRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): SendEvent
+class X11SendEventRequest extends X11Request {
+  final int destination;
+  final X11Event event;
+  final bool propagate;
+  final int eventMask;
+  final int sequenceNumber;
+
+  X11SendEventRequest(this.destination, this.event,
+      {this.propagate = false, this.eventMask = 0, this.sequenceNumber = 0});
+
+  factory X11SendEventRequest.fromBuffer(X11ReadBuffer buffer) {
+    var propagate = buffer.readBool();
+    var destination = buffer.readUint32();
+    var eventMask = buffer.readUint32();
+    var code = buffer.readUint8();
+    var eventBuffer = X11ReadBuffer();
+    eventBuffer.add(buffer.readUint8());
+    var sequenceNumber = buffer.readUint16();
+    for (var i = 0; i < 28; i++) {
+      eventBuffer.add(buffer.readUint8());
+    }
+    var event = X11Event.fromBuffer(code, eventBuffer);
+    return X11SendEventRequest(destination, event,
+        propagate: propagate,
+        eventMask: eventMask,
+        sequenceNumber: sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(propagate);
+    buffer.writeUint32(destination);
+    buffer.writeUint32(eventMask);
+    var eventBuffer = X11WriteBuffer();
+    var code = event.encode(eventBuffer);
+    buffer.writeUint8(code);
+    buffer.writeUint8(eventBuffer.data[0]);
+    buffer.writeUint16(sequenceNumber);
+    for (var i = 1; i < eventBuffer.data.length; i++) {
+      buffer.writeUint8(eventBuffer.data[i]);
+    }
+    event.encode(buffer);
+  }
+}
 
 class X11GrabPointerRequest extends X11Request {
   final int grabWindow;
@@ -4712,7 +4829,7 @@ class X11KeyPressEvent extends X11Event {
       this.positionRoot, this.position, this.state, this.sameScreen, this.time);
 
   factory X11KeyPressEvent.fromBuffer(X11ReadBuffer buffer) {
-    var key = buffer.readUint32();
+    var key = buffer.readUint8();
     var time = buffer.readUint32();
     var root = buffer.readUint32();
     var event = buffer.readUint32();
@@ -4729,8 +4846,8 @@ class X11KeyPressEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(key);
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(key);
     buffer.writeUint32(time);
     buffer.writeUint32(root);
     buffer.writeUint32(event);
@@ -4742,6 +4859,7 @@ class X11KeyPressEvent extends X11Event {
     buffer.writeUint16(state);
     buffer.writeBool(sameScreen);
     buffer.skip(1);
+    return 2;
   }
 }
 
@@ -4760,7 +4878,7 @@ class X11KeyReleaseEvent extends X11Event {
       this.positionRoot, this.position, this.state, this.sameScreen, this.time);
 
   factory X11KeyReleaseEvent.fromBuffer(X11ReadBuffer buffer) {
-    var key = buffer.readUint32();
+    var key = buffer.readUint8();
     var time = buffer.readUint32();
     var root = buffer.readUint32();
     var event = buffer.readUint32();
@@ -4777,8 +4895,8 @@ class X11KeyReleaseEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(key);
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(key);
     buffer.writeUint32(time);
     buffer.writeUint32(root);
     buffer.writeUint32(event);
@@ -4790,6 +4908,7 @@ class X11KeyReleaseEvent extends X11Event {
     buffer.writeUint16(state);
     buffer.writeBool(sameScreen);
     buffer.skip(1);
+    return 3;
   }
 }
 
@@ -4808,7 +4927,7 @@ class X11ButtonPressEvent extends X11Event {
       this.positionRoot, this.position, this.state, this.sameScreen, this.time);
 
   factory X11ButtonPressEvent.fromBuffer(X11ReadBuffer buffer) {
-    var button = buffer.readUint32();
+    var button = buffer.readUint8();
     var time = buffer.readUint32();
     var root = buffer.readUint32();
     var event = buffer.readUint32();
@@ -4833,8 +4952,8 @@ class X11ButtonPressEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(button);
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(button);
     buffer.writeUint32(time);
     buffer.writeUint32(root);
     buffer.writeUint32(event);
@@ -4846,6 +4965,7 @@ class X11ButtonPressEvent extends X11Event {
     buffer.writeUint16(state);
     buffer.writeBool(sameScreen);
     buffer.skip(1);
+    return 4;
   }
 }
 
@@ -4864,7 +4984,7 @@ class X11ButtonReleaseEvent extends X11Event {
       this.positionRoot, this.position, this.state, this.sameScreen, this.time);
 
   factory X11ButtonReleaseEvent.fromBuffer(X11ReadBuffer buffer) {
-    var button = buffer.readUint32();
+    var button = buffer.readUint8();
     var time = buffer.readUint32();
     var root = buffer.readUint32();
     var event = buffer.readUint32();
@@ -4889,8 +5009,8 @@ class X11ButtonReleaseEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(button);
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(button);
     buffer.writeUint32(time);
     buffer.writeUint32(root);
     buffer.writeUint32(event);
@@ -4902,6 +5022,7 @@ class X11ButtonReleaseEvent extends X11Event {
     buffer.writeUint16(state);
     buffer.writeBool(sameScreen);
     buffer.skip(1);
+    return 5;
   }
 }
 
@@ -4945,7 +5066,7 @@ class X11MotionNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(detail);
     buffer.writeUint32(time);
     buffer.writeUint32(root);
@@ -4958,6 +5079,7 @@ class X11MotionNotifyEvent extends X11Event {
     buffer.writeUint16(state);
     buffer.writeBool(sameScreen);
     buffer.skip(1);
+    return 6;
   }
 }
 
@@ -5012,7 +5134,7 @@ class X11EnterNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(detail);
     buffer.writeUint32(time);
     buffer.writeUint32(root);
@@ -5025,6 +5147,7 @@ class X11EnterNotifyEvent extends X11Event {
     buffer.writeUint16(state);
     buffer.writeUint8(mode);
     buffer.writeUint8(sameScreenFocus);
+    return 7;
   }
 }
 
@@ -5079,7 +5202,7 @@ class X11LeaveNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(detail);
     buffer.writeUint32(time);
     buffer.writeUint32(root);
@@ -5092,6 +5215,7 @@ class X11LeaveNotifyEvent extends X11Event {
     buffer.writeUint16(state);
     buffer.writeUint8(mode);
     buffer.writeUint8(sameScreenFocus);
+    return 8;
   }
 }
 
@@ -5111,11 +5235,12 @@ class X11FocusInEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(detail);
     buffer.writeUint32(event);
     buffer.writeUint8(mode);
     buffer.skip(3);
+    return 9;
   }
 }
 
@@ -5135,11 +5260,12 @@ class X11FocusOutEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(detail);
     buffer.writeUint32(event);
     buffer.writeUint8(mode);
     buffer.skip(3);
+    return 10;
   }
 }
 
@@ -5157,10 +5283,11 @@ class X11KeymapNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     for (var key in keys) {
       buffer.writeUint8(key);
     }
+    return 11;
   }
 }
 
@@ -5185,7 +5312,7 @@ class X11ExposeEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(window);
     buffer.writeUint16(area.x);
@@ -5194,6 +5321,7 @@ class X11ExposeEvent extends X11Event {
     buffer.writeUint16(area.height);
     buffer.writeUint16(count);
     buffer.skip(2);
+    return 12;
   }
 }
 
@@ -5225,7 +5353,7 @@ class X11GraphicsExposureEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(drawable);
     buffer.writeUint16(area.x);
@@ -5236,6 +5364,7 @@ class X11GraphicsExposureEvent extends X11Event {
     buffer.writeUint16(count);
     buffer.writeUint8(majorOpcode);
     buffer.skip(3);
+    return 13;
   }
 }
 
@@ -5256,12 +5385,13 @@ class X11NoExposureEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(drawable);
     buffer.writeUint16(minorOpcode);
     buffer.writeUint8(majorOpcode);
     buffer.skip(1);
+    return 14;
   }
 }
 
@@ -5280,11 +5410,12 @@ class X11VisibilityNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(window);
     buffer.writeUint8(state);
     buffer.skip(3);
+    return 15;
   }
 }
 
@@ -5315,7 +5446,7 @@ class X11CreateNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(parent);
     buffer.writeUint32(window);
@@ -5326,6 +5457,7 @@ class X11CreateNotifyEvent extends X11Event {
     buffer.writeUint16(borderWidth);
     buffer.writeBool(overrideRedirect);
     buffer.skip(1);
+    return 16;
   }
 }
 
@@ -5343,10 +5475,11 @@ class X11DestroyNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
     buffer.writeUint32(window);
+    return 17;
   }
 }
 
@@ -5367,12 +5500,13 @@ class X11UnmapNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
     buffer.writeUint32(window);
     buffer.writeBool(fromConfigure);
     buffer.skip(3);
+    return 18;
   }
 }
 
@@ -5393,12 +5527,13 @@ class X11MapNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
     buffer.writeUint32(window);
     buffer.writeBool(overrideRedirect);
     buffer.skip(3);
+    return 19;
   }
 }
 
@@ -5416,10 +5551,11 @@ class X11MapRequestEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(parent);
     buffer.writeUint32(window);
+    return 20;
   }
 }
 
@@ -5458,7 +5594,7 @@ class X11ReparentNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
     buffer.writeUint32(window);
@@ -5467,6 +5603,7 @@ class X11ReparentNotifyEvent extends X11Event {
     buffer.writeInt16(y);
     buffer.writeBool(overrideRedirect);
     buffer.skip(3);
+    return 21;
   }
 }
 
@@ -5517,7 +5654,7 @@ class X11ConfigureNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
     buffer.writeUint32(window);
@@ -5529,6 +5666,7 @@ class X11ConfigureNotifyEvent extends X11Event {
     buffer.writeUint16(borderWidth);
     buffer.writeBool(overrideRedirect);
     buffer.skip(1);
+    return 22;
   }
 }
 
@@ -5581,7 +5719,7 @@ class X11ConfigureRequestEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(stackMode);
     buffer.writeUint32(parent);
     buffer.writeUint32(window);
@@ -5592,6 +5730,7 @@ class X11ConfigureRequestEvent extends X11Event {
     buffer.writeUint16(height);
     buffer.writeUint16(borderWidth);
     buffer.writeUint16(valueMask);
+    return 23;
   }
 }
 
@@ -5612,12 +5751,13 @@ class X11GravityNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
     buffer.writeUint32(window);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
+    return 24;
   }
 }
 
@@ -5637,11 +5777,12 @@ class X11ResizeRequestEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(window);
     buffer.writeUint16(width);
     buffer.writeUint16(height);
+    return 25;
   }
 }
 
@@ -5663,13 +5804,14 @@ class X11CirculateNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
     buffer.writeUint32(window);
     buffer.skip(4);
     buffer.writeUint8(place);
     buffer.skip(3);
+    return 26;
   }
 }
 
@@ -5691,13 +5833,14 @@ class X11CirculateRequestEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
     buffer.writeUint32(window);
     buffer.skip(4);
     buffer.writeUint8(place);
     buffer.skip(3);
+    return 27;
   }
 }
 
@@ -5720,13 +5863,14 @@ class X11PropertyNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(window);
     buffer.writeUint32(atom);
     buffer.writeUint32(time);
     buffer.writeUint8(state);
     buffer.skip(3);
+    return 28;
   }
 }
 
@@ -5746,11 +5890,12 @@ class X11SelectionClearEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(time);
     buffer.writeUint32(owner);
     buffer.writeUint32(selection);
+    return 29;
   }
 }
 
@@ -5778,7 +5923,7 @@ class X11SelectionRequestEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(time);
     buffer.writeUint32(owner);
@@ -5786,6 +5931,7 @@ class X11SelectionRequestEvent extends X11Event {
     buffer.writeUint32(selection);
     buffer.writeUint32(target);
     buffer.writeUint32(property);
+    return 30;
   }
 }
 
@@ -5811,13 +5957,14 @@ class X11SelectionNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(time);
     buffer.writeUint32(requestor);
     buffer.writeUint32(selection);
     buffer.writeUint32(target);
     buffer.writeUint32(property);
+    return 31;
   }
 }
 
@@ -5840,13 +5987,14 @@ class X11ColormapNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(window);
     buffer.writeUint32(colormap);
     buffer.writeBool(new_);
     buffer.writeUint8(state);
     buffer.skip(2);
+    return 32;
   }
 }
 
@@ -5867,11 +6015,12 @@ class X11ColormapNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(format);
     buffer.writeUint32(window);
     buffer.writeUint32(type);
     buffer.write?ClientMessageData?(data);
+    return 33;
   }
 }*/
 
@@ -5892,12 +6041,13 @@ class X11MappingNotifyEvent extends X11Event {
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {
+  int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint8(request);
     buffer.writeUint32(firstKeycode);
     buffer.writeUint8(count);
     buffer.skip(1);
+    return 34;
   }
 }
 
@@ -6403,6 +6553,17 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(24, buffer.data);
+  }
+
+  int sendEvent(int destination, X11Event event,
+      {bool propagate = false, int eventMask = 0}) {
+    var request = X11SendEventRequest(destination, event,
+        propagate: propagate,
+        eventMask: eventMask,
+        sequenceNumber: _sequenceNumber);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(25, buffer.data);
   }
 
   Future<int> grabPointer(int grabWindow, bool ownerEvents, int eventMask,
@@ -7367,78 +7528,13 @@ class X11Client {
       }
     } else {
       var code = reply;
-      _buffer.skip(1);
+      var eventBuffer = X11ReadBuffer();
+      eventBuffer.add(_buffer.readUint8());
       _buffer.readUint16(); // FIXME(robert-ancell): sequenceNumber
-      X11Event event;
-      if (code == 2) {
-        event = X11KeyPressEvent.fromBuffer(_buffer);
-      } else if (code == 3) {
-        event = X11KeyReleaseEvent.fromBuffer(_buffer);
-      } else if (code == 4) {
-        event = X11ButtonPressEvent.fromBuffer(_buffer);
-      } else if (code == 5) {
-        event = X11ButtonReleaseEvent.fromBuffer(_buffer);
-      } else if (code == 6) {
-        event = X11MotionNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 7) {
-        event = X11EnterNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 8) {
-        event = X11LeaveNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 9) {
-        event = X11FocusInEvent.fromBuffer(_buffer);
-      } else if (code == 10) {
-        event = X11FocusOutEvent.fromBuffer(_buffer);
-      } else if (code == 11) {
-        event = X11KeymapNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 12) {
-        event = X11ExposeEvent.fromBuffer(_buffer);
-      } else if (code == 13) {
-        event = X11GraphicsExposureEvent.fromBuffer(_buffer);
-      } else if (code == 14) {
-        event = X11NoExposureEvent.fromBuffer(_buffer);
-      } else if (code == 15) {
-        event = X11VisibilityNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 16) {
-        event = X11CreateNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 17) {
-        event = X11DestroyNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 18) {
-        event = X11UnmapNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 19) {
-        event = X11MapNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 20) {
-        event = X11MapRequestEvent.fromBuffer(_buffer);
-      } else if (code == 21) {
-        event = X11ReparentNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 22) {
-        event = X11ConfigureNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 23) {
-        event = X11ConfigureRequestEvent.fromBuffer(_buffer);
-      } else if (code == 24) {
-        event = X11GravityNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 25) {
-        event = X11ResizeRequestEvent.fromBuffer(_buffer);
-      } else if (code == 26) {
-        event = X11CirculateNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 27) {
-        event = X11CirculateRequestEvent.fromBuffer(_buffer);
-      } else if (code == 28) {
-        event = X11PropertyNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 29) {
-        event = X11SelectionClearEvent.fromBuffer(_buffer);
-      } else if (code == 30) {
-        event = X11SelectionRequestEvent.fromBuffer(_buffer);
-      } else if (code == 31) {
-        event = X11SelectionNotifyEvent.fromBuffer(_buffer);
-      } else if (code == 32) {
-        event = X11ColormapNotifyEvent.fromBuffer(_buffer);
-        /*} else if (code == 33) {
-        event = X11ClientMessageEvent.fromBuffer(_buffer);*/
-      } else if (code == 34) {
-        event = X11MappingNotifyEvent.fromBuffer(_buffer);
-      } else {
-        event = X11UnknownEvent.fromBuffer(_buffer);
+      for (var i = 0; i < 28; i++) {
+        eventBuffer.add(_buffer.readUint8());
       }
+      var event = X11Event.fromBuffer(code, eventBuffer);
       _eventStreamController.add(event);
     }
 
