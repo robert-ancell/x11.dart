@@ -6659,9 +6659,10 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(17, buffer.data);
-    var reply = await _awaitReply<X11GetAtomNameReply>(
-        sequenceNumber, X11GetAtomNameReply.fromBuffer);
-    return reply.name;
+    return _awaitReply<X11GetAtomNameReply>(
+            sequenceNumber, X11GetAtomNameReply.fromBuffer)
+        .then<String>((reply) => reply.name)
+        .catchError((error) => null);
   }
 
   int changePropertyUint8(int window, int property, int type, List<int> value,
