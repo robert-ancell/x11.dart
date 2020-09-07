@@ -4626,7 +4626,51 @@ class X11RecolorCursorRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): QueryBestSize
+class X11QueryBestSizeRequest extends X11Request {
+  final int drawable;
+  final int class_;
+  final int width;
+  final int height;
+
+  X11QueryBestSizeRequest(this.drawable, this.class_, this.width, this.height);
+
+  factory X11QueryBestSizeRequest.fromBuffer(X11ReadBuffer buffer) {
+    var class_ = buffer.readUint8();
+    var drawable = buffer.readUint32();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    return X11QueryBestSizeRequest(drawable, class_, width, height);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(class_);
+    buffer.writeUint32(drawable);
+    buffer.writeUint16(width);
+    buffer.writeUint16(height);
+  }
+}
+
+class X11QueryBestSizeReply extends X11Reply {
+  final int width;
+  final int height;
+
+  X11QueryBestSizeReply(this.width, this.height);
+
+  static X11QueryBestSizeReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    return X11QueryBestSizeReply(width, height);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(width);
+    buffer.writeUint16(height);
+  }
+}
 
 class X11QueryExtensionRequest extends X11Request {
   final String name;
@@ -7358,6 +7402,16 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(96, buffer.data);
+  }
+
+  Future<X11QueryBestSizeReply> queryBestSize(
+      int drawable, int class_, int width, int height) async {
+    var request = X11QueryBestSizeRequest(drawable, class_, width, height);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(97, buffer.data);
+    return _awaitReply<X11QueryBestSizeReply>(
+        sequenceNumber, X11QueryBestSizeReply.fromBuffer);
   }
 
   Future<X11QueryExtensionReply> queryExtension(String name) async {
