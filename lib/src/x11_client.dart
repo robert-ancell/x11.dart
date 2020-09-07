@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 String _formatHex32(int id) {
@@ -135,6 +136,31 @@ class X11FontProperty {
 
   @override
   String toString() => 'X11FontProperty(name: ${name}, value: ${value})';
+}
+
+class X11ModifierMap {
+  final List<int> shiftKeycodes;
+  final List<int> lockKeycodes;
+  final List<int> controlKeycodes;
+  final List<int> mod1Keycodes;
+  final List<int> mod2Keycodes;
+  final List<int> mod3Keycodes;
+  final List<int> mod4Keycodes;
+  final List<int> mod5Keycodes;
+
+  X11ModifierMap(
+      this.shiftKeycodes,
+      this.lockKeycodes,
+      this.controlKeycodes,
+      this.mod1Keycodes,
+      this.mod2Keycodes,
+      this.mod3Keycodes,
+      this.mod4Keycodes,
+      this.mod5Keycodes);
+
+  @override
+  String toString() =>
+      'X11ModifierMap(shiftKeycodes: ${shiftKeycodes}, lockKeycodes: ${lockKeycodes}, controlKeycodes: ${controlKeycodes}, mod1Keycodes: ${mod1Keycodes}, mod2Keycodes: ${mod2Keycodes}, mod3Keycodes: ${mod3Keycodes}, mod4Keycodes: ${mod4Keycodes}, mod5Keycodes: ${mod5Keycodes})';
 }
 
 class X11Format {
@@ -2108,11 +2134,14 @@ class X11GetInputFocusRequest extends X11Request {
   X11GetInputFocusRequest();
 
   factory X11GetInputFocusRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     return X11GetInputFocusRequest();
   }
 
   @override
-  void encode(X11WriteBuffer buffer) {}
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
 }
 
 class X11GetInputFocusReply extends X11Reply {
@@ -5046,13 +5075,251 @@ class X11ForceScreenSaverRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): SetPointerMapping
+class X11SetPointerMappingRequest extends X11Request {
+  final List<int> map;
 
-// FIXME(robert-ancell): GetPointerMapping
+  X11SetPointerMappingRequest(this.map);
 
-// FIXME(robert-ancell): SetModifierMapping
+  factory X11SetPointerMappingRequest.fromBuffer(X11ReadBuffer buffer) {
+    var mapLength = buffer.readUint8();
+    var map = <int>[];
+    for (var i = 0; i < mapLength; i++) {
+      map.add(buffer.readUint8());
+    }
+    buffer.skip(pad(mapLength));
+    return X11SetPointerMappingRequest(map);
+  }
 
-// FIXME(robert-ancell): GetModifierMapping
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(map.length);
+    for (var element in map) {
+      buffer.writeUint8(element);
+    }
+    buffer.skip(pad(map.length));
+  }
+}
+
+class X11SetPointerMappingReply extends X11Reply {
+  final int status;
+
+  X11SetPointerMappingReply(this.status);
+
+  static X11SetPointerMappingReply fromBuffer(X11ReadBuffer buffer) {
+    var status = buffer.readUint8();
+    return X11SetPointerMappingReply(status);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(status);
+  }
+}
+
+class X11GetPointerMappingRequest extends X11Request {
+  X11GetPointerMappingRequest();
+
+  factory X11GetPointerMappingRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    return X11GetPointerMappingRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
+}
+
+class X11GetPointerMappingReply extends X11Reply {
+  final List<int> map;
+
+  X11GetPointerMappingReply(this.map);
+
+  static X11GetPointerMappingReply fromBuffer(X11ReadBuffer buffer) {
+    var mapLength = buffer.readUint8();
+    buffer.skip(24);
+    var map = <int>[];
+    for (var i = 0; i < mapLength; i++) {
+      map.add(buffer.readUint8());
+    }
+    buffer.skip(pad(mapLength));
+    return X11GetPointerMappingReply(map);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(map.length);
+    buffer.skip(24);
+    for (var element in map) {
+      buffer.writeUint8(element);
+    }
+    buffer.skip(pad(map.length));
+  }
+}
+
+class X11SetModifierMappingRequest extends X11Request {
+  final X11ModifierMap map;
+
+  X11SetModifierMappingRequest(this.map);
+
+  factory X11SetModifierMappingRequest.fromBuffer(X11ReadBuffer buffer) {
+    var keycodesPerModifier = buffer.readUint8();
+    List<int> readKeycodes() {
+      var keycodes = <int>[];
+      for (var i = 0; i < keycodesPerModifier; i++) {
+        var keycode = buffer.readUint8();
+        if (keycode != 0) {
+          keycodes.add(keycode);
+        }
+      }
+      return keycodes;
+    }
+
+    var shiftKeycodes = readKeycodes();
+    var lockKeycodes = readKeycodes();
+    var controlKeycodes = readKeycodes();
+    var mod1Keycodes = readKeycodes();
+    var mod2Keycodes = readKeycodes();
+    var mod3Keycodes = readKeycodes();
+    var mod4Keycodes = readKeycodes();
+    var mod5Keycodes = readKeycodes();
+    return X11SetModifierMappingRequest(X11ModifierMap(
+        shiftKeycodes,
+        lockKeycodes,
+        controlKeycodes,
+        mod1Keycodes,
+        mod2Keycodes,
+        mod3Keycodes,
+        mod4Keycodes,
+        mod5Keycodes));
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    var keycodesPerModifier = 0;
+    keycodesPerModifier = max(keycodesPerModifier, map.shiftKeycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.lockKeycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.controlKeycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod1Keycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod2Keycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod3Keycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod4Keycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod5Keycodes.length);
+    buffer.writeUint8(keycodesPerModifier);
+    void writeKeycodes(List<int> map) {
+      for (var i = 0; i < keycodesPerModifier; i++) {
+        buffer.writeUint8(i < map.length ? map[i] : 0);
+      }
+    }
+
+    writeKeycodes(map.shiftKeycodes);
+    writeKeycodes(map.lockKeycodes);
+    writeKeycodes(map.controlKeycodes);
+    writeKeycodes(map.mod1Keycodes);
+    writeKeycodes(map.mod2Keycodes);
+    writeKeycodes(map.mod3Keycodes);
+    writeKeycodes(map.mod4Keycodes);
+    writeKeycodes(map.mod5Keycodes);
+  }
+}
+
+class X11SetModifierMappingReply extends X11Reply {
+  final int status;
+
+  X11SetModifierMappingReply(this.status);
+
+  static X11SetModifierMappingReply fromBuffer(X11ReadBuffer buffer) {
+    var status = buffer.readUint8();
+    return X11SetModifierMappingReply(status);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(status);
+  }
+}
+
+class X11GetModifierMappingRequest extends X11Request {
+  X11GetModifierMappingRequest();
+
+  factory X11GetModifierMappingRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    return X11GetModifierMappingRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
+}
+
+class X11GetModifierMappingReply extends X11Reply {
+  final X11ModifierMap map;
+
+  X11GetModifierMappingReply(this.map);
+
+  static X11GetModifierMappingReply fromBuffer(X11ReadBuffer buffer) {
+    var keycodesPerModifier = buffer.readUint8();
+    buffer.skip(24);
+    List<int> readKeycodes() {
+      var keycodes = <int>[];
+      for (var i = 0; i < keycodesPerModifier; i++) {
+        var keycode = buffer.readUint8();
+        if (keycode != 0) {
+          keycodes.add(keycode);
+        }
+      }
+      return keycodes;
+    }
+
+    var shiftKeycodes = readKeycodes();
+    var lockKeycodes = readKeycodes();
+    var controlKeycodes = readKeycodes();
+    var mod1Keycodes = readKeycodes();
+    var mod2Keycodes = readKeycodes();
+    var mod3Keycodes = readKeycodes();
+    var mod4Keycodes = readKeycodes();
+    var mod5Keycodes = readKeycodes();
+    return X11GetModifierMappingReply(X11ModifierMap(
+        shiftKeycodes,
+        lockKeycodes,
+        controlKeycodes,
+        mod1Keycodes,
+        mod2Keycodes,
+        mod3Keycodes,
+        mod4Keycodes,
+        mod5Keycodes));
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    var keycodesPerModifier = 0;
+    keycodesPerModifier = max(keycodesPerModifier, map.shiftKeycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.lockKeycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.controlKeycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod1Keycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod2Keycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod3Keycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod4Keycodes.length);
+    keycodesPerModifier = max(keycodesPerModifier, map.mod5Keycodes.length);
+    buffer.writeUint8(keycodesPerModifier);
+    buffer.skip(24);
+    void writeKeycodes(List<int> map) {
+      for (var i = 0; i < keycodesPerModifier; i++) {
+        buffer.writeUint8(i < map.length ? map[i] : 0);
+      }
+    }
+
+    writeKeycodes(map.shiftKeycodes);
+    writeKeycodes(map.lockKeycodes);
+    writeKeycodes(map.controlKeycodes);
+    writeKeycodes(map.mod1Keycodes);
+    writeKeycodes(map.mod2Keycodes);
+    writeKeycodes(map.mod3Keycodes);
+    writeKeycodes(map.mod4Keycodes);
+    writeKeycodes(map.mod5Keycodes);
+  }
+}
 
 class X11NoOperationRequest extends X11Request {
   X11NoOperationRequest();
@@ -7469,6 +7736,46 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(115, buffer.data);
+  }
+
+  Future<int> setPointerMapping(List<int> map) async {
+    var request = X11SetPointerMappingRequest(map);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(116, buffer.data);
+    var reply = await _awaitReply<X11SetPointerMappingReply>(
+        sequenceNumber, X11SetPointerMappingReply.fromBuffer);
+    return reply.status;
+  }
+
+  Future<List<int>> getPointerMapping() async {
+    var request = X11GetPointerMappingRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(117, buffer.data);
+    var reply = await _awaitReply<X11GetPointerMappingReply>(
+        sequenceNumber, X11GetPointerMappingReply.fromBuffer);
+    return reply.map;
+  }
+
+  Future<int> setModifierMapping(X11ModifierMap map) async {
+    var request = X11SetModifierMappingRequest(map);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(118, buffer.data);
+    var reply = await _awaitReply<X11SetModifierMappingReply>(
+        sequenceNumber, X11SetModifierMappingReply.fromBuffer);
+    return reply.status;
+  }
+
+  Future<X11ModifierMap> getModifierMapping() async {
+    var request = X11GetModifierMappingRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(119, buffer.data);
+    var reply = await _awaitReply<X11GetModifierMappingReply>(
+        sequenceNumber, X11GetModifierMappingReply.fromBuffer);
+    return reply.map;
   }
 
   int noOperation() {
