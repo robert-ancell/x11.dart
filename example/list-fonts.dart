@@ -11,7 +11,39 @@ void main() async {
   var names = await client.listFonts();
   print('Fonts:');
   for (var name in names) {
+    var fid = client.generateId();
+    client.openFont(fid, name);
+    var info = await client.queryFont(fid);
     print('  ${name}');
+    for (var property in info.properties) {
+      var name = await client.getAtomName(property.name);
+      String value;
+      if ({
+        'ADD_STYLE_NAME',
+        'CHARSET_ENCODING',
+        'CHARSET_REGISTRY',
+        'COPYRIGHT',
+        'FACE_NAME',
+        'FAMILY_NAME',
+        'FONT',
+        'FONT_TYPE',
+        'FONTNAME_REGISTRY',
+        'FOUNDRY',
+        'RASTERIZER_NAME',
+        'RESOLUTION',
+        'SETWIDTH_NAME',
+        'SLANT',
+        'SPACING',
+        'WEIGHT_NAME'
+      }.contains(name)) {
+        var stringValue = await client.getAtomName(property.value);
+        value = "'${stringValue}'";
+      } else {
+        value = property.value.toString();
+      }
+      print('    ${name}: ${value}');
+    }
+    client.closeFont(fid);
   }
   await client.close();
 }

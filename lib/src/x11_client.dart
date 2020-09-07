@@ -100,6 +100,18 @@ class X11Success {
       "X11Success(releaseNumber: ${releaseNumber}, resourceIdBase: ${_formatId(resourceIdBase)}, resourceIdMask: ${_formatId(resourceIdMask)}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, roots: ${roots})";
 }
 
+class X11CharInfo {
+  final int leftSideBearing;
+  final int rightSideBearing;
+  final int characterWidth;
+  final int ascent;
+  final int decent;
+  final int attributes;
+
+  X11CharInfo(this.leftSideBearing, this.rightSideBearing, this.characterWidth,
+      this.ascent, this.decent, this.attributes);
+}
+
 class X11ColorItem {
   int pixel;
   X11Rgb color;
@@ -113,6 +125,16 @@ class X11ColorItem {
   @override
   String toString() =>
       'X11ColorItem(pixel: ${_formatPixel(pixel)}, color: ${color}, doRed: ${doRed}, doGreen: ${doGreen}, doBlue: ${doBlue})';
+}
+
+class X11FontProperty {
+  int name;
+  int value; // FIXME: Make getter to get signedValue
+
+  X11FontProperty(this.name, this.value);
+
+  @override
+  String toString() => 'X11FontProperty(name: ${name}, value: ${value})';
 }
 
 class X11Format {
@@ -2201,7 +2223,140 @@ class X11CloseFontRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): QueryFont
+class X11QueryFontRequest extends X11Request {
+  final int font;
+
+  X11QueryFontRequest(this.font);
+
+  factory X11QueryFontRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var font = buffer.readUint32();
+    return X11QueryFontRequest(font);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(font);
+  }
+}
+
+class X11QueryFontReply extends X11Reply {
+  final X11CharInfo minBounds;
+  final X11CharInfo maxBounds;
+  final int minCharOrByte2;
+  final int maxCharOrByte2;
+  final int defaultChar;
+  final int drawDirection;
+  final int minByte1;
+  final int maxByte1;
+  final bool allCharsExist;
+  final int fontAscent;
+  final int fontDescent;
+  final List<X11FontProperty> properties;
+  final List<X11CharInfo> charInfos;
+
+  X11QueryFontReply(
+      {this.minBounds,
+      this.maxBounds,
+      this.minCharOrByte2,
+      this.maxCharOrByte2,
+      this.defaultChar,
+      this.drawDirection,
+      this.minByte1,
+      this.maxByte1,
+      this.allCharsExist,
+      this.fontAscent,
+      this.fontDescent,
+      this.properties = const [],
+      this.charInfos});
+
+  factory X11QueryFontReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var minBounds = _readCharInfo(buffer);
+    buffer.skip(4);
+    var maxBounds = _readCharInfo(buffer);
+    buffer.skip(4);
+    var minCharOrByte2 = buffer.readUint16();
+    var maxCharOrByte2 = buffer.readUint16();
+    var defaultChar = buffer.readUint16();
+    var propertiesLength = buffer.readUint16();
+    var drawDirection = buffer.readUint8();
+    var minByte1 = buffer.readUint8();
+    var maxByte1 = buffer.readUint8();
+    var allCharsExist = buffer.readBool();
+    var fontAscent = buffer.readInt16();
+    var fontDescent = buffer.readInt16();
+    var charInfosLength = buffer.readUint32();
+    var properties = <X11FontProperty>[];
+    for (var i = 0; i < propertiesLength; i++) {
+      var name = buffer.readUint32();
+      var value = buffer.readUint32();
+      properties.add(X11FontProperty(name, value));
+    }
+    var charInfos = <X11CharInfo>[];
+    for (var i = 0; i < charInfosLength; i++) {
+      charInfos.add(_readCharInfo(buffer));
+    }
+    return X11QueryFontReply(
+        minBounds: minBounds,
+        maxBounds: maxBounds,
+        minCharOrByte2: minCharOrByte2,
+        maxCharOrByte2: maxCharOrByte2,
+        defaultChar: defaultChar,
+        drawDirection: drawDirection,
+        minByte1: minByte1,
+        maxByte1: maxByte1,
+        allCharsExist: allCharsExist,
+        fontAscent: fontAscent,
+        fontDescent: fontDescent,
+        properties: properties,
+        charInfos: charInfos);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    _writeCharInfo(buffer, minBounds);
+    buffer.skip(4);
+    _writeCharInfo(buffer, maxBounds);
+    buffer.skip(4);
+    buffer.writeUint16(minCharOrByte2);
+    buffer.writeUint16(maxCharOrByte2);
+    buffer.writeUint16(defaultChar);
+    buffer.writeUint16(properties.length);
+    buffer.writeUint8(drawDirection);
+    buffer.writeUint8(minByte1);
+    buffer.writeUint8(maxByte1);
+    buffer.writeBool(allCharsExist);
+    buffer.writeInt16(fontAscent);
+    buffer.writeInt16(fontDescent);
+    buffer.writeUint32(charInfos.length);
+    for (var info in charInfos) {
+      _writeCharInfo(buffer, info);
+    }
+  }
+
+  static X11CharInfo _readCharInfo(X11ReadBuffer buffer) {
+    var leftSideBearing = buffer.readInt16();
+    var rightSideBearing = buffer.readInt16();
+    var characterWidth = buffer.readInt16();
+    var ascent = buffer.readInt16();
+    var decent = buffer.readInt16();
+    var attributes = buffer.readUint16();
+    return X11CharInfo(leftSideBearing, rightSideBearing, characterWidth,
+        ascent, decent, attributes);
+  }
+
+  void _writeCharInfo(X11WriteBuffer buffer, X11CharInfo info) {
+    buffer.writeInt16(info.leftSideBearing);
+    buffer.writeInt16(info.rightSideBearing);
+    buffer.writeInt16(info.characterWidth);
+    buffer.writeInt16(info.ascent);
+    buffer.writeInt16(info.decent);
+    buffer.writeUint16(info.attributes);
+  }
+}
 
 // FIXME(robert-ancell): QueryTextExtents
 
@@ -3601,9 +3756,75 @@ class X11PolyFillArcRequest extends X11Request {
 
 // FIXME(robert-ancell): PolyText16
 
-// FIXME(robert-ancell): ImageText8
+class X11ImageText8Request extends X11Request {
+  final int drawable;
+  final int gc;
+  final X11Point position;
+  final List<int> string;
 
-// FIXME(robert-ancell): ImageText16
+  X11ImageText8Request(this.drawable, this.gc, this.position, this.string);
+
+  factory X11ImageText8Request.fromBuffer(X11ReadBuffer buffer) {
+    var stringLength = buffer.readUint8();
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    var string = <int>[];
+    for (var i = 0; i < stringLength; i++) {
+      string.add(buffer.readUint8());
+    }
+    return X11ImageText8Request(drawable, gc, X11Point(x, y), string);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(string.length);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    buffer.writeInt16(position.x);
+    buffer.writeInt16(position.y);
+    for (var c in string) {
+      buffer.writeUint8(c);
+    }
+    buffer.skip(pad(string.length));
+  }
+}
+
+class X11ImageText16Request extends X11Request {
+  final int drawable;
+  final int gc;
+  final X11Point position;
+  final List<int> string;
+
+  X11ImageText16Request(this.drawable, this.gc, this.position, this.string);
+
+  factory X11ImageText16Request.fromBuffer(X11ReadBuffer buffer) {
+    var stringLength = buffer.readUint8();
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    var string = <int>[];
+    for (var i = 0; i < stringLength; i++) {
+      string.add(buffer.readUint16()); // FIXME: Always big endian
+    }
+    return X11ImageText16Request(drawable, gc, X11Point(x, y), string);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(string.length);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    buffer.writeInt16(position.x);
+    buffer.writeInt16(position.y);
+    for (var c in string) {
+      buffer.writeUint16(c); // FIXME: Always big endian
+    }
+    buffer.skip(pad(string.length * 2));
+  }
+}
 
 class X11CreateColormapRequest extends X11Request {
   final int alloc;
@@ -6733,6 +6954,19 @@ class X11Client {
     return _sendRequest(46, buffer.data);
   }
 
+  Future<X11QueryFontReply> queryFont(int font) async {
+    var request = X11QueryFontRequest(font);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(47, buffer.data);
+    return _awaitReply(47, sequenceNumber).then<X11QueryFontReply>((response) {
+      if (response is X11QueryFontReply) {
+        return response;
+      }
+      throw response;
+    });
+  }
+
   Future<List<String>> listFonts(
       {String pattern = '*', int maxNames = 65535}) async {
     var request = X11ListFontsRequest(pattern: pattern, maxNames: maxNames);
@@ -7003,6 +7237,20 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(71, buffer.data);
+  }
+
+  int imageText8(int drawable, int gc, X11Point position, List<int> string) {
+    var request = X11ImageText8Request(drawable, gc, position, string);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(76, buffer.data);
+  }
+
+  int imageText16(int drawable, int gc, X11Point position, List<int> string) {
+    var request = X11ImageText16Request(drawable, gc, position, string);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(77, buffer.data);
   }
 
   int createColormap(int alloc, int mid, int window, int visual) {
@@ -7510,6 +7758,8 @@ class X11Client {
           reply = X11GetInputFocusReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 44) {
           reply = X11QueryKeymapReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 47) {
+          reply = X11QueryFontReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 49) {
           reply = X11ListFontsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 52) {
