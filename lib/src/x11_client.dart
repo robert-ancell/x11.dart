@@ -256,13 +256,11 @@ class X11Request {
   void encode(X11WriteBuffer buffer) {}
 }
 
-class X11Response {}
-
-class X11Reply extends X11Response {
+class X11Reply {
   void encode(X11WriteBuffer buffer) {}
 }
 
-class X11Error extends X11Response {
+class X11Error {
   final X11ErrorCode code;
   final int sequenceNumber;
   final int resourceId;
@@ -273,7 +271,6 @@ class X11Error extends X11Response {
       this.minorOpcode);
 
   factory X11Error.fromBuffer(X11ReadBuffer buffer) {
-    buffer.skip(1);
     var code = X11ErrorCode.values[buffer.readUint8() + 1];
     var sequenceNumber = buffer.readUint16();
     var resourceId = buffer.readUint32();
@@ -4735,12 +4732,13 @@ class X11UnknownEvent extends X11Event {
 
 class _RequestHandler {
   final int opcode;
-  final completer = Completer<X11Response>();
+  final completer = Completer<X11Reply>();
 
   _RequestHandler(this.opcode);
 
-  Future<X11Response> get future => completer.future;
-  void respond(X11Response response) => completer.complete(response);
+  Future<X11Reply> get future => completer.future;
+  void reply(X11Reply reply) => completer.complete(reply);
+  void replyError(X11Error error) => completer.completeError(error);
 }
 
 class X11Client {
@@ -4972,7 +4970,7 @@ class X11Client {
       if (response is X11GetWindowAttributesReply) {
         return response;
       }
-      throw 'Failed to get window attributes'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5067,7 +5065,7 @@ class X11Client {
       if (response is X11GetGeometryReply) {
         return response;
       }
-      throw 'Failed to query tree'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5080,7 +5078,7 @@ class X11Client {
       if (response is X11QueryTreeReply) {
         return response;
       }
-      throw 'Failed to query tree'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5168,7 +5166,7 @@ class X11Client {
       if (response is X11GetPropertyReply) {
         return response;
       }
-      throw 'Failed to get property'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5191,7 +5189,7 @@ class X11Client {
       if (response is X11ListPropertiesReply) {
         return response.atoms;
       }
-      throw 'Failed to list properties'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5211,7 +5209,7 @@ class X11Client {
       if (response is X11GetSelectionOwnerReply) {
         return response.owner;
       }
-      throw 'Failed to GetSelectionOwner'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5236,7 +5234,7 @@ class X11Client {
       if (response is X11GrabPointerReply) {
         return response.status;
       }
-      throw 'Failed to grab pointer'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5298,7 +5296,7 @@ class X11Client {
       if (response is X11QueryPointerReply) {
         return response;
       }
-      throw 'Failed to QueryPointer'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5313,7 +5311,7 @@ class X11Client {
       if (response is X11TranslateCoordinatesReply) {
         return response;
       }
-      throw 'Failed to TranslateCoordinates'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5337,7 +5335,7 @@ class X11Client {
       if (response is X11QueryKeymapReply) {
         return response.keys;
       }
-      throw 'Failed to QueryKeymap'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5365,7 +5363,7 @@ class X11Client {
       if (response is X11ListFontsReply) {
         return response.names;
       }
-      throw 'Failed to ListFonts'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5385,7 +5383,7 @@ class X11Client {
       if (response is X11GetFontPathReply) {
         return response.path;
       }
-      throw 'Failed to GetFontPath'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5671,7 +5669,7 @@ class X11Client {
       if (response is X11ListInstalledColormapsReply) {
         return response.cmaps;
       }
-      throw 'Failed to list installed colormaps'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5684,7 +5682,7 @@ class X11Client {
       if (response is X11AllocColorReply) {
         return response;
       }
-      throw 'Failed to AllocColor'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5698,7 +5696,7 @@ class X11Client {
       if (response is X11AllocNamedColorReply) {
         return response;
       }
-      throw 'Failed to AllocNamedColor'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5714,7 +5712,7 @@ class X11Client {
       if (response is X11AllocColorCellsReply) {
         return response;
       }
-      throw 'Failed to AllocColorCells'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5733,7 +5731,7 @@ class X11Client {
       if (response is X11AllocColorPlanesReply) {
         return response;
       }
-      throw 'Failed to AllocColorPlanes'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5769,7 +5767,7 @@ class X11Client {
       if (response is X11QueryColorsReply) {
         return response.colors;
       }
-      throw 'Failed to QueryColors'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5783,7 +5781,7 @@ class X11Client {
       if (response is X11LookupColorReply) {
         return response;
       }
-      throw 'Failed to LookupColor'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5832,7 +5830,7 @@ class X11Client {
       if (response is X11QueryExtensionReply) {
         return response;
       }
-      throw 'Failed to query extension'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5845,7 +5843,7 @@ class X11Client {
       if (response is X11ListExtensionsReply) {
         return response.names;
       }
-      throw 'Failed to list extensions'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5881,7 +5879,7 @@ class X11Client {
       if (response is X11GetScreenSaverReply) {
         return response;
       }
-      throw 'Failed to GetScreenSaver'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -5901,7 +5899,7 @@ class X11Client {
       if (response is X11ListHostsReply) {
         return response;
       }
-      throw 'Failed to list hosts'; // FIXME: Better error
+      throw response;
     });
   }
 
@@ -6086,7 +6084,7 @@ class X11Client {
       var error = X11Error.fromBuffer(_buffer);
       var handler = _requests[error.sequenceNumber];
       if (handler != null) {
-        handler.respond(error);
+        handler.replyError(error);
         _requests.remove(error.sequenceNumber);
       } else {
         _errorStreamController.add(error);
@@ -6105,59 +6103,59 @@ class X11Client {
       }
       var handler = _requests[sequenceNumber];
       if (handler != null) {
-        X11Response response;
+        X11Reply reply;
         if (handler.opcode == 3) {
-          response = X11GetWindowAttributesReply.fromBuffer(readBuffer);
+          reply = X11GetWindowAttributesReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 14) {
-          response = X11GetGeometryReply.fromBuffer(readBuffer);
+          reply = X11GetGeometryReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 15) {
-          response = X11QueryTreeReply.fromBuffer(readBuffer);
+          reply = X11QueryTreeReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 16) {
-          response = X11InternAtomReply.fromBuffer(readBuffer);
+          reply = X11InternAtomReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 17) {
-          response = X11GetAtomNameReply.fromBuffer(readBuffer);
+          reply = X11GetAtomNameReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 20) {
-          response = X11GetPropertyReply.fromBuffer(readBuffer);
+          reply = X11GetPropertyReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 21) {
-          response = X11ListPropertiesReply.fromBuffer(readBuffer);
+          reply = X11ListPropertiesReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 23) {
-          response = X11GetSelectionOwnerReply.fromBuffer(readBuffer);
+          reply = X11GetSelectionOwnerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 26) {
-          response = X11GrabPointerReply.fromBuffer(readBuffer);
+          reply = X11GrabPointerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 38) {
-          response = X11QueryPointerReply.fromBuffer(readBuffer);
+          reply = X11QueryPointerReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 40) {
-          response = X11TranslateCoordinatesReply.fromBuffer(readBuffer);
+          reply = X11TranslateCoordinatesReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 44) {
-          response = X11QueryKeymapReply.fromBuffer(readBuffer);
+          reply = X11QueryKeymapReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 49) {
-          response = X11ListFontsReply.fromBuffer(readBuffer);
+          reply = X11ListFontsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 52) {
-          response = X11GetFontPathReply.fromBuffer(readBuffer);
+          reply = X11GetFontPathReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 83) {
-          response = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
+          reply = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 84) {
-          response = X11AllocColorReply.fromBuffer(readBuffer);
+          reply = X11AllocColorReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 85) {
-          response = X11AllocNamedColorReply.fromBuffer(readBuffer);
+          reply = X11AllocNamedColorReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 86) {
-          response = X11AllocColorCellsReply.fromBuffer(readBuffer);
+          reply = X11AllocColorCellsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 87) {
-          response = X11AllocColorPlanesReply.fromBuffer(readBuffer);
+          reply = X11AllocColorPlanesReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 91) {
-          response = X11QueryColorsReply.fromBuffer(readBuffer);
+          reply = X11QueryColorsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 92) {
-          response = X11LookupColorReply.fromBuffer(readBuffer);
+          reply = X11LookupColorReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 98) {
-          response = X11QueryExtensionReply.fromBuffer(readBuffer);
+          reply = X11QueryExtensionReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 99) {
-          response = X11ListExtensionsReply.fromBuffer(readBuffer);
+          reply = X11ListExtensionsReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 108) {
-          response = X11GetScreenSaverReply.fromBuffer(readBuffer);
+          reply = X11GetScreenSaverReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 110) {
-          response = X11ListHostsReply.fromBuffer(readBuffer);
+          reply = X11ListHostsReply.fromBuffer(readBuffer);
         }
-        handler.respond(response);
+        handler.reply(reply);
         _requests.remove(sequenceNumber);
       }
     } else {
@@ -6195,7 +6193,7 @@ class X11Client {
     return _sequenceNumber;
   }
 
-  Future<X11Response> _awaitReply(int opcode, int sequenceNumber) {
+  Future<X11Reply> _awaitReply(int opcode, int sequenceNumber) {
     var handler = _RequestHandler(opcode);
     _requests[sequenceNumber] = handler;
     return handler.future;
