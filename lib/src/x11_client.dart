@@ -831,7 +831,7 @@ class X11GetWindowAttributesReply extends X11Reply {
       this.yourEventMask,
       this.doNotPropagateMask});
 
-  factory X11GetWindowAttributesReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11GetWindowAttributesReply fromBuffer(X11ReadBuffer buffer) {
     var backingStore = buffer.readUint8();
     var visual = buffer.readUint32();
     var class_ = X11WindowClass.values[buffer.readUint16()];
@@ -1204,7 +1204,7 @@ class X11GetGeometryReply extends X11Reply {
   X11GetGeometryReply(this.root, this.x, this.y, this.width, this.height,
       this.depth, this.borderWidth);
 
-  factory X11GetGeometryReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11GetGeometryReply fromBuffer(X11ReadBuffer buffer) {
     var depth = buffer.readUint8();
     var root = buffer.readUint32();
     var x = buffer.readInt16();
@@ -1254,7 +1254,7 @@ class X11QueryTreeReply extends X11Reply {
 
   X11QueryTreeReply(this.root, this.parent, this.children);
 
-  factory X11QueryTreeReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11QueryTreeReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var root = buffer.readUint32();
     var parent = buffer.readUint32();
@@ -1314,7 +1314,7 @@ class X11InternAtomReply extends X11Reply {
 
   X11InternAtomReply(this.atom);
 
-  factory X11InternAtomReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11InternAtomReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var atom = buffer.readUint32();
     return X11InternAtomReply(atom);
@@ -1351,7 +1351,7 @@ class X11GetAtomNameReply extends X11Reply {
 
   X11GetAtomNameReply(this.name);
 
-  factory X11GetAtomNameReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11GetAtomNameReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var nameLength = buffer.readUint16();
     buffer.skip(22);
@@ -1494,7 +1494,7 @@ class X11GetPropertyReply extends X11Reply {
 
   X11GetPropertyReply(this.type, this.format, this.value, this.bytesAfter);
 
-  factory X11GetPropertyReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11GetPropertyReply fromBuffer(X11ReadBuffer buffer) {
     var format = buffer.readUint8();
     var type = buffer.readUint32();
     var bytesAfter = buffer.readUint32();
@@ -1565,7 +1565,7 @@ class X11ListPropertiesReply extends X11Reply {
 
   X11ListPropertiesReply(this.atoms);
 
-  factory X11ListPropertiesReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11ListPropertiesReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var atomsLength = buffer.readUint16();
     buffer.skip(22);
@@ -1634,7 +1634,7 @@ class X11GetSelectionOwnerReply extends X11Reply {
 
   X11GetSelectionOwnerReply(this.owner);
 
-  factory X11GetSelectionOwnerReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11GetSelectionOwnerReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var owner = buffer.readUint32();
     return X11GetSelectionOwnerReply(owner);
@@ -1775,7 +1775,7 @@ class X11GrabPointerReply extends X11Reply {
 
   X11GrabPointerReply(this.status);
 
-  factory X11GrabPointerReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11GrabPointerReply fromBuffer(X11ReadBuffer buffer) {
     var status = buffer.readUint8();
     return X11GrabPointerReply(status);
   }
@@ -1966,7 +1966,7 @@ class X11QueryPointerReply extends X11Reply {
   X11QueryPointerReply(this.root, this.child, this.positionRoot,
       this.positionWindow, this.mask, this.sameScreen);
 
-  factory X11QueryPointerReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11QueryPointerReply fromBuffer(X11ReadBuffer buffer) {
     var sameScreen = buffer.readBool();
     var root = buffer.readUint32();
     var child = buffer.readUint32();
@@ -2030,7 +2030,7 @@ class X11TranslateCoordinatesReply extends X11Reply {
 
   X11TranslateCoordinatesReply(this.child, this.dst, {this.sameScreen = true});
 
-  factory X11TranslateCoordinatesReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11TranslateCoordinatesReply fromBuffer(X11ReadBuffer buffer) {
     var sameScreen = buffer.readBool();
     var child = buffer.readUint32();
     var dstX = buffer.readInt16();
@@ -2128,7 +2128,7 @@ class X11GetInputFocusReply extends X11Reply {
 
   X11GetInputFocusReply(this.focus, {this.revertTo = 0});
 
-  factory X11GetInputFocusReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11GetInputFocusReply fromBuffer(X11ReadBuffer buffer) {
     var revertTo = buffer.readUint8();
     var focus = buffer.readUint32();
     return X11GetInputFocusReply(focus, revertTo: revertTo);
@@ -2160,7 +2160,7 @@ class X11QueryKeymapReply extends X11Reply {
 
   X11QueryKeymapReply(this.keys);
 
-  factory X11QueryKeymapReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11QueryKeymapReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var keys = <int>[];
     for (var i = 0; i < 32; i++) {
@@ -2271,7 +2271,7 @@ class X11QueryFontReply extends X11Reply {
       this.properties = const [],
       this.charInfos});
 
-  factory X11QueryFontReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11QueryFontReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var minBounds = _readCharInfo(buffer);
     buffer.skip(4);
@@ -2390,7 +2390,7 @@ class X11ListFontsReply extends X11Reply {
 
   X11ListFontsReply(this.names);
 
-  factory X11ListFontsReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11ListFontsReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var namesLength = buffer.readUint16();
     buffer.skip(22);
@@ -2450,7 +2450,7 @@ class X11GetFontPathReply extends X11Reply {
 
   X11GetFontPathReply(this.path);
 
-  factory X11GetFontPathReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11GetFontPathReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var pathLength = buffer.readUint16();
     buffer.skip(22);
@@ -3949,7 +3949,7 @@ class X11ListInstalledColormapsReply extends X11Reply {
 
   X11ListInstalledColormapsReply(this.cmaps);
 
-  factory X11ListInstalledColormapsReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11ListInstalledColormapsReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var cmapsLength = buffer.readUint16();
     buffer.skip(22);
@@ -4004,7 +4004,7 @@ class X11AllocColorReply extends X11Reply {
 
   X11AllocColorReply(this.pixel, this.color);
 
-  factory X11AllocColorReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11AllocColorReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var red = buffer.readUint16();
     var green = buffer.readUint16();
@@ -4059,7 +4059,7 @@ class X11AllocNamedColorReply extends X11Reply {
 
   X11AllocNamedColorReply(this.pixel, this.exact, this.visual);
 
-  factory X11AllocNamedColorReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11AllocNamedColorReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var pixel = buffer.readUint32();
     var exactRed = buffer.readUint16();
@@ -4120,7 +4120,7 @@ class X11AllocColorCellsReply extends X11Reply {
 
   X11AllocColorCellsReply(this.pixels, this.masks);
 
-  factory X11AllocColorCellsReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11AllocColorCellsReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var pixelsLength = buffer.readUint16();
     var masksLength = buffer.readUint16();
@@ -4196,7 +4196,7 @@ class X11AllocColorPlanesReply extends X11Reply {
   X11AllocColorPlanesReply(
       this.pixels, this.redMask, this.greenMask, this.blueMask);
 
-  factory X11AllocColorPlanesReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11AllocColorPlanesReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var pixelsLength = buffer.readUint16();
     buffer.skip(2);
@@ -4385,7 +4385,7 @@ class X11QueryColorsReply extends X11Reply {
 
   X11QueryColorsReply(this.colors);
 
-  factory X11QueryColorsReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11QueryColorsReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var colorsLength = buffer.readUint16();
     buffer.skip(22);
@@ -4447,7 +4447,7 @@ class X11LookupColorReply extends X11Reply {
 
   X11LookupColorReply(this.exact, this.visual);
 
-  factory X11LookupColorReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11LookupColorReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var exactRed = buffer.readUint16();
     var exactGreen = buffer.readUint16();
@@ -4660,7 +4660,7 @@ class X11QueryExtensionReply extends X11Reply {
   X11QueryExtensionReply(
       this.present, this.majorOpcode, this.firstEvent, this.firstError);
 
-  factory X11QueryExtensionReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11QueryExtensionReply fromBuffer(X11ReadBuffer buffer) {
     var present = buffer.readBool();
     var majorOpcode = buffer.readUint8();
     var firstEvent = buffer.readUint8();
@@ -4696,7 +4696,7 @@ class X11ListExtensionsReply extends X11Reply {
 
   X11ListExtensionsReply(this.names);
 
-  factory X11ListExtensionsReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11ListExtensionsReply fromBuffer(X11ReadBuffer buffer) {
     var namesLength = buffer.readUint8();
     buffer.skip(24);
     var names = buffer.readListOfString(namesLength);
@@ -4805,7 +4805,7 @@ class X11GetScreenSaverReply extends X11Reply {
   X11GetScreenSaverReply(
       this.timeout, this.interval, this.preferBlanking, this.allowExposures);
 
-  factory X11GetScreenSaverReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11GetScreenSaverReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var timeout = buffer.readUint16();
     var interval = buffer.readUint16();
@@ -4880,7 +4880,7 @@ class X11ListHostsReply extends X11Reply {
 
   X11ListHostsReply(this.mode, this.hosts);
 
-  factory X11ListHostsReply.fromBuffer(X11ReadBuffer buffer) {
+  static X11ListHostsReply fromBuffer(X11ReadBuffer buffer) {
     var mode = buffer.readUint8();
     var hostsLength = buffer.readUint16();
     buffer.skip(22);
@@ -6299,13 +6299,17 @@ class X11UnknownEvent extends X11Event {
 }
 
 class _RequestHandler<T> {
-  final int opcode;
+  T Function(X11ReadBuffer) decodeFunction;
   final completer = Completer<T>();
 
-  _RequestHandler(this.opcode);
+  _RequestHandler(this.decodeFunction);
 
   Future<T> get future => completer.future;
-  void reply(T reply) => completer.complete(reply);
+
+  void processReply(X11ReadBuffer buffer) {
+    completer.complete(decodeFunction(buffer));
+  }
+
   void replyError(X11Error error) => completer.completeError(error);
 }
 
@@ -6533,7 +6537,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(3, buffer.data);
-    return _awaitReply<X11GetWindowAttributesReply>(3, sequenceNumber);
+    return _awaitReply<X11GetWindowAttributesReply>(
+        sequenceNumber, X11GetWindowAttributesReply.fromBuffer);
   }
 
   int destroyWindow(int window) {
@@ -6622,7 +6627,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(14, buffer.data);
-    return _awaitReply<X11GetGeometryReply>(14, sequenceNumber);
+    return _awaitReply<X11GetGeometryReply>(
+        sequenceNumber, X11GetGeometryReply.fromBuffer);
   }
 
   Future<X11QueryTreeReply> queryTree(int window) async {
@@ -6630,7 +6636,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(15, buffer.data);
-    return _awaitReply<X11QueryTreeReply>(15, sequenceNumber);
+    return _awaitReply<X11QueryTreeReply>(
+        sequenceNumber, X11QueryTreeReply.fromBuffer);
   }
 
   Future<int> internAtom(String name, {bool onlyIfExists = false}) async {
@@ -6642,7 +6649,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(16, buffer.data);
-    var reply = await _awaitReply<X11InternAtomReply>(16, sequenceNumber);
+    var reply = await _awaitReply<X11InternAtomReply>(
+        sequenceNumber, X11InternAtomReply.fromBuffer);
     return reply.atom;
   }
 
@@ -6651,7 +6659,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(17, buffer.data);
-    var reply = await _awaitReply<X11GetAtomNameReply>(17, sequenceNumber);
+    var reply = await _awaitReply<X11GetAtomNameReply>(
+        sequenceNumber, X11GetAtomNameReply.fromBuffer);
     return reply.name;
   }
 
@@ -6703,7 +6712,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(20, buffer.data);
-    return _awaitReply<X11GetPropertyReply>(20, sequenceNumber);
+    return _awaitReply<X11GetPropertyReply>(
+        sequenceNumber, X11GetPropertyReply.fromBuffer);
   }
 
   Future<String> getPropertyString(int window, int property) async {
@@ -6721,7 +6731,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(21, buffer.data);
-    var reply = await _awaitReply<X11ListPropertiesReply>(21, sequenceNumber);
+    var reply = await _awaitReply<X11ListPropertiesReply>(
+        sequenceNumber, X11ListPropertiesReply.fromBuffer);
     return reply.atoms;
   }
 
@@ -6737,8 +6748,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(23, buffer.data);
-    var reply =
-        await _awaitReply<X11GetSelectionOwnerReply>(23, sequenceNumber);
+    var reply = await _awaitReply<X11GetSelectionOwnerReply>(
+        sequenceNumber, X11GetSelectionOwnerReply.fromBuffer);
     return reply.owner;
   }
 
@@ -6770,7 +6781,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(26, buffer.data);
-    var reply = await _awaitReply<X11GrabPointerReply>(26, sequenceNumber);
+    var reply = await _awaitReply<X11GrabPointerReply>(
+        sequenceNumber, X11GrabPointerReply.fromBuffer);
     return reply.status;
   }
 
@@ -6827,7 +6839,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(38, buffer.data);
-    return _awaitReply<X11QueryPointerReply>(38, sequenceNumber);
+    return _awaitReply<X11QueryPointerReply>(
+        sequenceNumber, X11QueryPointerReply.fromBuffer);
   }
 
   Future<X11TranslateCoordinatesReply> translateCoordinates(
@@ -6836,7 +6849,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(40, buffer.data);
-    return _awaitReply<X11TranslateCoordinatesReply>(40, sequenceNumber);
+    return _awaitReply<X11TranslateCoordinatesReply>(
+        sequenceNumber, X11TranslateCoordinatesReply.fromBuffer);
   }
 
   int warpPointer(X11Point dst,
@@ -6863,7 +6877,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(43, buffer.data);
-    return _awaitReply<X11GetInputFocusReply>(43, sequenceNumber);
+    return _awaitReply<X11GetInputFocusReply>(
+        sequenceNumber, X11GetInputFocusReply.fromBuffer);
   }
 
   Future<List<int>> queryKeymap() async {
@@ -6871,7 +6886,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(44, buffer.data);
-    var reply = await _awaitReply<X11QueryKeymapReply>(44, sequenceNumber);
+    var reply = await _awaitReply<X11QueryKeymapReply>(
+        sequenceNumber, X11QueryKeymapReply.fromBuffer);
     return reply.keys;
   }
 
@@ -6894,7 +6910,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(47, buffer.data);
-    return _awaitReply<X11QueryFontReply>(47, sequenceNumber);
+    return _awaitReply<X11QueryFontReply>(
+        sequenceNumber, X11QueryFontReply.fromBuffer);
   }
 
   Future<List<String>> listFonts(
@@ -6903,7 +6920,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(49, buffer.data);
-    var reply = await _awaitReply<X11ListFontsReply>(49, sequenceNumber);
+    var reply = await _awaitReply<X11ListFontsReply>(
+        sequenceNumber, X11ListFontsReply.fromBuffer);
     return reply.names;
   }
 
@@ -6919,7 +6937,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(52, buffer.data);
-    var reply = await _awaitReply<X11GetFontPathReply>(52, sequenceNumber);
+    var reply = await _awaitReply<X11GetFontPathReply>(
+        sequenceNumber, X11GetFontPathReply.fromBuffer);
     return reply.path;
   }
 
@@ -7215,8 +7234,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(83, buffer.data);
-    var reply =
-        await _awaitReply<X11ListInstalledColormapsReply>(83, sequenceNumber);
+    var reply = await _awaitReply<X11ListInstalledColormapsReply>(
+        sequenceNumber, X11ListInstalledColormapsReply.fromBuffer);
     return reply.cmaps;
   }
 
@@ -7225,7 +7244,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(84, buffer.data);
-    return _awaitReply<X11AllocColorReply>(84, sequenceNumber);
+    return _awaitReply<X11AllocColorReply>(
+        sequenceNumber, X11AllocColorReply.fromBuffer);
   }
 
   Future<X11AllocNamedColorReply> allocNamedColor(int cmap, String name) async {
@@ -7233,7 +7253,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(85, buffer.data);
-    return _awaitReply<X11AllocNamedColorReply>(85, sequenceNumber);
+    return _awaitReply<X11AllocNamedColorReply>(
+        sequenceNumber, X11AllocNamedColorReply.fromBuffer);
   }
 
   Future<X11AllocColorCellsReply> allocColorCells(int cmap, int colors,
@@ -7243,7 +7264,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(86, buffer.data);
-    return _awaitReply<X11AllocColorCellsReply>(86, sequenceNumber);
+    return _awaitReply<X11AllocColorCellsReply>(
+        sequenceNumber, X11AllocColorCellsReply.fromBuffer);
   }
 
   Future<X11AllocColorPlanesReply> allocColorPlanes(int cmap, int colors,
@@ -7256,7 +7278,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(87, buffer.data);
-    return _awaitReply<X11AllocColorPlanesReply>(87, sequenceNumber);
+    return _awaitReply<X11AllocColorPlanesReply>(
+        sequenceNumber, X11AllocColorPlanesReply.fromBuffer);
   }
 
   int freeColors(int cmap, List<int> pixels, int planeMask) {
@@ -7287,7 +7310,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(91, buffer.data);
-    var reply = await _awaitReply<X11QueryColorsReply>(91, sequenceNumber);
+    var reply = await _awaitReply<X11QueryColorsReply>(
+        sequenceNumber, X11QueryColorsReply.fromBuffer);
     return reply.colors;
   }
 
@@ -7296,7 +7320,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(92, buffer.data);
-    return _awaitReply<X11LookupColorReply>(92, sequenceNumber);
+    return _awaitReply<X11LookupColorReply>(
+        sequenceNumber, X11LookupColorReply.fromBuffer);
   }
 
   int createCursor(
@@ -7339,7 +7364,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(98, buffer.data);
-    return _awaitReply<X11QueryExtensionReply>(98, sequenceNumber);
+    return _awaitReply<X11QueryExtensionReply>(
+        sequenceNumber, X11QueryExtensionReply.fromBuffer);
   }
 
   Future<List<String>> listExtensions() async {
@@ -7347,7 +7373,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(99, buffer.data);
-    var reply = await _awaitReply<X11ListExtensionsReply>(99, sequenceNumber);
+    var reply = await _awaitReply<X11ListExtensionsReply>(
+        sequenceNumber, X11ListExtensionsReply.fromBuffer);
     return reply.names;
   }
 
@@ -7378,7 +7405,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(108, buffer.data);
-    return _awaitReply<X11GetScreenSaverReply>(108, sequenceNumber);
+    return _awaitReply<X11GetScreenSaverReply>(
+        sequenceNumber, X11GetScreenSaverReply.fromBuffer);
   }
 
   int changeHosts(int mode, int family, List<int> address) {
@@ -7393,7 +7421,8 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(110, buffer.data);
-    return _awaitReply<X11ListHostsReply>(110, sequenceNumber);
+    return _awaitReply<X11ListHostsReply>(
+        sequenceNumber, X11ListHostsReply.fromBuffer);
   }
 
   int setAccessControl(int mode) {
@@ -7583,8 +7612,8 @@ class X11Client {
         _errorStreamController.add(error);
       }
     } else if (reply == 1) {
-      var readBuffer = X11ReadBuffer();
-      readBuffer.add(_buffer.readUint8());
+      var replyBuffer = X11ReadBuffer();
+      replyBuffer.add(_buffer.readUint8());
       var sequenceNumber = _buffer.readUint16();
       var length = _buffer.readUint32();
       if (_buffer.remaining < 24 + length * 4) {
@@ -7592,67 +7621,11 @@ class X11Client {
         return false;
       }
       for (var i = 0; i < 24 + length * 4; i++) {
-        readBuffer.add(_buffer.readUint8());
+        replyBuffer.add(_buffer.readUint8());
       }
       var handler = _requests[sequenceNumber];
       if (handler != null) {
-        X11Reply reply;
-        if (handler.opcode == 3) {
-          reply = X11GetWindowAttributesReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 14) {
-          reply = X11GetGeometryReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 15) {
-          reply = X11QueryTreeReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 16) {
-          reply = X11InternAtomReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 17) {
-          reply = X11GetAtomNameReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 20) {
-          reply = X11GetPropertyReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 21) {
-          reply = X11ListPropertiesReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 23) {
-          reply = X11GetSelectionOwnerReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 26) {
-          reply = X11GrabPointerReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 38) {
-          reply = X11QueryPointerReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 40) {
-          reply = X11TranslateCoordinatesReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 43) {
-          reply = X11GetInputFocusReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 44) {
-          reply = X11QueryKeymapReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 47) {
-          reply = X11QueryFontReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 49) {
-          reply = X11ListFontsReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 52) {
-          reply = X11GetFontPathReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 83) {
-          reply = X11ListInstalledColormapsReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 84) {
-          reply = X11AllocColorReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 85) {
-          reply = X11AllocNamedColorReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 86) {
-          reply = X11AllocColorCellsReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 87) {
-          reply = X11AllocColorPlanesReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 91) {
-          reply = X11QueryColorsReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 92) {
-          reply = X11LookupColorReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 98) {
-          reply = X11QueryExtensionReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 99) {
-          reply = X11ListExtensionsReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 108) {
-          reply = X11GetScreenSaverReply.fromBuffer(readBuffer);
-        } else if (handler.opcode == 110) {
-          reply = X11ListHostsReply.fromBuffer(readBuffer);
-        }
-        handler.reply(reply);
+        handler.processReply(replyBuffer);
         _requests.remove(sequenceNumber);
       }
     } else {
@@ -7689,8 +7662,9 @@ class X11Client {
     return _sequenceNumber;
   }
 
-  Future<T> _awaitReply<T>(int opcode, int sequenceNumber) {
-    var handler = _RequestHandler<T>(opcode);
+  Future<T> _awaitReply<T>(
+      int sequenceNumber, T Function(X11ReadBuffer) decodeFunction) {
+    var handler = _RequestHandler<T>(decodeFunction);
     _requests[sequenceNumber] = handler;
     return handler.future;
   }
