@@ -285,7 +285,7 @@ class X11Error {
       'X11Error(code: ${code}, sequenceNumber: ${sequenceNumber}, resourceId: ${resourceId}, majorOpcode: ${majorOpcode}, minorOpcode: ${minorOpcode})';
 }
 
-class X11Event {
+abstract class X11Event {
   X11Event();
 
   factory X11Event.fromBuffer(int code, X11ReadBuffer buffer) {
@@ -356,11 +356,11 @@ class X11Event {
     } else if (code == 34) {
       return X11MappingNotifyEvent.fromBuffer(buffer);
     } else {
-      return X11UnknownEvent.fromBuffer(buffer);
+      return X11UnknownEvent.fromBuffer(code, buffer);
     }
   }
 
-  int encode(X11WriteBuffer buffer) {}
+  int encode(X11WriteBuffer buffer);
 }
 
 enum X11WindowClass { copyFromParent, inputOutput, inputOnly }
@@ -6052,15 +6052,29 @@ class X11MappingNotifyEvent extends X11Event {
 }
 
 class X11UnknownEvent extends X11Event {
-  X11UnknownEvent();
+  final int code;
+  final List<int> data;
 
-  factory X11UnknownEvent.fromBuffer(X11ReadBuffer buffer) {
-    buffer.skip(26);
-    return X11UnknownEvent();
+  X11UnknownEvent(this.code, this.data);
+
+  factory X11UnknownEvent.fromBuffer(int code, X11ReadBuffer buffer) {
+    var data = <int>[];
+    for (var i = 0; i < 28; i++) {
+      data.add(buffer.readUint8());
+    }
+    return X11UnknownEvent(code, data);
   }
 
   @override
-  String toString() => 'X11UnknownEvent()';
+  int encode(X11WriteBuffer buffer) {
+    for (var d in data) {
+      buffer.writeUint8(d);
+    }
+    return code;
+  }
+
+  @override
+  String toString() => 'X11UnknownEvent(code: ${code})';
 }
 
 class _RequestHandler {
