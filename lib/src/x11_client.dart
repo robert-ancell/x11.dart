@@ -153,10 +153,8 @@ class X11Screen {
   int whitePixel;
   int blackPixel;
   int currentInputMasks;
-  int widthInPixels;
-  int heightInPixels;
-  int widthInMillimeters;
-  int heightInMillimeters;
+  X11Size sizeInPixels;
+  X11Size sizeInMillimeters;
   int minInstalledMaps;
   int maxInstalledMaps;
   int rootVisual;
@@ -167,7 +165,7 @@ class X11Screen {
 
   @override
   String toString() =>
-      'X11Window(window: ${window}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatId(whitePixel)}, blackPixel: ${_formatId(blackPixel)}, currentInputMasks: ${_formatId(currentInputMasks)}, widthInPixels: ${widthInPixels}, heightInPixels: ${heightInPixels}, widthInMillimeters: ${widthInMillimeters}, heightInMillimeters: ${heightInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
+      'X11Window(window: ${window}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatId(whitePixel)}, blackPixel: ${_formatId(blackPixel)}, currentInputMasks: ${_formatId(currentInputMasks)}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
 }
 
 class X11Depth {
@@ -258,6 +256,16 @@ class X11Segment {
 
   @override
   String toString() => 'X11Segment(x1: ${x1}, y1: ${y1}, x2: ${x2}, y2: ${y2})';
+}
+
+class X11Size {
+  final int width;
+  final int height;
+
+  const X11Size(this.width, this.height);
+
+  @override
+  String toString() => 'X11Size(width: ${width}, height: ${height})';
 }
 
 class X11Visual {
@@ -390,10 +398,7 @@ enum X11WindowClass { copyFromParent, inputOutput, inputOnly }
 class X11CreateWindowRequest extends X11Request {
   final int wid;
   final int parent;
-  final int x;
-  final int y;
-  final int width;
-  final int height;
+  final X11Rectangle geometry;
   final int depth;
   final int borderWidth;
   final X11WindowClass class_;
@@ -414,13 +419,8 @@ class X11CreateWindowRequest extends X11Request {
   final int colormap;
   final int cursor;
 
-  X11CreateWindowRequest(this.wid, this.parent,
-      {this.x = 0,
-      this.y = 0,
-      this.width = 0,
-      this.height = 0,
-      this.depth = 0,
-      this.class_ = X11WindowClass.inputOutput,
+  X11CreateWindowRequest(this.wid, this.parent, this.geometry, this.depth,
+      {this.class_ = X11WindowClass.inputOutput,
       this.visual = 0,
       this.borderWidth = 0,
       this.backgroundPixmap,
@@ -511,12 +511,8 @@ class X11CreateWindowRequest extends X11Request {
     if ((valueMask & 0x4000) != 0) {
       cursor = buffer.readUint32();
     }
-    return X11CreateWindowRequest(wid, parent,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        depth: depth,
+    return X11CreateWindowRequest(
+        wid, parent, X11Rectangle(x, y, width, height), depth,
         class_: class_,
         visual: visual,
         borderWidth: borderWidth,
@@ -542,10 +538,10 @@ class X11CreateWindowRequest extends X11Request {
     buffer.writeUint8(depth);
     buffer.writeUint32(wid);
     buffer.writeUint32(parent);
-    buffer.writeInt16(x);
-    buffer.writeInt16(y);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeInt16(geometry.x);
+    buffer.writeInt16(geometry.y);
+    buffer.writeUint16(geometry.width);
+    buffer.writeUint16(geometry.height);
     buffer.writeUint16(borderWidth);
     buffer.writeUint16(class_.index);
     buffer.writeUint32(visual);
@@ -1194,15 +1190,11 @@ class X11GetGeometryRequest extends X11Request {
 
 class X11GetGeometryReply extends X11Reply {
   final int root;
-  final int x;
-  final int y;
-  final int width;
-  final int height;
+  final X11Rectangle geometry;
   final int depth;
   final int borderWidth;
 
-  X11GetGeometryReply(this.root, this.x, this.y, this.width, this.height,
-      this.depth, this.borderWidth);
+  X11GetGeometryReply(this.root, this.geometry, this.depth, this.borderWidth);
 
   static X11GetGeometryReply fromBuffer(X11ReadBuffer buffer) {
     var depth = buffer.readUint8();
@@ -1213,17 +1205,18 @@ class X11GetGeometryReply extends X11Reply {
     var height = buffer.readUint16();
     var borderWidth = buffer.readUint16();
     buffer.skip(10);
-    return X11GetGeometryReply(root, x, y, width, height, depth, borderWidth);
+    return X11GetGeometryReply(
+        root, X11Rectangle(x, y, width, height), depth, borderWidth);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(depth);
     buffer.writeUint32(root);
-    buffer.writeInt16(x);
-    buffer.writeInt16(y);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeInt16(geometry.x);
+    buffer.writeInt16(geometry.y);
+    buffer.writeUint16(geometry.width);
+    buffer.writeUint16(geometry.height);
     buffer.writeUint16(borderWidth);
     buffer.skip(10);
   }
@@ -2470,12 +2463,10 @@ class X11GetFontPathReply extends X11Reply {
 class X11CreatePixmapRequest extends X11Request {
   final int pid;
   final int drawable;
-  final int width;
-  final int height;
+  final X11Size size;
   final int depth;
 
-  X11CreatePixmapRequest(
-      this.pid, this.drawable, this.width, this.height, this.depth);
+  X11CreatePixmapRequest(this.pid, this.drawable, this.size, this.depth);
 
   factory X11CreatePixmapRequest.fromBuffer(X11ReadBuffer buffer) {
     var depth = buffer.readUint8();
@@ -2483,7 +2474,7 @@ class X11CreatePixmapRequest extends X11Request {
     var drawable = buffer.readUint32();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11CreatePixmapRequest(pid, drawable, width, height, depth);
+    return X11CreatePixmapRequest(pid, drawable, X11Size(width, height), depth);
   }
 
   @override
@@ -2491,8 +2482,8 @@ class X11CreatePixmapRequest extends X11Request {
     buffer.writeUint8(depth);
     buffer.writeUint32(pid);
     buffer.writeUint32(drawable);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeUint16(size.width);
+    buffer.writeUint16(size.height);
   }
 }
 
@@ -4629,46 +4620,44 @@ class X11RecolorCursorRequest extends X11Request {
 class X11QueryBestSizeRequest extends X11Request {
   final int drawable;
   final int class_;
-  final int width;
-  final int height;
+  final X11Size size;
 
-  X11QueryBestSizeRequest(this.drawable, this.class_, this.width, this.height);
+  X11QueryBestSizeRequest(this.drawable, this.class_, this.size);
 
   factory X11QueryBestSizeRequest.fromBuffer(X11ReadBuffer buffer) {
     var class_ = buffer.readUint8();
     var drawable = buffer.readUint32();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11QueryBestSizeRequest(drawable, class_, width, height);
+    return X11QueryBestSizeRequest(drawable, class_, X11Size(width, height));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(class_);
     buffer.writeUint32(drawable);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeUint16(size.width);
+    buffer.writeUint16(size.height);
   }
 }
 
 class X11QueryBestSizeReply extends X11Reply {
-  final int width;
-  final int height;
+  final X11Size size;
 
-  X11QueryBestSizeReply(this.width, this.height);
+  X11QueryBestSizeReply(this.size);
 
   static X11QueryBestSizeReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11QueryBestSizeReply(width, height);
+    return X11QueryBestSizeReply(X11Size(width, height));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeUint16(size.width);
+    buffer.writeUint16(size.height);
   }
 }
 
@@ -5873,26 +5862,15 @@ class X11ReparentNotifyEvent extends X11Event {
 }
 
 class X11ConfigureNotifyEvent extends X11Event {
-  final int event;
   final int window;
+  final X11Rectangle geometry;
+  final int event;
   final int aboveSibling;
-  final int x;
-  final int y;
-  final int width;
-  final int height;
   final int borderWidth;
   final bool overrideRedirect;
 
-  X11ConfigureNotifyEvent(
-      {this.event,
-      this.window,
-      this.aboveSibling,
-      this.x,
-      this.y,
-      this.width,
-      this.height,
-      this.borderWidth,
-      this.overrideRedirect});
+  X11ConfigureNotifyEvent(this.window, this.geometry,
+      {this.event, this.aboveSibling, this.borderWidth, this.overrideRedirect});
 
   factory X11ConfigureNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -5906,14 +5884,9 @@ class X11ConfigureNotifyEvent extends X11Event {
     var borderWidth = buffer.readUint16();
     var overrideRedirect = buffer.readBool();
     buffer.skip(1);
-    return X11ConfigureNotifyEvent(
+    return X11ConfigureNotifyEvent(window, X11Rectangle(x, y, width, height),
         event: event,
-        window: window,
         aboveSibling: aboveSibling,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
         borderWidth: borderWidth,
         overrideRedirect: overrideRedirect);
   }
@@ -5924,10 +5897,10 @@ class X11ConfigureNotifyEvent extends X11Event {
     buffer.writeUint32(event);
     buffer.writeUint32(window);
     buffer.writeUint32(aboveSibling);
-    buffer.writeInt16(x);
-    buffer.writeInt16(y);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeInt16(geometry.x);
+    buffer.writeInt16(geometry.y);
+    buffer.writeUint16(geometry.width);
+    buffer.writeUint16(geometry.height);
     buffer.writeUint16(borderWidth);
     buffer.writeBool(overrideRedirect);
     buffer.skip(1);
@@ -5940,22 +5913,14 @@ class X11ConfigureRequestEvent extends X11Event {
   final int parent;
   final int window;
   final int sibling;
-  final int x;
-  final int y;
-  final int width;
-  final int height;
+  final X11Rectangle geometry;
   final int borderWidth;
   final int valueMask;
 
-  X11ConfigureRequestEvent(
+  X11ConfigureRequestEvent(this.window, this.geometry,
       {this.stackMode,
       this.parent,
-      this.window,
       this.sibling,
-      this.x,
-      this.y,
-      this.width,
-      this.height,
       this.borderWidth,
       this.valueMask});
 
@@ -5970,15 +5935,10 @@ class X11ConfigureRequestEvent extends X11Event {
     var height = buffer.readUint16();
     var borderWidth = buffer.readUint16();
     var valueMask = buffer.readUint16();
-    return X11ConfigureRequestEvent(
+    return X11ConfigureRequestEvent(window, X11Rectangle(x, y, width, height),
         stackMode: stackMode,
         parent: parent,
-        window: window,
         sibling: sibling,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
         borderWidth: borderWidth,
         valueMask: valueMask);
   }
@@ -5989,10 +5949,10 @@ class X11ConfigureRequestEvent extends X11Event {
     buffer.writeUint32(parent);
     buffer.writeUint32(window);
     buffer.writeUint32(sibling);
-    buffer.writeInt16(x);
-    buffer.writeInt16(y);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeInt16(geometry.x);
+    buffer.writeInt16(geometry.y);
+    buffer.writeUint16(geometry.width);
+    buffer.writeUint16(geometry.height);
     buffer.writeUint16(borderWidth);
     buffer.writeUint16(valueMask);
     return 23;
@@ -6028,25 +5988,24 @@ class X11GravityNotifyEvent extends X11Event {
 
 class X11ResizeRequestEvent extends X11Event {
   final int window;
-  final int width;
-  final int height;
+  final X11Size size;
 
-  X11ResizeRequestEvent(this.window, this.width, this.height);
+  X11ResizeRequestEvent(this.window, this.size);
 
   factory X11ResizeRequestEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var window = buffer.readUint32();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11ResizeRequestEvent(window, width, height);
+    return X11ResizeRequestEvent(window, X11Size(width, height));
   }
 
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(window);
-    buffer.writeUint16(width);
-    buffer.writeUint16(height);
+    buffer.writeUint16(size.width);
+    buffer.writeUint16(size.height);
     return 25;
   }
 }
@@ -6478,12 +6437,8 @@ class X11Client {
     return id;
   }
 
-  int createWindow(int wid, int parent,
+  int createWindow(int wid, int parent, X11Rectangle geometry,
       {X11WindowClass class_ = X11WindowClass.inputOutput,
-      int x = 0,
-      int y = 0,
-      int width = 0,
-      int height = 0,
       int depth = 0,
       int visual = 0,
       int borderWidth = 0,
@@ -6509,12 +6464,7 @@ class X11Client {
         eventMaskValue |= 1 << event.index;
       }
     }
-    var request = X11CreateWindowRequest(wid, parent,
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        depth: depth,
+    var request = X11CreateWindowRequest(wid, parent, geometry, depth,
         borderWidth: borderWidth,
         class_: class_,
         visual: visual,
@@ -6644,7 +6594,13 @@ class X11Client {
   }
 
   int configureWindow(int window,
-      {x, y, width, height, borderWidth, sibling, stackMode}) {
+      {int x,
+      int y,
+      int width,
+      int height,
+      int borderWidth,
+      int sibling,
+      int stackMode}) {
     var request = X11ConfigureWindowRequest(window,
         x: x,
         y: y,
@@ -6987,8 +6943,8 @@ class X11Client {
     return reply.path;
   }
 
-  int createPixmap(int pid, int drawable, int width, int height, int depth) {
-    var request = X11CreatePixmapRequest(pid, drawable, width, height, depth);
+  int createPixmap(int pid, int drawable, X11Size size, int depth) {
+    var request = X11CreatePixmapRequest(pid, drawable, size, depth);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(53, buffer.data);
@@ -7155,7 +7111,7 @@ class X11Client {
   }
 
   int copyPlane(int srcDrawable, int dstDrawable, int gc, X11Rectangle srcArea,
-      X11Point dstPosition, int width, int height, int bitPlane) {
+      X11Point dstPosition, int bitPlane) {
     var request = X11CopyPlaneRequest(
         srcDrawable, dstDrawable, gc, srcArea, dstPosition, bitPlane);
     var buffer = X11WriteBuffer();
@@ -7404,14 +7360,14 @@ class X11Client {
     return _sendRequest(96, buffer.data);
   }
 
-  Future<X11QueryBestSizeReply> queryBestSize(
-      int drawable, int class_, int width, int height) async {
-    var request = X11QueryBestSizeRequest(drawable, class_, width, height);
+  Future<X11Size> queryBestSize(int drawable, int class_, X11Size size) async {
+    var request = X11QueryBestSizeRequest(drawable, class_, size);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(97, buffer.data);
-    return _awaitReply<X11QueryBestSizeReply>(
+    var reply = await _awaitReply<X11QueryBestSizeReply>(
         sequenceNumber, X11QueryBestSizeReply.fromBuffer);
+    return reply.size;
   }
 
   Future<X11QueryExtensionReply> queryExtension(String name) async {
@@ -7598,10 +7554,10 @@ class X11Client {
         screen.whitePixel = _buffer.readUint32();
         screen.blackPixel = _buffer.readUint32();
         screen.currentInputMasks = _buffer.readUint32();
-        screen.widthInPixels = _buffer.readUint16();
-        screen.heightInPixels = _buffer.readUint16();
-        screen.widthInMillimeters = _buffer.readUint16();
-        screen.heightInMillimeters = _buffer.readUint16();
+        screen.sizeInPixels =
+            X11Size(_buffer.readUint16(), _buffer.readUint16());
+        screen.sizeInMillimeters =
+            X11Size(_buffer.readUint16(), _buffer.readUint16());
         screen.minInstalledMaps = _buffer.readUint16();
         screen.maxInstalledMaps = _buffer.readUint16();
         screen.rootVisual = _buffer.readUint32();
