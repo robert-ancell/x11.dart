@@ -4358,9 +4358,93 @@ class X11BellRequest extends X11Request {
 
 // FIXME(robert-ancell): GetPointerControl
 
-// FIXME(robert-ancell): SetScreenSaver
+class X11SetScreenSaverRequest extends X11Request {
+  final int timeout;
+  final int interval;
+  final bool preferBlanking;
+  final bool allowExposures;
 
-// FIXME(robert-ancell): GetScreenSaver
+  X11SetScreenSaverRequest(
+      {this.timeout = -1,
+      this.interval = -1,
+      this.preferBlanking,
+      this.allowExposures});
+
+  factory X11SetScreenSaverRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var timeout = buffer.readInt16();
+    var interval = buffer.readInt16();
+    var preferBlanking = buffer.readBool();
+    var allowExposures = buffer.readBool();
+    return X11SetScreenSaverRequest(
+        timeout: timeout,
+        interval: interval,
+        preferBlanking: preferBlanking,
+        allowExposures: allowExposures);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeInt16(timeout);
+    buffer.writeInt16(interval);
+    if (preferBlanking != null) {
+      buffer.writeBool(preferBlanking);
+    } else {
+      buffer.writeUint8(2);
+    }
+    if (allowExposures != null) {
+      buffer.writeBool(allowExposures);
+    } else {
+      buffer.writeUint8(2);
+    }
+  }
+}
+
+class X11GetScreenSaverRequest extends X11Request {
+  X11GetScreenSaverRequest();
+
+  factory X11GetScreenSaverRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    return X11GetScreenSaverRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
+}
+
+class X11GetScreenSaverReply extends X11Reply {
+  final int timeout;
+  final int interval;
+  final bool preferBlanking;
+  final bool allowExposures;
+
+  X11GetScreenSaverReply(
+      this.timeout, this.interval, this.preferBlanking, this.allowExposures);
+
+  factory X11GetScreenSaverReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var timeout = buffer.readUint16();
+    var interval = buffer.readUint16();
+    var preferBlanking = buffer.readBool();
+    var allowExposures = buffer.readBool();
+    buffer.skip(18);
+    return X11GetScreenSaverReply(
+        timeout, interval, preferBlanking, allowExposures);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(timeout);
+    buffer.writeUint16(interval);
+    buffer.writeBool(preferBlanking);
+    buffer.writeBool(allowExposures);
+    buffer.skip(18);
+  }
+}
 
 class X11ChangeHostsRequest extends X11Request {
   final int mode;
@@ -4532,7 +4616,21 @@ class X11RotatePropertiesRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): ForceScreenSaver
+class X11ForceScreenSaverRequest extends X11Request {
+  final int mode;
+
+  X11ForceScreenSaverRequest(this.mode);
+
+  factory X11ForceScreenSaverRequest.fromBuffer(X11ReadBuffer buffer) {
+    var mode = buffer.readUint8();
+    return X11ForceScreenSaverRequest(mode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(mode);
+  }
+}
 
 // FIXME(robert-ancell): SetPointerMapping
 
@@ -5758,6 +5856,35 @@ class X11Client {
     return _sendRequest(104, buffer.data);
   }
 
+  int setScreenSaver(
+      {int timeout = -1,
+      int interval = -1,
+      bool preferBlanking,
+      bool allowExposures}) {
+    var request = X11SetScreenSaverRequest(
+        timeout: timeout,
+        interval: interval,
+        preferBlanking: preferBlanking,
+        allowExposures: allowExposures);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(107, buffer.data);
+  }
+
+  Future<X11GetScreenSaverReply> getScreenSaver() async {
+    var request = X11GetScreenSaverRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(108, buffer.data);
+    return _awaitReply(108, sequenceNumber)
+        .then<X11GetScreenSaverReply>((response) {
+      if (response is X11GetScreenSaverReply) {
+        return response;
+      }
+      throw 'Failed to GetScreenSaver'; // FIXME: Better error
+    });
+  }
+
   int changeHosts(int mode, int family, List<int> address) {
     var request = X11ChangeHostsRequest(mode, family, address);
     var buffer = X11WriteBuffer();
@@ -5804,6 +5931,13 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(114, buffer.data);
+  }
+
+  int forceScreenSaver(int mode) {
+    var request = X11ForceScreenSaverRequest(mode);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(115, buffer.data);
   }
 
   int noOperation() {
@@ -6018,6 +6152,8 @@ class X11Client {
           response = X11QueryExtensionReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 99) {
           response = X11ListExtensionsReply.fromBuffer(readBuffer);
+        } else if (handler.opcode == 108) {
+          response = X11GetScreenSaverReply.fromBuffer(readBuffer);
         } else if (handler.opcode == 110) {
           response = X11ListHostsReply.fromBuffer(readBuffer);
         }
