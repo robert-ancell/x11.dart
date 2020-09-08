@@ -1910,7 +1910,33 @@ class X11UngrabButtonRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): ChangeActivePointerGrab
+class X11ChangeActivePointerGrabRequest extends X11Request {
+  final int eventMask;
+  final int cursor;
+  final int time;
+
+  X11ChangeActivePointerGrabRequest(this.eventMask,
+      {this.cursor = 0, this.time = 0});
+
+  factory X11ChangeActivePointerGrabRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var cursor = buffer.readUint32();
+    var time = buffer.readUint32();
+    var eventMask = buffer.readUint16();
+    buffer.skip(2);
+    return X11ChangeActivePointerGrabRequest(eventMask,
+        cursor: cursor, time: time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(cursor);
+    buffer.writeUint32(time);
+    buffer.writeUint16(eventMask);
+    buffer.skip(2);
+  }
+}
 
 class X11GrabKeyboardRequest extends X11Request {
   final int grabWindow;
@@ -7866,6 +7892,14 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(29, buffer.data);
+  }
+
+  int changeActivePointerGrab(int eventMask, {int cursor = 0, int time = 0}) {
+    var request = X11ChangeActivePointerGrabRequest(eventMask,
+        cursor: cursor, time: time);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(30, buffer.data);
   }
 
   Future<int> grabKeyboard(int grabWindow,
