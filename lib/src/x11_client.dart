@@ -1361,10 +1361,11 @@ class X11InternAtomRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(onlyIfExists);
-    buffer.writeUint16(name.length);
+    var nameLength = buffer.getString8Length(name);
+    buffer.writeUint16(nameLength);
     buffer.skip(2);
     buffer.writeString8(name);
-    buffer.skip(pad(name.length));
+    buffer.skip(pad(nameLength));
   }
 }
 
@@ -1422,10 +1423,11 @@ class X11GetAtomNameReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint16(name.length);
+    var nameLength = buffer.getString8Length(name);
+    buffer.writeUint16(nameLength);
     buffer.skip(22);
     buffer.writeString8(name);
-    buffer.skip(pad(name.length));
+    buffer.skip(pad(nameLength));
   }
 }
 
@@ -2469,10 +2471,11 @@ class X11OpenFontRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(fid);
-    buffer.writeUint16(name.length);
+    var nameLength = buffer.getString8Length(name);
+    buffer.writeUint16(nameLength);
     buffer.skip(2);
     buffer.writeString8(name);
-    buffer.skip(pad(name.length));
+    buffer.skip(pad(nameLength));
   }
 }
 
@@ -2737,9 +2740,10 @@ class X11ListFontsRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint16(maxNames);
-    buffer.writeUint16(pattern.length);
+    var patternLength = buffer.getString8Length(pattern);
+    buffer.writeUint16(patternLength);
     buffer.writeString8(pattern);
-    buffer.skip(pad(pattern.length));
+    buffer.skip(pad(patternLength));
   }
 }
 
@@ -2784,9 +2788,10 @@ class X11ListFontsWithInfoRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint16(maxNames);
-    buffer.writeUint16(pattern.length);
+    var patternLength = buffer.getString8Length(pattern);
+    buffer.writeUint16(patternLength);
     buffer.writeString8(pattern);
-    buffer.skip(pad(pattern.length));
+    buffer.skip(pad(patternLength));
   }
 }
 
@@ -2864,7 +2869,8 @@ class X11ListFontsWithInfoReply extends X11Reply {
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(name.length);
+    var nameLength = buffer.getString8Length(name);
+    buffer.writeUint8(nameLength);
     _writeCharInfo(buffer, minBounds);
     buffer.skip(4);
     _writeCharInfo(buffer, maxBounds);
@@ -2884,6 +2890,8 @@ class X11ListFontsWithInfoReply extends X11Reply {
       buffer.writeUint32(property.name);
       buffer.writeUint32(property.value);
     }
+    buffer.writeString8(name);
+    buffer.skip(pad(nameLength));
   }
 }
 
@@ -4390,7 +4398,8 @@ class X11PolyText8Request extends X11Request {
         buffer.writeUint8((item.font >> 8 & 0xff));
         buffer.writeUint8((item.font >> 0 & 0xff));
       } else if (item is X11TextItemString) {
-        buffer.writeUint8(item.string.length);
+        var stringLength = buffer.getString8Length(item.string);
+        buffer.writeUint8(stringLength);
         buffer.writeInt8(item.delta);
         buffer.writeString8(item.string);
       }
@@ -4447,7 +4456,7 @@ class X11PolyText16Request extends X11Request {
         buffer.writeUint8((item.font >> 8 & 0xff));
         buffer.writeUint8((item.font >> 0 & 0xff));
       } else if (item is X11TextItemString) {
-        buffer.writeUint8(item.string.length);
+        buffer.writeUint8(buffer.getString16Length(item.string));
         buffer.writeInt8(item.delta);
         buffer.writeString16(item.string);
       }
@@ -4476,13 +4485,14 @@ class X11ImageText8Request extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(string.length);
+    var stringLength = buffer.getString8Length(string);
+    buffer.writeUint8(stringLength);
     buffer.writeUint32(drawable);
     buffer.writeUint32(gc);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
     buffer.writeString8(string);
-    buffer.skip(pad(string.length));
+    buffer.skip(pad(stringLength));
   }
 }
 
@@ -4507,13 +4517,14 @@ class X11ImageText16Request extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(string.length);
+    var stringLength = buffer.getString16Length(string);
+    buffer.writeUint8(stringLength);
     buffer.writeUint32(drawable);
     buffer.writeUint32(gc);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
     buffer.writeString16(string);
-    buffer.skip(pad(string.length * 2));
+    buffer.skip(pad(stringLength * 2));
   }
 }
 
@@ -4736,10 +4747,11 @@ class X11AllocNamedColorRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(cmap);
-    buffer.writeUint16(name.length);
+    var nameLength = buffer.getString8Length(name);
+    buffer.writeUint16(nameLength);
     buffer.skip(2);
     buffer.writeString8(name);
-    buffer.skip(pad(name.length));
+    buffer.skip(pad(nameLength));
   }
 }
 
@@ -5038,10 +5050,11 @@ class X11StoreNamedColorRequest extends X11Request {
     buffer.writeUint8(flags);
     buffer.writeUint32(cmap);
     buffer.writeUint32(pixel);
-    buffer.writeUint16(name.length);
+    var nameLength = buffer.getString8Length(name);
+    buffer.writeUint16(nameLength);
     buffer.skip(2);
     buffer.writeString8(name);
-    buffer.skip(pad(name.length));
+    buffer.skip(pad(nameLength));
   }
 }
 
@@ -5125,10 +5138,11 @@ class X11LookupColorRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(cmap);
-    buffer.writeUint16(name.length);
+    var nameLength = buffer.getString8Length(name);
+    buffer.writeUint16(nameLength);
     buffer.skip(2);
     buffer.writeString8(name);
-    buffer.skip(pad(name.length));
+    buffer.skip(pad(nameLength));
   }
 }
 
@@ -5377,10 +5391,11 @@ class X11QueryExtensionRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint16(name.length);
+    var nameLength = buffer.getString8Length(name);
+    buffer.writeUint16(nameLength);
     buffer.skip(2);
     buffer.writeString8(name);
-    buffer.skip(pad(name.length));
+    buffer.skip(pad(nameLength));
   }
 }
 
@@ -7807,13 +7822,17 @@ class X11Client {
     buffer.skip(1);
     buffer.writeUint16(11); // Major version
     buffer.writeUint16(0); // Minor version
-    var authorizationProtocol = utf8.encode('');
+    var authorizationProtocol = '';
+    var authorizationProtocolLength =
+        buffer.getString8Length(authorizationProtocol);
     var authorizationProtocolData = <int>[];
-    buffer.writeUint16(authorizationProtocol.length);
+    buffer.writeUint16(authorizationProtocolLength);
     buffer.writeUint16(authorizationProtocolData.length);
-    buffer.data.addAll(authorizationProtocol);
-    buffer.skip(pad(authorizationProtocol.length));
-    buffer.data.addAll(authorizationProtocolData);
+    buffer.writeString8(authorizationProtocol);
+    buffer.skip(pad(authorizationProtocolLength));
+    for (var d in authorizationProtocolData) {
+      buffer.writeUint8(d);
+    }
     buffer.skip(pad(authorizationProtocolData.length));
     buffer.skip(2);
     _socket.add(buffer.data);
@@ -9386,6 +9405,10 @@ class X11WriteBuffer {
     data.addAll(bytes.asUint8List());
   }
 
+  int getString8Length(String value) {
+    return utf8.encode(value).length;
+  }
+
   void writeString8(String value) {
     data.addAll(utf8.encode(value));
   }
@@ -9393,11 +9416,16 @@ class X11WriteBuffer {
   void writeListOfString8(List<String> values) {
     var totalLength = 0;
     for (var value in values) {
-      writeUint8(value.length);
+      var valueLength = getString8Length(value);
+      writeUint8(valueLength);
       writeString8(value);
-      totalLength += 1 + value.length;
+      totalLength += 1 + valueLength;
     }
     skip(pad(totalLength));
+  }
+
+  int getString16Length(String value) {
+    return value.length;
   }
 
   void writeString16(String value) {
