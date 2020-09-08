@@ -3833,9 +3833,122 @@ class X11PolyFillArcRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): PutImage
+class X11PutImageRequest extends X11Request {
+  final int drawable;
+  final int gc;
+  final X11Point dst;
+  final X11Size size;
+  final int depth;
+  final int format;
+  final int leftPad;
+  final List<int> data;
 
-// FIXME(robert-ancell): GetImage
+  X11PutImageRequest(this.drawable, this.gc, this.dst, this.size, this.depth,
+      this.format, this.data,
+      {this.leftPad = 0});
+
+  factory X11PutImageRequest.fromBuffer(X11ReadBuffer buffer) {
+    var format = buffer.readUint8();
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    var dstX = buffer.readInt16();
+    var dstY = buffer.readInt16();
+    var leftPad = buffer.readUint8();
+    var depth = buffer.readUint8();
+    buffer.skip(2);
+    var data = <int>[];
+    // FIXME(robert-ancell): Some of the remaining bytes are padding, but need to calculate the length?
+    while (buffer.remaining > 0) {
+      data.add(buffer.readUint8());
+    }
+    return X11PutImageRequest(drawable, gc, X11Point(dstX, dstY),
+        X11Size(width, height), depth, format, data,
+        leftPad: leftPad);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(format);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    buffer.writeUint16(size.width);
+    buffer.writeUint16(size.height);
+    buffer.writeInt16(dst.x);
+    buffer.writeInt16(dst.y);
+    buffer.writeUint8(leftPad);
+    buffer.writeUint8(depth);
+    buffer.skip(2);
+    for (var d in data) {
+      buffer.writeUint8(d);
+    }
+    buffer.skip(pad(data.length));
+  }
+}
+
+class X11GetImageRequest extends X11Request {
+  final int drawable;
+  final X11Rectangle area;
+  final int planeMask;
+  final int format;
+
+  X11GetImageRequest(this.drawable, this.area, this.planeMask, this.format);
+
+  factory X11GetImageRequest.fromBuffer(X11ReadBuffer buffer) {
+    var format = buffer.readUint8();
+    var drawable = buffer.readUint32();
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    var planeMask = buffer.readUint32();
+    return X11GetImageRequest(
+        drawable, X11Rectangle(x, y, width, height), planeMask, format);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(format);
+    buffer.writeUint32(drawable);
+    buffer.writeInt16(area.x);
+    buffer.writeInt16(area.y);
+    buffer.writeUint16(area.width);
+    buffer.writeUint16(area.height);
+    buffer.writeUint32(planeMask);
+  }
+}
+
+class X11GetImageReply extends X11Reply {
+  final int depth;
+  final int visual;
+  final List<int> data;
+
+  X11GetImageReply(this.depth, this.visual, this.data);
+
+  static X11GetImageReply fromBuffer(X11ReadBuffer buffer) {
+    var depth = buffer.readUint8();
+    var visual = buffer.readUint32();
+    buffer.skip(20);
+    var data = <int>[];
+    // FIXME(robert-ancell): Some of the remaining bytes are padding, but need to calculate the length?
+    while (buffer.remaining > 0) {
+      data.add(buffer.readUint8());
+    }
+    return X11GetImageReply(depth, visual, data);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(depth);
+    buffer.writeUint32(visual);
+    buffer.skip(20);
+    for (var d in data) {
+      buffer.writeUint8(d);
+    }
+    buffer.skip(pad(data.length));
+  }
+}
 
 // FIXME(robert-ancell): PolyText8
 
@@ -7522,6 +7635,27 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(71, buffer.data);
+  }
+
+  int putImage(int drawable, int gc, X11Point dst, X11Size size, int depth,
+      int format, List<int> data,
+      {int leftPad = 0}) {
+    var request = X11PutImageRequest(
+        drawable, gc, dst, size, depth, format, data,
+        leftPad: leftPad);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(72, buffer.data);
+  }
+
+  Future<X11GetImageReply> getImage(
+      int drawable, X11Rectangle area, int planeMask, int format) async {
+    var request = X11GetImageRequest(drawable, area, planeMask, format);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(73, buffer.data);
+    return _awaitReply<X11GetImageReply>(
+        sequenceNumber, X11GetImageReply.fromBuffer);
   }
 
   int imageText8(int drawable, int gc, X11Point position, List<int> string) {
