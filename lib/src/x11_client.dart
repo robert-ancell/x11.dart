@@ -4951,9 +4951,107 @@ class X11ListExtensionsReply extends X11Reply {
   }
 }
 
-// FIXME(robert-ancell): ChangeKeyboardMapping
+class X11ChangeKeyboardMappingRequest extends X11Request {
+  final int firstKeycode;
+  final List<List<int>> map;
 
-// FIXME(robert-ancell): GetKeyboardMapping
+  X11ChangeKeyboardMappingRequest(this.firstKeycode, this.map);
+
+  factory X11ChangeKeyboardMappingRequest.fromBuffer(X11ReadBuffer buffer) {
+    var keycodeCount = buffer.readUint8();
+    var firstKeycode = buffer.readUint32();
+    var keysymsPerKeycode = buffer.readUint8();
+    buffer.skip(2);
+    var map = <List<int>>[];
+    for (var i = 0; i < keycodeCount; i++) {
+      var keysyms = <int>[];
+      for (var j = 0; j < keysymsPerKeycode; j++) {
+        var keysym = buffer.readUint8();
+        if (keysym != 0) {
+          keysyms.add(keysym);
+        }
+      }
+      map.add(keysyms);
+    }
+    return X11ChangeKeyboardMappingRequest(firstKeycode, map);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(map.length);
+    buffer.writeUint32(firstKeycode);
+    var keysymsPerKeycode = 0;
+    for (var keysyms in map) {
+      keysymsPerKeycode = max(keysymsPerKeycode, keysyms.length);
+    }
+    buffer.writeUint8(keysymsPerKeycode);
+    buffer.skip(2);
+    for (var keysyms in map) {
+      for (var i = 0; i < keysymsPerKeycode; i++) {
+        buffer.writeUint8(i < keysyms.length ? keysyms[i] : 0);
+      }
+    }
+  }
+}
+
+class X11GetKeyboardMappingRequest extends X11Request {
+  final int firstKeycode;
+  final int count;
+
+  X11GetKeyboardMappingRequest(this.firstKeycode, this.count);
+
+  factory X11GetKeyboardMappingRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var firstKeycode = buffer.readUint32();
+    var count = buffer.readUint8();
+    return X11GetKeyboardMappingRequest(firstKeycode, count);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(firstKeycode);
+    buffer.writeUint8(count);
+  }
+}
+
+class X11GetKeyboardMappingReply extends X11Reply {
+  final List<List<int>> map;
+
+  X11GetKeyboardMappingReply(this.map);
+
+  static X11GetKeyboardMappingReply fromBuffer(X11ReadBuffer buffer) {
+    var keysymsPerKeycode = buffer.readUint8();
+    buffer.skip(24);
+    var map = <List<int>>[];
+    while (buffer.remaining > 0) {
+      var keysyms = <int>[];
+      for (var i = 0; i < keysymsPerKeycode; i++) {
+        var keysym = buffer.readUint8();
+        if (keysym != 0) {
+          keysyms.add(keysym);
+        }
+      }
+      map.add(keysyms);
+    }
+    return X11GetKeyboardMappingReply(map);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    var keysymsPerKeycode = 0;
+    for (var keysyms in map) {
+      keysymsPerKeycode = max(keysymsPerKeycode, keysyms.length);
+    }
+    buffer.writeUint8(keysymsPerKeycode);
+    buffer.skip(24);
+    for (var keysyms in map) {
+      for (var i = 0; i < keysymsPerKeycode; i++) {
+        buffer.writeUint8(i < keysyms.length ? keysyms[i] : 0);
+      }
+    }
+  }
+}
 
 class X11ChangeKeyboardControlRequest extends X11Request {
   final int keyClickPercent;
@@ -8176,6 +8274,24 @@ class X11Client {
     var reply = await _awaitReply<X11ListExtensionsReply>(
         sequenceNumber, X11ListExtensionsReply.fromBuffer);
     return reply.names;
+  }
+
+  int changeKeyboardMapping(int firstKeycode, List<List<int>> map) {
+    var request = X11ChangeKeyboardMappingRequest(firstKeycode, map);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(100, buffer.data);
+  }
+
+  Future<List<List<int>>> getKeyboardMapping(
+      int firstKeycode, int count) async {
+    var request = X11GetKeyboardMappingRequest(firstKeycode, count);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(101, buffer.data);
+    var reply = await _awaitReply<X11GetKeyboardMappingReply>(
+        sequenceNumber, X11GetKeyboardMappingReply.fromBuffer);
+    return reply.map;
   }
 
   int changeKeyboardControl(
