@@ -1324,7 +1324,7 @@ class X11InternAtomRequest extends X11Request {
     var onlyIfExists = buffer.readBool();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
-    var name = buffer.readString(nameLength);
+    var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
     return X11InternAtomRequest(name, onlyIfExists);
   }
@@ -1334,7 +1334,7 @@ class X11InternAtomRequest extends X11Request {
     buffer.writeBool(onlyIfExists);
     buffer.writeUint16(name.length);
     buffer.skip(2);
-    buffer.writeString(name);
+    buffer.writeString8(name);
     buffer.skip(pad(name.length));
   }
 }
@@ -1385,7 +1385,7 @@ class X11GetAtomNameReply extends X11Reply {
     buffer.skip(1);
     var nameLength = buffer.readUint16();
     buffer.skip(22);
-    var name = buffer.readString(nameLength);
+    var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
     return X11GetAtomNameReply(name);
   }
@@ -1395,7 +1395,7 @@ class X11GetAtomNameReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(name.length);
     buffer.skip(22);
-    buffer.writeString(name);
+    buffer.writeString8(name);
     buffer.skip(pad(name.length));
   }
 }
@@ -2276,7 +2276,7 @@ class X11OpenFontRequest extends X11Request {
     var fid = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
-    var name = buffer.readString(nameLength);
+    var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
     return X11OpenFontRequest(fid, name);
   }
@@ -2287,7 +2287,7 @@ class X11OpenFontRequest extends X11Request {
     buffer.writeUint32(fid);
     buffer.writeUint16(name.length);
     buffer.skip(2);
-    buffer.writeString(name);
+    buffer.writeString8(name);
     buffer.skip(pad(name.length));
   }
 }
@@ -2445,7 +2445,85 @@ class X11QueryFontReply extends X11Reply {
   }
 }
 
-// FIXME(robert-ancell): QueryTextExtents
+class X11QueryTextExtentsRequest extends X11Request {
+  final int font;
+  final String string;
+
+  X11QueryTextExtentsRequest(this.font, this.string);
+
+  factory X11QueryTextExtentsRequest.fromBuffer(X11ReadBuffer buffer) {
+    var oddLength = buffer.readBool();
+    var font = buffer.readUint32();
+    var stringLength = buffer.remaining ~/ 2;
+    if (oddLength) {
+      stringLength -= 2;
+    }
+    var string = buffer.readString16(stringLength);
+    buffer.skip(pad(stringLength * 2));
+    return X11QueryTextExtentsRequest(font, string);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(string.length % 2 == 1);
+    buffer.writeUint32(font);
+    buffer.writeString16(string);
+    buffer.skip(pad(string.length * 2));
+  }
+}
+
+class X11QueryTextExtentsReply extends X11Reply {
+  final int drawDirection;
+  final int fontAscent;
+  final int fontDescent;
+  final int overallAscent;
+  final int overallDescent;
+  final int overallWidth;
+  final int overallLeft;
+  final int overallRight;
+
+  X11QueryTextExtentsReply(
+      {this.drawDirection = 0,
+      this.fontAscent = 0,
+      this.fontDescent = 0,
+      this.overallAscent = 0,
+      this.overallDescent = 0,
+      this.overallWidth = 0,
+      this.overallLeft = 0,
+      this.overallRight = 0});
+
+  static X11QueryTextExtentsReply fromBuffer(X11ReadBuffer buffer) {
+    var drawDirection = buffer.readUint8();
+    var fontAscent = buffer.readInt16();
+    var fontDescent = buffer.readInt16();
+    var overallAscent = buffer.readInt16();
+    var overallDescent = buffer.readInt16();
+    var overallWidth = buffer.readInt32();
+    var overallLeft = buffer.readInt32();
+    var overallRight = buffer.readInt32();
+    return X11QueryTextExtentsReply(
+        drawDirection: drawDirection,
+        fontAscent: fontAscent,
+        fontDescent: fontDescent,
+        overallAscent: overallAscent,
+        overallDescent: overallDescent,
+        overallWidth: overallWidth,
+        overallLeft: overallLeft,
+        overallRight: overallRight);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(drawDirection);
+    buffer.writeInt16(fontAscent);
+    buffer.writeInt16(fontDescent);
+    buffer.writeInt16(overallAscent);
+    buffer.writeInt16(overallDescent);
+    buffer.writeInt32(overallWidth);
+    buffer.writeInt32(overallLeft);
+    buffer.writeInt32(overallRight);
+  }
+}
 
 class X11ListFontsRequest extends X11Request {
   final String pattern;
@@ -2457,7 +2535,7 @@ class X11ListFontsRequest extends X11Request {
     buffer.skip(1);
     var maxNames = buffer.readUint16();
     var patternLength = buffer.readUint16();
-    var pattern = buffer.readString(patternLength);
+    var pattern = buffer.readString8(patternLength);
     buffer.skip(pad(patternLength));
     return X11ListFontsRequest(pattern: pattern, maxNames: maxNames);
   }
@@ -2467,7 +2545,7 @@ class X11ListFontsRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint16(maxNames);
     buffer.writeUint16(pattern.length);
-    buffer.writeString(pattern);
+    buffer.writeString8(pattern);
     buffer.skip(pad(pattern.length));
   }
 }
@@ -2481,7 +2559,7 @@ class X11ListFontsReply extends X11Reply {
     buffer.skip(1);
     var namesLength = buffer.readUint16();
     buffer.skip(22);
-    var names = buffer.readListOfString(namesLength);
+    var names = buffer.readListOfString8(namesLength);
     return X11ListFontsReply(names);
   }
 
@@ -2490,7 +2568,7 @@ class X11ListFontsReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(names.length);
     buffer.skip(22);
-    buffer.writeListOfString(names);
+    buffer.writeListOfString8(names);
   }
 }
 
@@ -2505,7 +2583,7 @@ class X11SetFontPathRequest extends X11Request {
     buffer.skip(1);
     var pathLength = buffer.readUint16();
     buffer.skip(2);
-    var path = buffer.readListOfString(pathLength);
+    var path = buffer.readListOfString8(pathLength);
     return X11SetFontPathRequest(path);
   }
 
@@ -2514,7 +2592,7 @@ class X11SetFontPathRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint16(path.length);
     buffer.skip(2);
-    buffer.writeListOfString(path);
+    buffer.writeListOfString8(path);
   }
 }
 
@@ -2541,7 +2619,7 @@ class X11GetFontPathReply extends X11Reply {
     buffer.skip(1);
     var pathLength = buffer.readUint16();
     buffer.skip(22);
-    var path = buffer.readListOfString(pathLength);
+    var path = buffer.readListOfString8(pathLength);
     return X11GetFontPathReply(path);
   }
 
@@ -2550,7 +2628,7 @@ class X11GetFontPathReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(path.length);
     buffer.skip(22);
-    buffer.writeListOfString(path);
+    buffer.writeListOfString8(path);
   }
 }
 
@@ -3958,7 +4036,7 @@ class X11ImageText8Request extends X11Request {
   final int drawable;
   final int gc;
   final X11Point position;
-  final List<int> string;
+  final String string;
 
   X11ImageText8Request(this.drawable, this.gc, this.position, this.string);
 
@@ -3968,10 +4046,8 @@ class X11ImageText8Request extends X11Request {
     var gc = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
-    var string = <int>[];
-    for (var i = 0; i < stringLength; i++) {
-      string.add(buffer.readUint8());
-    }
+    var string = buffer.readString8(stringLength);
+    buffer.skip(pad(stringLength));
     return X11ImageText8Request(drawable, gc, X11Point(x, y), string);
   }
 
@@ -3982,9 +4058,7 @@ class X11ImageText8Request extends X11Request {
     buffer.writeUint32(gc);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
-    for (var c in string) {
-      buffer.writeUint8(c);
-    }
+    buffer.writeString8(string);
     buffer.skip(pad(string.length));
   }
 }
@@ -3993,7 +4067,7 @@ class X11ImageText16Request extends X11Request {
   final int drawable;
   final int gc;
   final X11Point position;
-  final List<int> string;
+  final String string;
 
   X11ImageText16Request(this.drawable, this.gc, this.position, this.string);
 
@@ -4003,10 +4077,8 @@ class X11ImageText16Request extends X11Request {
     var gc = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
-    var string = <int>[];
-    for (var i = 0; i < stringLength; i++) {
-      string.add(buffer.readUint16()); // FIXME: Always big endian
-    }
+    var string = buffer.readString16(stringLength);
+    buffer.skip(pad(stringLength * 2));
     return X11ImageText16Request(drawable, gc, X11Point(x, y), string);
   }
 
@@ -4017,9 +4089,7 @@ class X11ImageText16Request extends X11Request {
     buffer.writeUint32(gc);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
-    for (var c in string) {
-      buffer.writeUint16(c); // FIXME: Always big endian
-    }
+    buffer.writeString16(string);
     buffer.skip(pad(string.length * 2));
   }
 }
@@ -4234,7 +4304,7 @@ class X11AllocNamedColorRequest extends X11Request {
     var cmap = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
-    var name = buffer.readString(nameLength);
+    var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
     return X11AllocNamedColorRequest(cmap, name);
   }
@@ -4245,7 +4315,7 @@ class X11AllocNamedColorRequest extends X11Request {
     buffer.writeUint32(cmap);
     buffer.writeUint16(name.length);
     buffer.skip(2);
-    buffer.writeString(name);
+    buffer.writeString8(name);
     buffer.skip(pad(name.length));
   }
 }
@@ -4524,7 +4594,7 @@ class X11StoreNamedColorRequest extends X11Request {
     var pixel = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
-    var name = buffer.readString(nameLength);
+    var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
     return X11StoreNamedColorRequest(cmap, pixel, name,
         doRed: doRed, doGreen: doGreen, doBlue: doBlue);
@@ -4547,7 +4617,7 @@ class X11StoreNamedColorRequest extends X11Request {
     buffer.writeUint32(pixel);
     buffer.writeUint16(name.length);
     buffer.skip(2);
-    buffer.writeString(name);
+    buffer.writeString8(name);
     buffer.skip(pad(name.length));
   }
 }
@@ -4623,7 +4693,7 @@ class X11LookupColorRequest extends X11Request {
     var cmap = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
-    var name = buffer.readString(nameLength);
+    var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
     return X11LookupColorRequest(cmap, name);
   }
@@ -4634,7 +4704,7 @@ class X11LookupColorRequest extends X11Request {
     buffer.writeUint32(cmap);
     buffer.writeUint16(name.length);
     buffer.skip(2);
-    buffer.writeString(name);
+    buffer.writeString8(name);
     buffer.skip(pad(name.length));
   }
 }
@@ -4877,7 +4947,7 @@ class X11QueryExtensionRequest extends X11Request {
     buffer.skip(1);
     var nameLength = buffer.readUint16();
     buffer.skip(2);
-    var name = buffer.readString(nameLength);
+    var name = buffer.readString8(nameLength);
     return X11QueryExtensionRequest(name);
   }
 
@@ -4886,7 +4956,7 @@ class X11QueryExtensionRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint16(name.length);
     buffer.skip(2);
-    buffer.writeString(name);
+    buffer.writeString8(name);
     buffer.skip(pad(name.length));
   }
 }
@@ -4939,7 +5009,7 @@ class X11ListExtensionsReply extends X11Reply {
   static X11ListExtensionsReply fromBuffer(X11ReadBuffer buffer) {
     var namesLength = buffer.readUint8();
     buffer.skip(24);
-    var names = buffer.readListOfString(namesLength);
+    var names = buffer.readListOfString8(namesLength);
     return X11ListExtensionsReply(names);
   }
 
@@ -4947,7 +5017,7 @@ class X11ListExtensionsReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(names.length);
     buffer.skip(24);
-    buffer.writeListOfString(names);
+    buffer.writeListOfString8(names);
   }
 }
 
@@ -7781,6 +7851,16 @@ class X11Client {
         sequenceNumber, X11QueryFontReply.fromBuffer);
   }
 
+  Future<X11QueryTextExtentsReply> queryTextExtents(
+      int font, String string) async {
+    var request = X11QueryTextExtentsRequest(font, string);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(48, buffer.data);
+    return _awaitReply<X11QueryTextExtentsReply>(
+        sequenceNumber, X11QueryTextExtentsReply.fromBuffer);
+  }
+
   Future<List<String>> listFonts(
       {String pattern = '*', int maxNames = 65535}) async {
     var request = X11ListFontsRequest(pattern: pattern, maxNames: maxNames);
@@ -8068,14 +8148,14 @@ class X11Client {
         sequenceNumber, X11GetImageReply.fromBuffer);
   }
 
-  int imageText8(int drawable, int gc, X11Point position, List<int> string) {
+  int imageText8(int drawable, int gc, X11Point position, String string) {
     var request = X11ImageText8Request(drawable, gc, position, string);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(76, buffer.data);
   }
 
-  int imageText16(int drawable, int gc, X11Point position, List<int> string) {
+  int imageText16(int drawable, int gc, X11Point position, String string) {
     var request = X11ImageText16Request(drawable, gc, position, string);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -8514,7 +8594,7 @@ class X11Client {
     if (result == 0) {
       // Failed
       var reasonLength = data;
-      var reason = _buffer.readString(reasonLength);
+      var reason = _buffer.readString8(reasonLength);
       print('Failed: ${reason}');
     } else if (result == 1) {
       // Success
@@ -8538,7 +8618,7 @@ class X11Client {
       result.minKeycode = _buffer.readUint8();
       result.maxKeycode = _buffer.readUint8();
       _buffer.skip(4);
-      result.vendor = _buffer.readString(vendorLength);
+      result.vendor = _buffer.readString8(vendorLength);
       _buffer.skip(pad(vendorLength));
       result.pixmapFormats = <X11Format>[];
       for (var i = 0; i < formatCount; i++) {
@@ -8597,7 +8677,7 @@ class X11Client {
       roots = result.roots;
     } else if (result == 2) {
       // Authenticate
-      var reason = _buffer.readString(length ~/ 4);
+      var reason = _buffer.readString8(length ~/ 4);
       print('Authenticate: ${reason}');
     }
 
@@ -8740,18 +8820,28 @@ class X11WriteBuffer {
     data.addAll(bytes.asUint8List());
   }
 
-  void writeString(String value) {
+  void writeInt32(int value) {
+    var bytes = Uint8List(4).buffer;
+    ByteData.view(bytes).setInt32(0, value, Endian.little);
+    data.addAll(bytes.asUint8List());
+  }
+
+  void writeString8(String value) {
     data.addAll(utf8.encode(value));
   }
 
-  void writeListOfString(List<String> values) {
+  void writeListOfString8(List<String> values) {
     var totalLength = 0;
     for (var value in values) {
       writeUint8(value.length);
-      writeString(value);
+      writeString8(value);
       totalLength += 1 + value.length;
     }
     skip(pad(totalLength));
+  }
+
+  void writeString16(String value) {
+    data.addAll(value.codeUnits);
   }
 }
 
@@ -8814,7 +8904,11 @@ class X11ReadBuffer {
     return ByteData.view(readBytes(4)).getUint32(0, Endian.little);
   }
 
-  String readString(int length) {
+  int readInt32() {
+    return ByteData.view(readBytes(4)).getInt32(0, Endian.little);
+  }
+
+  String readString8(int length) {
     var d = <int>[];
     for (var i = 0; i < length; i++) {
       d.add(readUint8());
@@ -8822,17 +8916,25 @@ class X11ReadBuffer {
     return utf8.decode(d);
   }
 
-  List<String> readListOfString(int length) {
+  List<String> readListOfString8(int length) {
     var values = <String>[];
     var totalLength = 0;
     for (var i = 0; i < length; i++) {
       var valueLength = readUint8();
-      values.add(readString(valueLength));
+      values.add(readString8(valueLength));
       totalLength += 1 + valueLength;
     }
     skip(pad(totalLength));
 
     return values;
+  }
+
+  String readString16(int length) {
+    var d = <int>[];
+    for (var i = 0; i < length; i++) {
+      d.add(readUint16()); // FIXME: Always big endian
+    }
+    return String.fromCharCodes(d);
   }
 
   /// Removes all buffered data.
