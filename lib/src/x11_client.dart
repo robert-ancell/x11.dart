@@ -1984,9 +1984,70 @@ class X11UngrabKeyboardRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): GrabKey
+class X11GrabKeyRequest extends X11Request {
+  final int grabWindow;
+  final int key;
+  final int modifiers;
+  final bool ownerEvents;
+  final int pointerMode;
+  final int keyboardMode;
 
-// FIXME(robert-ancell): UngrabKey
+  X11GrabKeyRequest(this.grabWindow, this.key,
+      {this.modifiers = 0,
+      this.ownerEvents = false,
+      this.pointerMode = 0,
+      this.keyboardMode = 0});
+
+  factory X11GrabKeyRequest.fromBuffer(X11ReadBuffer buffer) {
+    var ownerEvents = buffer.readBool();
+    var grabWindow = buffer.readUint32();
+    var modifiers = buffer.readUint16();
+    var key = buffer.readUint32();
+    var pointerMode = buffer.readUint8();
+    var keyboardMode = buffer.readUint8();
+    buffer.skip(3);
+    return X11GrabKeyRequest(grabWindow, key,
+        modifiers: modifiers,
+        ownerEvents: ownerEvents,
+        pointerMode: pointerMode,
+        keyboardMode: keyboardMode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(ownerEvents);
+    buffer.writeUint32(grabWindow);
+    buffer.writeUint16(modifiers);
+    buffer.writeUint32(key);
+    buffer.writeUint8(pointerMode);
+    buffer.writeUint8(keyboardMode);
+    buffer.skip(3);
+  }
+}
+
+class X11UngrabKeyRequest extends X11Request {
+  final int grabWindow;
+  final int key;
+  final int modifiers;
+
+  X11UngrabKeyRequest(this.grabWindow, this.key, {this.modifiers = 0});
+
+  factory X11UngrabKeyRequest.fromBuffer(X11ReadBuffer buffer) {
+    var key = buffer.readUint32();
+    var grabWindow = buffer.readUint32();
+    var modifiers = buffer.readUint16();
+    buffer.skip(2);
+    return X11UngrabKeyRequest(grabWindow, key, modifiers: modifiers);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(key);
+    buffer.writeUint32(grabWindow);
+    buffer.writeUint16(modifiers);
+    buffer.skip(2);
+  }
+}
 
 class X11AllowEventsRequest extends X11Request {
   final int mode;
@@ -7830,6 +7891,28 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(32, buffer.data);
+  }
+
+  int grabKey(int grabWindow, int key,
+      {int modifiers = 0,
+      bool ownerEvents = false,
+      int pointerMode = 0,
+      int keyboardMode = 0}) {
+    var request = X11GrabKeyRequest(grabWindow, key,
+        modifiers: modifiers,
+        ownerEvents: ownerEvents,
+        pointerMode: pointerMode,
+        keyboardMode: keyboardMode);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(33, buffer.data);
+  }
+
+  int ungrabKey(int grabWindow, int key, {int modifiers = 0}) {
+    var request = X11UngrabKeyRequest(grabWindow, key, modifiers: modifiers);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(34, buffer.data);
   }
 
   int allowEvents(int mode, {int time = 0}) {
