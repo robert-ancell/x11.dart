@@ -109,8 +109,13 @@ class X11CharInfo {
   final int decent;
   final int attributes;
 
-  X11CharInfo(this.leftSideBearing, this.rightSideBearing, this.characterWidth,
-      this.ascent, this.decent, this.attributes);
+  const X11CharInfo(
+      {this.leftSideBearing = 0,
+      this.rightSideBearing = 0,
+      this.characterWidth = 0,
+      this.ascent = 0,
+      this.decent = 0,
+      this.attributes = 0});
 }
 
 class X11ColorItem {
@@ -2507,6 +2512,31 @@ class X11QueryFontRequest extends X11Request {
   }
 }
 
+X11CharInfo _readCharInfo(X11ReadBuffer buffer) {
+  var leftSideBearing = buffer.readInt16();
+  var rightSideBearing = buffer.readInt16();
+  var characterWidth = buffer.readInt16();
+  var ascent = buffer.readInt16();
+  var decent = buffer.readInt16();
+  var attributes = buffer.readUint16();
+  return X11CharInfo(
+      leftSideBearing: leftSideBearing,
+      rightSideBearing: rightSideBearing,
+      characterWidth: characterWidth,
+      ascent: ascent,
+      decent: decent,
+      attributes: attributes);
+}
+
+void _writeCharInfo(X11WriteBuffer buffer, X11CharInfo info) {
+  buffer.writeInt16(info.leftSideBearing);
+  buffer.writeInt16(info.rightSideBearing);
+  buffer.writeInt16(info.characterWidth);
+  buffer.writeInt16(info.ascent);
+  buffer.writeInt16(info.decent);
+  buffer.writeUint16(info.attributes);
+}
+
 class X11QueryFontReply extends X11Reply {
   final X11CharInfo minBounds;
   final X11CharInfo maxBounds;
@@ -2523,19 +2553,19 @@ class X11QueryFontReply extends X11Reply {
   final List<X11CharInfo> charInfos;
 
   X11QueryFontReply(
-      {this.minBounds,
-      this.maxBounds,
-      this.minCharOrByte2,
-      this.maxCharOrByte2,
-      this.defaultChar,
-      this.drawDirection,
-      this.minByte1,
-      this.maxByte1,
-      this.allCharsExist,
-      this.fontAscent,
-      this.fontDescent,
+      {this.minBounds = const X11CharInfo(),
+      this.maxBounds = const X11CharInfo(),
+      this.minCharOrByte2 = 0,
+      this.maxCharOrByte2 = 0,
+      this.defaultChar = 0,
+      this.drawDirection = 0,
+      this.minByte1 = 0,
+      this.maxByte1 = 0,
+      this.allCharsExist = false,
+      this.fontAscent = 0,
+      this.fontDescent = 0,
       this.properties = const [],
-      this.charInfos});
+      this.charInfos = const []});
 
   static X11QueryFontReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -2598,29 +2628,13 @@ class X11QueryFontReply extends X11Reply {
     buffer.writeInt16(fontAscent);
     buffer.writeInt16(fontDescent);
     buffer.writeUint32(charInfos.length);
+    for (var property in properties) {
+      buffer.writeUint32(property.name);
+      buffer.writeUint32(property.value);
+    }
     for (var info in charInfos) {
       _writeCharInfo(buffer, info);
     }
-  }
-
-  static X11CharInfo _readCharInfo(X11ReadBuffer buffer) {
-    var leftSideBearing = buffer.readInt16();
-    var rightSideBearing = buffer.readInt16();
-    var characterWidth = buffer.readInt16();
-    var ascent = buffer.readInt16();
-    var decent = buffer.readInt16();
-    var attributes = buffer.readUint16();
-    return X11CharInfo(leftSideBearing, rightSideBearing, characterWidth,
-        ascent, decent, attributes);
-  }
-
-  void _writeCharInfo(X11WriteBuffer buffer, X11CharInfo info) {
-    buffer.writeInt16(info.leftSideBearing);
-    buffer.writeInt16(info.rightSideBearing);
-    buffer.writeInt16(info.characterWidth);
-    buffer.writeInt16(info.ascent);
-    buffer.writeInt16(info.decent);
-    buffer.writeUint16(info.attributes);
   }
 }
 
@@ -2751,7 +2765,127 @@ class X11ListFontsReply extends X11Reply {
   }
 }
 
-// FIXME(robert-ancell): ListFontsWithInfo
+class X11ListFontsWithInfoRequest extends X11Request {
+  final String pattern;
+  final int maxNames;
+
+  X11ListFontsWithInfoRequest({this.pattern = '*', this.maxNames = 65535});
+
+  factory X11ListFontsWithInfoRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var maxNames = buffer.readUint16();
+    var patternLength = buffer.readUint16();
+    var pattern = buffer.readString8(patternLength);
+    buffer.skip(pad(patternLength));
+    return X11ListFontsWithInfoRequest(pattern: pattern, maxNames: maxNames);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(maxNames);
+    buffer.writeUint16(pattern.length);
+    buffer.writeString8(pattern);
+    buffer.skip(pad(pattern.length));
+  }
+}
+
+class X11ListFontsWithInfoReply extends X11Reply {
+  final String name;
+  final X11CharInfo minBounds;
+  final X11CharInfo maxBounds;
+  final int minCharOrByte2;
+  final int maxCharOrByte2;
+  final int defaultChar;
+  final int drawDirection;
+  final int minByte1;
+  final int maxByte1;
+  final bool allCharsExist;
+  final int fontAscent;
+  final int fontDescent;
+  final int repliesHint;
+  final List<X11FontProperty> properties;
+
+  X11ListFontsWithInfoReply(this.name,
+      {this.minBounds = const X11CharInfo(),
+      this.maxBounds = const X11CharInfo(),
+      this.minCharOrByte2 = 0,
+      this.maxCharOrByte2 = 0,
+      this.defaultChar = 0,
+      this.drawDirection = 0,
+      this.minByte1 = 0,
+      this.maxByte1 = 0,
+      this.allCharsExist = false,
+      this.fontAscent = 0,
+      this.fontDescent = 0,
+      this.repliesHint = 0,
+      this.properties = const []});
+
+  static X11ListFontsWithInfoReply fromBuffer(X11ReadBuffer buffer) {
+    var nameLength = buffer.readUint8();
+    var minBounds = _readCharInfo(buffer);
+    buffer.skip(4);
+    var maxBounds = _readCharInfo(buffer);
+    buffer.skip(4);
+    var minCharOrByte2 = buffer.readUint16();
+    var maxCharOrByte2 = buffer.readUint16();
+    var defaultChar = buffer.readUint16();
+    var propertiesLength = buffer.readUint16();
+    var drawDirection = buffer.readUint8();
+    var minByte1 = buffer.readUint8();
+    var maxByte1 = buffer.readUint8();
+    var allCharsExist = buffer.readBool();
+    var fontAscent = buffer.readInt16();
+    var fontDescent = buffer.readInt16();
+    var repliesHint = buffer.readUint32();
+    var properties = <X11FontProperty>[];
+    for (var i = 0; i < propertiesLength; i++) {
+      var name = buffer.readUint32();
+      var value = buffer.readUint32();
+      properties.add(X11FontProperty(name, value));
+    }
+    var name = buffer.readString8(nameLength);
+    buffer.skip(pad(nameLength));
+    return X11ListFontsWithInfoReply(name,
+        minBounds: minBounds,
+        maxBounds: maxBounds,
+        minCharOrByte2: minCharOrByte2,
+        maxCharOrByte2: maxCharOrByte2,
+        defaultChar: defaultChar,
+        drawDirection: drawDirection,
+        minByte1: minByte1,
+        maxByte1: maxByte1,
+        allCharsExist: allCharsExist,
+        fontAscent: fontAscent,
+        fontDescent: fontDescent,
+        repliesHint: repliesHint,
+        properties: properties);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(name.length);
+    _writeCharInfo(buffer, minBounds);
+    buffer.skip(4);
+    _writeCharInfo(buffer, maxBounds);
+    buffer.skip(4);
+    buffer.writeUint16(minCharOrByte2);
+    buffer.writeUint16(maxCharOrByte2);
+    buffer.writeUint16(defaultChar);
+    buffer.writeUint16(properties.length);
+    buffer.writeUint8(drawDirection);
+    buffer.writeUint8(minByte1);
+    buffer.writeUint8(maxByte1);
+    buffer.writeBool(allCharsExist);
+    buffer.writeInt16(fontAscent);
+    buffer.writeInt16(fontDescent);
+    buffer.writeUint32(repliesHint);
+    for (var property in properties) {
+      buffer.writeUint32(property.name);
+      buffer.writeUint32(property.value);
+    }
+  }
+}
 
 class X11SetFontPathRequest extends X11Request {
   final List<String> path;
@@ -7515,19 +7649,61 @@ class X11UnknownEvent extends X11Event {
   String toString() => 'X11UnknownEvent(code: ${code})';
 }
 
-class _RequestHandler<T> {
+abstract class _RequestHandler {
+  bool get done;
+
+  void processReply(X11ReadBuffer buffer);
+
+  void replyError(X11Error error);
+}
+
+class _RequestSingleHandler<T> extends _RequestHandler {
   T Function(X11ReadBuffer) decodeFunction;
   final completer = Completer<T>();
 
-  _RequestHandler(this.decodeFunction);
+  _RequestSingleHandler(this.decodeFunction);
 
   Future<T> get future => completer.future;
 
+  @override
+  bool get done => completer.isCompleted;
+
+  @override
   void processReply(X11ReadBuffer buffer) {
     completer.complete(decodeFunction(buffer));
   }
 
+  @override
   void replyError(X11Error error) => completer.completeError(error);
+}
+
+class _RequestStreamHandler<T> extends _RequestHandler {
+  T Function(X11ReadBuffer) decodeFunction;
+  bool Function(T) isLastFunction;
+  final controller = StreamController<T>();
+
+  _RequestStreamHandler(this.decodeFunction, this.isLastFunction);
+
+  Stream<T> get stream => controller.stream;
+
+  @override
+  bool get done => controller.isClosed;
+
+  @override
+  void processReply(X11ReadBuffer buffer) {
+    var reply = decodeFunction(buffer);
+    if (isLastFunction(reply)) {
+      controller.close();
+    } else {
+      controller.add(reply);
+    }
+  }
+
+  @override
+  void replyError(X11Error error) {
+    controller.addError(error);
+    controller.close();
+  }
 }
 
 class X11Client {
@@ -8214,6 +8390,17 @@ class X11Client {
     var reply = await _awaitReply<X11ListFontsReply>(
         sequenceNumber, X11ListFontsReply.fromBuffer);
     return reply.names;
+  }
+
+  Stream<X11ListFontsWithInfoReply> listFontsWithInfo(
+      {String pattern = '*', int maxNames = 65535}) {
+    var request =
+        X11ListFontsWithInfoRequest(maxNames: maxNames, pattern: pattern);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(50, buffer.data);
+    return _awaitReplyStream<X11ListFontsWithInfoReply>(sequenceNumber,
+        X11ListFontsWithInfoReply.fromBuffer, (reply) => reply.name.isEmpty);
   }
 
   int setFontPath(List<String> path) {
@@ -9061,7 +9248,9 @@ class X11Client {
       var handler = _requests[error.sequenceNumber];
       if (handler != null) {
         handler.replyError(error);
-        _requests.remove(error.sequenceNumber);
+        if (handler.done) {
+          _requests.remove(error.sequenceNumber);
+        }
       } else {
         _errorStreamController.add(error);
       }
@@ -9080,7 +9269,9 @@ class X11Client {
       var handler = _requests[sequenceNumber];
       if (handler != null) {
         handler.processReply(replyBuffer);
-        _requests.remove(sequenceNumber);
+        if (handler.done) {
+          _requests.remove(sequenceNumber);
+        }
       }
     } else {
       var code = reply;
@@ -9118,9 +9309,18 @@ class X11Client {
 
   Future<T> _awaitReply<T>(
       int sequenceNumber, T Function(X11ReadBuffer) decodeFunction) {
-    var handler = _RequestHandler<T>(decodeFunction);
+    var handler = _RequestSingleHandler<T>(decodeFunction);
     _requests[sequenceNumber] = handler;
     return handler.future;
+  }
+
+  Stream<T> _awaitReplyStream<T>(
+      int sequenceNumber,
+      T Function(X11ReadBuffer) decodeFunction,
+      bool Function(T) isLastFunction) {
+    var handler = _RequestStreamHandler<T>(decodeFunction, isLastFunction);
+    _requests[sequenceNumber] = handler;
+    return handler.stream;
   }
 
   void close() async {

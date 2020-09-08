@@ -8,13 +8,10 @@ void main() async {
   for (var directory in path) {
     print('  ${directory}');
   }
-  var names = await client.listFonts();
+  var infos = await client.listFontsWithInfo();
   print('Fonts:');
-  for (var name in names) {
-    var fid = client.generateId();
-    client.openFont(fid, name);
-    var info = await client.queryFont(fid);
-    print('  ${name}');
+  await for (var info in infos) {
+    print('  ${info.name}');
     for (var property in info.properties) {
       var name = await client.getAtomName(property.name);
       String value;
@@ -43,7 +40,6 @@ void main() async {
       }
       print('    ${name}: ${value}');
     }
-    client.closeFont(fid);
   }
   await client.close();
 }
