@@ -1912,9 +1912,77 @@ class X11UngrabButtonRequest extends X11Request {
 
 // FIXME(robert-ancell): ChangeActivePointerGrab
 
-// FIXME(robert-ancell): GrabKeyboard
+class X11GrabKeyboardRequest extends X11Request {
+  final int grabWindow;
+  final bool ownerEvents;
+  final int pointerMode;
+  final int keyboardMode;
+  final int time;
 
-// FIXME(robert-ancell): UngrabKeyboard
+  X11GrabKeyboardRequest(this.grabWindow,
+      {this.ownerEvents = false,
+      this.pointerMode = 0,
+      this.keyboardMode = 0,
+      this.time = 0});
+
+  factory X11GrabKeyboardRequest.fromBuffer(X11ReadBuffer buffer) {
+    var ownerEvents = buffer.readBool();
+    var grabWindow = buffer.readUint32();
+    var time = buffer.readUint32();
+    var pointerMode = buffer.readUint8();
+    var keyboardMode = buffer.readUint8();
+    buffer.skip(2);
+    return X11GrabKeyboardRequest(grabWindow,
+        ownerEvents: ownerEvents,
+        pointerMode: pointerMode,
+        keyboardMode: keyboardMode,
+        time: time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeBool(ownerEvents);
+    buffer.writeUint32(grabWindow);
+    buffer.writeUint32(time);
+    buffer.writeUint8(pointerMode);
+    buffer.writeUint8(keyboardMode);
+    buffer.skip(2);
+  }
+}
+
+class X11GrabKeyboardReply extends X11Reply {
+  final int status;
+
+  X11GrabKeyboardReply(this.status);
+
+  static X11GrabKeyboardReply fromBuffer(X11ReadBuffer buffer) {
+    var status = buffer.readUint8();
+    return X11GrabKeyboardReply(status);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(status);
+  }
+}
+
+class X11UngrabKeyboardRequest extends X11Request {
+  final int time;
+
+  X11UngrabKeyboardRequest({this.time = 0});
+
+  factory X11UngrabKeyboardRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var time = buffer.readUint32();
+    return X11UngrabKeyboardRequest(time: time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(time);
+  }
+}
 
 // FIXME(robert-ancell): GrabKey
 
@@ -7737,6 +7805,31 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(29, buffer.data);
+  }
+
+  Future<int> grabKeyboard(int grabWindow,
+      {bool ownerEvents = false,
+      int pointerMode = 0,
+      int keyboardMode = 0,
+      int time = 0}) async {
+    var request = X11GrabKeyboardRequest(grabWindow,
+        ownerEvents: ownerEvents,
+        pointerMode: pointerMode,
+        keyboardMode: keyboardMode,
+        time: time);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(31, buffer.data);
+    var reply = await _awaitReply<X11GrabKeyboardReply>(
+        sequenceNumber, X11GrabKeyboardReply.fromBuffer);
+    return reply.status;
+  }
+
+  int ungrabKeyboard({int time = 0}) {
+    var request = X11UngrabKeyboardRequest(time: time);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(32, buffer.data);
   }
 
   int allowEvents(int mode, {int time = 0}) {
