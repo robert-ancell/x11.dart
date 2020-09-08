@@ -5205,9 +5205,91 @@ class X11BellRequest extends X11Request {
   }
 }
 
-// FIXME(robert-ancell): ChangePointerControl
+class X11ChangePointerControlRequest extends X11Request {
+  final bool doAcceleration;
+  final int accelerationNumerator;
+  final int accelerationDenominator;
+  final bool doThreshold;
+  final int threshold;
 
-// FIXME(robert-ancell): GetPointerControl
+  X11ChangePointerControlRequest(
+      {this.doAcceleration = false,
+      this.accelerationNumerator = 0,
+      this.accelerationDenominator = 0,
+      this.doThreshold = false,
+      this.threshold = 0});
+
+  factory X11ChangePointerControlRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var accelerationNumerator = buffer.readInt16();
+    var accelerationDenominator = buffer.readInt16();
+    var threshold = buffer.readInt16();
+    var doAcceleration = buffer.readBool();
+    var doThreshold = buffer.readBool();
+    return X11ChangePointerControlRequest(
+        doAcceleration: doAcceleration,
+        accelerationNumerator: accelerationNumerator,
+        accelerationDenominator: accelerationDenominator,
+        doThreshold: doThreshold,
+        threshold: threshold);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeInt16(accelerationNumerator);
+    buffer.writeInt16(accelerationDenominator);
+    buffer.writeInt16(threshold);
+    buffer.writeBool(doAcceleration);
+    buffer.writeBool(doThreshold);
+  }
+}
+
+class X11GetPointerControlRequest extends X11Request {
+  X11GetPointerControlRequest();
+
+  factory X11GetPointerControlRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    return X11GetPointerControlRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
+}
+
+class X11GetPointerControlReply extends X11Reply {
+  final int accelerationNumerator;
+  final int accelerationDenominator;
+  final int threshold;
+
+  X11GetPointerControlReply(
+      {this.accelerationNumerator,
+      this.accelerationDenominator,
+      this.threshold});
+
+  static X11GetPointerControlReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var accelerationNumerator = buffer.readUint16();
+    var accelerationDenominator = buffer.readUint16();
+    var threshold = buffer.readUint16();
+    buffer.skip(18);
+    return X11GetPointerControlReply(
+        accelerationNumerator: accelerationNumerator,
+        accelerationDenominator: accelerationDenominator,
+        threshold: threshold);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(accelerationNumerator);
+    buffer.writeUint16(accelerationDenominator);
+    buffer.writeUint16(threshold);
+    buffer.skip(18);
+  }
+}
 
 class X11SetScreenSaverRequest extends X11Request {
   final int timeout;
@@ -8133,6 +8215,32 @@ class X11Client {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(104, buffer.data);
+  }
+
+  int changePointerControl(
+      {bool doAcceleration = false,
+      int accelerationNumerator = 0,
+      int accelerationDenominator = 0,
+      bool doThreshold = false,
+      int threshold = 0}) {
+    var request = X11ChangePointerControlRequest(
+        doAcceleration: doAcceleration,
+        accelerationNumerator: accelerationNumerator,
+        accelerationDenominator: accelerationDenominator,
+        doThreshold: doThreshold,
+        threshold: threshold);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(105, buffer.data);
+  }
+
+  Future<X11GetPointerControlReply> getPointerControl() async {
+    var request = X11GetPointerControlRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(106, buffer.data);
+    return _awaitReply<X11GetPointerControlReply>(
+        sequenceNumber, X11GetPointerControlReply.fromBuffer);
   }
 
   int setScreenSaver(
