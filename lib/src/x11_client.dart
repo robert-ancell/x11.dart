@@ -4955,9 +4955,239 @@ class X11ListExtensionsReply extends X11Reply {
 
 // FIXME(robert-ancell): GetKeyboardMapping
 
-// FIXME(robert-ancell): ChangeKeyboardControl
+class X11ChangeKeyboardControlRequest extends X11Request {
+  final int keyClickPercent;
+  final int bellPercent;
+  final int bellPitch;
+  final int bellDuration;
+  final int led;
+  final int ledMode;
+  final int key;
+  final int autoRepeatMode;
 
-// FIXME(robert-ancell): GetKeyboardControl
+  X11ChangeKeyboardControlRequest(
+      {this.keyClickPercent,
+      this.bellPercent,
+      this.bellPitch,
+      this.bellDuration,
+      this.led,
+      this.ledMode,
+      this.key,
+      this.autoRepeatMode});
+
+  factory X11ChangeKeyboardControlRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var valueMask = buffer.readUint32();
+    int keyClickPercent;
+    if ((valueMask & 0x0001) != 0) {
+      keyClickPercent = buffer.readInt8();
+      buffer.skip(3);
+    }
+    int bellPercent;
+    if ((valueMask & 0x0002) != 0) {
+      bellPercent = buffer.readInt8();
+      buffer.skip(3);
+    }
+    int bellPitch;
+    if ((valueMask & 0x0004) != 0) {
+      bellPitch = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int bellDuration;
+    if ((valueMask & 0x0008) != 0) {
+      bellDuration = buffer.readInt16();
+      buffer.skip(2);
+    }
+    int led;
+    if ((valueMask & 0x0010) != 0) {
+      led = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int ledMode;
+    if ((valueMask & 0x0020) != 0) {
+      ledMode = buffer.readUint32();
+    }
+    int key;
+    if ((valueMask & 0x0040) != 0) {
+      key = buffer.readUint32();
+    }
+    int autoRepeatMode;
+    if ((valueMask & 0x0080) != 0) {
+      autoRepeatMode = buffer.readUint32();
+    }
+    return X11ChangeKeyboardControlRequest(
+        keyClickPercent: keyClickPercent,
+        bellPercent: bellPercent,
+        bellPitch: bellPitch,
+        bellDuration: bellDuration,
+        led: led,
+        ledMode: ledMode,
+        key: key,
+        autoRepeatMode: autoRepeatMode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    var valueMask = 0;
+    if (keyClickPercent != null) {
+      valueMask |= 0x0001;
+    }
+    if (bellPercent != null) {
+      valueMask |= 0x0002;
+    }
+    if (bellPitch != null) {
+      valueMask |= 0x0004;
+    }
+    if (bellDuration != null) {
+      valueMask |= 0x0008;
+    }
+    if (led != null) {
+      valueMask |= 0x0010;
+    }
+    if (ledMode != null) {
+      valueMask |= 0x0020;
+    }
+    if (key != null) {
+      valueMask |= 0x0040;
+    }
+    if (autoRepeatMode != null) {
+      valueMask |= 0x0080;
+    }
+    buffer.writeUint32(valueMask);
+    if (keyClickPercent != null) {
+      buffer.writeInt8(keyClickPercent);
+      buffer.skip(3);
+    }
+    if (bellPercent != null) {
+      buffer.writeInt8(bellPercent);
+      buffer.skip(3);
+    }
+    if (bellPitch != null) {
+      buffer.writeInt16(bellPitch);
+      buffer.skip(2);
+    }
+    if (bellDuration != null) {
+      buffer.writeInt16(bellDuration);
+      buffer.skip(2);
+    }
+    if (led != null) {
+      buffer.writeUint8(led);
+      buffer.skip(3);
+    }
+    if (ledMode != null) {
+      buffer.writeUint32(ledMode);
+    }
+    if (key != null) {
+      buffer.writeUint32(key);
+    }
+    if (autoRepeatMode != null) {
+      buffer.writeUint32(autoRepeatMode);
+    }
+  }
+}
+
+class X11GetKeyboardControlRequest extends X11Request {
+  X11GetKeyboardControlRequest();
+
+  factory X11GetKeyboardControlRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    return X11GetKeyboardControlRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+  }
+}
+
+class X11GetKeyboardControlReply extends X11Reply {
+  final int globalAutoRepeat;
+  final int ledMask;
+  final int keyClickPercent;
+  final int bellPercent;
+  final int bellPitch;
+  final int bellDuration;
+  final List<int> autoRepeats;
+
+  X11GetKeyboardControlReply(
+      {this.globalAutoRepeat = 0,
+      this.ledMask = 0,
+      this.keyClickPercent = 0,
+      this.bellPercent = 0,
+      this.bellPitch = 0,
+      this.bellDuration = 0,
+      this.autoRepeats = const [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]});
+
+  static X11GetKeyboardControlReply fromBuffer(X11ReadBuffer buffer) {
+    var globalAutoRepeat = buffer.readUint8();
+    var ledMask = buffer.readUint32();
+    var keyClickPercent = buffer.readUint8();
+    var bellPercent = buffer.readUint8();
+    var bellPitch = buffer.readUint16();
+    var bellDuration = buffer.readUint16();
+    buffer.skip(2);
+    var autoRepeats = <int>[];
+    for (var i = 0; i < 32; i++) {
+      autoRepeats.add(buffer.readUint8());
+    }
+    return X11GetKeyboardControlReply(
+        globalAutoRepeat: globalAutoRepeat,
+        ledMask: ledMask,
+        keyClickPercent: keyClickPercent,
+        bellPercent: bellPercent,
+        bellPitch: bellPitch,
+        bellDuration: bellDuration,
+        autoRepeats: autoRepeats);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(globalAutoRepeat);
+    buffer.writeUint32(ledMask);
+    buffer.writeUint8(keyClickPercent);
+    buffer.writeUint8(bellPercent);
+    buffer.writeUint16(bellPitch);
+    buffer.writeUint16(bellDuration);
+    buffer.skip(2);
+    for (var value in autoRepeats) {
+      buffer.writeUint8(value);
+    }
+  }
+}
 
 class X11BellRequest extends X11Request {
   final int percent;
@@ -7864,6 +8094,38 @@ class X11Client {
     var reply = await _awaitReply<X11ListExtensionsReply>(
         sequenceNumber, X11ListExtensionsReply.fromBuffer);
     return reply.names;
+  }
+
+  int changeKeyboardControl(
+      {int keyClickPercent,
+      int bellPercent,
+      int bellPitch,
+      int bellDuration,
+      int led,
+      int ledMode,
+      int key,
+      int autoRepeatMode}) {
+    var request = X11ChangeKeyboardControlRequest(
+        keyClickPercent: keyClickPercent,
+        bellPercent: bellPercent,
+        bellPitch: bellPitch,
+        bellDuration: bellDuration,
+        led: led,
+        ledMode: ledMode,
+        key: key,
+        autoRepeatMode: autoRepeatMode);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(102, buffer.data);
+  }
+
+  Future<X11GetKeyboardControlReply> getKeyboardControl() async {
+    var request = X11GetKeyboardControlRequest();
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(103, buffer.data);
+    return _awaitReply<X11GetKeyboardControlReply>(
+        sequenceNumber, X11GetKeyboardControlReply.fromBuffer);
   }
 
   int bell(int percent) {
