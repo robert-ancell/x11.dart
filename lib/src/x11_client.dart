@@ -294,6 +294,30 @@ class X11Size {
   String toString() => 'X11Size(width: ${width}, height: ${height})';
 }
 
+abstract class X11TextItem {
+  const X11TextItem();
+}
+
+class X11TextItemFont extends X11TextItem {
+  final int font;
+
+  const X11TextItemFont(this.font);
+
+  @override
+  String toString() => 'X11TextItemFont(font: ${font})';
+}
+
+class X11TextItemString extends X11TextItem {
+  final int delta;
+  final String string;
+
+  const X11TextItemString(this.delta, this.string);
+
+  @override
+  String toString() =>
+      "X11TextItemString(delta: ${delta}, string: '${string}')";
+}
+
 class X11TimeCoord {
   final int x;
   final int y;
@@ -4183,9 +4207,119 @@ class X11GetImageReply extends X11Reply {
   }
 }
 
-// FIXME(robert-ancell): PolyText8
+class X11PolyText8Request extends X11Request {
+  final int drawable;
+  final int gc;
+  final X11Point position;
+  final List<X11TextItem> items;
 
-// FIXME(robert-ancell): PolyText16
+  X11PolyText8Request(this.drawable, this.gc, this.position, this.items);
+
+  factory X11PolyText8Request.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    var items = <X11TextItem>[];
+    while (buffer.remaining >= 2) {
+      var stringLength = buffer.readUint8();
+      if (stringLength == 255) {
+        var fontByte3 = buffer.readUint8();
+        var fontByte2 = buffer.readUint8();
+        var fontByte1 = buffer.readUint8();
+        var fontByte0 = buffer.readUint8();
+        var font =
+            fontByte3 << 24 | fontByte2 << 16 | fontByte1 << 8 | fontByte0;
+        items.add(X11TextItemFont(font));
+      } else {
+        var delta = buffer.readInt8();
+        var string = buffer.readString8(stringLength);
+        items.add(X11TextItemString(delta, string));
+      }
+    }
+    return X11PolyText8Request(drawable, gc, X11Point(x, y), items);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    buffer.writeInt16(position.x);
+    buffer.writeInt16(position.y);
+    for (var item in items) {
+      if (item is X11TextItemFont) {
+        buffer.writeUint8(255);
+        buffer.writeUint8((item.font >> 24 & 0xff));
+        buffer.writeUint8((item.font >> 16 & 0xff));
+        buffer.writeUint8((item.font >> 8 & 0xff));
+        buffer.writeUint8((item.font >> 0 & 0xff));
+      } else if (item is X11TextItemString) {
+        buffer.writeUint8(item.string.length);
+        buffer.writeInt8(item.delta);
+        buffer.writeString8(item.string);
+      }
+    }
+  }
+}
+
+class X11PolyText16Request extends X11Request {
+  final int drawable;
+  final int gc;
+  final X11Point position;
+  final List<X11TextItem> items;
+
+  X11PolyText16Request(this.drawable, this.gc, this.position, this.items);
+
+  factory X11PolyText16Request.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var drawable = buffer.readUint32();
+    var gc = buffer.readUint32();
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    var items = <X11TextItem>[];
+    while (buffer.remaining >= 2) {
+      var stringLength = buffer.readUint8();
+      if (stringLength == 255) {
+        var fontByte3 = buffer.readUint8();
+        var fontByte2 = buffer.readUint8();
+        var fontByte1 = buffer.readUint8();
+        var fontByte0 = buffer.readUint8();
+        var font =
+            fontByte3 << 24 | fontByte2 << 16 | fontByte1 << 8 | fontByte0;
+        items.add(X11TextItemFont(font));
+      } else {
+        var delta = buffer.readInt8();
+        var string = buffer.readString16(stringLength);
+        items.add(X11TextItemString(delta, string));
+      }
+    }
+    return X11PolyText16Request(drawable, gc, X11Point(x, y), items);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(gc);
+    buffer.writeInt16(position.x);
+    buffer.writeInt16(position.y);
+    for (var item in items) {
+      if (item is X11TextItemFont) {
+        buffer.writeUint8(255);
+        buffer.writeUint8((item.font >> 24 & 0xff));
+        buffer.writeUint8((item.font >> 16 & 0xff));
+        buffer.writeUint8((item.font >> 8 & 0xff));
+        buffer.writeUint8((item.font >> 0 & 0xff));
+      } else if (item is X11TextItemString) {
+        buffer.writeUint8(item.string.length);
+        buffer.writeInt8(item.delta);
+        buffer.writeString16(item.string);
+      }
+    }
+  }
+}
 
 class X11ImageText8Request extends X11Request {
   final int drawable;
@@ -8356,6 +8490,22 @@ class X11Client {
     var sequenceNumber = _sendRequest(73, buffer.data);
     return _awaitReply<X11GetImageReply>(
         sequenceNumber, X11GetImageReply.fromBuffer);
+  }
+
+  int polyText8(
+      int drawable, int gc, X11Point position, List<X11TextItem> items) {
+    var request = X11PolyText8Request(drawable, gc, position, items);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(74, buffer.data);
+  }
+
+  int polyText16(
+      int drawable, int gc, X11Point position, List<X11TextItem> items) {
+    var request = X11PolyText16Request(drawable, gc, position, items);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    return _sendRequest(75, buffer.data);
   }
 
   int imageText8(int drawable, int gc, X11Point position, String string) {
