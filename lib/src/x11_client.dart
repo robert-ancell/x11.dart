@@ -294,6 +294,17 @@ class X11Size {
   String toString() => 'X11Size(width: ${width}, height: ${height})';
 }
 
+class X11TimeCoord {
+  final int x;
+  final int y;
+  final int time;
+
+  const X11TimeCoord(this.x, this.y, this.time);
+
+  @override
+  String toString() => 'X11TimeCoord(x: ${x}, y: ${y}, time: ${time})';
+}
+
 class X11Visual {
   int visualId;
   X11VisualClass class_;
@@ -2013,7 +2024,61 @@ class X11QueryPointerReply extends X11Reply {
   }
 }
 
-// FIXME(robert-ancell): GetMotionEvents
+class X11GetMotionEventsRequest extends X11Request {
+  final int window;
+  final int start;
+  final int stop;
+
+  X11GetMotionEventsRequest(this.window, this.start, this.stop);
+
+  factory X11GetMotionEventsRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var window = buffer.readUint32();
+    var start = buffer.readUint32();
+    var stop = buffer.readUint32();
+    return X11GetMotionEventsRequest(window, start, stop);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(window);
+    buffer.writeUint32(start);
+    buffer.writeUint32(stop);
+  }
+}
+
+class X11GetMotionEventsReply extends X11Reply {
+  final List<X11TimeCoord> events;
+
+  X11GetMotionEventsReply(this.events);
+
+  static X11GetMotionEventsReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var eventsLength = buffer.readUint32();
+    buffer.skip(20);
+    var events = <X11TimeCoord>[];
+    for (var i = 0; i < eventsLength; i++) {
+      var time = buffer.readUint32();
+      var x = buffer.readInt16();
+      var y = buffer.readInt16();
+      events.add(X11TimeCoord(x, y, time));
+    }
+    return X11GetMotionEventsReply(events);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(events.length);
+    buffer.skip(20);
+    for (var event in events) {
+      buffer.writeUint32(event.time);
+      buffer.writeInt16(event.x);
+      buffer.writeInt16(event.y);
+    }
+  }
+}
 
 class X11TranslateCoordinatesRequest extends X11Request {
   final int srcWindow;
@@ -7109,6 +7174,17 @@ class X11Client {
     var sequenceNumber = _sendRequest(38, buffer.data);
     return _awaitReply<X11QueryPointerReply>(
         sequenceNumber, X11QueryPointerReply.fromBuffer);
+  }
+
+  Future<List<X11TimeCoord>> getMotionEvents(
+      int window, int start, int stop) async {
+    var request = X11GetMotionEventsRequest(window, start, stop);
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+    var sequenceNumber = _sendRequest(39, buffer.data);
+    var reply = await _awaitReply<X11GetMotionEventsReply>(
+        sequenceNumber, X11GetMotionEventsReply.fromBuffer);
+    return reply.events;
   }
 
   Future<X11TranslateCoordinatesReply> translateCoordinates(
