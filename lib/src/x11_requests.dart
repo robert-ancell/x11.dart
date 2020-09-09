@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'x11_client.dart';
 import 'x11_events.dart';
+import 'x11_types.dart';
 
 String _formatHex32(int id) {
   return '0x' + id.toRadixString(16).padLeft(8, '0');

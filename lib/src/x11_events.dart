@@ -1,4 +1,5 @@
 import 'x11_client.dart';
+import 'x11_types.dart';
 
 abstract class X11Event {
   X11Event();
