@@ -1436,7 +1436,7 @@ class X11GetPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GetPropertyRequest(window: ${window}, ${property}; ${property}, ${type}: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}})';
+      'X11GetPropertyRequest(window: ${window}, property: ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}})';
 }
 
 class X11GetPropertyReply extends X11Reply {
@@ -1498,6 +1498,10 @@ class X11GetPropertyReply extends X11Reply {
     }
     buffer.skip(pad(value.length * format ~/ 8));
   }
+
+  @override
+  String toString() =>
+      'X11GetPropertyReply(type: ${type}, format: ${format}, value: ${value}, bytesAfter: ${bytesAfter})';
 }
 
 class X11ListPropertiesRequest extends X11Request {
@@ -2076,8 +2080,11 @@ class X11QueryPointerReply extends X11Reply {
   final int mask;
   final bool sameScreen;
 
-  X11QueryPointerReply(this.root, this.child, this.positionRoot,
-      this.positionWindow, this.mask, this.sameScreen);
+  X11QueryPointerReply(this.root, this.positionRoot,
+      {this.positionWindow = const X11Point(0, 0),
+      this.child = 0,
+      this.mask = 0,
+      this.sameScreen = true});
 
   static X11QueryPointerReply fromBuffer(X11ReadBuffer buffer) {
     var sameScreen = buffer.readBool();
@@ -2089,8 +2096,11 @@ class X11QueryPointerReply extends X11Reply {
     var winY = buffer.readInt16();
     var mask = buffer.readUint16();
     buffer.skip(2);
-    return X11QueryPointerReply(root, child, X11Point(rootX, rootY),
-        X11Point(winX, winY), mask, sameScreen);
+    return X11QueryPointerReply(root, X11Point(rootX, rootY),
+        positionWindow: X11Point(winX, winY),
+        child: child,
+        mask: mask,
+        sameScreen: sameScreen);
   }
 
   @override
@@ -5000,6 +5010,10 @@ class X11QueryColorsRequest extends X11Request {
       buffer.writeUint32(pixel);
     }
   }
+
+  @override
+  String toString() =>
+      'X11QueryColorsRequest(cmap: ${cmap}, pixels: ${pixels})';
 }
 
 class X11QueryColorsReply extends X11Reply {
@@ -5034,6 +5048,9 @@ class X11QueryColorsReply extends X11Reply {
       buffer.skip(2);
     }
   }
+
+  @override
+  String toString() => 'X11QueryColorsReply(colors: ${colors})';
 }
 
 class X11LookupColorRequest extends X11Request {

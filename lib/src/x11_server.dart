@@ -153,6 +153,9 @@ class _X11Client {
     } else if (opcode == 20) {
       request = X11GetPropertyRequest.fromBuffer(requestBuffer);
       reply = X11GetPropertyReply();
+    } else if (opcode == 38) {
+      request = X11QueryPointerRequest.fromBuffer(requestBuffer);
+      reply = X11QueryPointerReply(0x000007a5, X11Point(0, 0));
     } else if (opcode == 43) {
       request = X11GetInputFocusRequest.fromBuffer(requestBuffer);
       reply = X11GetInputFocusReply(0);
@@ -164,11 +167,21 @@ class _X11Client {
       request = X11CreateGCRequest.fromBuffer(requestBuffer);
     } else if (opcode == 60) {
       request = X11FreeGCRequest.fromBuffer(requestBuffer);
+    } else if (opcode == 61) {
+      request = X11ClearAreaRequest.fromBuffer(requestBuffer);
     } else if (opcode == 72) {
       request = X11PutImageRequest.fromBuffer(requestBuffer);
     } else if (opcode == 91) {
-      request = X11QueryColorsRequest.fromBuffer(requestBuffer);
-      reply = X11QueryColorsReply([]);
+      var r = X11QueryColorsRequest.fromBuffer(requestBuffer);
+      var colors = <X11Rgb>[];
+      for (var pixel in r.pixels) {
+        var red = (pixel >> 16) & 0xFF;
+        var green = (pixel >> 8) & 0xFF;
+        var blue = (pixel >> 0) & 0xFF;
+        colors.add(X11Rgb(red << 16, green << 16, blue << 16));
+      }
+      request = r;
+      reply = X11QueryColorsReply(colors);
     } else if (opcode == 98) {
       request = X11QueryExtensionRequest.fromBuffer(requestBuffer);
       reply = X11QueryExtensionReply(present: false);
