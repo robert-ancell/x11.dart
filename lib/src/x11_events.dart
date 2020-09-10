@@ -1,4 +1,6 @@
 import 'x11_client.dart';
+import 'x11_read_buffer.dart';
+import 'x11_write_buffer.dart';
 import 'x11_types.dart';
 
 abstract class X11Event {

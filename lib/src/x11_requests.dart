@@ -1,8 +1,18 @@
 import 'dart:math';
 
-import 'x11_client.dart';
 import 'x11_events.dart';
+import 'x11_read_buffer.dart';
 import 'x11_types.dart';
+import 'x11_write_buffer.dart';
+
+int pad(int length) {
+  var n = 0;
+  while (length % 4 != 0) {
+    length++;
+    n++;
+  }
+  return n;
+}
 
 String _formatHex32(int id) {
   return '0x' + id.toRadixString(16).padLeft(8, '0');
@@ -1628,7 +1638,7 @@ class X11SendEventRequest extends X11Request {
     buffer.writeUint8(code);
     buffer.writeUint8(eventBuffer.data[0]);
     buffer.writeUint16(sequenceNumber);
-    for (var i = 1; i < eventBuffer.data.length; i++) {
+    for (var i = 1; i < eventBuffer.length; i++) {
       buffer.writeUint8(eventBuffer.data[i]);
     }
     event.encode(buffer);
@@ -2606,7 +2616,9 @@ class X11ListFontsReply extends X11Reply {
     buffer.skip(1);
     var namesLength = buffer.readUint16();
     buffer.skip(22);
+    var start = buffer.remaining;
     var names = buffer.readListOfString8(namesLength);
+    buffer.skip(pad(start - buffer.remaining));
     return X11ListFontsReply(names);
   }
 
@@ -2615,7 +2627,9 @@ class X11ListFontsReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(names.length);
     buffer.skip(22);
+    var start = buffer.length;
     buffer.writeListOfString8(names);
+    buffer.skip(pad(buffer.length - start));
   }
 }
 
@@ -2754,7 +2768,9 @@ class X11SetFontPathRequest extends X11Request {
     buffer.skip(1);
     var pathLength = buffer.readUint16();
     buffer.skip(2);
+    var start = buffer.remaining;
     var path = buffer.readListOfString8(pathLength);
+    buffer.skip(pad(start - buffer.remaining));
     return X11SetFontPathRequest(path);
   }
 
@@ -2763,7 +2779,9 @@ class X11SetFontPathRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint16(path.length);
     buffer.skip(2);
+    var start = buffer.length;
     buffer.writeListOfString8(path);
+    buffer.skip(pad(buffer.length - start));
   }
 }
 
@@ -2790,7 +2808,9 @@ class X11GetFontPathReply extends X11Reply {
     buffer.skip(1);
     var pathLength = buffer.readUint16();
     buffer.skip(22);
+    var start = buffer.remaining;
     var path = buffer.readListOfString8(pathLength);
+    buffer.skip(pad(start - buffer.remaining));
     return X11GetFontPathReply(path);
   }
 
@@ -2799,7 +2819,9 @@ class X11GetFontPathReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(path.length);
     buffer.skip(22);
+    var start = buffer.length;
     buffer.writeListOfString8(path);
+    buffer.skip(pad(buffer.length - start));
   }
 }
 
@@ -5297,7 +5319,9 @@ class X11ListExtensionsReply extends X11Reply {
   static X11ListExtensionsReply fromBuffer(X11ReadBuffer buffer) {
     var namesLength = buffer.readUint8();
     buffer.skip(24);
+    var start = buffer.remaining;
     var names = buffer.readListOfString8(namesLength);
+    buffer.skip(pad(start - buffer.remaining));
     return X11ListExtensionsReply(names);
   }
 
@@ -5305,7 +5329,9 @@ class X11ListExtensionsReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(names.length);
     buffer.skip(24);
+    var start = buffer.length;
     buffer.writeListOfString8(names);
+    buffer.skip(pad(buffer.length - start));
   }
 }
 
