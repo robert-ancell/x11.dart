@@ -350,11 +350,11 @@ class X11CreateWindowRequest extends X11Request {
   final int borderPixel;
   final int bitGravity;
   final int winGravity;
-  final int backingStore;
+  final int backingStore; // FIXME: enum
   final int backingPlanes;
   final int backingPixel;
-  final int overrideRedirect;
-  final int saveUnder;
+  final bool overrideRedirect;
+  final bool saveUnder;
   final int eventMask;
   final int doNotPropagateMask;
   final int colormap;
@@ -410,11 +410,13 @@ class X11CreateWindowRequest extends X11Request {
     }
     int bitGravity;
     if ((valueMask & 0x0010) != 0) {
-      bitGravity = buffer.readUint32();
+      bitGravity = buffer.readUint8();
+      buffer.skip(3);
     }
     int winGravity;
     if ((valueMask & 0x0020) != 0) {
-      winGravity = buffer.readUint32();
+      winGravity = buffer.readUint8();
+      buffer.skip(3);
     }
     int backingStore;
     if ((valueMask & 0x0040) != 0) {
@@ -428,13 +430,15 @@ class X11CreateWindowRequest extends X11Request {
     if ((valueMask & 0x0100) != 0) {
       backingPixel = buffer.readUint32();
     }
-    int overrideRedirect;
+    bool overrideRedirect;
     if ((valueMask & 0x0200) != 0) {
-      overrideRedirect = buffer.readUint32();
+      overrideRedirect = buffer.readBool();
+      buffer.skip(3);
     }
-    int saveUnder;
+    bool saveUnder;
     if ((valueMask & 0x0400) != 0) {
-      saveUnder = buffer.readUint32();
+      saveUnder = buffer.readBool();
+      buffer.skip(3);
     }
     int eventMask;
     if ((valueMask & 0x0800) != 0) {
@@ -546,10 +550,12 @@ class X11CreateWindowRequest extends X11Request {
       buffer.writeUint32(borderPixel);
     }
     if (bitGravity != null) {
-      buffer.writeUint32(bitGravity);
+      buffer.writeUint8(bitGravity);
+      buffer.skip(3);
     }
     if (winGravity != null) {
-      buffer.writeUint32(winGravity);
+      buffer.writeUint8(winGravity);
+      buffer.skip(3);
     }
     if (backingStore != null) {
       buffer.writeUint32(backingStore);
@@ -561,10 +567,12 @@ class X11CreateWindowRequest extends X11Request {
       buffer.writeUint32(backingPixel);
     }
     if (overrideRedirect != null) {
-      buffer.writeUint32(overrideRedirect);
+      buffer.writeBool(overrideRedirect);
+      buffer.skip(3);
     }
     if (saveUnder != null) {
-      buffer.writeUint32(saveUnder);
+      buffer.writeBool(saveUnder);
+      buffer.skip(3);
     }
     if (eventMask != null) {
       buffer.writeUint32(eventMask);
@@ -592,8 +600,8 @@ class X11ChangeWindowAttributesRequest extends X11Request {
   final int backingStore;
   final int backingPlanes;
   final int backingPixel;
-  final int overrideRedirect;
-  final int saveUnder;
+  final bool overrideRedirect;
+  final bool saveUnder;
   final int eventMask;
   final int doNotPropagateMask;
   final int colormap;
@@ -615,6 +623,92 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       this.doNotPropagateMask,
       this.colormap,
       this.cursor});
+
+  factory X11ChangeWindowAttributesRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var window = buffer.readUint32();
+    var valueMask = buffer.readUint32();
+    int backgroundPixmap;
+    if ((valueMask & 0x0001) != 0) {
+      backgroundPixmap = buffer.readUint32();
+    }
+    int backgroundPixel;
+    if ((valueMask & 0x0002) != 0) {
+      backgroundPixel = buffer.readUint32();
+    }
+    int borderPixmap;
+    if ((valueMask & 0x0004) != 0) {
+      borderPixmap = buffer.readUint32();
+    }
+    int borderPixel;
+    if ((valueMask & 0x0008) != 0) {
+      borderPixel = buffer.readUint32();
+    }
+    int bitGravity;
+    if ((valueMask & 0x0010) != 0) {
+      bitGravity = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int winGravity;
+    if ((valueMask & 0x0020) != 0) {
+      winGravity = buffer.readUint8();
+      buffer.skip(3);
+    }
+    int backingStore;
+    if ((valueMask & 0x0040) != 0) {
+      backingStore = buffer.readUint32();
+    }
+    int backingPlanes;
+    if ((valueMask & 0x0080) != 0) {
+      backingPlanes = buffer.readUint32();
+    }
+    int backingPixel;
+    if ((valueMask & 0x0100) != 0) {
+      backingPixel = buffer.readUint32();
+    }
+    bool overrideRedirect;
+    if ((valueMask & 0x0200) != 0) {
+      overrideRedirect = buffer.readBool();
+      buffer.skip(3);
+    }
+    bool saveUnder;
+    if ((valueMask & 0x0400) != 0) {
+      saveUnder = buffer.readBool();
+      buffer.skip(3);
+    }
+    int eventMask;
+    if ((valueMask & 0x0800) != 0) {
+      eventMask = buffer.readUint32();
+    }
+    int doNotPropagateMask;
+    if ((valueMask & 0x1000) != 0) {
+      doNotPropagateMask = buffer.readUint32();
+    }
+    int colormap;
+    if ((valueMask & 0x2000) != 0) {
+      colormap = buffer.readUint32();
+    }
+    int cursor;
+    if ((valueMask & 0x4000) != 0) {
+      cursor = buffer.readUint32();
+    }
+    return X11ChangeWindowAttributesRequest(window,
+        backgroundPixmap: backgroundPixmap,
+        backgroundPixel: backgroundPixel,
+        borderPixmap: borderPixmap,
+        borderPixel: borderPixel,
+        bitGravity: bitGravity,
+        winGravity: winGravity,
+        backingStore: backingStore,
+        backingPlanes: backingPlanes,
+        backingPixel: backingPixel,
+        overrideRedirect: overrideRedirect,
+        saveUnder: saveUnder,
+        eventMask: eventMask,
+        doNotPropagateMask: doNotPropagateMask,
+        colormap: colormap,
+        cursor: cursor);
+  }
 
   @override
   void encode(X11WriteBuffer buffer) {
@@ -680,10 +774,12 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       buffer.writeUint32(borderPixel);
     }
     if (bitGravity != null) {
-      buffer.writeUint32(bitGravity);
+      buffer.writeUint8(bitGravity);
+      buffer.skip(3);
     }
     if (winGravity != null) {
-      buffer.writeUint32(winGravity);
+      buffer.writeUint8(winGravity);
+      buffer.skip(3);
     }
     if (backingStore != null) {
       buffer.writeUint32(backingStore);
@@ -695,10 +791,12 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       buffer.writeUint32(backingPixel);
     }
     if (overrideRedirect != null) {
-      buffer.writeUint32(overrideRedirect);
+      buffer.writeBool(overrideRedirect);
+      buffer.skip(3);
     }
     if (saveUnder != null) {
-      buffer.writeUint32(saveUnder);
+      buffer.writeBool(saveUnder);
+      buffer.skip(3);
     }
     if (eventMask != null) {
       buffer.writeUint32(eventMask);
@@ -720,8 +818,7 @@ class X11GetWindowAttributesRequest extends X11Request {
 
   X11GetWindowAttributesRequest(this.window);
 
-  factory X11GetWindowAttributesRequest.fromBuffer(
-      int data, X11ReadBuffer buffer) {
+  factory X11GetWindowAttributesRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var window = buffer.readUint32();
     return X11GetWindowAttributesRequest(window);
@@ -847,8 +944,7 @@ class X11DestroySubwindowsRequest extends X11Request {
 
   X11DestroySubwindowsRequest(this.window);
 
-  factory X11DestroySubwindowsRequest.fromBuffer(
-      int data, X11ReadBuffer buffer) {
+  factory X11DestroySubwindowsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var window = buffer.readUint32();
     return X11DestroySubwindowsRequest(window);

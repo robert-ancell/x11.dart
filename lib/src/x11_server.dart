@@ -132,45 +132,225 @@ class _X11Client {
     X11Request request;
     X11Reply reply;
     if (opcode == 1) {
-      request = X11CreateWindowRequest.fromBuffer(requestBuffer);
+      var r = X11CreateWindowRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 2) {
+      var r = X11ChangeWindowAttributesRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 3) {
+      var r = X11GetWindowAttributesRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetWindowAttributesReply();
+    } else if (opcode == 4) {
+      var r = X11DestroyWindowRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 5) {
+      var r = X11DestroySubwindowsRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 6) {
+      var r = X11ChangeSaveSetRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 7) {
-      request = X11ReparentWindowRequest.fromBuffer(requestBuffer);
+      var r = X11ReparentWindowRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 8) {
-      request = X11MapWindowRequest.fromBuffer(requestBuffer);
+      var r = X11MapWindowRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 9) {
-      request = X11MapSubwindowsRequest.fromBuffer(requestBuffer);
+      var r = X11MapSubwindowsRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 10) {
-      request = X11UnmapWindowRequest.fromBuffer(requestBuffer);
+      var r = X11UnmapWindowRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 11) {
       request = X11UnmapSubwindowsRequest.fromBuffer(requestBuffer);
+    } else if (opcode == 12) {
+      var r = X11ConfigureWindowRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 13) {
+      var r = X11CirculateWindowRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 14) {
+      var r = X11GetGeometryRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetGeometryReply();
+    } else if (opcode == 15) {
+      var r = X11QueryTreeRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11QueryTreeReply();
     } else if (opcode == 16) {
       var r = X11InternAtomRequest.fromBuffer(requestBuffer);
       var atom = server.internAtom(r.name, onlyIfExists: r.onlyIfExists);
       request = r;
       reply = X11InternAtomReply(atom);
     } else if (opcode == 18) {
-      request = X11ChangePropertyRequest.fromBuffer(requestBuffer);
+      var r = X11ChangePropertyRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 20) {
-      request = X11GetPropertyRequest.fromBuffer(requestBuffer);
+      var r = X11GetPropertyRequest.fromBuffer(requestBuffer);
+      request = r;
       reply = X11GetPropertyReply();
     } else if (opcode == 38) {
-      request = X11QueryPointerRequest.fromBuffer(requestBuffer);
+      var r = X11QueryPointerRequest.fromBuffer(requestBuffer);
+      request = r;
       reply = X11QueryPointerReply(0x000007a5, X11Point(0, 0));
     } else if (opcode == 43) {
-      request = X11GetInputFocusRequest.fromBuffer(requestBuffer);
+      var r = X11GetInputFocusRequest.fromBuffer(requestBuffer);
+      request = r;
       reply = X11GetInputFocusReply(0);
+    } else if (opcode == 44) {
+      var r = X11QueryKeymapRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11QueryKeymapReply();
+    } else if (opcode == 45) {
+      var r = X11OpenFontRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 46) {
+      var r = X11CloseFontRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 47) {
+      var r = X11QueryFontRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11QueryFontReply();
+    } else if (opcode == 48) {
+      var r = X11QueryTextExtentsRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11QueryTextExtentsReply();
+    } else if (opcode == 49) {
+      var r = X11ListFontsRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11ListFontsReply();
+    } else if (opcode == 50) {
+      var r = X11ListFontsWithInfoRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11ListFontsWithInfoReply();
+    } else if (opcode == 51) {
+      var r = X11SetFontPathRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 52) {
+      var r = X11GetFontPathRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetFontPathReply();
     } else if (opcode == 53) {
-      request = X11CreatePixmapRequest.fromBuffer(requestBuffer);
+      var r = X11CreatePixmapRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 54) {
-      request = X11FreePixmapRequest.fromBuffer(requestBuffer);
+      var r = X11FreePixmapRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 55) {
-      request = X11CreateGCRequest.fromBuffer(requestBuffer);
+      var r = X11CreateGCRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 56) {
+      var r = X11ChangeGCRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 57) {
+      var r = X11CopyGCRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 58) {
+      var r = X11SetDashesRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 59) {
+      var r = X11SetClipRectanglesRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 60) {
-      request = X11FreeGCRequest.fromBuffer(requestBuffer);
+      var r = X11FreeGCRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 61) {
-      request = X11ClearAreaRequest.fromBuffer(requestBuffer);
+      var r = X11ClearAreaRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 62) {
+      var r = X11CopyAreaRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 63) {
+      var r = X11CopyPlaneRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 64) {
+      var r = X11PolyPointRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 65) {
+      var r = X11PolyLineRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 66) {
+      var r = X11PolySegmentRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 67) {
+      var r = X11PolyRectangleRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 68) {
+      var r = X11PolyArcRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 69) {
+      var r = X11FillPolyRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 70) {
+      var r = X11PolyFillRectangleRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 71) {
+      var r = X11PolyFillArcRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 72) {
-      request = X11PutImageRequest.fromBuffer(requestBuffer);
+      var r = X11PutImageRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 73) {
+      var r = X11GetImageRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetImageReply();
+    } else if (opcode == 74) {
+      var r = X11PolyText8Request.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 75) {
+      var r = X11PolyText16Request.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 76) {
+      var r = X11ImageText8Request.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 77) {
+      var r = X11ImageText16Request.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 78) {
+      var r = X11CreateColormapRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 79) {
+      var r = X11FreeColormapRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 80) {
+      var r = X11CopyColormapAndFreeRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 81) {
+      var r = X11InstallColormapRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 82) {
+      var r = X11UninstallColormapRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 83) {
+      var r = X11ListInstalledColormapsRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11ListInstalledColormapsReply();
+    } else if (opcode == 84) {
+      var r = X11AllocColorRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11AllocColorReply();
+    } else if (opcode == 85) {
+      var r = X11AllocNamedColorRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11AllocNamedColorReply();
+    } else if (opcode == 86) {
+      var r = X11AllocColorCellsRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11AllocColorCellsReply();
+    } else if (opcode == 87) {
+      var r = X11AllocColorPlanesRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11AllocColorPlanesReply();
+    } else if (opcode == 88) {
+      var r = X11FreeColorsRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 89) {
+      var r = X11StoreColorsRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 90) {
+      var r = X11StoreNamedColorRequest.fromBuffer(requestBuffer);
+      request = r;
     } else if (opcode == 91) {
       var r = X11QueryColorsRequest.fromBuffer(requestBuffer);
       var colors = <X11Rgb>[];
@@ -182,15 +362,114 @@ class _X11Client {
       }
       request = r;
       reply = X11QueryColorsReply(colors);
+    } else if (opcode == 92) {
+      var r = X11LookupColorRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11LookupColorReply();
+    } else if (opcode == 93) {
+      var r = X11CreateCursorRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 94) {
+      var r = X11CreateGlyphCursorRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 95) {
+      var r = X11FreeCursorRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 96) {
+      var r = X11RecolorCursorRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 97) {
+      var r = X11QueryBestSizeRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11QueryBestSizeReply();
     } else if (opcode == 98) {
-      request = X11QueryExtensionRequest.fromBuffer(requestBuffer);
+      var r = X11QueryExtensionRequest.fromBuffer(requestBuffer);
+      request = r;
       reply = X11QueryExtensionReply(present: false);
+    } else if (opcode == 99) {
+      var r = X11ListExtensionsRequest.fromBuffer(requestBuffer);
+      request = r;
+      reply = X11ListExtensionsReply([]);
+    } else if (opcode == 100) {
+      var r = X11ChangeKeyboardMappingRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 101) {
+      var r = X11GetKeyboardMappingRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetKeyboardMappingReply();
+    } else if (opcode == 102) {
+      var r = X11ChangeKeyboardControlRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 103) {
+      var r = X11GetKeyboardControlRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetKeyboardControlReply();
+    } else if (opcode == 104) {
+      var r = X11BellRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 105) {
+      var r = X11ChangePointerControlRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 106) {
+      var r = X11GetPointerControlRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetPointerControlReply();
+    } else if (opcode == 107) {
+      var r = X11SetScreenSaverRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 108) {
+      var r = X11GetScreenSaverRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetScreenSaverReply();
+    } else if (opcode == 109) {
+      var r = X11ChangeHostsRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 110) {
+      var r = X11ListHostsRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11ListHostsReply();
+    } else if (opcode == 111) {
+      var r = X11SetAccessControlRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 112) {
+      var r = X11SetCloseDownModeRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 113) {
+      var r = X11KillClientRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 114) {
+      var r = X11RotatePropertiesRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 115) {
+      var r = X11ForceScreenSaverRequest.fromBuffer(requestBuffer);
+      request = r;
+    } else if (opcode == 116) {
+      var r = X11SetPointerMappingRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11SetPointerMappingReply();
+    } else if (opcode == 117) {
+      var r = X11GetPointerMappingRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetPointerMappingReply();
+    } else if (opcode == 118) {
+      var r = X11SetModifierMappingRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11SetModifierMappingReply();
+    } else if (opcode == 119) {
+      var r = X11GetModifierMappingRequest.fromBuffer(requestBuffer);
+      request = r;
+      //reply = X11GetModifierMappingReply();
+    } else if (opcode == 127) {
+      var r = X11NoOperationRequest.fromBuffer(requestBuffer);
+      request = r;
     } else {
       // FIXME: Add UnknownRequest
       print('Unknown opcode ${opcode}');
     }
 
+    print(request);
     if (reply != null) {
+      print('  ${reply}');
       var replyBuffer = X11WriteBuffer();
       reply.encode(replyBuffer);
 
