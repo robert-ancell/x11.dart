@@ -178,8 +178,33 @@ class X11Client {
   X11Client();
 
   void connect() async {
-    //var display = Platform.environment['DISPLAY'];
-    var displayNumber = 0;
+    var display = Platform.environment['DISPLAY'];
+    if (display == null) {
+      throw 'No DISPLAY set';
+    }
+
+    String host;
+    int displayNumber;
+    var dividerIndex = display.indexOf(':');
+    if (dividerIndex >= 0) {
+      host = display.substring(0, dividerIndex);
+      var displayNumberString = display.substring(dividerIndex + 1);
+      if (RegExp(r'^[0-9]+$').hasMatch(displayNumberString)) {
+        displayNumber = int.parse(displayNumberString);
+      }
+    }
+    if (host == null || displayNumber == null) {
+      throw "Invalid DISPLAY: '${display}'";
+    }
+
+    await connectToHost(host, displayNumber);
+  }
+
+  void connectToHost(String host, int displayNumber) async {
+    if (!(host == '' || host == 'localhost')) {
+      throw 'Connecting to host ${host} not supported';
+    }
+
     var socketAddress = InternetAddress('/tmp/.X11-unix/X${displayNumber}',
         type: InternetAddressType.unix);
     _socket = await Socket.connect(socketAddress, 0);
