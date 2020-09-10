@@ -5293,22 +5293,33 @@ class X11QueryExtensionReply extends X11Reply {
   final int firstError;
 
   X11QueryExtensionReply(
-      this.present, this.majorOpcode, this.firstEvent, this.firstError);
+      {this.present = false,
+      this.majorOpcode = 0,
+      this.firstEvent = 0,
+      this.firstError = 0});
 
   static X11QueryExtensionReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var present = buffer.readBool();
     var majorOpcode = buffer.readUint8();
     var firstEvent = buffer.readUint8();
     var firstError = buffer.readUint8();
-    return X11QueryExtensionReply(present, majorOpcode, firstEvent, firstError);
+    buffer.skip(20);
+    return X11QueryExtensionReply(
+        present: present,
+        majorOpcode: majorOpcode,
+        firstEvent: firstEvent,
+        firstError: firstError);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
     buffer.writeBool(present);
     buffer.writeUint8(majorOpcode);
     buffer.writeUint8(firstEvent);
     buffer.writeUint8(firstError);
+    buffer.skip(20);
   }
 }
 
