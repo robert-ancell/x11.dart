@@ -410,13 +410,11 @@ class X11CreateWindowRequest extends X11Request {
     }
     int bitGravity;
     if ((valueMask & 0x0010) != 0) {
-      bitGravity = buffer.readUint8();
-      buffer.skip(3);
+      bitGravity = buffer.readValueUint8();
     }
     int winGravity;
     if ((valueMask & 0x0020) != 0) {
-      winGravity = buffer.readUint8();
-      buffer.skip(3);
+      winGravity = buffer.readValueUint8();
     }
     int backingStore;
     if ((valueMask & 0x0040) != 0) {
@@ -432,13 +430,11 @@ class X11CreateWindowRequest extends X11Request {
     }
     bool overrideRedirect;
     if ((valueMask & 0x0200) != 0) {
-      overrideRedirect = buffer.readBool();
-      buffer.skip(3);
+      overrideRedirect = buffer.readValueBool();
     }
     bool saveUnder;
     if ((valueMask & 0x0400) != 0) {
-      saveUnder = buffer.readBool();
-      buffer.skip(3);
+      saveUnder = buffer.readValueBool();
     }
     int eventMask;
     if ((valueMask & 0x0800) != 0) {
@@ -550,12 +546,10 @@ class X11CreateWindowRequest extends X11Request {
       buffer.writeUint32(borderPixel);
     }
     if (bitGravity != null) {
-      buffer.writeUint8(bitGravity);
-      buffer.skip(3);
+      buffer.writeValueUint8(bitGravity);
     }
     if (winGravity != null) {
-      buffer.writeUint8(winGravity);
-      buffer.skip(3);
+      buffer.writeValueUint8(winGravity);
     }
     if (backingStore != null) {
       buffer.writeUint32(backingStore);
@@ -567,12 +561,10 @@ class X11CreateWindowRequest extends X11Request {
       buffer.writeUint32(backingPixel);
     }
     if (overrideRedirect != null) {
-      buffer.writeBool(overrideRedirect);
-      buffer.skip(3);
+      buffer.writeValueBool(overrideRedirect);
     }
     if (saveUnder != null) {
-      buffer.writeBool(saveUnder);
-      buffer.skip(3);
+      buffer.writeValueBool(saveUnder);
     }
     if (eventMask != null) {
       buffer.writeUint32(eventMask);
@@ -646,13 +638,11 @@ class X11ChangeWindowAttributesRequest extends X11Request {
     }
     int bitGravity;
     if ((valueMask & 0x0010) != 0) {
-      bitGravity = buffer.readUint8();
-      buffer.skip(3);
+      bitGravity = buffer.readValueUint8();
     }
     int winGravity;
     if ((valueMask & 0x0020) != 0) {
-      winGravity = buffer.readUint8();
-      buffer.skip(3);
+      winGravity = buffer.readValueUint8();
     }
     int backingStore;
     if ((valueMask & 0x0040) != 0) {
@@ -668,13 +658,11 @@ class X11ChangeWindowAttributesRequest extends X11Request {
     }
     bool overrideRedirect;
     if ((valueMask & 0x0200) != 0) {
-      overrideRedirect = buffer.readBool();
-      buffer.skip(3);
+      overrideRedirect = buffer.readValueBool();
     }
     bool saveUnder;
     if ((valueMask & 0x0400) != 0) {
-      saveUnder = buffer.readBool();
-      buffer.skip(3);
+      saveUnder = buffer.readValueBool();
     }
     int eventMask;
     if ((valueMask & 0x0800) != 0) {
@@ -774,12 +762,10 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       buffer.writeUint32(borderPixel);
     }
     if (bitGravity != null) {
-      buffer.writeUint8(bitGravity);
-      buffer.skip(3);
+      buffer.writeValueUint8(bitGravity);
     }
     if (winGravity != null) {
-      buffer.writeUint8(winGravity);
-      buffer.skip(3);
+      buffer.writeValueUint8(winGravity);
     }
     if (backingStore != null) {
       buffer.writeUint32(backingStore);
@@ -791,12 +777,10 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       buffer.writeUint32(backingPixel);
     }
     if (overrideRedirect != null) {
-      buffer.writeBool(overrideRedirect);
-      buffer.skip(3);
+      buffer.writeValueBool(overrideRedirect);
     }
     if (saveUnder != null) {
-      buffer.writeBool(saveUnder);
-      buffer.skip(3);
+      buffer.writeValueBool(saveUnder);
     }
     if (eventMask != null) {
       buffer.writeUint32(eventMask);

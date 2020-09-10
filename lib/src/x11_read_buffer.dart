@@ -64,6 +64,14 @@ class X11ReadBuffer {
     return ByteData.view(_readBytes(4)).getInt32(0, Endian.little);
   }
 
+  int readValueUint8() {
+    return readUint32() & 0xFF;
+  }
+
+  bool readValueBool() {
+    return readValueUint8() != 0;
+  }
+
   String readString8(int length) {
     var d = <int>[];
     var done = false;

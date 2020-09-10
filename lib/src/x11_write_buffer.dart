@@ -52,6 +52,14 @@ class X11WriteBuffer {
     _data.addAll(bytes.asUint8List());
   }
 
+  void writeValueUint8(int value) {
+    writeUint32(value);
+  }
+
+  void writeValueBool(bool value) {
+    writeUint32(value ? 1 : 0);
+  }
+
   int getString8Length(String value) {
     return utf8.encode(value).length;
   }
