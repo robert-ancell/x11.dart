@@ -1529,8 +1529,8 @@ class X11Client {
 
     var result = _buffer.readUint8();
     var data = _buffer.readUint8();
-    var protocolMajorVersion = _buffer.readUint16();
-    var protocolMinorVersion = _buffer.readUint16();
+    _buffer.readUint16(); // protocolMajorVersion
+    _buffer.readUint16(); // protocolMinorVersion
     var length = _buffer.readUint16();
 
     if (_buffer.remaining < length * 4) {

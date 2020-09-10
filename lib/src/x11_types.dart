@@ -181,14 +181,14 @@ class X11Screen {
       this.minInstalledMaps = 0,
       this.maxInstalledMaps = 0,
       this.rootVisual = 0,
-      this.backingStores,
+      this.backingStores = X11BackingStore.never,
       this.saveUnders = false,
       this.rootDepth = 0,
       this.allowedDepths = const []});
 
   @override
   String toString() =>
-      'X11Window(window: ${window}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatId(whitePixel)}, blackPixel: ${_formatId(blackPixel)}, currentInputMasks: ${_formatId(currentInputMasks)}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
+      'X11Window(window: ${_formatId(window)}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatPixel(whitePixel)}, blackPixel: ${_formatPixel(blackPixel)}, currentInputMasks: ${_formatHex32(currentInputMasks)}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
 }
 
 class X11Depth {
@@ -338,11 +338,11 @@ class X11Visual {
   final int blueMask;
 
   const X11Visual(this.visualId, this.class_,
-      {this.bitsPerRgbValue: 0,
-      this.colormapEntries: 0,
-      this.redMask: 0,
-      this.greenMask: 0,
-      this.blueMask: 0});
+      {this.bitsPerRgbValue = 0,
+      this.colormapEntries = 0,
+      this.redMask = 0,
+      this.greenMask = 0,
+      this.blueMask = 0});
 
   @override
   String toString() =>
