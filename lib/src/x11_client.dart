@@ -1554,7 +1554,6 @@ class X11Client {
     } else if (result == 1) {
       // Success
       var reply = X11SetupSuccessReply.fromBuffer(replyBuffer);
-      print(reply);
       _resourceIdBase = reply.resourceIdBase;
       roots = reply.roots;
     } else if (result == 2) {

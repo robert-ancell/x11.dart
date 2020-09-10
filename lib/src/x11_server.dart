@@ -190,9 +190,7 @@ class _X11Client {
       print('Unknown opcode ${opcode}');
     }
 
-    print(request);
     if (reply != null) {
-      print('  ${reply}');
       var replyBuffer = X11WriteBuffer();
       reply.encode(replyBuffer);
 
