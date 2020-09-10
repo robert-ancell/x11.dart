@@ -12,6 +12,297 @@ String _formatId(int id) {
   return _formatHex32(id);
 }
 
+class X11SetupRequest {
+  final int protocolMajorVersion;
+  final int protocolMinorVersion;
+  final String authorizationProtocolName;
+  final List<int> authorizationProtocolData;
+
+  const X11SetupRequest(
+      {this.protocolMajorVersion = 11,
+      this.protocolMinorVersion = 0,
+      this.authorizationProtocolName = '',
+      this.authorizationProtocolData = const []});
+
+  factory X11SetupRequest.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var protocolMajorVersion = buffer.readUint16();
+    var protocolMinorVersion = buffer.readUint16();
+    var authorizationProtocolNameLength = buffer.readUint16();
+    var authorizationProtocolDataLength = buffer.readUint16();
+    var authorizationProtocolName =
+        buffer.readString8(authorizationProtocolNameLength);
+    buffer.skip(pad(authorizationProtocolNameLength));
+    var authorizationProtocolData = <int>[];
+    for (var i = 0; i < authorizationProtocolDataLength; i++) {
+      authorizationProtocolData.add(buffer.readUint8());
+    }
+    buffer.skip(pad(authorizationProtocolDataLength));
+    buffer.skip(2);
+
+    return X11SetupRequest(
+        protocolMajorVersion: protocolMajorVersion,
+        protocolMinorVersion: protocolMinorVersion,
+        authorizationProtocolName: authorizationProtocolName,
+        authorizationProtocolData: authorizationProtocolData);
+  }
+
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint16(protocolMajorVersion);
+    buffer.writeUint16(protocolMinorVersion);
+    var authorizationProtocolNameLength =
+        buffer.getString8Length(authorizationProtocolName);
+    buffer.writeUint16(authorizationProtocolNameLength);
+    buffer.writeUint16(authorizationProtocolData.length);
+    buffer.skip(2);
+    buffer.writeString8(authorizationProtocolName);
+    buffer.skip(pad(authorizationProtocolNameLength));
+    for (var d in authorizationProtocolData) {
+      buffer.writeUint8(d);
+    }
+    buffer.skip(pad(authorizationProtocolData.length));
+  }
+
+  @override
+  String toString() =>
+      "X11SetupRequest(protocolMajorVersion = ${protocolMajorVersion}, protocolMinorVersion = ${protocolMinorVersion}, authorizationProtocolName: '${authorizationProtocolName}', authorizationProtocolData: ${authorizationProtocolData})";
+}
+
+class X11SetupFailedReply {
+  final String reason;
+
+  const X11SetupFailedReply(this.reason);
+
+  factory X11SetupFailedReply.fromBuffer(X11ReadBuffer buffer) {
+    var reasonLength = buffer.readUint8();
+    var reason = buffer.readString8(reasonLength);
+    buffer.skip(pad(reasonLength));
+
+    return X11SetupFailedReply(reason);
+  }
+
+  void encode(X11WriteBuffer buffer) {
+    var reasonLength = buffer.getString8Length(reason);
+    buffer.writeUint8(reasonLength);
+    buffer.writeString8(reason);
+    buffer.skip(pad(reasonLength));
+  }
+
+  @override
+  String toString() => "X11SetupFailedReply(reason: '${reason}')";
+}
+
+class X11SetupSuccessReply {
+  final int releaseNumber;
+  final int resourceIdBase;
+  final int resourceIdMask;
+  final int motionBufferSize;
+  final int maximumRequestLength;
+  final X11ImageByteOrder imageByteOrder;
+  final X11BitmapFormatBitOrder bitmapFormatBitOrder;
+  final int bitmapFormatScanlineUnit;
+  final int bitmapFormatScanlinePad;
+  final int minKeycode;
+  final int maxKeycode;
+  final String vendor;
+  final List<X11Format> pixmapFormats;
+  final List<X11Screen> roots;
+
+  const X11SetupSuccessReply(
+      {this.releaseNumber = 0,
+      this.resourceIdBase = 0,
+      this.resourceIdMask = 0,
+      this.motionBufferSize = 0,
+      this.maximumRequestLength = 0,
+      this.imageByteOrder = X11ImageByteOrder.lsbFirst,
+      this.bitmapFormatBitOrder = X11BitmapFormatBitOrder.leastSignificant,
+      this.bitmapFormatScanlineUnit = 0,
+      this.bitmapFormatScanlinePad = 0,
+      this.minKeycode = 0,
+      this.maxKeycode = 0,
+      this.vendor = '',
+      this.pixmapFormats = const [],
+      this.roots = const []});
+
+  factory X11SetupSuccessReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var releaseNumber = buffer.readUint32();
+    var resourceIdBase = buffer.readUint32();
+    var resourceIdMask = buffer.readUint32();
+    var motionBufferSize = buffer.readUint32();
+    var vendorLength = buffer.readUint16();
+    var maximumRequestLength = buffer.readUint16();
+    var rootsCount = buffer.readUint8();
+    var formatCount = buffer.readUint8();
+    var imageByteOrder = X11ImageByteOrder.values[buffer.readUint8()];
+    var bitmapFormatBitOrder =
+        X11BitmapFormatBitOrder.values[buffer.readUint8()];
+    var bitmapFormatScanlineUnit = buffer.readUint8();
+    var bitmapFormatScanlinePad = buffer.readUint8();
+    var minKeycode = buffer.readUint8();
+    var maxKeycode = buffer.readUint8();
+    buffer.skip(4);
+    var vendor = buffer.readString8(vendorLength);
+    buffer.skip(pad(vendorLength));
+    var pixmapFormats = <X11Format>[];
+    for (var i = 0; i < formatCount; i++) {
+      var format = X11Format();
+      format.depth = buffer.readUint8();
+      format.bitsPerPixel = buffer.readUint8();
+      format.scanlinePad = buffer.readUint8();
+      buffer.skip(5);
+      pixmapFormats.add(format);
+    }
+    var roots = <X11Screen>[];
+    for (var i = 0; i < rootsCount; i++) {
+      var screen = X11Screen();
+      screen.window = buffer.readUint32();
+      screen.defaultColormap = buffer.readUint32();
+      screen.whitePixel = buffer.readUint32();
+      screen.blackPixel = buffer.readUint32();
+      screen.currentInputMasks = buffer.readUint32();
+      screen.sizeInPixels = X11Size(buffer.readUint16(), buffer.readUint16());
+      screen.sizeInMillimeters =
+          X11Size(buffer.readUint16(), buffer.readUint16());
+      screen.minInstalledMaps = buffer.readUint16();
+      screen.maxInstalledMaps = buffer.readUint16();
+      screen.rootVisual = buffer.readUint32();
+      screen.backingStores = X11BackingStore.values[buffer.readUint8()];
+      screen.saveUnders = buffer.readBool();
+      screen.rootDepth = buffer.readUint8();
+      var allowedDepthsCount = buffer.readUint8();
+      screen.allowedDepths = <X11Depth>[];
+      for (var j = 0; j < allowedDepthsCount; j++) {
+        var depth = X11Depth();
+        depth.depth = buffer.readUint8();
+        buffer.skip(1);
+        var visualsCount = buffer.readUint16();
+        buffer.skip(4);
+        depth.visuals = <X11Visual>[];
+        for (var k = 0; k < visualsCount; k++) {
+          var visual = X11Visual();
+          visual.visualId = buffer.readUint32();
+          visual.class_ = X11VisualClass.values[buffer.readUint8()];
+          visual.bitsPerRgbValue = buffer.readUint8();
+          visual.colormapEntries = buffer.readUint16();
+          visual.redMask = buffer.readUint32();
+          visual.greenMask = buffer.readUint32();
+          visual.blueMask = buffer.readUint32();
+          buffer.skip(4);
+          depth.visuals.add(visual);
+        }
+        screen.allowedDepths.add(depth);
+      }
+      roots.add(screen);
+    }
+
+    return X11SetupSuccessReply(
+        releaseNumber: releaseNumber,
+        resourceIdBase: resourceIdBase,
+        resourceIdMask: resourceIdMask,
+        motionBufferSize: motionBufferSize,
+        maximumRequestLength: maximumRequestLength,
+        imageByteOrder: imageByteOrder,
+        bitmapFormatBitOrder: bitmapFormatBitOrder,
+        bitmapFormatScanlineUnit: bitmapFormatScanlineUnit,
+        bitmapFormatScanlinePad: bitmapFormatScanlinePad,
+        minKeycode: minKeycode,
+        maxKeycode: maxKeycode,
+        vendor: vendor,
+        pixmapFormats: pixmapFormats,
+        roots: roots);
+  }
+
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(releaseNumber);
+    buffer.writeUint32(resourceIdBase);
+    buffer.writeUint32(resourceIdMask);
+    buffer.writeUint32(motionBufferSize);
+    var vendorLength = buffer.getString8Length(vendor);
+    buffer.writeUint16(vendorLength);
+    buffer.writeUint16(maximumRequestLength);
+    buffer.writeUint8(roots.length);
+    buffer.writeUint8(pixmapFormats.length);
+    buffer.writeUint8(imageByteOrder.index);
+    buffer.writeUint8(bitmapFormatBitOrder.index);
+    buffer.writeUint8(bitmapFormatScanlineUnit);
+    buffer.writeUint8(bitmapFormatScanlinePad);
+    buffer.writeUint8(minKeycode);
+    buffer.writeUint8(maxKeycode);
+    buffer.skip(4);
+    buffer.writeString8(vendor);
+    buffer.skip(pad(vendorLength));
+    for (var format in pixmapFormats) {
+      buffer.writeUint8(format.depth);
+      buffer.writeUint8(format.bitsPerPixel);
+      buffer.writeUint8(format.scanlinePad);
+      buffer.skip(5);
+    }
+    for (var screen in roots) {
+      buffer.writeUint32(screen.window);
+      buffer.writeUint32(screen.defaultColormap);
+      buffer.writeUint32(screen.whitePixel);
+      buffer.writeUint32(screen.blackPixel);
+      buffer.writeUint32(screen.currentInputMasks);
+      buffer.writeUint16(screen.sizeInPixels.width);
+      buffer.writeUint16(screen.sizeInPixels.height);
+      buffer.writeUint16(screen.sizeInMillimeters.width);
+      buffer.writeUint16(screen.sizeInMillimeters.height);
+      buffer.writeUint16(screen.minInstalledMaps);
+      buffer.writeUint16(screen.maxInstalledMaps);
+      buffer.writeUint32(screen.rootVisual);
+      buffer.writeUint8(screen.backingStores.index);
+      buffer.writeBool(screen.saveUnders);
+      buffer.writeUint8(screen.rootDepth);
+      buffer.writeUint8(screen.allowedDepths.length);
+      for (var depth in screen.allowedDepths) {
+        buffer.writeUint8(depth.depth);
+        buffer.skip(1);
+        buffer.writeUint16(depth.visuals.length);
+        buffer.skip(4);
+        for (var visual in depth.visuals) {
+          buffer.writeUint32(visual.visualId);
+          buffer.writeUint8(visual.class_.index);
+          buffer.writeUint8(visual.bitsPerRgbValue);
+          buffer.writeUint16(visual.colormapEntries);
+          buffer.writeUint32(visual.redMask);
+          buffer.writeUint32(visual.greenMask);
+          buffer.writeUint32(visual.blueMask);
+          buffer.skip(4);
+        }
+      }
+    }
+  }
+
+  @override
+  String toString() =>
+      "X11SetupSuccessReply(releaseNumber: ${releaseNumber}, resourceIdBase: ${_formatId(resourceIdBase)}, resourceIdMask: ${_formatId(resourceIdMask)}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, roots: ${roots})";
+}
+
+class X11SetupAuthenticateReply {
+  final String reason;
+
+  const X11SetupAuthenticateReply(this.reason);
+
+  factory X11SetupAuthenticateReply.fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var reason = buffer.readString8(buffer.remaining);
+    return X11SetupAuthenticateReply(reason);
+  }
+
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    var reasonLength = buffer.getString8Length(reason);
+    buffer.writeString8(reason);
+    buffer.skip(pad(reasonLength));
+  }
+
+  @override
+  String toString() => "X11SetupAuthenticateReply(reason: '${reason}')";
+}
+
 class X11Request {
   void encode(X11WriteBuffer buffer) {}
 }

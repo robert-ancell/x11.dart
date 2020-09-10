@@ -212,22 +212,8 @@ class X11Client {
 
     var buffer = X11WriteBuffer();
     buffer.writeUint8(0x6c); // Little endian
-    buffer.skip(1);
-    buffer.writeUint16(11); // Major version
-    buffer.writeUint16(0); // Minor version
-    var authorizationProtocol = '';
-    var authorizationProtocolLength =
-        buffer.getString8Length(authorizationProtocol);
-    var authorizationProtocolData = <int>[];
-    buffer.writeUint16(authorizationProtocolLength);
-    buffer.writeUint16(authorizationProtocolData.length);
-    buffer.writeString8(authorizationProtocol);
-    buffer.skip(pad(authorizationProtocolLength));
-    for (var d in authorizationProtocolData) {
-      buffer.writeUint8(d);
-    }
-    buffer.skip(pad(authorizationProtocolData.length));
-    buffer.skip(2);
+    var request = X11SetupRequest();
+    request.encode(buffer);
     _socket.add(buffer.data);
 
     return _connectCompleter.future;
@@ -1550,94 +1536,25 @@ class X11Client {
       return false;
     }
 
+    var replyBuffer = X11ReadBuffer();
+    replyBuffer.add(data);
+    for (var i = 0; i < length * 4; i++) {
+      replyBuffer.add(_buffer.readUint8());
+    }
+
     if (result == 0) {
       // Failed
-      var reasonLength = data;
-      var reason = _buffer.readString8(reasonLength);
-      print('Failed: ${reason}');
+      var reply = X11SetupFailedReply.fromBuffer(replyBuffer);
+      print('Failed: ${reply.reason}');
     } else if (result == 1) {
       // Success
-      var result = X11Success();
-      if (protocolMajorVersion != 11 || protocolMinorVersion != 0) {
-        throw 'Unsupported X version ${protocolMajorVersion}.${protocolMinorVersion}';
-      }
-      result.releaseNumber = _buffer.readUint32();
-      result.resourceIdBase = _buffer.readUint32();
-      result.resourceIdMask = _buffer.readUint32();
-      result.motionBufferSize = _buffer.readUint32();
-      var vendorLength = _buffer.readUint16();
-      result.maximumRequestLength = _buffer.readUint16();
-      var rootsCount = _buffer.readUint8();
-      var formatCount = _buffer.readUint8();
-      result.imageByteOrder = X11ImageByteOrder.values[_buffer.readUint8()];
-      result.bitmapFormatBitOrder =
-          X11BitmapFormatBitOrder.values[_buffer.readUint8()];
-      result.bitmapFormatScanlineUnit = _buffer.readUint8();
-      result.bitmapFormatScanlinePad = _buffer.readUint8();
-      result.minKeycode = _buffer.readUint8();
-      result.maxKeycode = _buffer.readUint8();
-      _buffer.skip(4);
-      result.vendor = _buffer.readString8(vendorLength);
-      _buffer.skip(pad(vendorLength));
-      result.pixmapFormats = <X11Format>[];
-      for (var i = 0; i < formatCount; i++) {
-        var format = X11Format();
-        format.depth = _buffer.readUint8();
-        format.bitsPerPixel = _buffer.readUint8();
-        format.scanlinePad = _buffer.readUint8();
-        _buffer.skip(5);
-        result.pixmapFormats.add(format);
-      }
-      result.roots = <X11Screen>[];
-      for (var i = 0; i < rootsCount; i++) {
-        var screen = X11Screen();
-        screen.window = _buffer.readUint32();
-        screen.defaultColormap = _buffer.readUint32();
-        screen.whitePixel = _buffer.readUint32();
-        screen.blackPixel = _buffer.readUint32();
-        screen.currentInputMasks = _buffer.readUint32();
-        screen.sizeInPixels =
-            X11Size(_buffer.readUint16(), _buffer.readUint16());
-        screen.sizeInMillimeters =
-            X11Size(_buffer.readUint16(), _buffer.readUint16());
-        screen.minInstalledMaps = _buffer.readUint16();
-        screen.maxInstalledMaps = _buffer.readUint16();
-        screen.rootVisual = _buffer.readUint32();
-        screen.backingStores = X11BackingStore.values[_buffer.readUint8()];
-        screen.saveUnders = _buffer.readBool();
-        screen.rootDepth = _buffer.readUint8();
-        var allowedDepthsCount = _buffer.readUint8();
-        screen.allowedDepths = <X11Depth>[];
-        for (var j = 0; j < allowedDepthsCount; j++) {
-          var depth = X11Depth();
-          depth.depth = _buffer.readUint8();
-          _buffer.skip(1);
-          var visualsCount = _buffer.readUint16();
-          _buffer.skip(4);
-          depth.visuals = <X11Visual>[];
-          for (var k = 0; k < visualsCount; k++) {
-            var visual = X11Visual();
-            visual.visualId = _buffer.readUint32();
-            visual.class_ = X11VisualClass.values[_buffer.readUint8()];
-            visual.bitsPerRgbValue = _buffer.readUint8();
-            visual.colormapEntries = _buffer.readUint16();
-            visual.redMask = _buffer.readUint32();
-            visual.greenMask = _buffer.readUint32();
-            visual.blueMask = _buffer.readUint32();
-            _buffer.skip(4);
-            depth.visuals.add(visual);
-          }
-          screen.allowedDepths.add(depth);
-        }
-        result.roots.add(screen);
-      }
-
-      _resourceIdBase = result.resourceIdBase;
-      roots = result.roots;
+      var reply = X11SetupSuccessReply.fromBuffer(replyBuffer);
+      _resourceIdBase = reply.resourceIdBase;
+      roots = reply.roots;
     } else if (result == 2) {
       // Authenticate
-      var reason = _buffer.readString8(length ~/ 4);
-      print('Authenticate: ${reason}');
+      var reply = X11SetupAuthenticateReply.fromBuffer(replyBuffer);
+      print('Authenticate: ${reply.reason}');
     }
 
     _connectCompleter.complete();
@@ -1891,8 +1808,15 @@ class X11ReadBuffer {
 
   String readString8(int length) {
     var d = <int>[];
+    var done = false;
     for (var i = 0; i < length; i++) {
-      d.add(readUint8());
+      var c = readUint8();
+      if (c == 0) {
+        done = true;
+      }
+      if (!done) {
+        d.add(c);
+      }
     }
     return utf8.decode(d);
   }

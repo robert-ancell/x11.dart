@@ -74,27 +74,6 @@ enum X11EventMask {
 
 enum X11ChangePropertyMode { replace, prepend, append }
 
-class X11Success {
-  int releaseNumber;
-  int resourceIdBase;
-  int resourceIdMask;
-  int motionBufferSize;
-  int maximumRequestLength;
-  X11ImageByteOrder imageByteOrder;
-  X11BitmapFormatBitOrder bitmapFormatBitOrder;
-  int bitmapFormatScanlineUnit;
-  int bitmapFormatScanlinePad;
-  int minKeycode;
-  int maxKeycode;
-  String vendor;
-  List<X11Format> pixmapFormats;
-  List<X11Screen> roots;
-
-  @override
-  String toString() =>
-      "X11Success(releaseNumber: ${releaseNumber}, resourceIdBase: ${_formatId(resourceIdBase)}, resourceIdMask: ${_formatId(resourceIdMask)}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, roots: ${roots})";
-}
-
 class X11CharInfo {
   final int leftSideBearing;
   final int rightSideBearing;
