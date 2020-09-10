@@ -143,12 +143,32 @@ class _X11Client {
       request = X11UnmapWindowRequest.fromBuffer(requestBuffer);
     } else if (opcode == 11) {
       request = X11UnmapSubwindowsRequest.fromBuffer(requestBuffer);
+    } else if (opcode == 16) {
+      var r = X11InternAtomRequest.fromBuffer(requestBuffer);
+      var atom = server.internAtom(r.name, onlyIfExists: r.onlyIfExists);
+      request = r;
+      reply = X11InternAtomReply(atom);
     } else if (opcode == 18) {
       request = X11ChangePropertyRequest.fromBuffer(requestBuffer);
     } else if (opcode == 20) {
       request = X11GetPropertyRequest.fromBuffer(requestBuffer);
+      reply = X11GetPropertyReply();
+    } else if (opcode == 43) {
+      request = X11GetInputFocusRequest.fromBuffer(requestBuffer);
+      reply = X11GetInputFocusReply(0);
+    } else if (opcode == 53) {
+      request = X11CreatePixmapRequest.fromBuffer(requestBuffer);
+    } else if (opcode == 54) {
+      request = X11FreePixmapRequest.fromBuffer(requestBuffer);
     } else if (opcode == 55) {
       request = X11CreateGCRequest.fromBuffer(requestBuffer);
+    } else if (opcode == 60) {
+      request = X11FreeGCRequest.fromBuffer(requestBuffer);
+    } else if (opcode == 72) {
+      request = X11PutImageRequest.fromBuffer(requestBuffer);
+    } else if (opcode == 91) {
+      request = X11QueryColorsRequest.fromBuffer(requestBuffer);
+      reply = X11QueryColorsReply([]);
     } else if (opcode == 98) {
       request = X11QueryExtensionRequest.fromBuffer(requestBuffer);
       reply = X11QueryExtensionReply(present: false);
@@ -157,7 +177,9 @@ class _X11Client {
       print('Unknown opcode ${opcode}');
     }
 
+    print(request);
     if (reply != null) {
+      print('  ${reply}');
       var replyBuffer = X11WriteBuffer();
       reply.encode(replyBuffer);
 
@@ -259,6 +281,17 @@ class X11Server {
         type: InternetAddressType.unix);
     _socket = await ServerSocket.bind(socketAddress, 0);
     _socket.listen(_onConnect);
+  }
+
+  int internAtom(String name, {bool onlyIfExists = false}) {
+    var atom = atoms[name];
+    if (atom == null && onlyIfExists) {
+      return 0;
+    }
+    atom = atoms.length;
+    atoms[name] = atom;
+
+    return atom;
   }
 
   void _onConnect(Socket socket) {

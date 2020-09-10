@@ -1242,6 +1242,10 @@ class X11InternAtomRequest extends X11Request {
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
   }
+
+  @override
+  String toString() =>
+      "X11InternAtomRequest(name: '${name}', onlyIfExists: ${onlyIfExists})";
 }
 
 class X11InternAtomReply extends X11Reply {
@@ -1261,6 +1265,9 @@ class X11InternAtomReply extends X11Reply {
     buffer.writeUint32(atom);
     buffer.skip(20);
   }
+
+  @override
+  String toString() => 'X11InternAtomReply(atom: ${atom})';
 }
 
 class X11GetAtomNameRequest extends X11Request {
@@ -1397,8 +1404,11 @@ class X11GetPropertyRequest extends X11Request {
   final int longLength;
   final bool delete;
 
-  X11GetPropertyRequest(this.window, this.property, this.type, this.longOffset,
-      this.longLength, this.delete);
+  X11GetPropertyRequest(this.window, this.property,
+      {this.type = 0,
+      this.longOffset = 0,
+      this.longLength = 4294967295,
+      this.delete = false});
 
   factory X11GetPropertyRequest.fromBuffer(X11ReadBuffer buffer) {
     var delete = buffer.readBool();
@@ -1407,8 +1417,11 @@ class X11GetPropertyRequest extends X11Request {
     var type = buffer.readUint32();
     var longOffset = buffer.readUint32();
     var longLength = buffer.readUint32();
-    return X11GetPropertyRequest(
-        window, property, type, longOffset, longLength, delete);
+    return X11GetPropertyRequest(window, property,
+        type: type,
+        longOffset: longOffset,
+        longLength: longLength,
+        delete: delete);
   }
 
   @override
@@ -1420,6 +1433,10 @@ class X11GetPropertyRequest extends X11Request {
     buffer.writeUint32(longOffset);
     buffer.writeUint32(longLength);
   }
+
+  @override
+  String toString() =>
+      'X11GetPropertyRequest(window: ${window}, ${property}; ${property}, ${type}: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}})';
 }
 
 class X11GetPropertyReply extends X11Reply {
@@ -1428,7 +1445,11 @@ class X11GetPropertyReply extends X11Reply {
   final List<int> value;
   final int bytesAfter;
 
-  X11GetPropertyReply(this.type, this.format, this.value, this.bytesAfter);
+  X11GetPropertyReply(
+      {this.type = 0,
+      this.format = 0,
+      this.value = const [],
+      this.bytesAfter = 0});
 
   static X11GetPropertyReply fromBuffer(X11ReadBuffer buffer) {
     var format = buffer.readUint8();
@@ -1451,7 +1472,8 @@ class X11GetPropertyReply extends X11Reply {
       }
     }
     buffer.skip(pad(valueLength * format ~/ 8));
-    return X11GetPropertyReply(type, format, value, bytesAfter);
+    return X11GetPropertyReply(
+        type: type, format: format, value: value, bytesAfter: bytesAfter);
   }
 
   @override
@@ -2268,6 +2290,9 @@ class X11GetInputFocusRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11GetInputFocusRequest()';
 }
 
 class X11GetInputFocusReply extends X11Reply {
@@ -2279,6 +2304,7 @@ class X11GetInputFocusReply extends X11Reply {
   static X11GetInputFocusReply fromBuffer(X11ReadBuffer buffer) {
     var revertTo = buffer.readUint8();
     var focus = buffer.readUint32();
+    buffer.skip(20);
     return X11GetInputFocusReply(focus, revertTo: revertTo);
   }
 
@@ -2286,7 +2312,12 @@ class X11GetInputFocusReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(revertTo);
     buffer.writeUint32(focus);
+    buffer.skip(20);
   }
+
+  @override
+  String toString() =>
+      'X11GetInputFocusReply(focus: ${_formatId(focus)}, revertTo: ${revertTo})';
 }
 
 class X11QueryKeymapRequest extends X11Request {
@@ -5284,6 +5315,9 @@ class X11QueryExtensionRequest extends X11Request {
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
   }
+
+  @override
+  String toString() => "X11QueryExtensionRequest(name: '${name}')";
 }
 
 class X11QueryExtensionReply extends X11Reply {
@@ -5321,6 +5355,10 @@ class X11QueryExtensionReply extends X11Reply {
     buffer.writeUint8(firstError);
     buffer.skip(20);
   }
+
+  @override
+  String toString() =>
+      'X11QueryExtensionReply(present: ${present}, majorOpcode: ${majorOpcode}, firstEvent: ${firstEvent}, firstError: ${firstError})';
 }
 
 class X11ListExtensionsRequest extends X11Request {

@@ -498,8 +498,11 @@ class X11Client {
       int longOffset = 0,
       int longLength = 4294967295,
       bool delete = false}) async {
-    var request = X11GetPropertyRequest(
-        window, property, type, longOffset, longLength, delete);
+    var request = X11GetPropertyRequest(window, property,
+        type: type,
+        longOffset: longOffset,
+        longLength: longLength,
+        delete: delete);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(20, buffer.data);
