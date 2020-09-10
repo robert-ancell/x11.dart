@@ -142,9 +142,12 @@ class X11ModifierMap {
 }
 
 class X11Format {
-  int depth;
-  int bitsPerPixel;
-  int scanlinePad;
+  final int depth;
+  final int bitsPerPixel;
+  final int scanlinePad;
+
+  const X11Format(
+      {this.depth = 24, this.bitsPerPixel = 8, this.scanlinePad = 8});
 
   @override
   String toString() =>
@@ -152,20 +155,36 @@ class X11Format {
 }
 
 class X11Screen {
-  int window;
-  int defaultColormap;
-  int whitePixel;
-  int blackPixel;
-  int currentInputMasks;
-  X11Size sizeInPixels;
-  X11Size sizeInMillimeters;
-  int minInstalledMaps;
-  int maxInstalledMaps;
-  int rootVisual;
-  X11BackingStore backingStores;
-  bool saveUnders;
-  int rootDepth;
-  List<X11Depth> allowedDepths;
+  final int window;
+  final int defaultColormap;
+  final int whitePixel;
+  final int blackPixel;
+  final int currentInputMasks;
+  final X11Size sizeInPixels;
+  final X11Size sizeInMillimeters;
+  final int minInstalledMaps;
+  final int maxInstalledMaps;
+  final int rootVisual;
+  final X11BackingStore backingStores;
+  final bool saveUnders;
+  final int rootDepth;
+  final List<X11Depth> allowedDepths;
+
+  const X11Screen(
+      {this.window = 0,
+      this.defaultColormap = 0,
+      this.whitePixel = 0,
+      this.blackPixel = 0,
+      this.currentInputMasks = 0,
+      this.sizeInPixels = const X11Size(0, 0),
+      this.sizeInMillimeters = const X11Size(0, 0),
+      this.minInstalledMaps = 0,
+      this.maxInstalledMaps = 0,
+      this.rootVisual = 0,
+      this.backingStores,
+      this.saveUnders = false,
+      this.rootDepth = 0,
+      this.allowedDepths = const []});
 
   @override
   String toString() =>
@@ -173,8 +192,10 @@ class X11Screen {
 }
 
 class X11Depth {
-  int depth;
-  List<X11Visual> visuals;
+  final int depth;
+  final List<X11Visual> visuals;
+
+  const X11Depth(this.depth, this.visuals);
 
   @override
   String toString() => 'X11Depth(depth: ${depth}, visuals: ${visuals})';
@@ -308,13 +329,20 @@ class X11TimeCoord {
 }
 
 class X11Visual {
-  int visualId;
-  X11VisualClass class_;
-  int bitsPerRgbValue;
-  int colormapEntries;
-  int redMask;
-  int greenMask;
-  int blueMask;
+  final int visualId;
+  final X11VisualClass class_;
+  final int bitsPerRgbValue;
+  final int colormapEntries;
+  final int redMask;
+  final int greenMask;
+  final int blueMask;
+
+  const X11Visual(this.visualId, this.class_,
+      {this.bitsPerRgbValue: 0,
+      this.colormapEntries: 0,
+      this.redMask: 0,
+      this.greenMask: 0,
+      this.blueMask: 0});
 
   @override
   String toString() =>

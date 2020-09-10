@@ -130,7 +130,7 @@ class X11SetupSuccessReply {
       this.bitmapFormatScanlineUnit = 0,
       this.bitmapFormatScanlinePad = 0,
       this.minKeycode = 0,
-      this.maxKeycode = 0,
+      this.maxKeycode = 255,
       this.vendor = '',
       this.pixmapFormats = const [],
       this.roots = const []});
@@ -157,54 +157,69 @@ class X11SetupSuccessReply {
     buffer.skip(pad(vendorLength));
     var pixmapFormats = <X11Format>[];
     for (var i = 0; i < formatCount; i++) {
-      var format = X11Format();
-      format.depth = buffer.readUint8();
-      format.bitsPerPixel = buffer.readUint8();
-      format.scanlinePad = buffer.readUint8();
+      var depth = buffer.readUint8();
+      var bitsPerPixel = buffer.readUint8();
+      var scanlinePad = buffer.readUint8();
       buffer.skip(5);
-      pixmapFormats.add(format);
+      pixmapFormats.add(X11Format(
+          depth: depth, bitsPerPixel: bitsPerPixel, scanlinePad: scanlinePad));
     }
     var roots = <X11Screen>[];
     for (var i = 0; i < rootsCount; i++) {
-      var screen = X11Screen();
-      screen.window = buffer.readUint32();
-      screen.defaultColormap = buffer.readUint32();
-      screen.whitePixel = buffer.readUint32();
-      screen.blackPixel = buffer.readUint32();
-      screen.currentInputMasks = buffer.readUint32();
-      screen.sizeInPixels = X11Size(buffer.readUint16(), buffer.readUint16());
-      screen.sizeInMillimeters =
-          X11Size(buffer.readUint16(), buffer.readUint16());
-      screen.minInstalledMaps = buffer.readUint16();
-      screen.maxInstalledMaps = buffer.readUint16();
-      screen.rootVisual = buffer.readUint32();
-      screen.backingStores = X11BackingStore.values[buffer.readUint8()];
-      screen.saveUnders = buffer.readBool();
-      screen.rootDepth = buffer.readUint8();
+      var window = buffer.readUint32();
+      var defaultColormap = buffer.readUint32();
+      var whitePixel = buffer.readUint32();
+      var blackPixel = buffer.readUint32();
+      var currentInputMasks = buffer.readUint32();
+      var sizeInPixels = X11Size(buffer.readUint16(), buffer.readUint16());
+      var sizeInMillimeters = X11Size(buffer.readUint16(), buffer.readUint16());
+      var minInstalledMaps = buffer.readUint16();
+      var maxInstalledMaps = buffer.readUint16();
+      var rootVisual = buffer.readUint32();
+      var backingStores = X11BackingStore.values[buffer.readUint8()];
+      var saveUnders = buffer.readBool();
+      var rootDepth = buffer.readUint8();
       var allowedDepthsCount = buffer.readUint8();
-      screen.allowedDepths = <X11Depth>[];
+      var allowedDepths = <X11Depth>[];
       for (var j = 0; j < allowedDepthsCount; j++) {
-        var depth = X11Depth();
-        depth.depth = buffer.readUint8();
+        var depth = buffer.readUint8();
         buffer.skip(1);
         var visualsCount = buffer.readUint16();
         buffer.skip(4);
-        depth.visuals = <X11Visual>[];
+        var visuals = <X11Visual>[];
         for (var k = 0; k < visualsCount; k++) {
-          var visual = X11Visual();
-          visual.visualId = buffer.readUint32();
-          visual.class_ = X11VisualClass.values[buffer.readUint8()];
-          visual.bitsPerRgbValue = buffer.readUint8();
-          visual.colormapEntries = buffer.readUint16();
-          visual.redMask = buffer.readUint32();
-          visual.greenMask = buffer.readUint32();
-          visual.blueMask = buffer.readUint32();
+          var visualId = buffer.readUint32();
+          var class_ = X11VisualClass.values[buffer.readUint8()];
+          var bitsPerRgbValue = buffer.readUint8();
+          var colormapEntries = buffer.readUint16();
+          var redMask = buffer.readUint32();
+          var greenMask = buffer.readUint32();
+          var blueMask = buffer.readUint32();
           buffer.skip(4);
-          depth.visuals.add(visual);
+          visuals.add(X11Visual(visualId, class_,
+              bitsPerRgbValue: bitsPerRgbValue,
+              colormapEntries: colormapEntries,
+              redMask: redMask,
+              greenMask: greenMask,
+              blueMask: blueMask));
         }
-        screen.allowedDepths.add(depth);
+        allowedDepths.add(X11Depth(depth, visuals));
       }
-      roots.add(screen);
+      roots.add(X11Screen(
+          window: window,
+          defaultColormap: defaultColormap,
+          whitePixel: whitePixel,
+          blackPixel: blackPixel,
+          currentInputMasks: currentInputMasks,
+          sizeInPixels: sizeInPixels,
+          sizeInMillimeters: sizeInMillimeters,
+          minInstalledMaps: minInstalledMaps,
+          maxInstalledMaps: maxInstalledMaps,
+          rootVisual: rootVisual,
+          backingStores: backingStores,
+          saveUnders: saveUnders,
+          rootDepth: rootDepth,
+          allowedDepths: allowedDepths));
     }
 
     return X11SetupSuccessReply(
