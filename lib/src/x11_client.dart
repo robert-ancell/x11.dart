@@ -1020,6 +1020,7 @@ class X11Client {
     return _sendRequest(60, buffer.data);
   }
 
+  /// Clears [area] on [window] to its backing color / pixmap.
   int clearArea(int window, X11Rectangle area, {bool exposures = false}) {
     var request = X11ClearAreaRequest(window, area, exposures: exposures);
     var buffer = X11WriteBuffer();
@@ -1027,26 +1028,27 @@ class X11Client {
     return _sendRequest(61, buffer.data);
   }
 
-  int copyArea(int srcDrawable, int dstDrawable, int gc, X11Rectangle srcArea,
-      X11Point dstPosition) {
-    var request =
-        X11CopyAreaRequest(srcDrawable, dstDrawable, gc, srcArea, dstPosition);
+  /// Copies [area] from [source] onto [drawable] at [position].
+  int copyArea(
+      int gc, int drawable, int source, X11Rectangle area, X11Point position) {
+    var request = X11CopyAreaRequest(source, drawable, gc, area, position);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(62, buffer.data);
   }
 
-  int copyPlane(int srcDrawable, int dstDrawable, int gc, X11Rectangle srcArea,
-      X11Point dstPosition, int bitPlane) {
-    var request = X11CopyPlaneRequest(
-        srcDrawable, dstDrawable, gc, srcArea, dstPosition, bitPlane);
+  int copyPlane(int gc, int drawable, int source, X11Rectangle area,
+      X11Point position, int bitPlane) {
+    var request =
+        X11CopyPlaneRequest(source, drawable, gc, area, position, bitPlane);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(63, buffer.data);
   }
 
-  int polyPoint(int drawable, int gc, List<X11Point> points,
-      {int coordinateMode = 0}) {
+  /// Draws [points] on [drawable].
+  int polyPoint(int gc, int drawable, List<X11Point> points,
+      {X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11PolyPointRequest(drawable, gc, points,
         coordinateMode: coordinateMode);
     var buffer = X11WriteBuffer();
@@ -1054,8 +1056,9 @@ class X11Client {
     return _sendRequest(64, buffer.data);
   }
 
-  int polyLine(int drawable, int gc, List<X11Point> points,
-      {int coordinateMode = 0}) {
+  /// Draws lines on [drawable] between each pair of [points].
+  int polyLine(int gc, int drawable, List<X11Point> points,
+      {X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11PolyLineRequest(drawable, gc, points,
         coordinateMode: coordinateMode);
     var buffer = X11WriteBuffer();
@@ -1063,29 +1066,30 @@ class X11Client {
     return _sendRequest(65, buffer.data);
   }
 
-  int polySegment(int drawable, int gc, List<X11Segment> segments) {
+  int polySegment(int gc, int drawable, List<X11Segment> segments) {
     var request = X11PolySegmentRequest(drawable, gc, segments);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(66, buffer.data);
   }
 
-  int polyRectangle(int drawable, int gc, List<X11Rectangle> rectangles) {
+  int polyRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyRectangleRequest(drawable, gc, rectangles);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(67, buffer.data);
   }
 
-  int polyArc(int drawable, int gc, List<X11Arc> arcs) {
+  int polyArc(int gc, int drawable, List<X11Arc> arcs) {
     var request = X11PolyArcRequest(drawable, gc, arcs);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(68, buffer.data);
   }
 
-  int fillPoly(int drawable, int gc, List<X11Point> points,
-      {int shape = 0, int coordinateMode = 0}) {
+  int fillPoly(int gc, int drawable, List<X11Point> points,
+      {int shape = 0,
+      X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11FillPolyRequest(drawable, gc, points,
         shape: shape, coordinateMode: coordinateMode);
     var buffer = X11WriteBuffer();
@@ -1093,34 +1097,38 @@ class X11Client {
     return _sendRequest(69, buffer.data);
   }
 
-  int polyFillRectangle(int drawable, int gc, List<X11Rectangle> rectangles) {
+  int polyFillRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyFillRectangleRequest(drawable, gc, rectangles);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(70, buffer.data);
   }
 
-  int polyFillArc(int drawable, int gc, List<X11Arc> arcs) {
+  int polyFillArc(int gc, int drawable, List<X11Arc> arcs) {
     var request = X11PolyFillArcRequest(drawable, gc, arcs);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(71, buffer.data);
   }
 
-  int putImage(int drawable, int gc, X11Point dst, X11Size size, int depth,
-      int format, List<int> data,
-      {int leftPad = 0}) {
-    var request = X11PutImageRequest(
-        drawable, gc, dst, size, depth, format, data,
-        leftPad: leftPad);
+  /// Sets the contents of [area] on [drawable].
+  int putImage(int gc, int drawable, X11Rectangle area, List<int> data,
+      {X11ImageFormat format = X11ImageFormat.zPixmap,
+      int depth = 24,
+      int leftPad = 0}) {
+    var request = X11PutImageRequest(drawable, gc, area, data,
+        depth: depth, format: format, leftPad: leftPad);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(72, buffer.data);
   }
 
-  Future<X11GetImageReply> getImage(
-      int drawable, X11Rectangle area, int planeMask, int format) async {
-    var request = X11GetImageRequest(drawable, area, planeMask, format);
+  /// Gets the contents of [area] on [drawable].
+  Future<X11GetImageReply> getImage(int drawable, X11Rectangle area,
+      {X11ImageFormat format = X11ImageFormat.zPixmap,
+      int planeMask = 0xFFFFFFFF}) async {
+    var request = X11GetImageRequest(drawable, area,
+        planeMask: planeMask, format: format);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(73, buffer.data);
@@ -1129,7 +1137,7 @@ class X11Client {
   }
 
   int polyText8(
-      int drawable, int gc, X11Point position, List<X11TextItem> items) {
+      int gc, int drawable, X11Point position, List<X11TextItem> items) {
     var request = X11PolyText8Request(drawable, gc, position, items);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1137,21 +1145,21 @@ class X11Client {
   }
 
   int polyText16(
-      int drawable, int gc, X11Point position, List<X11TextItem> items) {
+      int gc, int drawable, X11Point position, List<X11TextItem> items) {
     var request = X11PolyText16Request(drawable, gc, position, items);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(75, buffer.data);
   }
 
-  int imageText8(int drawable, int gc, X11Point position, String string) {
+  int imageText8(int gc, int drawable, X11Point position, String string) {
     var request = X11ImageText8Request(drawable, gc, position, string);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(76, buffer.data);
   }
 
-  int imageText16(int drawable, int gc, X11Point position, String string) {
+  int imageText16(int gc, int drawable, X11Point position, String string) {
     var request = X11ImageText16Request(drawable, gc, position, string);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1402,7 +1410,12 @@ class X11Client {
         sequenceNumber, X11GetKeyboardControlReply.fromBuffer);
   }
 
-  int bell(int percent) {
+  /// Rings the bell on the keyboard.
+  ///
+  /// If [percent] is zero, the volume is the default configured values.
+  /// If [percent] is in the range [0, 100] the volume ranges between the default and maximum.
+  /// If [percent] is in the range [-100, 0] the volume ranges between minimum and the default.
+  int bell({int percent = 0}) {
     var request = X11BellRequest(percent);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1435,6 +1448,7 @@ class X11Client {
         sequenceNumber, X11GetPointerControlReply.fromBuffer);
   }
 
+  /// Set the screensaver state.
   int setScreenSaver(
       {int timeout = -1,
       int interval = -1,
@@ -1450,6 +1464,7 @@ class X11Client {
     return _sendRequest(107, buffer.data);
   }
 
+  /// Gets the screensaver state.
   Future<X11GetScreenSaverReply> getScreenSaver() async {
     var request = X11GetScreenSaverRequest();
     var buffer = X11WriteBuffer();
@@ -1482,13 +1497,15 @@ class X11Client {
     return _sendRequest(111, buffer.data);
   }
 
-  int setCloseDownMode(int mode) {
+  /// Sets the behaviour of this clients resources when its connection is closed.
+  int setCloseDownMode(X11CloseDownMode mode) {
     var request = X11SetCloseDownModeRequest(mode);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(112, buffer.data);
   }
 
+  /// Closes the client that controls [resource].
   int killClient(int resource) {
     var request = X11KillClientRequest(resource);
     var buffer = X11WriteBuffer();
@@ -1550,6 +1567,7 @@ class X11Client {
     return reply.map;
   }
 
+  /// Sends an empty request.
   int noOperation() {
     var request = X11NoOperationRequest();
     var buffer = X11WriteBuffer();

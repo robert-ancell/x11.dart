@@ -35,6 +35,10 @@ enum X11ChangeSetMode { insert, delete }
 
 enum X11CirculateDirection { raiseHighest, raiseLowest }
 
+enum X11CloseDownMode { destroy, retainPermanent, retainTemporary }
+
+enum X11CoordinateMode { origin, previous }
+
 enum X11ErrorCode {
   request,
   value,
@@ -118,6 +122,8 @@ enum X11HostFamily {
 }
 
 enum X11ImageByteOrder { lsbFirst, msbFirst }
+
+enum X11ImageFormat { bitmap, xyPixmap, zPixmap }
 
 enum X11JoinStyle { miter, round, bevel }
 

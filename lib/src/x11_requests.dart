@@ -4282,13 +4282,13 @@ class X11PolyPointRequest extends X11Request {
   final int drawable;
   final int gc;
   final List<X11Point> points;
-  final int coordinateMode;
+  final X11CoordinateMode coordinateMode;
 
   X11PolyPointRequest(this.drawable, this.gc, this.points,
-      {this.coordinateMode = 0});
+      {this.coordinateMode = X11CoordinateMode.origin});
 
   factory X11PolyPointRequest.fromBuffer(X11ReadBuffer buffer) {
-    var coordinateMode = buffer.readUint8();
+    var coordinateMode = X11CoordinateMode.values[buffer.readUint8()];
     var drawable = buffer.readUint32();
     var gc = buffer.readUint32();
     var points = <X11Point>[];
@@ -4303,7 +4303,7 @@ class X11PolyPointRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(coordinateMode);
+    buffer.writeUint8(coordinateMode.index);
     buffer.writeUint32(drawable);
     buffer.writeUint32(gc);
     for (var point in points) {
@@ -4321,13 +4321,13 @@ class X11PolyLineRequest extends X11Request {
   final int drawable;
   final int gc;
   final List<X11Point> points;
-  final int coordinateMode;
+  final X11CoordinateMode coordinateMode;
 
   X11PolyLineRequest(this.drawable, this.gc, this.points,
-      {this.coordinateMode = 0});
+      {this.coordinateMode = X11CoordinateMode.origin});
 
   factory X11PolyLineRequest.fromBuffer(X11ReadBuffer buffer) {
-    var coordinateMode = buffer.readUint8();
+    var coordinateMode = X11CoordinateMode.values[buffer.readUint8()];
     var drawable = buffer.readUint32();
     var gc = buffer.readUint32();
     var points = <X11Point>[];
@@ -4342,7 +4342,7 @@ class X11PolyLineRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(coordinateMode);
+    buffer.writeUint8(coordinateMode.index);
     buffer.writeUint32(drawable);
     buffer.writeUint32(gc);
     for (var point in points) {
@@ -4485,17 +4485,17 @@ class X11FillPolyRequest extends X11Request {
   final int gc;
   final List<X11Point> points;
   final int shape;
-  final int coordinateMode;
+  final X11CoordinateMode coordinateMode;
 
   X11FillPolyRequest(this.drawable, this.gc, this.points,
-      {this.shape = 0, this.coordinateMode = 0});
+      {this.shape = 0, this.coordinateMode = X11CoordinateMode.origin});
 
   factory X11FillPolyRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var drawable = buffer.readUint32();
     var gc = buffer.readUint32();
     var shape = buffer.readUint8();
-    var coordinateMode = buffer.readUint8();
+    var coordinateMode = X11CoordinateMode.values[buffer.readUint8()];
     buffer.skip(2);
     var points = <X11Point>[];
     while (buffer.remaining > 0) {
@@ -4509,7 +4509,7 @@ class X11FillPolyRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(coordinateMode);
+    buffer.writeUint8(coordinateMode.index);
     buffer.writeUint32(drawable);
     buffer.writeUint32(gc);
     for (var point in points) {
@@ -4610,19 +4610,19 @@ class X11PolyFillArcRequest extends X11Request {
 class X11PutImageRequest extends X11Request {
   final int drawable;
   final int gc;
-  final X11Point dst;
-  final X11Size size;
+  final X11Rectangle area;
   final int depth;
-  final int format;
+  final X11ImageFormat format;
   final int leftPad;
   final List<int> data;
 
-  X11PutImageRequest(this.drawable, this.gc, this.dst, this.size, this.depth,
-      this.format, this.data,
-      {this.leftPad = 0});
+  X11PutImageRequest(this.drawable, this.gc, this.area, this.data,
+      {this.format = X11ImageFormat.zPixmap,
+      this.depth = 24,
+      this.leftPad = 0});
 
   factory X11PutImageRequest.fromBuffer(X11ReadBuffer buffer) {
-    var format = buffer.readUint8();
+    var format = X11ImageFormat.values[buffer.readUint8()];
     var drawable = buffer.readUint32();
     var gc = buffer.readUint32();
     var width = buffer.readUint16();
@@ -4637,20 +4637,20 @@ class X11PutImageRequest extends X11Request {
     while (buffer.remaining > 0) {
       data.add(buffer.readUint8());
     }
-    return X11PutImageRequest(drawable, gc, X11Point(dstX, dstY),
-        X11Size(width, height), depth, format, data,
-        leftPad: leftPad);
+    return X11PutImageRequest(
+        drawable, gc, X11Rectangle(dstX, dstY, width, height), data,
+        format: format, depth: depth, leftPad: leftPad);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(format);
+    buffer.writeUint8(format.index);
     buffer.writeUint32(drawable);
     buffer.writeUint32(gc);
-    buffer.writeUint16(size.width);
-    buffer.writeUint16(size.height);
-    buffer.writeInt16(dst.x);
-    buffer.writeInt16(dst.y);
+    buffer.writeUint16(area.width);
+    buffer.writeUint16(area.height);
+    buffer.writeInt16(area.x);
+    buffer.writeInt16(area.y);
     buffer.writeUint8(leftPad);
     buffer.writeUint8(depth);
     buffer.skip(2);
@@ -4662,32 +4662,33 @@ class X11PutImageRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PutImageRequest(format: ${format}, drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, dst: ${dst}, size: ${size}, leftPad: ${leftPad}, depth: ${depth}, data: <${data.length} bytes>)';
+      'X11PutImageRequest(format: ${format}, drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, area: ${area}, leftPad: ${leftPad}, depth: ${depth}, data: <${data.length} bytes>)';
 }
 
 class X11GetImageRequest extends X11Request {
   final int drawable;
   final X11Rectangle area;
+  final X11ImageFormat format;
   final int planeMask;
-  final int format;
 
-  X11GetImageRequest(this.drawable, this.area, this.planeMask, this.format);
+  X11GetImageRequest(this.drawable, this.area,
+      {this.format = X11ImageFormat.zPixmap, this.planeMask = 0xFFFFFFFF});
 
   factory X11GetImageRequest.fromBuffer(X11ReadBuffer buffer) {
-    var format = buffer.readUint8();
+    var format = X11ImageFormat.values[buffer.readUint8()];
     var drawable = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     var planeMask = buffer.readUint32();
-    return X11GetImageRequest(
-        drawable, X11Rectangle(x, y, width, height), planeMask, format);
+    return X11GetImageRequest(drawable, X11Rectangle(x, y, width, height),
+        format: format, planeMask: planeMask);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(format);
+    buffer.writeUint8(format.index);
     buffer.writeUint32(drawable);
     buffer.writeInt16(area.x);
     buffer.writeInt16(area.y);
@@ -6669,18 +6670,18 @@ class X11SetAccessControlRequest extends X11Request {
 }
 
 class X11SetCloseDownModeRequest extends X11Request {
-  final int mode;
+  final X11CloseDownMode mode;
 
   X11SetCloseDownModeRequest(this.mode);
 
   factory X11SetCloseDownModeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var mode = buffer.readUint8();
+    var mode = X11CloseDownMode.values[buffer.readUint8()];
     return X11SetCloseDownModeRequest(mode);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(mode);
+    buffer.writeUint8(mode.index);
   }
 
   @override
