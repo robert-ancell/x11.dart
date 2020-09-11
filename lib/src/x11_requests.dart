@@ -3311,14 +3311,14 @@ class X11CreateGCRequest extends X11Request {
   final int tileStippleXOrigin;
   final int tileStippleYOrigin;
   final int font;
-  final int subwindowMode;
+  final X11SubwindowMode subwindowMode;
   final bool graphicsExposures;
   final int clipXOrigin;
   final int clipYOrigin;
   final int clipMask;
   final int dashOffset;
   final int dashes;
-  final int arcMode;
+  final X11ArcMode arcMode;
 
   X11CreateGCRequest(this.cid, this.drawable,
       {this.function,
@@ -3400,37 +3400,31 @@ class X11CreateGCRequest extends X11Request {
     }
     int tileStippleXOrigin;
     if ((valueMask & 0x001000) != 0) {
-      tileStippleXOrigin = buffer.readInt16();
-      buffer.skip(2);
+      tileStippleXOrigin = buffer.readValueInt16();
     }
     int tileStippleYOrigin;
     if ((valueMask & 0x002000) != 0) {
-      tileStippleYOrigin = buffer.readInt16();
-      buffer.skip(2);
+      tileStippleYOrigin = buffer.readValueInt16();
     }
     int font;
     if ((valueMask & 0x004000) != 0) {
       font = buffer.readUint32();
     }
-    int subwindowMode;
+    X11SubwindowMode subwindowMode;
     if ((valueMask & 0x008000) != 0) {
-      subwindowMode = buffer.readUint8();
-      buffer.skip(3);
+      subwindowMode = X11SubwindowMode.values[buffer.readValueUint8()];
     }
     bool graphicsExposures;
     if ((valueMask & 0x010000) != 0) {
-      graphicsExposures = buffer.readBool();
-      buffer.skip(3);
+      graphicsExposures = buffer.readValueBool();
     }
     int clipXOrigin;
     if ((valueMask & 0x020000) != 0) {
-      clipXOrigin = buffer.readInt16();
-      buffer.skip(2);
+      clipXOrigin = buffer.readValueInt16();
     }
     int clipYOrigin;
     if ((valueMask & 0x040000) != 0) {
-      clipYOrigin = buffer.readInt16();
-      buffer.skip(2);
+      clipYOrigin = buffer.readValueInt16();
     }
     int clipMask;
     if ((valueMask & 0x080000) != 0) {
@@ -3438,18 +3432,15 @@ class X11CreateGCRequest extends X11Request {
     }
     int dashOffset;
     if ((valueMask & 0x100000) != 0) {
-      dashOffset = buffer.readUint16();
-      buffer.skip(2);
+      dashOffset = buffer.readValueUint16();
     }
     int dashes;
     if ((valueMask & 0x200000) != 0) {
-      dashes = buffer.readUint8();
-      buffer.skip(3);
+      dashes = buffer.readValueUint8();
     }
-    int arcMode;
+    X11ArcMode arcMode;
     if ((valueMask & 0x400000) != 0) {
-      arcMode = buffer.readUint8();
-      buffer.skip(3);
+      arcMode = X11ArcMode.values[buffer.readValueUint8()];
     }
     return X11CreateGCRequest(cid, drawable,
         function: function,
@@ -3590,46 +3581,37 @@ class X11CreateGCRequest extends X11Request {
       buffer.writeUint32(stipple);
     }
     if (tileStippleXOrigin != null) {
-      buffer.writeInt16(tileStippleXOrigin);
-      buffer.skip(2);
+      buffer.writeValueInt16(tileStippleXOrigin);
     }
     if (tileStippleYOrigin != null) {
-      buffer.writeInt16(tileStippleYOrigin);
-      buffer.skip(2);
+      buffer.writeValueInt16(tileStippleYOrigin);
     }
     if (font != null) {
       buffer.writeUint32(font);
     }
     if (subwindowMode != null) {
-      buffer.writeUint8(subwindowMode);
-      buffer.skip(3);
+      buffer.writeValueUint8(subwindowMode.index);
     }
     if (graphicsExposures != null) {
-      buffer.writeBool(graphicsExposures);
-      buffer.skip(3);
+      buffer.writeValueBool(graphicsExposures);
     }
     if (clipXOrigin != null) {
-      buffer.writeInt16(clipXOrigin);
-      buffer.skip(2);
+      buffer.writeValueInt16(clipXOrigin);
     }
     if (clipYOrigin != null) {
-      buffer.writeInt16(clipYOrigin);
-      buffer.skip(2);
+      buffer.writeValueInt16(clipYOrigin);
     }
     if (clipMask != null) {
       buffer.writeUint32(clipMask);
     }
     if (dashOffset != null) {
-      buffer.writeUint16(dashOffset);
-      buffer.skip(2);
+      buffer.writeValueUint16(dashOffset);
     }
     if (dashes != null) {
-      buffer.writeUint8(dashes);
-      buffer.skip(3);
+      buffer.writeValueUint8(dashes);
     }
     if (arcMode != null) {
-      buffer.writeUint8(arcMode);
-      buffer.skip(3);
+      buffer.writeValueUint8(arcMode.index);
     }
   }
 
@@ -3728,14 +3710,14 @@ class X11ChangeGCRequest extends X11Request {
   final int tileStippleXOrigin;
   final int tileStippleYOrigin;
   final int font;
-  final int subwindowMode;
+  final X11SubwindowMode subwindowMode;
   final bool graphicsExposures;
   final int clipXOrigin;
   final int clipYOrigin;
   final int clipMask;
   final int dashOffset;
   final int dashes;
-  final int arcMode;
+  final X11ArcMode arcMode;
 
   X11ChangeGCRequest(this.gc,
       {this.function,
@@ -3816,37 +3798,31 @@ class X11ChangeGCRequest extends X11Request {
     }
     int tileStippleXOrigin;
     if ((valueMask & 0x001000) != 0) {
-      tileStippleXOrigin = buffer.readInt16();
-      buffer.skip(2);
+      tileStippleXOrigin = buffer.readValueInt16();
     }
     int tileStippleYOrigin;
     if ((valueMask & 0x002000) != 0) {
-      tileStippleYOrigin = buffer.readInt16();
-      buffer.skip(2);
+      tileStippleYOrigin = buffer.readValueInt16();
     }
     int font;
     if ((valueMask & 0x004000) != 0) {
       font = buffer.readUint32();
     }
-    int subwindowMode;
+    X11SubwindowMode subwindowMode;
     if ((valueMask & 0x008000) != 0) {
-      subwindowMode = buffer.readUint8();
-      buffer.skip(3);
+      subwindowMode = X11SubwindowMode.values[buffer.readValueUint8()];
     }
     bool graphicsExposures;
     if ((valueMask & 0x010000) != 0) {
-      graphicsExposures = buffer.readBool();
-      buffer.skip(3);
+      graphicsExposures = buffer.readValueBool();
     }
     int clipXOrigin;
     if ((valueMask & 0x020000) != 0) {
-      clipXOrigin = buffer.readInt16();
-      buffer.skip(2);
+      clipXOrigin = buffer.readValueInt16();
     }
     int clipYOrigin;
     if ((valueMask & 0x040000) != 0) {
-      clipYOrigin = buffer.readInt16();
-      buffer.skip(2);
+      clipYOrigin = buffer.readValueInt16();
     }
     int clipMask;
     if ((valueMask & 0x080000) != 0) {
@@ -3854,18 +3830,15 @@ class X11ChangeGCRequest extends X11Request {
     }
     int dashOffset;
     if ((valueMask & 0x100000) != 0) {
-      dashOffset = buffer.readUint16();
-      buffer.skip(2);
+      dashOffset = buffer.readValueUint16();
     }
     int dashes;
     if ((valueMask & 0x200000) != 0) {
-      dashes = buffer.readUint8();
-      buffer.skip(3);
+      dashes = buffer.readValueUint8();
     }
-    int arcMode;
+    X11ArcMode arcMode;
     if ((valueMask & 0x400000) != 0) {
-      arcMode = buffer.readUint8();
-      buffer.skip(3);
+      arcMode = X11ArcMode.values[buffer.readValueUint8()];
     }
     return X11ChangeGCRequest(gc,
         function: function,
@@ -4005,46 +3978,37 @@ class X11ChangeGCRequest extends X11Request {
       buffer.writeUint32(stipple);
     }
     if (tileStippleXOrigin != null) {
-      buffer.writeUint16(tileStippleXOrigin);
-      buffer.skip(2);
+      buffer.writeValueUint16(tileStippleXOrigin);
     }
     if (tileStippleYOrigin != null) {
-      buffer.writeUint16(tileStippleYOrigin);
-      buffer.skip(2);
+      buffer.writeValueUint16(tileStippleYOrigin);
     }
     if (font != null) {
       buffer.writeUint32(font);
     }
     if (subwindowMode != null) {
-      buffer.writeUint8(subwindowMode);
-      buffer.skip(3);
+      buffer.writeValueUint8(subwindowMode.index);
     }
     if (graphicsExposures != null) {
-      buffer.writeBool(graphicsExposures);
-      buffer.skip(3);
+      buffer.writeValueBool(graphicsExposures);
     }
     if (clipXOrigin != null) {
-      buffer.writeInt16(clipXOrigin);
-      buffer.skip(2);
+      buffer.writeValueInt16(clipXOrigin);
     }
     if (clipYOrigin != null) {
-      buffer.writeInt16(clipYOrigin);
-      buffer.skip(2);
+      buffer.writeValueInt16(clipYOrigin);
     }
     if (clipMask != null) {
       buffer.writeUint32(clipMask);
     }
     if (dashOffset != null) {
-      buffer.writeUint16(dashOffset);
-      buffer.skip(2);
+      buffer.writeValueUint16(dashOffset);
     }
     if (dashes != null) {
-      buffer.writeUint8(dashes);
-      buffer.skip(3);
+      buffer.writeValueUint8(dashes);
     }
     if (arcMode != null) {
-      buffer.writeUint8(arcMode);
-      buffer.skip(3);
+      buffer.writeValueUint8(arcMode.index);
     }
   }
 
@@ -6165,28 +6129,23 @@ class X11ChangeKeyboardControlRequest extends X11Request {
     var valueMask = buffer.readUint32();
     int keyClickPercent;
     if ((valueMask & 0x0001) != 0) {
-      keyClickPercent = buffer.readInt8();
-      buffer.skip(3);
+      keyClickPercent = buffer.readValueInt8();
     }
     int bellPercent;
     if ((valueMask & 0x0002) != 0) {
-      bellPercent = buffer.readInt8();
-      buffer.skip(3);
+      bellPercent = buffer.readValueInt8();
     }
     int bellPitch;
     if ((valueMask & 0x0004) != 0) {
-      bellPitch = buffer.readInt16();
-      buffer.skip(2);
+      bellPitch = buffer.readValueInt16();
     }
     int bellDuration;
     if ((valueMask & 0x0008) != 0) {
-      bellDuration = buffer.readInt16();
-      buffer.skip(2);
+      bellDuration = buffer.readValueInt16();
     }
     int led;
     if ((valueMask & 0x0010) != 0) {
-      led = buffer.readUint8();
-      buffer.skip(3);
+      led = buffer.readValueUint8();
     }
     int ledMode;
     if ((valueMask & 0x0020) != 0) {
@@ -6241,24 +6200,19 @@ class X11ChangeKeyboardControlRequest extends X11Request {
     }
     buffer.writeUint32(valueMask);
     if (keyClickPercent != null) {
-      buffer.writeInt8(keyClickPercent);
-      buffer.skip(3);
+      buffer.writeValueInt8(keyClickPercent);
     }
     if (bellPercent != null) {
-      buffer.writeInt8(bellPercent);
-      buffer.skip(3);
+      buffer.writeValueInt8(bellPercent);
     }
     if (bellPitch != null) {
-      buffer.writeInt16(bellPitch);
-      buffer.skip(2);
+      buffer.writeValueInt16(bellPitch);
     }
     if (bellDuration != null) {
-      buffer.writeInt16(bellDuration);
-      buffer.skip(2);
+      buffer.writeValueInt16(bellDuration);
     }
     if (led != null) {
-      buffer.writeUint8(led);
-      buffer.skip(3);
+      buffer.writeValueUint8(led);
     }
     if (ledMode != null) {
       buffer.writeUint32(ledMode);

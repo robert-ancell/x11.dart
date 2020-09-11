@@ -21,6 +21,8 @@ enum X11AllowEventsMode {
   syncBoth
 }
 
+enum X11ArcMode { chord, pieSlice }
+
 enum X11BackingStore { never, whenMapped, always }
 
 enum X11BitmapFormatBitOrder { leastSignificant, mostSignificant }
@@ -122,6 +124,8 @@ enum X11JoinStyle { miter, round, bevel }
 enum X11LineStyle { solid, onOffDash, doubleDash }
 
 enum X11StackMode { above, below, topIf, bottomIf, opposite }
+
+enum X11SubwindowMode { clipByChildren, includeInferiors }
 
 enum X11VisualClass {
   staticGray,

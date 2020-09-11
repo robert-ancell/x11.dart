@@ -898,14 +898,14 @@ class X11Client {
       int tileStippleXOrigin,
       int tileStippleYOrigin,
       int font,
-      int subwindowMode,
+      X11SubwindowMode subwindowMode,
       bool graphicsExposures,
       int clipXOrigin,
       int clipYOrigin,
       int clipMask,
       int dashOffset,
       int dashes,
-      int arcMode}) {
+      X11ArcMode arcMode}) {
     var request = X11CreateGCRequest(id, drawable,
         function: function,
         planeMask: planeMask,
@@ -952,14 +952,14 @@ class X11Client {
       int tileStippleXOrigin,
       int tileStippleYOrigin,
       int font,
-      int subwindowMode,
+      X11SubwindowMode subwindowMode,
       bool graphicsExposures,
       int clipXOrigin,
       int clipYOrigin,
       int clipMask,
       int dashOffset,
       int dashes,
-      int arcMode}) {
+      X11ArcMode arcMode}) {
     var request = X11ChangeGCRequest(gc,
         function: function,
         planeMask: planeMask,

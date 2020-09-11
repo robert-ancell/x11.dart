@@ -65,15 +65,28 @@ class X11ReadBuffer {
   }
 
   int readValueUint8() {
-    return readUint32() & 0xFF;
+    skip(3);
+    return readUint8();
+  }
+
+  int readValueInt8() {
+    skip(3);
+    return readInt8();
   }
 
   bool readValueBool() {
-    return readValueUint8() != 0;
+    skip(3);
+    return readBool();
   }
 
   int readValueUint16() {
-    return readUint32() & 0xFFFF;
+    skip(2);
+    return readUint16();
+  }
+
+  int readValueInt16() {
+    skip(2);
+    return readInt16();
   }
 
   String readString8(int length) {

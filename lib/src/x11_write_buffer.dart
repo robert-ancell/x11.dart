@@ -53,15 +53,28 @@ class X11WriteBuffer {
   }
 
   void writeValueUint8(int value) {
-    writeUint32(value);
+    skip(3);
+    writeUint8(value);
+  }
+
+  void writeValueInt8(int value) {
+    skip(3);
+    writeInt8(value);
   }
 
   void writeValueBool(bool value) {
-    writeUint32(value ? 1 : 0);
+    skip(3);
+    writeBool(value);
   }
 
   void writeValueUint16(int value) {
-    writeUint32(value);
+    skip(2);
+    writeUint16(value);
+  }
+
+  void writeValueInt16(int value) {
+    skip(2);
+    writeInt16(value);
   }
 
   int getString8Length(String value) {
