@@ -1726,7 +1726,7 @@ class X11ListPropertiesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ListPropertiesRequest(window: ${_formatId(window)})';
+  String toString() => 'X11ListPropertiesRequest(${_formatId(window)})';
 }
 
 class X11ListPropertiesReply extends X11Reply {
@@ -1756,7 +1756,7 @@ class X11ListPropertiesReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ListPropertiesReply(atoms: ${atoms})';
+  String toString() => 'X11ListPropertiesReply(${atoms})';
 }
 
 class X11SetSelectionOwnerRequest extends X11Request {
@@ -2276,20 +2276,20 @@ class X11UngrabKeyRequest extends X11Request {
 }
 
 class X11AllowEventsRequest extends X11Request {
-  final int mode;
+  final X11AllowEventsMode mode;
   final int time;
 
   X11AllowEventsRequest(this.mode, {this.time = 0});
 
   factory X11AllowEventsRequest.fromBuffer(X11ReadBuffer buffer) {
-    var mode = buffer.readUint8();
+    var mode = X11AllowEventsMode.values[buffer.readUint8()];
     var time = buffer.readUint32();
     return X11AllowEventsRequest(mode, time: time);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(mode);
+    buffer.writeUint8(mode.index);
     buffer.writeUint32(time);
   }
 
@@ -2570,29 +2570,31 @@ class X11WarpPointerRequest extends X11Request {
 }
 
 class X11SetInputFocusRequest extends X11Request {
-  final int focus;
-  final int revertTo;
+  final int window;
+  final X11FocusRevertTo revertTo;
   final int time;
 
-  X11SetInputFocusRequest(this.focus, {this.revertTo = 0, this.time = 0});
+  X11SetInputFocusRequest(
+      {this.window = 0, this.revertTo = X11FocusRevertTo.none, this.time = 0});
 
   factory X11SetInputFocusRequest.fromBuffer(X11ReadBuffer buffer) {
-    var revertTo = buffer.readUint8();
-    var focus = buffer.readUint32();
+    var revertTo = X11FocusRevertTo.values[buffer.readUint8()];
+    var window = buffer.readUint32();
     var time = buffer.readUint32();
-    return X11SetInputFocusRequest(focus, revertTo: revertTo, time: time);
+    return X11SetInputFocusRequest(
+        window: window, revertTo: revertTo, time: time);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(revertTo);
-    buffer.writeUint32(focus);
+    buffer.writeUint8(revertTo.index);
+    buffer.writeUint32(window);
     buffer.writeUint32(time);
   }
 
   @override
   String toString() =>
-      'X11SetInputFocusRequest(revertTo: ${revertTo}, focus: ${focus}, time: ${time})';
+      'X11SetInputFocusRequest(window: ${_formatId(window)}, revertTo: ${revertTo}, time: ${time})';
 }
 
 class X11GetInputFocusRequest extends X11Request {
@@ -2613,28 +2615,28 @@ class X11GetInputFocusRequest extends X11Request {
 }
 
 class X11GetInputFocusReply extends X11Reply {
-  final int focus;
-  final int revertTo;
+  final int window;
+  final X11FocusRevertTo revertTo;
 
-  X11GetInputFocusReply(this.focus, {this.revertTo = 0});
+  X11GetInputFocusReply(this.window, {this.revertTo = X11FocusRevertTo.none});
 
   static X11GetInputFocusReply fromBuffer(X11ReadBuffer buffer) {
-    var revertTo = buffer.readUint8();
-    var focus = buffer.readUint32();
+    var revertTo = X11FocusRevertTo.values[buffer.readUint8()];
+    var window = buffer.readUint32();
     buffer.skip(20);
-    return X11GetInputFocusReply(focus, revertTo: revertTo);
+    return X11GetInputFocusReply(window, revertTo: revertTo);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(revertTo);
-    buffer.writeUint32(focus);
+    buffer.writeUint8(revertTo.index);
+    buffer.writeUint32(window);
     buffer.skip(20);
   }
 
   @override
   String toString() =>
-      'X11GetInputFocusReply(focus: ${_formatId(focus)}, revertTo: ${revertTo})';
+      'X11GetInputFocusReply(window: ${_formatId(window)}, revertTo: ${revertTo})';
 }
 
 class X11QueryKeymapRequest extends X11Request {

@@ -508,6 +508,7 @@ class X11Client {
     return _sendRequest(18, buffer.data);
   }
 
+  /// Deletes the [property] from [window].
   int deleteProperty(int window, int property) {
     var request = X11DeletePropertyRequest(window, property);
     var buffer = X11WriteBuffer();
@@ -515,6 +516,9 @@ class X11Client {
     return _sendRequest(19, buffer.data);
   }
 
+  /// Gets the value of the [property] on [window].
+  ///
+  /// If [delete] is true the property is removed.
   Future<X11GetPropertyReply> getProperty(int window, int property,
       {int type = 0,
       int longOffset = 0,
@@ -532,6 +536,7 @@ class X11Client {
         sequenceNumber, X11GetPropertyReply.fromBuffer);
   }
 
+  /// Gets a string [property] on [window].
   Future<String> getPropertyString(int window, int property) async {
     var stringAtom = await internAtom('STRING');
     var reply = await getProperty(window, property, type: stringAtom);
@@ -542,6 +547,7 @@ class X11Client {
     }
   }
 
+  /// Gets the properties on [window].
   Future<List<int>> listProperties(int window) async {
     var request = X11ListPropertiesRequest(window);
     var buffer = X11WriteBuffer();
@@ -552,6 +558,7 @@ class X11Client {
     return reply.atoms;
   }
 
+  /// Sets the owner of [selection] to [owner].
   int setSelectionOwner(int selection, int owner, {int time = 0}) {
     var request = X11SetSelectionOwnerRequest(selection, owner, time: time);
     var buffer = X11WriteBuffer();
@@ -578,6 +585,7 @@ class X11Client {
     return _sendRequest(24, buffer.data);
   }
 
+  /// Sends [event] to [destination].
   int sendEvent(int destination, X11Event event,
       {bool propagate = false, int eventMask = 0}) {
     var request = X11SendEventRequest(destination, event,
@@ -684,7 +692,8 @@ class X11Client {
     return _sendRequest(34, buffer.data);
   }
 
-  int allowEvents(int mode, {int time = 0}) {
+  /// Releases queued events.
+  int allowEvents(X11AllowEventsMode mode, {int time = 0}) {
     var request = X11AllowEventsRequest(mode, time: time);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -705,6 +714,7 @@ class X11Client {
     return _sendRequest(37, buffer.data);
   }
 
+  /// Gets the location of the pointer relative to [window].
   Future<X11QueryPointerReply> queryPointer(int window) async {
     var request = X11QueryPointerRequest(window);
     var buffer = X11WriteBuffer();
@@ -725,6 +735,7 @@ class X11Client {
     return reply.events;
   }
 
+  /// Gets the position [src] on [srcWindow] relative to [dstWindow].
   Future<X11TranslateCoordinatesReply> translateCoordinates(
       int srcWindow, X11Point src, int dstWindow) async {
     var request = X11TranslateCoordinatesRequest(srcWindow, src, dstWindow);
@@ -746,14 +757,19 @@ class X11Client {
     return _sendRequest(41, buffer.data);
   }
 
-  int setInputFocus(int focus, {int revertTo = 0, int time = 0}) {
+  /// Sets the input focus state.
+  int setInputFocus(
+      {int window = 0,
+      X11FocusRevertTo revertTo = X11FocusRevertTo.none,
+      int time = 0}) {
     var request =
-        X11SetInputFocusRequest(focus, revertTo: revertTo, time: time);
+        X11SetInputFocusRequest(window: window, revertTo: revertTo, time: time);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(42, buffer.data);
   }
 
+  /// Gets the current input focus state.
   Future<X11GetInputFocusReply> getInputFocus() async {
     var request = X11GetInputFocusRequest();
     var buffer = X11WriteBuffer();

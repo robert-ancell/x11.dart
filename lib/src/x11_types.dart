@@ -10,6 +10,17 @@ String _formatPixel(int pixel) {
   return _formatHex32(pixel);
 }
 
+enum X11AllowEventsMode {
+  asyncPointer,
+  syncPointer,
+  replayPointer,
+  asyncKeyboard,
+  syncKeyboard,
+  replayKeyboard,
+  asyncBoth,
+  syncBoth
+}
+
 enum X11BackingStore { never, whenMapped, always }
 
 enum X11BitmapFormatBitOrder { leastSignificant, mostSignificant }
@@ -66,6 +77,8 @@ enum X11EventMask {
   colormapChange,
   ownerGrabButton
 }
+
+enum X11FocusRevertTo { none, pointerRoot, parent }
 
 enum X11HostFamily {
   internet,
