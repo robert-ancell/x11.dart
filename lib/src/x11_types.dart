@@ -25,6 +25,8 @@ enum X11BackingStore { never, whenMapped, always }
 
 enum X11BitmapFormatBitOrder { leastSignificant, mostSignificant }
 
+enum X11CapStyle { notLast, butt, round, projecting }
+
 enum X11ChangePropertyMode { replace, prepend, append }
 
 enum X11ChangeSetMode { insert, delete }
@@ -78,7 +80,30 @@ enum X11EventMask {
   ownerGrabButton
 }
 
+enum X11FillRule { evenOdd, winding }
+
+enum X11FillStyle { solid, tiled, stippled, opaqueStippled }
+
 enum X11FocusRevertTo { none, pointerRoot, parent }
+
+enum X11GraphicsFunction {
+  clear,
+  and,
+  andReverse,
+  copy,
+  andInverted,
+  noOp,
+  xor,
+  or,
+  nor,
+  equiv,
+  invert,
+  orReverse,
+  copyInverted,
+  orInverted,
+  nand,
+  set
+}
 
 enum X11HostFamily {
   internet,
@@ -91,6 +116,10 @@ enum X11HostFamily {
 }
 
 enum X11ImageByteOrder { lsbFirst, msbFirst }
+
+enum X11JoinStyle { miter, round, bevel }
+
+enum X11LineStyle { solid, onOffDash, doubleDash }
 
 enum X11StackMode { above, below, topIf, bottomIf, opposite }
 
@@ -300,7 +329,7 @@ class X11Size {
   const X11Size(this.width, this.height);
 
   @override
-  String toString() => 'X11Size(width: ${width}, height: ${height})';
+  String toString() => 'X11Size(${width}, ${height})';
 }
 
 abstract class X11TextItem {
@@ -313,7 +342,7 @@ class X11TextItemFont extends X11TextItem {
   const X11TextItemFont(this.font);
 
   @override
-  String toString() => 'X11TextItemFont(font: ${font})';
+  String toString() => 'X11TextItemFont(${_formatId(font)})';
 }
 
 class X11TextItemString extends X11TextItem {

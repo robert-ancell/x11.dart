@@ -3296,16 +3296,16 @@ class X11FreePixmapRequest extends X11Request {
 class X11CreateGCRequest extends X11Request {
   final int cid;
   final int drawable;
-  final int function;
+  final X11GraphicsFunction function;
   final int planeMask;
   final int foreground;
   final int background;
   final int lineWidth;
-  final int lineStyle;
-  final int capStyle;
-  final int joinStyle;
-  final int fillStyle;
-  final int fillRule;
+  final X11LineStyle lineStyle;
+  final X11CapStyle capStyle;
+  final X11JoinStyle joinStyle;
+  final X11FillStyle fillStyle;
+  final X11FillRule fillRule;
   final int tile;
   final int stipple;
   final int tileStippleXOrigin;
@@ -3350,10 +3350,9 @@ class X11CreateGCRequest extends X11Request {
     var cid = buffer.readUint32();
     var drawable = buffer.readUint32();
     var valueMask = buffer.readUint32();
-    int function;
+    X11GraphicsFunction function;
     if ((valueMask & 0x000001) != 0) {
-      function = buffer.readUint8();
-      buffer.skip(3);
+      function = X11GraphicsFunction.values[buffer.readValueUint8()];
     }
     int planeMask;
     if ((valueMask & 0x000002) != 0) {
@@ -3369,32 +3368,27 @@ class X11CreateGCRequest extends X11Request {
     }
     int lineWidth;
     if ((valueMask & 0x000010) != 0) {
-      lineWidth = buffer.readUint16();
-      buffer.skip(2);
+      lineWidth = buffer.readValueUint16();
     }
-    int lineStyle;
+    X11LineStyle lineStyle;
     if ((valueMask & 0x000020) != 0) {
-      lineStyle = buffer.readUint8();
-      buffer.skip(3);
+      lineStyle = X11LineStyle.values[buffer.readValueUint8()];
     }
-    int capStyle;
+    X11CapStyle capStyle;
     if ((valueMask & 0x000040) != 0) {
-      capStyle = buffer.readUint8();
-      buffer.skip(3);
+      capStyle = X11CapStyle.values[buffer.readValueUint8()];
     }
-    int joinStyle;
+    X11JoinStyle joinStyle;
     if ((valueMask & 0x000080) != 0) {
-      joinStyle = buffer.readUint8();
-      buffer.skip(3);
+      joinStyle = X11JoinStyle.values[buffer.readValueUint8()];
     }
-    int fillStyle;
+    X11FillStyle fillStyle;
     if ((valueMask & 0x00100) != 0) {
-      fillStyle = buffer.readUint8();
-      buffer.skip(3);
+      fillStyle = X11FillStyle.values[buffer.readValueUint8()];
     }
-    int fillRule;
+    X11FillRule fillRule;
     if ((valueMask & 0x00200) != 0) {
-      fillRule = buffer.readUint32();
+      fillRule = X11FillRule.values[buffer.readValueUint8()];
     }
     int tile;
     if ((valueMask & 0x00400) != 0) {
@@ -3560,8 +3554,7 @@ class X11CreateGCRequest extends X11Request {
     }
     buffer.writeUint32(valueMask);
     if (function != null) {
-      buffer.writeUint8(function);
-      buffer.skip(3);
+      buffer.writeValueUint8(function.index);
     }
     if (planeMask != null) {
       buffer.writeUint32(planeMask);
@@ -3573,27 +3566,22 @@ class X11CreateGCRequest extends X11Request {
       buffer.writeUint32(background);
     }
     if (lineWidth != null) {
-      buffer.writeUint16(lineWidth);
-      buffer.skip(2);
+      buffer.writeValueUint16(lineWidth);
     }
     if (lineStyle != null) {
-      buffer.writeUint8(lineStyle);
-      buffer.skip(3);
+      buffer.writeValueUint8(lineStyle.index);
     }
     if (capStyle != null) {
-      buffer.writeUint8(capStyle);
-      buffer.skip(3);
+      buffer.writeValueUint8(capStyle.index);
     }
     if (joinStyle != null) {
-      buffer.writeUint8(joinStyle);
-      buffer.skip(3);
+      buffer.writeValueUint8(joinStyle.index);
     }
     if (fillStyle != null) {
-      buffer.writeUint8(fillStyle);
-      buffer.skip(3);
+      buffer.writeValueUint8(fillStyle.index);
     }
     if (fillRule != null) {
-      buffer.writeUint32(fillRule);
+      buffer.writeValueUint8(fillRule.index);
     }
     if (tile != null) {
       buffer.writeUint32(tile);
@@ -3725,16 +3713,16 @@ class X11CreateGCRequest extends X11Request {
 
 class X11ChangeGCRequest extends X11Request {
   final int gc;
-  final int function;
+  final X11GraphicsFunction function;
   final int planeMask;
   final int foreground;
   final int background;
   final int lineWidth;
-  final int lineStyle;
-  final int capStyle;
-  final int joinStyle;
-  final int fillStyle;
-  final int fillRule;
+  final X11LineStyle lineStyle;
+  final X11CapStyle capStyle;
+  final X11JoinStyle joinStyle;
+  final X11FillStyle fillStyle;
+  final X11FillRule fillRule;
   final int tile;
   final int stipple;
   final int tileStippleXOrigin;
@@ -3778,10 +3766,9 @@ class X11ChangeGCRequest extends X11Request {
     buffer.skip(1);
     var gc = buffer.readUint32();
     var valueMask = buffer.readUint32();
-    int function;
+    X11GraphicsFunction function;
     if ((valueMask & 0x000001) != 0) {
-      function = buffer.readUint8();
-      buffer.skip(3);
+      function = X11GraphicsFunction.values[buffer.readValueUint8()];
     }
     int planeMask;
     if ((valueMask & 0x000002) != 0) {
@@ -3797,32 +3784,27 @@ class X11ChangeGCRequest extends X11Request {
     }
     int lineWidth;
     if ((valueMask & 0x000010) != 0) {
-      lineWidth = buffer.readUint16();
-      buffer.skip(2);
+      lineWidth = buffer.readValueUint16();
     }
-    int lineStyle;
+    X11LineStyle lineStyle;
     if ((valueMask & 0x000020) != 0) {
-      lineStyle = buffer.readUint8();
-      buffer.skip(3);
+      lineStyle = X11LineStyle.values[buffer.readValueUint8()];
     }
-    int capStyle;
+    X11CapStyle capStyle;
     if ((valueMask & 0x000040) != 0) {
-      capStyle = buffer.readUint8();
-      buffer.skip(3);
+      capStyle = X11CapStyle.values[buffer.readValueUint8()];
     }
-    int joinStyle;
+    X11JoinStyle joinStyle;
     if ((valueMask & 0x000080) != 0) {
-      joinStyle = buffer.readUint8();
-      buffer.skip(3);
+      joinStyle = X11JoinStyle.values[buffer.readValueUint8()];
     }
-    int fillStyle;
+    X11FillStyle fillStyle;
     if ((valueMask & 0x00100) != 0) {
-      fillStyle = buffer.readUint8();
-      buffer.skip(3);
+      fillStyle = X11FillStyle.values[buffer.readValueUint8()];
     }
-    int fillRule;
+    X11FillRule fillRule;
     if ((valueMask & 0x00200) != 0) {
-      fillRule = buffer.readUint32();
+      fillRule = X11FillRule.values[buffer.readValueUint8()];
     }
     int tile;
     if ((valueMask & 0x00400) != 0) {
@@ -3987,8 +3969,7 @@ class X11ChangeGCRequest extends X11Request {
     }
     buffer.writeUint32(valueMask);
     if (function != null) {
-      buffer.writeUint8(function);
-      buffer.skip(3);
+      buffer.writeValueUint8(function.index);
     }
     if (planeMask != null) {
       buffer.writeUint32(planeMask);
@@ -4000,27 +3981,22 @@ class X11ChangeGCRequest extends X11Request {
       buffer.writeUint32(background);
     }
     if (lineWidth != null) {
-      buffer.writeUint16(lineWidth);
-      buffer.skip(2);
+      buffer.writeValueUint16(lineWidth);
     }
     if (lineStyle != null) {
-      buffer.writeUint8(lineStyle);
-      buffer.skip(3);
+      buffer.writeValueUint8(lineStyle.index);
     }
     if (capStyle != null) {
-      buffer.writeUint8(capStyle);
-      buffer.skip(3);
+      buffer.writeValueUint8(capStyle.index);
     }
     if (joinStyle != null) {
-      buffer.writeUint8(joinStyle);
-      buffer.skip(3);
+      buffer.writeValueUint8(joinStyle.index);
     }
     if (fillStyle != null) {
-      buffer.writeUint8(fillStyle);
-      buffer.skip(3);
+      buffer.writeValueUint8(fillStyle.index);
     }
     if (fillRule != null) {
-      buffer.writeUint32(fillRule);
+      buffer.writeValueUint8(fillRule.index);
     }
     if (tile != null) {
       buffer.writeUint32(tile);

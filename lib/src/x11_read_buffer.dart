@@ -72,6 +72,10 @@ class X11ReadBuffer {
     return readValueUint8() != 0;
   }
 
+  int readValueUint16() {
+    return readUint32() & 0xFFFF;
+  }
+
   String readString8(int length) {
     var d = <int>[];
     var done = false;

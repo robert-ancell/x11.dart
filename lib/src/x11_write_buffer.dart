@@ -60,6 +60,10 @@ class X11WriteBuffer {
     writeUint32(value ? 1 : 0);
   }
 
+  void writeValueUint16(int value) {
+    writeUint32(value);
+  }
+
   int getString8Length(String value) {
     return utf8.encode(value).length;
   }

@@ -822,6 +822,9 @@ class X11Client {
         sequenceNumber, X11QueryTextExtentsReply.fromBuffer);
   }
 
+  /// Gets the list of available fonts.
+  ///
+  /// Setting [pattern] filters fonts by name.
   Future<List<String>> listFonts(
       {String pattern = '*', int maxNames = 65535}) async {
     var request = X11ListFontsRequest(pattern: pattern, maxNames: maxNames);
@@ -833,6 +836,9 @@ class X11Client {
     return reply.names;
   }
 
+  /// Gets the list of available fonts, including information on each font.
+  ///
+  /// Setting [pattern] filters fonts by name.
   Stream<X11ListFontsWithInfoReply> listFontsWithInfo(
       {String pattern = '*', int maxNames = 65535}) {
     var request =
@@ -875,17 +881,18 @@ class X11Client {
     return _sendRequest(54, buffer.data);
   }
 
-  int createGC(int cid, int drawable,
-      {int function,
+  /// Creates a graphics context for drawing on [drawable].
+  int createGC(int id, int drawable,
+      {X11GraphicsFunction function,
       int planeMask,
       int foreground,
       int background,
       int lineWidth,
-      int lineStyle,
-      int capStyle,
-      int joinStyle,
-      int fillStyle,
-      int fillRule,
+      X11LineStyle lineStyle,
+      X11CapStyle capStyle,
+      X11JoinStyle joinStyle,
+      X11FillStyle fillStyle,
+      X11FillRule fillRule,
       int tile,
       int stipple,
       int tileStippleXOrigin,
@@ -899,7 +906,7 @@ class X11Client {
       int dashOffset,
       int dashes,
       int arcMode}) {
-    var request = X11CreateGCRequest(cid, drawable,
+    var request = X11CreateGCRequest(id, drawable,
         function: function,
         planeMask: planeMask,
         foreground: foreground,
@@ -928,17 +935,18 @@ class X11Client {
     return _sendRequest(55, buffer.data);
   }
 
+  // Changes properties of [gc].
   int changeGC(int gc,
-      {int function,
+      {X11GraphicsFunction function,
       int planeMask,
       int foreground,
       int background,
       int lineWidth,
-      int lineStyle,
-      int capStyle,
-      int joinStyle,
-      int fillStyle,
-      int fillRule,
+      X11LineStyle lineStyle,
+      X11CapStyle capStyle,
+      X11JoinStyle joinStyle,
+      X11FillStyle fillStyle,
+      X11FillRule fillRule,
       int tile,
       int stipple,
       int tileStippleXOrigin,
