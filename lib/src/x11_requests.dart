@@ -180,7 +180,7 @@ class X11SetupSuccessReply {
       var saveUnders = buffer.readBool();
       var rootDepth = buffer.readUint8();
       var allowedDepthsCount = buffer.readUint8();
-      var allowedDepths = <X11Depth>[];
+      var allowedDepths = <int, List<X11Visual>>{};
       for (var j = 0; j < allowedDepthsCount; j++) {
         var depth = buffer.readUint8();
         buffer.skip(1);
@@ -203,7 +203,7 @@ class X11SetupSuccessReply {
               greenMask: greenMask,
               blueMask: blueMask));
         }
-        allowedDepths.add(X11Depth(depth, visuals));
+        allowedDepths[depth] = visuals;
       }
       roots.add(X11Screen(
           window: window,
@@ -282,12 +282,12 @@ class X11SetupSuccessReply {
       buffer.writeBool(screen.saveUnders);
       buffer.writeUint8(screen.rootDepth);
       buffer.writeUint8(screen.allowedDepths.length);
-      for (var depth in screen.allowedDepths) {
-        buffer.writeUint8(depth.depth);
+      screen.allowedDepths.forEach((depth, visuals) {
+        buffer.writeUint8(depth);
         buffer.skip(1);
-        buffer.writeUint16(depth.visuals.length);
+        buffer.writeUint16(visuals.length);
         buffer.skip(4);
-        for (var visual in depth.visuals) {
+        for (var visual in visuals) {
           buffer.writeUint32(visual.visualId);
           buffer.writeUint8(visual.class_.index);
           buffer.writeUint8(visual.bitsPerRgbValue);
@@ -297,7 +297,7 @@ class X11SetupSuccessReply {
           buffer.writeUint32(visual.blueMask);
           buffer.skip(4);
         }
-      }
+      });
     }
   }
 
@@ -579,6 +579,59 @@ class X11CreateWindowRequest extends X11Request {
       buffer.writeUint32(cursor);
     }
   }
+
+  @override
+  String toString() {
+    var string =
+        'X11CreateWindowRequest(wid: ${_formatId(wid)}, parent: ${_formatId(parent)}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth}, class_: ${class_}, visual: ${visual}';
+    if (backgroundPixmap != null) {
+      string += ', backgroundPixmap: ${_formatId(backgroundPixmap)}';
+    }
+    if (backgroundPixel != null) {
+      string += ', backgroundPixel: ${backgroundPixel}';
+    }
+    if (borderPixmap != null) {
+      string += ', borderPixmap: ${_formatId(borderPixmap)}';
+    }
+    if (borderPixel != null) {
+      string += ', borderPixel: ${borderPixel}';
+    }
+    if (bitGravity != null) {
+      string += ', bitGravity: ${bitGravity}';
+    }
+    if (winGravity != null) {
+      string += ', winGravity: ${winGravity}';
+    }
+    if (backingStore != null) {
+      string += ', backingStore: ${backingStore}';
+    }
+    if (backingPlanes != null) {
+      string += ', backingPlanes: ${backingPlanes}';
+    }
+    if (backingPixel != null) {
+      string += ', backingPixel: ${backingPixel}';
+    }
+    if (overrideRedirect != null) {
+      string += ', overrideRedirect: ${overrideRedirect}';
+    }
+    if (saveUnder != null) {
+      string += ', saveUnder: ${saveUnder}';
+    }
+    if (eventMask != null) {
+      string += ', eventMask: ${eventMask}';
+    }
+    if (doNotPropagateMask != null) {
+      string += ', doNotPropagateMask: ${doNotPropagateMask}';
+    }
+    if (colormap != null) {
+      string += ', colormap: ${colormap}';
+    }
+    if (cursor != null) {
+      string += ', cursor: ${cursor}';
+    }
+    string += ')';
+    return string;
+  }
 }
 
 class X11ChangeWindowAttributesRequest extends X11Request {
@@ -795,6 +848,10 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       buffer.writeUint32(cursor);
     }
   }
+
+  @override
+  String toString() =>
+      'X11ChangeWindowAttributesRequest(window: ${_formatId(window)}, backgroundPixmap: ${backgroundPixmap}, backgroundPixel: ${backgroundPixel}, borderPixmap: ${borderPixmap}, borderPixel: ${borderPixel}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingStore: ${backingStore}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, overrideRedirect: ${overrideRedirect}, saveUnder: ${saveUnder}, eventMask: ${eventMask}, doNotPropagateMask: ${doNotPropagateMask}, colormap: ${colormap}, cursor: ${cursor})';
 }
 
 class X11GetWindowAttributesRequest extends X11Request {
@@ -813,6 +870,10 @@ class X11GetWindowAttributesRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() =>
+      'X11GetWindowAttributesRequest(window: ${_formatId(window)})';
 }
 
 class X11GetWindowAttributesReply extends X11Reply {
@@ -903,6 +964,10 @@ class X11GetWindowAttributesReply extends X11Reply {
     buffer.writeUint16(doNotPropagateMask);
     buffer.skip(2);
   }
+
+  @override
+  String toString() =>
+      'X11GetWindowAttributesReply(backingStore: ${backingStore}, visual: ${visual}, class_: ${class_}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, saveUnder: ${saveUnder}, mapIsInstalled: ${mapIsInstalled}, mapState: ${mapState}, overrideRedirect: ${overrideRedirect}, colormap: ${colormap}, allEventMasks: ${allEventMasks}, yourEventMask: ${yourEventMask}, doNotPropagateMask: ${doNotPropagateMask})';
 }
 
 class X11DestroyWindowRequest extends X11Request {
@@ -921,6 +986,9 @@ class X11DestroyWindowRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() => 'X11DestroyWindowRequest(window: ${_formatId(window)})';
 }
 
 class X11DestroySubwindowsRequest extends X11Request {
@@ -939,6 +1007,10 @@ class X11DestroySubwindowsRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() =>
+      'X11DestroySubwindowsRequest(window: ${_formatId(window)})';
 }
 
 class X11ChangeSaveSetRequest extends X11Request {
@@ -958,6 +1030,10 @@ class X11ChangeSaveSetRequest extends X11Request {
     buffer.writeUint8(mode);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() =>
+      'X11ChangeSaveSetRequest(window: ${_formatId(window)}, mode: ${mode})';
 }
 
 class X11ReparentWindowRequest extends X11Request {
@@ -984,6 +1060,10 @@ class X11ReparentWindowRequest extends X11Request {
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
   }
+
+  @override
+  String toString() =>
+      'X11ReparentWindowRequest(window: ${_formatId(window)}, parent: ${parent}, position: ${position})';
 }
 
 class X11MapWindowRequest extends X11Request {
@@ -1002,6 +1082,9 @@ class X11MapWindowRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() => 'X11MapWindowRequest(${_formatId(window)})';
 }
 
 class X11MapSubwindowsRequest extends X11Request {
@@ -1020,6 +1103,9 @@ class X11MapSubwindowsRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() => 'X11MapSubwindowsRequest(${_formatId(window)})';
 }
 
 class X11UnmapWindowRequest extends X11Request {
@@ -1038,6 +1124,9 @@ class X11UnmapWindowRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() => 'X11UnmapWindowRequest(${_formatId(window)})';
 }
 
 class X11UnmapSubwindowsRequest extends X11Request {
@@ -1056,6 +1145,9 @@ class X11UnmapSubwindowsRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() => 'X11UnmapSubwindowsRequest(${_formatId(window)})';
 }
 
 class X11ConfigureWindowRequest extends X11Request {
@@ -1170,6 +1262,10 @@ class X11ConfigureWindowRequest extends X11Request {
       buffer.writeUint32(stackMode);
     }
   }
+
+  @override
+  String toString() =>
+      'X11ConfigureWindowRequest(window: ${_formatId(window)}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, borderWidth: ${borderWidth}, sibling: ${sibling}, stackMode: ${stackMode})';
 }
 
 class X11CirculateWindowRequest extends X11Request {
@@ -1189,6 +1285,10 @@ class X11CirculateWindowRequest extends X11Request {
     buffer.writeUint8(direction);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() =>
+      'X11CirculateWindowRequest(window: ${_formatId(window)}, direction: ${direction})';
 }
 
 class X11GetGeometryRequest extends X11Request {
@@ -1207,6 +1307,10 @@ class X11GetGeometryRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(drawable);
   }
+
+  @override
+  String toString() =>
+      'X11GetGeometryRequest(drawable: ${_formatId(drawable)})';
 }
 
 class X11GetGeometryReply extends X11Reply {
@@ -1241,6 +1345,10 @@ class X11GetGeometryReply extends X11Reply {
     buffer.writeUint16(borderWidth);
     buffer.skip(10);
   }
+
+  @override
+  String toString() =>
+      'X11GetGeometryReply(root: ${_formatId(root)}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth})';
 }
 
 class X11QueryTreeRequest extends X11Request {
@@ -1259,6 +1367,9 @@ class X11QueryTreeRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() => 'X11QueryTreeRequest(window: ${_formatId(window)})';
 }
 
 class X11QueryTreeReply extends X11Reply {
@@ -1325,7 +1436,7 @@ class X11InternAtomRequest extends X11Request {
 
   @override
   String toString() =>
-      "X11InternAtomRequest(name: '${name}', onlyIfExists: ${onlyIfExists})";
+      "X11InternAtomRequest('${name}', onlyIfExists: ${onlyIfExists})";
 }
 
 class X11InternAtomReply extends X11Reply {
@@ -1347,7 +1458,7 @@ class X11InternAtomReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11InternAtomReply(atom: ${atom})';
+  String toString() => 'X11InternAtomReply(${atom})';
 }
 
 class X11GetAtomNameRequest extends X11Request {
@@ -1366,6 +1477,9 @@ class X11GetAtomNameRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(atom);
   }
+
+  @override
+  String toString() => 'X11GetAtomNameRequest(${atom})';
 }
 
 class X11GetAtomNameReply extends X11Reply {
@@ -1391,6 +1505,9 @@ class X11GetAtomNameReply extends X11Reply {
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
   }
+
+  @override
+  String toString() => 'X11GetAtomNameReply(${name})';
 }
 
 class X11ChangePropertyRequest extends X11Request {
@@ -1453,6 +1570,10 @@ class X11ChangePropertyRequest extends X11Request {
       }
     }
   }
+
+  @override
+  String toString() =>
+      'X11ChangePropertyRequest(window: ${_formatId(window)}, mode: ${mode}, property: ${property}, type: ${type}, format: ${format}, data: <${data.length} bytes>)';
 }
 
 class X11DeletePropertyRequest extends X11Request {
@@ -1474,6 +1595,10 @@ class X11DeletePropertyRequest extends X11Request {
     buffer.writeUint32(window);
     buffer.writeUint32(property);
   }
+
+  @override
+  String toString() =>
+      'X11DeletePropertyRequest(window: ${_formatId(window)}, property: ${property})';
 }
 
 class X11GetPropertyRequest extends X11Request {
@@ -1516,7 +1641,7 @@ class X11GetPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GetPropertyRequest(window: ${window}, property: ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}})';
+      'X11GetPropertyRequest(window: ${_formatId(window)}, property: ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}})';
 }
 
 class X11GetPropertyReply extends X11Reply {
@@ -1600,6 +1725,9 @@ class X11ListPropertiesRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() => 'X11ListPropertiesRequest(window: ${_formatId(window)})';
 }
 
 class X11ListPropertiesReply extends X11Reply {
@@ -1627,6 +1755,9 @@ class X11ListPropertiesReply extends X11Reply {
       buffer.writeUint32(atom);
     }
   }
+
+  @override
+  String toString() => 'X11ListPropertiesReply(atoms: ${atoms})';
 }
 
 class X11SetSelectionOwnerRequest extends X11Request {
@@ -1651,6 +1782,10 @@ class X11SetSelectionOwnerRequest extends X11Request {
     buffer.writeUint32(selection);
     buffer.writeUint32(time);
   }
+
+  @override
+  String toString() =>
+      'X11SetSelectionOwnerRequest(selection: ${selection}, owner: ${owner}, time: ${time})';
 }
 
 class X11GetSelectionOwnerRequest extends X11Request {
@@ -1669,6 +1804,9 @@ class X11GetSelectionOwnerRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(selection);
   }
+
+  @override
+  String toString() => 'X11GetSelectionOwnerRequest(selection: ${selection})';
 }
 
 class X11GetSelectionOwnerReply extends X11Reply {
@@ -1687,6 +1825,9 @@ class X11GetSelectionOwnerReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint32(owner);
   }
+
+  @override
+  String toString() => 'X11GetSelectionOwnerReply(owner: ${owner})';
 }
 
 class X11ConvertSelectionRequest extends X11Request {
@@ -1719,6 +1860,10 @@ class X11ConvertSelectionRequest extends X11Request {
     buffer.writeUint32(property);
     buffer.writeUint32(time);
   }
+
+  @override
+  String toString() =>
+      'X11ConvertSelectionRequest(selection: ${selection}, requestor: ${requestor}, target: ${target}, property: ${property}, time: ${time})';
 }
 
 class X11SendEventRequest extends X11Request {
@@ -1764,6 +1909,10 @@ class X11SendEventRequest extends X11Request {
     }
     event.encode(buffer);
   }
+
+  @override
+  String toString() =>
+      'X11SendEventRequest(propagate: ${propagate}, destination: ${destination}, eventMask: ${eventMask}, event: ${event})';
 }
 
 class X11GrabPointerRequest extends X11Request {
@@ -1810,6 +1959,10 @@ class X11GrabPointerRequest extends X11Request {
     buffer.writeUint32(cursor);
     buffer.writeUint32(time);
   }
+
+  @override
+  String toString() =>
+      'X11GrabPointerRequest(grabWindow: ${grabWindow}, ownerEvents: ${ownerEvents}, eventMask: ${eventMask}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode}, confineTo: ${confineTo}, cursor: ${cursor}, time: ${time})';
 }
 
 class X11GrabPointerReply extends X11Reply {
@@ -1826,6 +1979,9 @@ class X11GrabPointerReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(status);
   }
+
+  @override
+  String toString() => 'X11GrabPointerReply(status: ${status})';
 }
 
 class X11UngrabPointerRequest extends X11Request {
@@ -1844,6 +2000,9 @@ class X11UngrabPointerRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(time);
   }
+
+  @override
+  String toString() => 'X11UngrabPointerRequest(time: ${time})';
 }
 
 class X11GrabButtonRequest extends X11Request {
@@ -1896,6 +2055,10 @@ class X11GrabButtonRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint16(modifiers);
   }
+
+  @override
+  String toString() =>
+      'X11GrabButtonRequest(grabWindow: ${grabWindow}, ownerEvents: ${ownerEvents}, eventMask: ${eventMask}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode}, confineTo: ${confineTo}, cursor: ${cursor}, button: ${button}, modifiers: ${modifiers})';
 }
 
 class X11UngrabButtonRequest extends X11Request {
@@ -1920,6 +2083,10 @@ class X11UngrabButtonRequest extends X11Request {
     buffer.writeUint16(modifiers);
     buffer.skip(2);
   }
+
+  @override
+  String toString() =>
+      'X11UngrabButtonRequest(button: ${button}, grabWindow: ${grabWindow}, modifiers: ${modifiers})';
 }
 
 class X11ChangeActivePointerGrabRequest extends X11Request {
@@ -1948,6 +2115,10 @@ class X11ChangeActivePointerGrabRequest extends X11Request {
     buffer.writeUint16(eventMask);
     buffer.skip(2);
   }
+
+  @override
+  String toString() =>
+      'X11ChangeActivePointerGrabRequest(eventMask: ${eventMask}, cursor: ${cursor}, time: ${time})';
 }
 
 class X11GrabKeyboardRequest extends X11Request {
@@ -1986,6 +2157,10 @@ class X11GrabKeyboardRequest extends X11Request {
     buffer.writeUint8(keyboardMode);
     buffer.skip(2);
   }
+
+  @override
+  String toString() =>
+      'X11GrabKeyboardRequest(ownerEvents: ${ownerEvents}, grabWindow: ${grabWindow}, time: ${time}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode})';
 }
 
 class X11GrabKeyboardReply extends X11Reply {
@@ -2002,6 +2177,9 @@ class X11GrabKeyboardReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(status);
   }
+
+  @override
+  String toString() => 'X11GrabKeyboardReply(status: ${status})';
 }
 
 class X11UngrabKeyboardRequest extends X11Request {
@@ -2020,6 +2198,9 @@ class X11UngrabKeyboardRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(time);
   }
+
+  @override
+  String toString() => 'X11UngrabKeyboardRequest(time: ${time})';
 }
 
 class X11GrabKeyRequest extends X11Request {
@@ -2061,6 +2242,10 @@ class X11GrabKeyRequest extends X11Request {
     buffer.writeUint8(keyboardMode);
     buffer.skip(3);
   }
+
+  @override
+  String toString() =>
+      'X11GrabKeyRequest(ownerEvents: ${ownerEvents}, grabWindow: ${grabWindow}, modifiers: ${modifiers}, key: ${key}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode})';
 }
 
 class X11UngrabKeyRequest extends X11Request {
@@ -2085,6 +2270,10 @@ class X11UngrabKeyRequest extends X11Request {
     buffer.writeUint16(modifiers);
     buffer.skip(2);
   }
+
+  @override
+  String toString() =>
+      'X11UngrabKeyRequest(key: ${key}, grabWindow: ${grabWindow}, modifiers: ${modifiers})';
 }
 
 class X11AllowEventsRequest extends X11Request {
@@ -2104,6 +2293,9 @@ class X11AllowEventsRequest extends X11Request {
     buffer.writeUint8(mode);
     buffer.writeUint32(time);
   }
+
+  @override
+  String toString() => 'X11AllowEventsRequest(mode: ${mode}, time: ${time})';
 }
 
 class X11GrabServerRequest extends X11Request {
@@ -2118,6 +2310,9 @@ class X11GrabServerRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11GrabServerRequest()';
 }
 
 class X11UngrabServerRequest extends X11Request {
@@ -2132,6 +2327,9 @@ class X11UngrabServerRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11UngrabServerRequest()';
 }
 
 class X11QueryPointerRequest extends X11Request {
@@ -2150,6 +2348,9 @@ class X11QueryPointerRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() => 'X11QueryPointerRequest(window: ${_formatId(window)})';
 }
 
 class X11QueryPointerReply extends X11Reply {
@@ -2195,6 +2396,10 @@ class X11QueryPointerReply extends X11Reply {
     buffer.writeUint16(mask);
     buffer.skip(2);
   }
+
+  @override
+  String toString() =>
+      'X11QueryPointerReply(root: ${_formatId(root)}, child: ${child}, positionRoot: ${positionRoot}, posiitionWindow: ${positionWindow}, mask: ${mask}, sameScreen: ${sameScreen})';
 }
 
 class X11GetMotionEventsRequest extends X11Request {
@@ -2219,6 +2424,10 @@ class X11GetMotionEventsRequest extends X11Request {
     buffer.writeUint32(start);
     buffer.writeUint32(stop);
   }
+
+  @override
+  String toString() =>
+      'X11GetMotionEventsRequest(window: ${_formatId(window)}, start: ${start}, stop: ${stop})';
 }
 
 class X11GetMotionEventsReply extends X11Reply {
@@ -2251,6 +2460,9 @@ class X11GetMotionEventsReply extends X11Reply {
       buffer.writeInt16(event.y);
     }
   }
+
+  @override
+  String toString() => 'X11GetMotionEventsReply(events: ${events})';
 }
 
 class X11TranslateCoordinatesRequest extends X11Request {
@@ -2278,6 +2490,10 @@ class X11TranslateCoordinatesRequest extends X11Request {
     buffer.writeInt16(src.x);
     buffer.writeInt16(src.y);
   }
+
+  @override
+  String toString() =>
+      'X11TranslateCoordinatesRequest(srcWindow: ${srcWindow}, src: ${src}, dstWindow: ${dstWindow})';
 }
 
 class X11TranslateCoordinatesReply extends X11Reply {
@@ -2303,6 +2519,10 @@ class X11TranslateCoordinatesReply extends X11Reply {
     buffer.writeInt16(dst.x);
     buffer.writeInt16(dst.y);
   }
+
+  @override
+  String toString() =>
+      'X11TranslateCoordinatesReply(child: ${child}, dst: ${dst}, sameScreen: ${sameScreen})';
 }
 
 class X11WarpPointerRequest extends X11Request {
@@ -2344,6 +2564,10 @@ class X11WarpPointerRequest extends X11Request {
     buffer.writeInt16(dst.x);
     buffer.writeInt16(dst.y);
   }
+
+  @override
+  String toString() =>
+      'X11WarpPointerRequest(dst: ${dst}, srcWindow: ${srcWindow}, dstWindow: ${dstWindow}, src: ${src})';
 }
 
 class X11SetInputFocusRequest extends X11Request {
@@ -2366,6 +2590,10 @@ class X11SetInputFocusRequest extends X11Request {
     buffer.writeUint32(focus);
     buffer.writeUint32(time);
   }
+
+  @override
+  String toString() =>
+      'X11SetInputFocusRequest(revertTo: ${revertTo}, focus: ${focus}, time: ${time})';
 }
 
 class X11GetInputFocusRequest extends X11Request {
@@ -2422,6 +2650,9 @@ class X11QueryKeymapRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11QueryKeymapRequest()';
 }
 
 class X11QueryKeymapReply extends X11Reply {
@@ -2445,6 +2676,9 @@ class X11QueryKeymapReply extends X11Reply {
       buffer.writeUint8(key);
     }
   }
+
+  @override
+  String toString() => 'X11QueryKeymapReply(keys: ${keys})';
 }
 
 class X11OpenFontRequest extends X11Request {
@@ -2473,6 +2707,9 @@ class X11OpenFontRequest extends X11Request {
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
   }
+
+  @override
+  String toString() => 'X11OpenFontRequest(fid: ${fid}, name: ${name})';
 }
 
 class X11CloseFontRequest extends X11Request {
@@ -2491,6 +2728,9 @@ class X11CloseFontRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(font);
   }
+
+  @override
+  String toString() => 'X11CloseFontRequest(font: ${font})';
 }
 
 class X11QueryFontRequest extends X11Request {
@@ -2509,16 +2749,19 @@ class X11QueryFontRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(font);
   }
+
+  @override
+  String toString() => 'X11QueryFontRequest(font: ${font})';
 }
 
-X11CharInfo _readCharInfo(X11ReadBuffer buffer) {
+X11CharacterInfo _readCharacterInfo(X11ReadBuffer buffer) {
   var leftSideBearing = buffer.readInt16();
   var rightSideBearing = buffer.readInt16();
   var characterWidth = buffer.readInt16();
   var ascent = buffer.readInt16();
   var decent = buffer.readInt16();
   var attributes = buffer.readUint16();
-  return X11CharInfo(
+  return X11CharacterInfo(
       leftSideBearing: leftSideBearing,
       rightSideBearing: rightSideBearing,
       characterWidth: characterWidth,
@@ -2527,7 +2770,7 @@ X11CharInfo _readCharInfo(X11ReadBuffer buffer) {
       attributes: attributes);
 }
 
-void _writeCharInfo(X11WriteBuffer buffer, X11CharInfo info) {
+void _writeCharacterInfo(X11WriteBuffer buffer, X11CharacterInfo info) {
   buffer.writeInt16(info.leftSideBearing);
   buffer.writeInt16(info.rightSideBearing);
   buffer.writeInt16(info.characterWidth);
@@ -2537,8 +2780,8 @@ void _writeCharInfo(X11WriteBuffer buffer, X11CharInfo info) {
 }
 
 class X11QueryFontReply extends X11Reply {
-  final X11CharInfo minBounds;
-  final X11CharInfo maxBounds;
+  final X11CharacterInfo minBounds;
+  final X11CharacterInfo maxBounds;
   final int minCharOrByte2;
   final int maxCharOrByte2;
   final int defaultChar;
@@ -2549,11 +2792,11 @@ class X11QueryFontReply extends X11Reply {
   final int fontAscent;
   final int fontDescent;
   final List<X11FontProperty> properties;
-  final List<X11CharInfo> charInfos;
+  final List<X11CharacterInfo> charInfos;
 
   X11QueryFontReply(
-      {this.minBounds = const X11CharInfo(),
-      this.maxBounds = const X11CharInfo(),
+      {this.minBounds = const X11CharacterInfo(),
+      this.maxBounds = const X11CharacterInfo(),
       this.minCharOrByte2 = 0,
       this.maxCharOrByte2 = 0,
       this.defaultChar = 0,
@@ -2568,9 +2811,9 @@ class X11QueryFontReply extends X11Reply {
 
   static X11QueryFontReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var minBounds = _readCharInfo(buffer);
+    var minBounds = _readCharacterInfo(buffer);
     buffer.skip(4);
-    var maxBounds = _readCharInfo(buffer);
+    var maxBounds = _readCharacterInfo(buffer);
     buffer.skip(4);
     var minCharOrByte2 = buffer.readUint16();
     var maxCharOrByte2 = buffer.readUint16();
@@ -2589,9 +2832,9 @@ class X11QueryFontReply extends X11Reply {
       var value = buffer.readUint32();
       properties.add(X11FontProperty(name, value));
     }
-    var charInfos = <X11CharInfo>[];
+    var charInfos = <X11CharacterInfo>[];
     for (var i = 0; i < charInfosLength; i++) {
-      charInfos.add(_readCharInfo(buffer));
+      charInfos.add(_readCharacterInfo(buffer));
     }
     return X11QueryFontReply(
         minBounds: minBounds,
@@ -2612,9 +2855,9 @@ class X11QueryFontReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    _writeCharInfo(buffer, minBounds);
+    _writeCharacterInfo(buffer, minBounds);
     buffer.skip(4);
-    _writeCharInfo(buffer, maxBounds);
+    _writeCharacterInfo(buffer, maxBounds);
     buffer.skip(4);
     buffer.writeUint16(minCharOrByte2);
     buffer.writeUint16(maxCharOrByte2);
@@ -2632,9 +2875,13 @@ class X11QueryFontReply extends X11Reply {
       buffer.writeUint32(property.value);
     }
     for (var info in charInfos) {
-      _writeCharInfo(buffer, info);
+      _writeCharacterInfo(buffer, info);
     }
   }
+
+  @override
+  String toString() =>
+      'X11QueryFontReply(minBounds: ${minBounds}, maxBounds: ${maxBounds}, minCharOrByte2: ${minCharOrByte2}, maxCharOrByte2: ${maxCharOrByte2}, defaultChar: ${defaultChar}, drawDirection: ${drawDirection}, minByte1: ${minByte1}, maxByte1: ${maxByte1}, allCharsExist: ${allCharsExist}, fontAscent: ${fontAscent}, fontDescent: ${fontDescent}, properties: ${properties}, charInfos: ${charInfos})';
 }
 
 class X11QueryTextExtentsRequest extends X11Request {
@@ -2662,6 +2909,10 @@ class X11QueryTextExtentsRequest extends X11Request {
     buffer.writeString16(string);
     buffer.skip(pad(string.length * 2));
   }
+
+  @override
+  String toString() =>
+      'X11QueryTextExtentsRequest(font: ${font}, string: ${string})';
 }
 
 class X11QueryTextExtentsReply extends X11Reply {
@@ -2715,6 +2966,10 @@ class X11QueryTextExtentsReply extends X11Reply {
     buffer.writeInt32(overallLeft);
     buffer.writeInt32(overallRight);
   }
+
+  @override
+  String toString() =>
+      'X11QueryTextExtentsReply(drawDirection: ${drawDirection}, fontAscent: ${fontAscent}, fontDescent: ${fontDescent}, overallAscent: ${overallAscent}, overallDescent: ${overallDescent}, overallWidth: ${overallWidth}, overallLeft: ${overallLeft}, overallRight: ${overallRight})';
 }
 
 class X11ListFontsRequest extends X11Request {
@@ -2741,6 +2996,10 @@ class X11ListFontsRequest extends X11Request {
     buffer.writeString8(pattern);
     buffer.skip(pad(patternLength));
   }
+
+  @override
+  String toString() =>
+      'X11ListFontsRequest(maxNames: ${maxNames}, pattern: ${pattern})';
 }
 
 class X11ListFontsReply extends X11Reply {
@@ -2767,6 +3026,9 @@ class X11ListFontsReply extends X11Reply {
     buffer.writeListOfString8(names);
     buffer.skip(pad(buffer.length - start));
   }
+
+  @override
+  String toString() => 'X11ListFontsReply(names: ${names})';
 }
 
 class X11ListFontsWithInfoRequest extends X11Request {
@@ -2793,12 +3055,16 @@ class X11ListFontsWithInfoRequest extends X11Request {
     buffer.writeString8(pattern);
     buffer.skip(pad(patternLength));
   }
+
+  @override
+  String toString() =>
+      'X11ListFontsWithInfoRequest(maxNames: ${maxNames}, pattern: ${pattern})';
 }
 
 class X11ListFontsWithInfoReply extends X11Reply {
   final String name;
-  final X11CharInfo minBounds;
-  final X11CharInfo maxBounds;
+  final X11CharacterInfo minBounds;
+  final X11CharacterInfo maxBounds;
   final int minCharOrByte2;
   final int maxCharOrByte2;
   final int defaultChar;
@@ -2812,8 +3078,8 @@ class X11ListFontsWithInfoReply extends X11Reply {
   final List<X11FontProperty> properties;
 
   X11ListFontsWithInfoReply(this.name,
-      {this.minBounds = const X11CharInfo(),
-      this.maxBounds = const X11CharInfo(),
+      {this.minBounds = const X11CharacterInfo(),
+      this.maxBounds = const X11CharacterInfo(),
       this.minCharOrByte2 = 0,
       this.maxCharOrByte2 = 0,
       this.defaultChar = 0,
@@ -2828,9 +3094,9 @@ class X11ListFontsWithInfoReply extends X11Reply {
 
   static X11ListFontsWithInfoReply fromBuffer(X11ReadBuffer buffer) {
     var nameLength = buffer.readUint8();
-    var minBounds = _readCharInfo(buffer);
+    var minBounds = _readCharacterInfo(buffer);
     buffer.skip(4);
-    var maxBounds = _readCharInfo(buffer);
+    var maxBounds = _readCharacterInfo(buffer);
     buffer.skip(4);
     var minCharOrByte2 = buffer.readUint16();
     var maxCharOrByte2 = buffer.readUint16();
@@ -2871,9 +3137,9 @@ class X11ListFontsWithInfoReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint8(nameLength);
-    _writeCharInfo(buffer, minBounds);
+    _writeCharacterInfo(buffer, minBounds);
     buffer.skip(4);
-    _writeCharInfo(buffer, maxBounds);
+    _writeCharacterInfo(buffer, maxBounds);
     buffer.skip(4);
     buffer.writeUint16(minCharOrByte2);
     buffer.writeUint16(maxCharOrByte2);
@@ -2893,6 +3159,10 @@ class X11ListFontsWithInfoReply extends X11Reply {
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
   }
+
+  @override
+  String toString() =>
+      'X11ListFontsWithInfoReply(minBounds: ${minBounds}, maxBounds: ${maxBounds}, minCharOrByte2: ${minCharOrByte2}, maxCharOrByte2: ${maxCharOrByte2}, defaultChar: ${defaultChar}, drawDirection: ${drawDirection}, minByte1: ${minByte1}, maxByte1: ${maxByte1}, allCharsExist: ${allCharsExist}, fontAscent: ${fontAscent}, fontDescent: ${fontDescent}, repliesHint: ${repliesHint}, properties: ${properties}, name: ${name})';
 }
 
 class X11SetFontPathRequest extends X11Request {
@@ -2919,6 +3189,9 @@ class X11SetFontPathRequest extends X11Request {
     buffer.writeListOfString8(path);
     buffer.skip(pad(buffer.length - start));
   }
+
+  @override
+  String toString() => 'X11SetFontPathRequest(path: ${path})';
 }
 
 class X11GetFontPathRequest extends X11Request {
@@ -2933,6 +3206,9 @@ class X11GetFontPathRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11GetFontPathRequest()';
 }
 
 class X11GetFontPathReply extends X11Reply {
@@ -2959,6 +3235,9 @@ class X11GetFontPathReply extends X11Reply {
     buffer.writeListOfString8(path);
     buffer.skip(pad(buffer.length - start));
   }
+
+  @override
+  String toString() => 'X11GetFontPathReply(path: ${path})';
 }
 
 class X11CreatePixmapRequest extends X11Request {
@@ -2986,6 +3265,10 @@ class X11CreatePixmapRequest extends X11Request {
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
   }
+
+  @override
+  String toString() =>
+      'X11CreatePixmapRequest(pid: ${_formatId(pid)}, drawable: ${_formatId(drawable)}, size: ${size}, depth: ${depth})';
 }
 
 class X11FreePixmapRequest extends X11Request {
@@ -3004,6 +3287,9 @@ class X11FreePixmapRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(pixmap);
   }
+
+  @override
+  String toString() => 'X11FreePixmapRequest(pixmap: ${pixmap})';
 }
 
 class X11CreateGCRequest extends X11Request {
@@ -3026,8 +3312,8 @@ class X11CreateGCRequest extends X11Request {
   final int font;
   final int subwindowMode;
   final bool graphicsExposures;
-  final int clipXOorigin;
-  final int clipYOorigin;
+  final int clipXOrigin;
+  final int clipYOrigin;
   final int clipMask;
   final int dashOffset;
   final int dashes;
@@ -3051,8 +3337,8 @@ class X11CreateGCRequest extends X11Request {
       this.font,
       this.subwindowMode,
       this.graphicsExposures,
-      this.clipXOorigin,
-      this.clipYOorigin,
+      this.clipXOrigin,
+      this.clipYOrigin,
       this.clipMask,
       this.dashOffset,
       this.dashes,
@@ -3141,14 +3427,14 @@ class X11CreateGCRequest extends X11Request {
       graphicsExposures = buffer.readBool();
       buffer.skip(3);
     }
-    int clipXOorigin;
+    int clipXOrigin;
     if ((valueMask & 0x020000) != 0) {
-      clipXOorigin = buffer.readInt16();
+      clipXOrigin = buffer.readInt16();
       buffer.skip(2);
     }
-    int clipYOorigin;
+    int clipYOrigin;
     if ((valueMask & 0x040000) != 0) {
-      clipYOorigin = buffer.readInt16();
+      clipYOrigin = buffer.readInt16();
       buffer.skip(2);
     }
     int clipMask;
@@ -3188,8 +3474,8 @@ class X11CreateGCRequest extends X11Request {
         font: font,
         subwindowMode: subwindowMode,
         graphicsExposures: graphicsExposures,
-        clipXOorigin: clipXOorigin,
-        clipYOorigin: clipYOorigin,
+        clipXOrigin: clipXOrigin,
+        clipYOrigin: clipYOrigin,
         clipMask: clipMask,
         dashOffset: dashOffset,
         dashes: dashes,
@@ -3253,10 +3539,10 @@ class X11CreateGCRequest extends X11Request {
     if (graphicsExposures != null) {
       valueMask |= 0x010000;
     }
-    if (clipXOorigin != null) {
+    if (clipXOrigin != null) {
       valueMask |= 0x020000;
     }
-    if (clipYOorigin != null) {
+    if (clipYOrigin != null) {
       valueMask |= 0x040000;
     }
     if (clipMask != null) {
@@ -3333,12 +3619,12 @@ class X11CreateGCRequest extends X11Request {
       buffer.writeBool(graphicsExposures);
       buffer.skip(3);
     }
-    if (clipXOorigin != null) {
-      buffer.writeInt16(clipXOorigin);
+    if (clipXOrigin != null) {
+      buffer.writeInt16(clipXOrigin);
       buffer.skip(2);
     }
-    if (clipYOorigin != null) {
-      buffer.writeInt16(clipYOorigin);
+    if (clipYOrigin != null) {
+      buffer.writeInt16(clipYOrigin);
       buffer.skip(2);
     }
     if (clipMask != null) {
@@ -3356,6 +3642,83 @@ class X11CreateGCRequest extends X11Request {
       buffer.writeUint8(arcMode);
       buffer.skip(3);
     }
+  }
+
+  @override
+  String toString() {
+    var string =
+        'X11CreateGCRequest(cid: ${_formatId(cid)}, drawable: ${_formatId(drawable)}';
+    if (function != null) {
+      string += ', function: ${function}';
+    }
+    if (planeMask != null) {
+      string += ', planeMask: ${planeMask}';
+    }
+    if (foreground != null) {
+      string += ', foreground: ${foreground}';
+    }
+    if (background != null) {
+      string += ', background: ${background}';
+    }
+    if (lineWidth != null) {
+      string += ', lineWidth: ${lineWidth}';
+    }
+    if (lineStyle != null) {
+      string += ', lineStyle: ${lineStyle}';
+    }
+    if (capStyle != null) {
+      string += ', capStyle: ${capStyle}';
+    }
+    if (joinStyle != null) {
+      string += ', joinStyle: ${joinStyle}';
+    }
+    if (fillStyle != null) {
+      string += ', fillStyle: ${fillStyle}';
+    }
+    if (fillRule != null) {
+      string += ', fillRule: ${fillRule}';
+    }
+    if (tile != null) {
+      string += ', tile: ${tile}';
+    }
+    if (stipple != null) {
+      string += ', stipple: ${stipple}';
+    }
+    if (tileStippleXOrigin != null) {
+      string += ', tileStippleXOrigin: ${tileStippleXOrigin}';
+    }
+    if (tileStippleYOrigin != null) {
+      string += ', tileStippleYOrigin: ${tileStippleYOrigin}';
+    }
+    if (font != null) {
+      string += ', font: ${font}';
+    }
+    if (subwindowMode != null) {
+      string += ', subwindowMode: ${subwindowMode}';
+    }
+    if (graphicsExposures != null) {
+      string += ', graphicsExposures: ${graphicsExposures}';
+    }
+    if (clipXOrigin != null) {
+      string += ', clipXOrigin: ${clipXOrigin}';
+    }
+    if (clipYOrigin != null) {
+      string += ', clipYOrigin: ${clipYOrigin}';
+    }
+    if (clipMask != null) {
+      string += ', clipMask: ${clipMask}';
+    }
+    if (dashOffset != null) {
+      string += ', dashOffset: ${dashOffset}';
+    }
+    if (dashes != null) {
+      string += ', dashes: ${dashes}';
+    }
+    if (arcMode != null) {
+      string += ', arcMode: ${arcMode}';
+    }
+    string += ')';
+    return string;
   }
 }
 
@@ -3378,8 +3741,8 @@ class X11ChangeGCRequest extends X11Request {
   final int font;
   final int subwindowMode;
   final bool graphicsExposures;
-  final int clipXOorigin;
-  final int clipYOorigin;
+  final int clipXOrigin;
+  final int clipYOrigin;
   final int clipMask;
   final int dashOffset;
   final int dashes;
@@ -3403,8 +3766,8 @@ class X11ChangeGCRequest extends X11Request {
       this.font,
       this.subwindowMode,
       this.graphicsExposures,
-      this.clipXOorigin,
-      this.clipYOorigin,
+      this.clipXOrigin,
+      this.clipYOrigin,
       this.clipMask,
       this.dashOffset,
       this.dashes,
@@ -3492,14 +3855,14 @@ class X11ChangeGCRequest extends X11Request {
       graphicsExposures = buffer.readBool();
       buffer.skip(3);
     }
-    int clipXOorigin;
+    int clipXOrigin;
     if ((valueMask & 0x020000) != 0) {
-      clipXOorigin = buffer.readInt16();
+      clipXOrigin = buffer.readInt16();
       buffer.skip(2);
     }
-    int clipYOorigin;
+    int clipYOrigin;
     if ((valueMask & 0x040000) != 0) {
-      clipYOorigin = buffer.readInt16();
+      clipYOrigin = buffer.readInt16();
       buffer.skip(2);
     }
     int clipMask;
@@ -3539,8 +3902,8 @@ class X11ChangeGCRequest extends X11Request {
         font: font,
         subwindowMode: subwindowMode,
         graphicsExposures: graphicsExposures,
-        clipXOorigin: clipXOorigin,
-        clipYOorigin: clipYOorigin,
+        clipXOrigin: clipXOrigin,
+        clipYOrigin: clipYOrigin,
         clipMask: clipMask,
         dashOffset: dashOffset,
         dashes: dashes,
@@ -3603,10 +3966,10 @@ class X11ChangeGCRequest extends X11Request {
     if (graphicsExposures != null) {
       valueMask |= 0x010000;
     }
-    if (clipXOorigin != null) {
+    if (clipXOrigin != null) {
       valueMask |= 0x020000;
     }
-    if (clipYOorigin != null) {
+    if (clipYOrigin != null) {
       valueMask |= 0x040000;
     }
     if (clipMask != null) {
@@ -3683,12 +4046,12 @@ class X11ChangeGCRequest extends X11Request {
       buffer.writeBool(graphicsExposures);
       buffer.skip(3);
     }
-    if (clipXOorigin != null) {
-      buffer.writeInt16(clipXOorigin);
+    if (clipXOrigin != null) {
+      buffer.writeInt16(clipXOrigin);
       buffer.skip(2);
     }
-    if (clipYOorigin != null) {
-      buffer.writeInt16(clipYOorigin);
+    if (clipYOrigin != null) {
+      buffer.writeInt16(clipYOrigin);
       buffer.skip(2);
     }
     if (clipMask != null) {
@@ -3707,6 +4070,10 @@ class X11ChangeGCRequest extends X11Request {
       buffer.skip(3);
     }
   }
+
+  @override
+  String toString() =>
+      'X11ChangeGCRequest(gc: ${_formatId(gc)}, function: ${function}, planeMask: ${planeMask}, foreground: ${foreground}, background: ${background}, lineWidth: ${lineWidth}, lineStyle: ${lineStyle}, capStyle: ${capStyle}, joinStyle: ${joinStyle}, fillStyle: ${fillStyle}, fillRule: ${fillRule}, tile: ${tile}, stipple: ${stipple}, tileStippleXOrigin: ${tileStippleXOrigin}, tileStippleYOrigin: ${tileStippleYOrigin}, font: ${font}, subwindowMode: ${subwindowMode}, graphicsExposures: ${graphicsExposures}, clipXOrigin: ${clipXOrigin}, clipYOrigin: ${clipYOrigin}, clipMask: ${clipMask}, dashOffset: ${dashOffset}, dashes: ${dashes}, arcMode: ${arcMode})';
 }
 
 class X11CopyGCRequest extends X11Request {
@@ -3731,6 +4098,10 @@ class X11CopyGCRequest extends X11Request {
     buffer.writeUint32(dstGc);
     buffer.writeUint32(valueMask);
   }
+
+  @override
+  String toString() =>
+      'X11CopyGCRequest(srcGc: ${srcGc}, dstGc: ${dstGc}, valueMask: ${valueMask})';
 }
 
 class X11SetDashesRequest extends X11Request {
@@ -3764,6 +4135,10 @@ class X11SetDashesRequest extends X11Request {
     }
     buffer.skip(pad(dashes.length));
   }
+
+  @override
+  String toString() =>
+      'X11SetDashesRequest(gc: ${_formatId(gc)}, dashOffset: ${dashOffset}, dashes: ${dashes})';
 }
 
 class X11SetClipRectanglesRequest extends X11Request {
@@ -3806,6 +4181,10 @@ class X11SetClipRectanglesRequest extends X11Request {
       buffer.writeUint16(rectangle.height);
     }
   }
+
+  @override
+  String toString() =>
+      'X11SetClipRectanglesRequest(ordering: ${ordering}, gc: ${_formatId(gc)}, clipOrigin: ${clipOrigin}, rectangles: ${rectangles})';
 }
 
 class X11FreeGCRequest extends X11Request {
@@ -3824,6 +4203,9 @@ class X11FreeGCRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(gc);
   }
+
+  @override
+  String toString() => 'X11FreeGCRequest(gc: ${_formatId(gc)})';
 }
 
 class X11ClearAreaRequest extends X11Request {
@@ -3853,6 +4235,10 @@ class X11ClearAreaRequest extends X11Request {
     buffer.writeUint16(area.width);
     buffer.writeUint16(area.height);
   }
+
+  @override
+  String toString() =>
+      'X11ClearAreaRequest(exposures: ${exposures}, window: ${_formatId(window)}, area: ${area})';
 }
 
 class X11CopyAreaRequest extends X11Request {
@@ -3893,6 +4279,10 @@ class X11CopyAreaRequest extends X11Request {
     buffer.writeUint16(srcArea.width);
     buffer.writeUint16(srcArea.height);
   }
+
+  @override
+  String toString() =>
+      'X11CopyAreaRequest(srcDrawable: ${srcDrawable}, dstDrawable: ${dstDrawable}, gc: ${_formatId(gc)}, srcArea: ${srcArea}, dstPosition: ${dstPosition})';
 }
 
 class X11CopyPlaneRequest extends X11Request {
@@ -3941,6 +4331,10 @@ class X11CopyPlaneRequest extends X11Request {
     buffer.writeUint16(srcArea.height);
     buffer.writeUint32(bitPlane);
   }
+
+  @override
+  String toString() =>
+      'X11CopyPlaneRequest(srcDrawable: ${srcDrawable}, dstDrawable: ${dstDrawable}, gc: ${_formatId(gc)}, srcArea: ${srcArea}, dstPosition: ${dstPosition}, bitPlane: ${bitPlane})';
 }
 
 class X11PolyPointRequest extends X11Request {
@@ -3976,6 +4370,10 @@ class X11PolyPointRequest extends X11Request {
       buffer.writeInt16(point.y);
     }
   }
+
+  @override
+  String toString() =>
+      'X11PolyPointRequest(coordinateMode: ${coordinateMode}, drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, points: ${points})';
 }
 
 class X11PolyLineRequest extends X11Request {
@@ -4011,6 +4409,10 @@ class X11PolyLineRequest extends X11Request {
       buffer.writeInt16(point.y);
     }
   }
+
+  @override
+  String toString() =>
+      'X11PolyLineRequest(coordinateMode: ${coordinateMode}, drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, points: ${points})';
 }
 
 class X11PolySegmentRequest extends X11Request {
@@ -4047,6 +4449,10 @@ class X11PolySegmentRequest extends X11Request {
       buffer.writeInt16(segment.y2);
     }
   }
+
+  @override
+  String toString() =>
+      'X11PolySegmentRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, segments: ${segments})';
 }
 
 class X11PolyRectangleRequest extends X11Request {
@@ -4083,6 +4489,10 @@ class X11PolyRectangleRequest extends X11Request {
       buffer.writeUint16(rectangle.height);
     }
   }
+
+  @override
+  String toString() =>
+      'X11PolyRectangleRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, rectangles: ${rectangles})';
 }
 
 class X11PolyArcRequest extends X11Request {
@@ -4123,6 +4533,10 @@ class X11PolyArcRequest extends X11Request {
       buffer.writeInt16(arc.angle2);
     }
   }
+
+  @override
+  String toString() =>
+      'X11PolyArcRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, arcs: ${arcs})';
 }
 
 class X11FillPolyRequest extends X11Request {
@@ -4162,6 +4576,10 @@ class X11FillPolyRequest extends X11Request {
       buffer.writeInt16(point.y);
     }
   }
+
+  @override
+  String toString() =>
+      'X11FillPolyRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, shape: ${shape}, coordinateMode: ${coordinateMode}, points: ${points})';
 }
 
 class X11PolyFillRectangleRequest extends X11Request {
@@ -4198,6 +4616,10 @@ class X11PolyFillRectangleRequest extends X11Request {
       buffer.writeUint16(rectangle.height);
     }
   }
+
+  @override
+  String toString() =>
+      'X11PolyFillRectangleRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, rectangles: ${rectangles})';
 }
 
 class X11PolyFillArcRequest extends X11Request {
@@ -4238,6 +4660,10 @@ class X11PolyFillArcRequest extends X11Request {
       buffer.writeInt16(arc.angle2);
     }
   }
+
+  @override
+  String toString() =>
+      'X11PolyFillArcRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, arcs: ${arcs})';
 }
 
 class X11PutImageRequest extends X11Request {
@@ -4292,6 +4718,10 @@ class X11PutImageRequest extends X11Request {
     }
     buffer.skip(pad(data.length));
   }
+
+  @override
+  String toString() =>
+      'X11PutImageRequest(format: ${format}, drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, dst: ${dst}, size: ${size}, leftPad: ${leftPad}, depth: ${depth}, data: <${data.length} bytes>)';
 }
 
 class X11GetImageRequest extends X11Request {
@@ -4324,6 +4754,10 @@ class X11GetImageRequest extends X11Request {
     buffer.writeUint16(area.height);
     buffer.writeUint32(planeMask);
   }
+
+  @override
+  String toString() =>
+      'X11GetImageRequest(format: ${format}, drawable: ${_formatId(drawable)}, area: ${area}, planeMask: ${planeMask})';
 }
 
 class X11GetImageReply extends X11Reply {
@@ -4355,6 +4789,10 @@ class X11GetImageReply extends X11Reply {
     }
     buffer.skip(pad(data.length));
   }
+
+  @override
+  String toString() =>
+      'X11GetImageReply(depth: ${depth}, visual: ${visual}, data: <${data.length} bytes>)';
 }
 
 class X11PolyText8Request extends X11Request {
@@ -4413,6 +4851,10 @@ class X11PolyText8Request extends X11Request {
       }
     }
   }
+
+  @override
+  String toString() =>
+      'X11PolyText8Request(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, position: ${position}, items: ${items})';
 }
 
 class X11PolyText16Request extends X11Request {
@@ -4470,6 +4912,10 @@ class X11PolyText16Request extends X11Request {
       }
     }
   }
+
+  @override
+  String toString() =>
+      'X11PolyText16Request(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, position: ${position}, items: ${items})';
 }
 
 class X11ImageText8Request extends X11Request {
@@ -4502,6 +4948,10 @@ class X11ImageText8Request extends X11Request {
     buffer.writeString8(string);
     buffer.skip(pad(stringLength));
   }
+
+  @override
+  String toString() =>
+      'X11ImageText8Request(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, position: ${position}, string: ${string})';
 }
 
 class X11ImageText16Request extends X11Request {
@@ -4534,6 +4984,10 @@ class X11ImageText16Request extends X11Request {
     buffer.writeString16(string);
     buffer.skip(pad(stringLength * 2));
   }
+
+  @override
+  String toString() =>
+      'X11ImageText16Request(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, position: ${position}, string: ${string})';
 }
 
 class X11CreateColormapRequest extends X11Request {
@@ -4559,6 +5013,10 @@ class X11CreateColormapRequest extends X11Request {
     buffer.writeUint32(window);
     buffer.writeUint32(visual);
   }
+
+  @override
+  String toString() =>
+      'X11CreateColormapRequest(alloc: ${alloc}, mid: ${mid}, window: ${_formatId(window)}, visual: ${visual})';
 }
 
 class X11FreeColormapRequest extends X11Request {
@@ -4577,6 +5035,9 @@ class X11FreeColormapRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(cmap);
   }
+
+  @override
+  String toString() => 'X11FreeColormapRequest(${cmap})';
 }
 
 class X11CopyColormapAndFreeRequest extends X11Request {
@@ -4598,6 +5059,10 @@ class X11CopyColormapAndFreeRequest extends X11Request {
     buffer.writeUint32(mid);
     buffer.writeUint32(srcCmap);
   }
+
+  @override
+  String toString() =>
+      'X11CopyColormapAndFreeRequest(mid: ${mid}, srcCmap: ${srcCmap})';
 }
 
 class X11InstallColormapRequest extends X11Request {
@@ -4616,6 +5081,9 @@ class X11InstallColormapRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(cmap);
   }
+
+  @override
+  String toString() => 'X11InstallColormapRequest(${cmap})';
 }
 
 class X11UninstallColormapRequest extends X11Request {
@@ -4634,6 +5102,9 @@ class X11UninstallColormapRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(cmap);
   }
+
+  @override
+  String toString() => 'X11UninstallColormapRequest(${cmap})';
 }
 
 class X11ListInstalledColormapsRequest extends X11Request {
@@ -4652,6 +5123,10 @@ class X11ListInstalledColormapsRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(window);
   }
+
+  @override
+  String toString() =>
+      'X11ListInstalledColormapsRequest(window: ${_formatId(window)})';
 }
 
 class X11ListInstalledColormapsReply extends X11Reply {
@@ -4679,6 +5154,9 @@ class X11ListInstalledColormapsReply extends X11Reply {
       buffer.writeUint32(cmap);
     }
   }
+
+  @override
+  String toString() => 'X11ListInstalledColormapsReply(cmaps: ${cmaps})';
 }
 
 class X11AllocColorRequest extends X11Request {
@@ -4706,6 +5184,9 @@ class X11AllocColorRequest extends X11Request {
     buffer.writeUint16(color.blue);
     buffer.skip(2);
   }
+
+  @override
+  String toString() => 'X11AllocColorRequest(cmap: ${cmap}, color: ${color})';
 }
 
 class X11AllocColorReply extends X11Reply {
@@ -4733,6 +5214,9 @@ class X11AllocColorReply extends X11Reply {
     buffer.skip(2);
     buffer.writeUint32(pixel);
   }
+
+  @override
+  String toString() => 'X11AllocColorReply(pixel: ${pixel}, color: ${color})';
 }
 
 class X11AllocNamedColorRequest extends X11Request {
@@ -4761,6 +5245,10 @@ class X11AllocNamedColorRequest extends X11Request {
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
   }
+
+  @override
+  String toString() =>
+      'X11AllocNamedColorRequest(cmap: ${cmap}, name: ${name})';
 }
 
 class X11AllocNamedColorReply extends X11Reply {
@@ -4796,6 +5284,10 @@ class X11AllocNamedColorReply extends X11Reply {
     buffer.writeUint16(visual.green);
     buffer.writeUint16(visual.blue);
   }
+
+  @override
+  String toString() =>
+      'X11AllocNamedColorReply(pixel: ${pixel}, exact: ${exact}, visual: ${visual})';
 }
 
 class X11AllocColorCellsRequest extends X11Request {
@@ -4823,6 +5315,10 @@ class X11AllocColorCellsRequest extends X11Request {
     buffer.writeUint16(colors);
     buffer.writeUint16(planes);
   }
+
+  @override
+  String toString() =>
+      'X11AllocColorCellsRequest(cmap: ${cmap}, colors: ${colors}, planes: ${planes}, contiguous: ${contiguous})';
 }
 
 class X11AllocColorCellsReply extends X11Reply {
@@ -4860,6 +5356,10 @@ class X11AllocColorCellsReply extends X11Reply {
       buffer.writeUint32(mask);
     }
   }
+
+  @override
+  String toString() =>
+      'X11AllocColorCellsReply(pixels: ${pixels}, masks: ${masks})';
 }
 
 class X11AllocColorPlanesRequest extends X11Request {
@@ -4896,6 +5396,10 @@ class X11AllocColorPlanesRequest extends X11Request {
     buffer.writeUint16(greens);
     buffer.writeUint16(blues);
   }
+
+  @override
+  String toString() =>
+      'X11AllocColorPlanesRequest(cmap: ${cmap}, colors: ${colors}, reds: ${reds}, greens: ${greens}, blues: ${blues}, contiguous: ${contiguous})';
 }
 
 class X11AllocColorPlanesReply extends X11Reply {
@@ -4935,6 +5439,10 @@ class X11AllocColorPlanesReply extends X11Reply {
       buffer.writeUint32(pixel);
     }
   }
+
+  @override
+  String toString() =>
+      'X11AllocColorPlanesReply(redMask: ${redMask}, greenMask: ${greenMask}, blueMask: ${blueMask}, pixels: ${pixels})';
 }
 
 class X11FreeColorsRequest extends X11Request {
@@ -4964,6 +5472,10 @@ class X11FreeColorsRequest extends X11Request {
       buffer.writeUint32(pixel);
     }
   }
+
+  @override
+  String toString() =>
+      'X11FreeColorsRequest(cmap: ${cmap}, planeMask: ${planeMask}, pixels: ${pixels})';
 }
 
 class X11StoreColorsRequest extends X11Request {
@@ -5015,6 +5527,9 @@ class X11StoreColorsRequest extends X11Request {
       buffer.skip(1);
     }
   }
+
+  @override
+  String toString() => 'X11StoreColorsRequest(cmap: ${cmap}, items: ${items})';
 }
 
 class X11StoreNamedColorRequest extends X11Request {
@@ -5064,6 +5579,10 @@ class X11StoreNamedColorRequest extends X11Request {
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
   }
+
+  @override
+  String toString() =>
+      'X11StoreNamedColorRequest(cmap: ${cmap}, pixel: ${pixel}, name: ${name}, doRed: ${doRed}, doGreen: ${doGreen}, doBlue: ${doBlue})';
 }
 
 class X11QueryColorsRequest extends X11Request {
@@ -5159,6 +5678,9 @@ class X11LookupColorRequest extends X11Request {
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
   }
+
+  @override
+  String toString() => 'X11LookupColorRequest(cmap: ${cmap}, name: ${name})';
 }
 
 class X11LookupColorReply extends X11Reply {
@@ -5189,18 +5711,22 @@ class X11LookupColorReply extends X11Reply {
     buffer.writeUint16(visual.green);
     buffer.writeUint16(visual.blue);
   }
+
+  @override
+  String toString() =>
+      'X11LookupColorReply(exact: ${exact}, visual: ${visual})';
 }
 
 class X11CreateCursorRequest extends X11Request {
   final int cid;
   final int source;
   final int mask;
-  final X11Rgb fore;
-  final X11Rgb back;
+  final X11Rgb foreground;
+  final X11Rgb background;
   final X11Point hotspot;
 
   X11CreateCursorRequest(
-      this.cid, this.source, this.fore, this.back, this.hotspot,
+      this.cid, this.source, this.foreground, this.background, this.hotspot,
       {this.mask = 0});
 
   factory X11CreateCursorRequest.fromBuffer(X11ReadBuffer buffer) {
@@ -5231,15 +5757,19 @@ class X11CreateCursorRequest extends X11Request {
     buffer.writeUint32(cid);
     buffer.writeUint32(source);
     buffer.writeUint32(mask);
-    buffer.writeUint16(fore.red);
-    buffer.writeUint16(fore.green);
-    buffer.writeUint16(fore.blue);
-    buffer.writeUint16(back.red);
-    buffer.writeUint16(back.green);
-    buffer.writeUint16(back.blue);
+    buffer.writeUint16(foreground.red);
+    buffer.writeUint16(foreground.green);
+    buffer.writeUint16(foreground.blue);
+    buffer.writeUint16(background.red);
+    buffer.writeUint16(background.green);
+    buffer.writeUint16(background.blue);
     buffer.writeUint16(hotspot.x);
     buffer.writeUint16(hotspot.y);
   }
+
+  @override
+  String toString() =>
+      'X11CreateCursorRequest(cid: ${_formatId(cid)}, source: ${source}, mask: ${mask}, foreground: ${foreground}, background: ${background}, hotspot: ${hotspot})';
 }
 
 class X11CreateGlyphCursorRequest extends X11Request {
@@ -5248,11 +5778,11 @@ class X11CreateGlyphCursorRequest extends X11Request {
   final int sourceChar;
   final int maskFont;
   final int maskChar;
-  final X11Rgb fore;
-  final X11Rgb back;
+  final X11Rgb foreground;
+  final X11Rgb background;
 
-  X11CreateGlyphCursorRequest(
-      this.cid, this.sourceFont, this.sourceChar, this.fore, this.back,
+  X11CreateGlyphCursorRequest(this.cid, this.sourceFont, this.sourceChar,
+      this.foreground, this.background,
       {this.maskFont = 0, this.maskChar = 0});
 
   factory X11CreateGlyphCursorRequest.fromBuffer(X11ReadBuffer buffer) {
@@ -5286,13 +5816,17 @@ class X11CreateGlyphCursorRequest extends X11Request {
     buffer.writeUint32(maskFont);
     buffer.writeUint16(sourceChar);
     buffer.writeUint16(maskChar);
-    buffer.writeUint16(fore.red);
-    buffer.writeUint16(fore.green);
-    buffer.writeUint16(fore.blue);
-    buffer.writeUint16(back.red);
-    buffer.writeUint16(back.green);
-    buffer.writeUint16(back.blue);
+    buffer.writeUint16(foreground.red);
+    buffer.writeUint16(foreground.green);
+    buffer.writeUint16(foreground.blue);
+    buffer.writeUint16(background.red);
+    buffer.writeUint16(background.green);
+    buffer.writeUint16(background.blue);
   }
+
+  @override
+  String toString() =>
+      'X11CreateGlyphCursorRequest(cid: ${_formatId(cid)}, sourceFont: ${sourceFont}, maskFont: ${maskFont}, sourceChar: ${sourceChar}, maskChar: ${maskChar}, foreground: ${foreground}, background: ${background})';
 }
 
 class X11FreeCursorRequest extends X11Request {
@@ -5311,14 +5845,17 @@ class X11FreeCursorRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(cursor);
   }
+
+  @override
+  String toString() => 'X11FreeCursorRequest(cursor: ${cursor})';
 }
 
 class X11RecolorCursorRequest extends X11Request {
   final int cursor;
-  final X11Rgb fore;
-  final X11Rgb back;
+  final X11Rgb foreground;
+  final X11Rgb background;
 
-  X11RecolorCursorRequest(this.cursor, this.fore, this.back);
+  X11RecolorCursorRequest(this.cursor, this.foreground, this.background);
 
   factory X11RecolorCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -5337,13 +5874,17 @@ class X11RecolorCursorRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(cursor);
-    buffer.writeUint16(fore.red);
-    buffer.writeUint16(fore.green);
-    buffer.writeUint16(fore.blue);
-    buffer.writeUint16(back.red);
-    buffer.writeUint16(back.green);
-    buffer.writeUint16(back.blue);
+    buffer.writeUint16(foreground.red);
+    buffer.writeUint16(foreground.green);
+    buffer.writeUint16(foreground.blue);
+    buffer.writeUint16(background.red);
+    buffer.writeUint16(background.green);
+    buffer.writeUint16(background.blue);
   }
+
+  @override
+  String toString() =>
+      'X11RecolorCursorRequest(cursor: ${cursor}, foreground: ${foreground}, background: ${background})';
 }
 
 class X11QueryBestSizeRequest extends X11Request {
@@ -5368,6 +5909,10 @@ class X11QueryBestSizeRequest extends X11Request {
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
   }
+
+  @override
+  String toString() =>
+      'X11QueryBestSizeRequest(drawable: ${_formatId(drawable)}, class_: ${class_}, size: ${size})';
 }
 
 class X11QueryBestSizeReply extends X11Reply {
@@ -5388,6 +5933,9 @@ class X11QueryBestSizeReply extends X11Reply {
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
   }
+
+  @override
+  String toString() => 'X11QueryBestSizeReply(size: ${size})';
 }
 
 class X11QueryExtensionRequest extends X11Request {
@@ -5414,7 +5962,7 @@ class X11QueryExtensionRequest extends X11Request {
   }
 
   @override
-  String toString() => "X11QueryExtensionRequest(name: '${name}')";
+  String toString() => "X11QueryExtensionRequest('${name}')";
 }
 
 class X11QueryExtensionReply extends X11Reply {
@@ -5470,6 +6018,9 @@ class X11ListExtensionsRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11ListExtensionsRequest()';
 }
 
 class X11ListExtensionsReply extends X11Reply {
@@ -5494,6 +6045,9 @@ class X11ListExtensionsReply extends X11Reply {
     buffer.writeListOfString8(names);
     buffer.skip(pad(buffer.length - start));
   }
+
+  @override
+  String toString() => 'X11ListExtensionsReply(names: ${names})';
 }
 
 class X11ChangeKeyboardMappingRequest extends X11Request {
@@ -5537,6 +6091,10 @@ class X11ChangeKeyboardMappingRequest extends X11Request {
       }
     }
   }
+
+  @override
+  String toString() =>
+      'X11ChangeKeyboardMappingRequest(firstKeycode: ${firstKeycode}, map: ${map})';
 }
 
 class X11GetKeyboardMappingRequest extends X11Request {
@@ -5558,6 +6116,10 @@ class X11GetKeyboardMappingRequest extends X11Request {
     buffer.writeUint32(firstKeycode);
     buffer.writeUint8(count);
   }
+
+  @override
+  String toString() =>
+      'X11GetKeyboardMappingRequest(firstKeycode: ${firstKeycode}, count: ${count})';
 }
 
 class X11GetKeyboardMappingReply extends X11Reply {
@@ -5596,6 +6158,9 @@ class X11GetKeyboardMappingReply extends X11Reply {
       }
     }
   }
+
+  @override
+  String toString() => 'X11GetKeyboardMappingReply(map: ${map})';
 }
 
 class X11ChangeKeyboardControlRequest extends X11Request {
@@ -5742,6 +6307,9 @@ class X11GetKeyboardControlRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11GetKeyboardControlRequest()';
 }
 
 class X11GetKeyboardControlReply extends X11Reply {
@@ -5830,6 +6398,10 @@ class X11GetKeyboardControlReply extends X11Reply {
       buffer.writeUint8(value);
     }
   }
+
+  @override
+  String toString() =>
+      'X11GetKeyboardControlReply(globalAutoRepeat: ${globalAutoRepeat}, ledMask: ${ledMask}, keyClickPercent: ${keyClickPercent}, bellPercent: ${bellPercent}, bellPitch: ${bellPitch}, bellDuration: ${bellDuration}, autoRepeats: ${autoRepeats})';
 }
 
 class X11BellRequest extends X11Request {
@@ -5846,6 +6418,9 @@ class X11BellRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.writeInt8(percent);
   }
+
+  @override
+  String toString() => 'X11BellRequest(percent: ${percent})';
 }
 
 class X11ChangePointerControlRequest extends X11Request {
@@ -5886,6 +6461,10 @@ class X11ChangePointerControlRequest extends X11Request {
     buffer.writeBool(doAcceleration);
     buffer.writeBool(doThreshold);
   }
+
+  @override
+  String toString() =>
+      'X11ChangePointerControlRequest(accelerationNumerator: ${accelerationNumerator}, accelerationDenominator: ${accelerationDenominator}, threshold: ${threshold}, doAcceleration: ${doAcceleration}, doThreshold: ${doThreshold})';
 }
 
 class X11GetPointerControlRequest extends X11Request {
@@ -5900,6 +6479,9 @@ class X11GetPointerControlRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11GetPointerControlRequest()';
 }
 
 class X11GetPointerControlReply extends X11Reply {
@@ -5932,6 +6514,10 @@ class X11GetPointerControlReply extends X11Reply {
     buffer.writeUint16(threshold);
     buffer.skip(18);
   }
+
+  @override
+  String toString() =>
+      'X11GetPointerControlReply(accelerationNumerator: ${accelerationNumerator}, accelerationDenominator: ${accelerationDenominator}, threshold: ${threshold})';
 }
 
 class X11SetScreenSaverRequest extends X11Request {
@@ -5975,6 +6561,10 @@ class X11SetScreenSaverRequest extends X11Request {
       buffer.writeUint8(2);
     }
   }
+
+  @override
+  String toString() =>
+      'X11SetScreenSaverRequest(timeout: ${timeout}, interval: ${interval}, preferBlanking: ${preferBlanking}, allowExposures: ${allowExposures})';
 }
 
 class X11GetScreenSaverRequest extends X11Request {
@@ -5989,6 +6579,9 @@ class X11GetScreenSaverRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11GetScreenSaverRequest()';
 }
 
 class X11GetScreenSaverReply extends X11Reply {
@@ -6020,6 +6613,10 @@ class X11GetScreenSaverReply extends X11Reply {
     buffer.writeBool(allowExposures);
     buffer.skip(18);
   }
+
+  @override
+  String toString() =>
+      'X11GetScreenSaverReply(timeout: ${timeout}, interval: ${interval}, preferBlanking: ${preferBlanking}, allowExposures: ${allowExposures})';
 }
 
 class X11ChangeHostsRequest extends X11Request {
@@ -6053,6 +6650,10 @@ class X11ChangeHostsRequest extends X11Request {
     }
     buffer.skip(pad(address.length));
   }
+
+  @override
+  String toString() =>
+      'X11ChangeHostsRequest(mode: ${mode}, family: ${family}, address: ${address})';
 }
 
 class X11ListHostsRequest extends X11Request {
@@ -6067,6 +6668,9 @@ class X11ListHostsRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11ListHostsRequest()';
 }
 
 class X11ListHostsReply extends X11Reply {
@@ -6109,6 +6713,9 @@ class X11ListHostsReply extends X11Reply {
       buffer.skip(pad(host.address.length));
     }
   }
+
+  @override
+  String toString() => 'X11ListHostsReply(mode: ${mode}, hosts: ${hosts})';
 }
 
 class X11SetAccessControlRequest extends X11Request {
@@ -6125,6 +6732,9 @@ class X11SetAccessControlRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(mode);
   }
+
+  @override
+  String toString() => 'X11SetAccessControlRequest(mode: ${mode})';
 }
 
 class X11SetCloseDownModeRequest extends X11Request {
@@ -6141,6 +6751,9 @@ class X11SetCloseDownModeRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(mode);
   }
+
+  @override
+  String toString() => 'X11SetCloseDownModeRequest(mode: ${mode})';
 }
 
 class X11KillClientRequest extends X11Request {
@@ -6159,6 +6772,9 @@ class X11KillClientRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(resource);
   }
+
+  @override
+  String toString() => 'X11KillClientRequest(resource: ${resource})';
 }
 
 class X11RotatePropertiesRequest extends X11Request {
@@ -6190,6 +6806,10 @@ class X11RotatePropertiesRequest extends X11Request {
       buffer.writeUint32(atom);
     }
   }
+
+  @override
+  String toString() =>
+      'X11RotatePropertiesRequest(window: ${_formatId(window)}, delta: ${delta}, atoms: ${atoms})';
 }
 
 class X11ForceScreenSaverRequest extends X11Request {
@@ -6206,6 +6826,9 @@ class X11ForceScreenSaverRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(mode);
   }
+
+  @override
+  String toString() => 'X11ForceScreenSaverRequest(mode: ${mode})';
 }
 
 class X11SetPointerMappingRequest extends X11Request {
@@ -6231,6 +6854,9 @@ class X11SetPointerMappingRequest extends X11Request {
     }
     buffer.skip(pad(map.length));
   }
+
+  @override
+  String toString() => 'X11SetPointerMappingRequest(map: ${map})';
 }
 
 class X11SetPointerMappingReply extends X11Reply {
@@ -6247,6 +6873,9 @@ class X11SetPointerMappingReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(status);
   }
+
+  @override
+  String toString() => 'X11SetPointerMappingReply(status: ${status})';
 }
 
 class X11GetPointerMappingRequest extends X11Request {
@@ -6261,6 +6890,9 @@ class X11GetPointerMappingRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11GetPointerMappingRequest()';
 }
 
 class X11GetPointerMappingReply extends X11Reply {
@@ -6288,6 +6920,9 @@ class X11GetPointerMappingReply extends X11Reply {
     }
     buffer.skip(pad(map.length));
   }
+
+  @override
+  String toString() => 'X11GetPointerMappingReply(map: ${map})';
 }
 
 class X11SetModifierMappingRequest extends X11Request {
@@ -6370,6 +7005,9 @@ class X11SetModifierMappingReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(status);
   }
+
+  @override
+  String toString() => 'X11SetModifierMappingReply(status: ${status})';
 }
 
 class X11GetModifierMappingRequest extends X11Request {
@@ -6384,6 +7022,9 @@ class X11GetModifierMappingRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11GetModifierMappingRequest()';
 }
 
 class X11GetModifierMappingReply extends X11Reply {
@@ -6466,4 +7107,7 @@ class X11NoOperationRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
   }
+
+  @override
+  String toString() => 'X11NoOperationRequest()';
 }

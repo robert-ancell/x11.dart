@@ -68,7 +68,7 @@ class _X11Client {
             greenMask: 0x0000ff00,
             blueMask: 0x000000ff)
       ];
-      var allowedDepths = [X11Depth(24, visuals)];
+      var allowedDepths = {24: visuals};
       var roots = [
         X11Screen(
             window: 0x000007a5,

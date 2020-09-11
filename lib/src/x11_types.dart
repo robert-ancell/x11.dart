@@ -74,7 +74,7 @@ enum X11EventMask {
 
 enum X11ChangePropertyMode { replace, prepend, append }
 
-class X11CharInfo {
+class X11CharacterInfo {
   final int leftSideBearing;
   final int rightSideBearing;
   final int characterWidth;
@@ -82,7 +82,7 @@ class X11CharInfo {
   final int decent;
   final int attributes;
 
-  const X11CharInfo(
+  const X11CharacterInfo(
       {this.leftSideBearing = 0,
       this.rightSideBearing = 0,
       this.characterWidth = 0,
@@ -168,7 +168,7 @@ class X11Screen {
   final X11BackingStore backingStores;
   final bool saveUnders;
   final int rootDepth;
-  final List<X11Depth> allowedDepths;
+  final Map<int, List<X11Visual>> allowedDepths;
 
   const X11Screen(
       {this.window = 0,
@@ -184,21 +184,11 @@ class X11Screen {
       this.backingStores = X11BackingStore.never,
       this.saveUnders = false,
       this.rootDepth = 0,
-      this.allowedDepths = const []});
+      this.allowedDepths = const {}});
 
   @override
   String toString() =>
       'X11Window(window: ${_formatId(window)}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatPixel(whitePixel)}, blackPixel: ${_formatPixel(blackPixel)}, currentInputMasks: ${_formatHex32(currentInputMasks)}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
-}
-
-class X11Depth {
-  final int depth;
-  final List<X11Visual> visuals;
-
-  const X11Depth(this.depth, this.visuals);
-
-  @override
-  String toString() => 'X11Depth(depth: ${depth}, visuals: ${visuals})';
 }
 
 enum X11HostFamily {
@@ -244,7 +234,7 @@ class X11Point {
   const X11Point(this.x, this.y);
 
   @override
-  String toString() => 'X11Point(x: ${x}, y: ${y})';
+  String toString() => 'X11Point(${x}, ${y})';
 }
 
 class X11Rectangle {
@@ -256,8 +246,7 @@ class X11Rectangle {
   const X11Rectangle(this.x, this.y, this.width, this.height);
 
   @override
-  String toString() =>
-      'X11Rectangle(x: ${x}, y: ${y}, width: ${width}, height: ${height})';
+  String toString() => 'X11Rectangle(${x}, ${y}, ${width}, ${height})';
 }
 
 class X11Rgb {
@@ -268,7 +257,7 @@ class X11Rgb {
   X11Rgb(this.red, this.green, this.blue);
 
   @override
-  String toString() => 'X11Rgb(red: ${red}, green: ${green}, blue: ${blue})';
+  String toString() => 'X11Rgb(${red}, ${green}, ${blue})';
 }
 
 class X11Segment {
