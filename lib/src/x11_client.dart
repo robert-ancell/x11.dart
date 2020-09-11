@@ -227,7 +227,8 @@ class X11Client {
     return id;
   }
 
-  int createWindow(int wid, int parent, X11Rectangle geometry,
+  /// Creates a new window.
+  int createWindow(int id, int parent, X11Rectangle geometry,
       {X11WindowClass class_ = X11WindowClass.inputOutput,
       int depth = 0,
       int visual = 0,
@@ -254,7 +255,7 @@ class X11Client {
         eventMaskValue |= 1 << event.index;
       }
     }
-    var request = X11CreateWindowRequest(wid, parent, geometry, depth,
+    var request = X11CreateWindowRequest(id, parent, geometry, depth,
         borderWidth: borderWidth,
         class_: class_,
         visual: visual,
@@ -278,8 +279,9 @@ class X11Client {
     return _sendRequest(1, buffer.data);
   }
 
+  /// Changes the attributes of [window].
   int changeWindowAttributes(int window,
-      {int borderWidth = 0,
+      {int borderWidth,
       int backgroundPixmap,
       int backgroundPixel,
       int borderPixmap,
@@ -316,6 +318,7 @@ class X11Client {
     return _sendRequest(2, buffer.data);
   }
 
+  /// Gets the attributes of [window].
   Future<X11GetWindowAttributesReply> getWindowAttributes(int window) async {
     var request = X11GetWindowAttributesRequest(window);
     var buffer = X11WriteBuffer();
@@ -325,6 +328,7 @@ class X11Client {
         sequenceNumber, X11GetWindowAttributesReply.fromBuffer);
   }
 
+  /// Destroys [window].
   int destroyWindow(int window) {
     var request = X11DestroyWindowRequest(window);
     var buffer = X11WriteBuffer();
@@ -333,6 +337,7 @@ class X11Client {
     return _sendRequest(4, buffer.data);
   }
 
+  /// Destroys the children of [window] in bottom-to-top stacking order.
   int destroySubwindows(int window) {
     var request = X11DestroySubwindowsRequest(window);
     var buffer = X11WriteBuffer();
@@ -340,13 +345,15 @@ class X11Client {
     return _sendRequest(5, buffer.data);
   }
 
-  int changeSaveSet(int window, int mode) {
+  /// Adds or removes [window] from the clients save-set.
+  int changeSaveSet(int window, X11ChangeSetMode mode) {
     var request = X11ChangeSaveSetRequest(window, mode);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(6, buffer.data);
   }
 
+  /// Moves [window] to be a child of [parent]. The window is placed [position] relative to [parent].
   int reparentWindow(int window, int parent,
       {X11Point position = const X11Point(0, 0)}) {
     var request = X11ReparentWindowRequest(window, parent, position);
@@ -355,6 +362,7 @@ class X11Client {
     return _sendRequest(7, buffer.data);
   }
 
+  /// Maps [window].
   int mapWindow(int window) {
     var request = X11MapWindowRequest(window);
     var buffer = X11WriteBuffer();
@@ -362,6 +370,7 @@ class X11Client {
     return _sendRequest(8, buffer.data);
   }
 
+  /// Maps all unmapped children of [window] in top-to-bottom stacking order.
   int mapSubwindows(int window) {
     var request = X11MapSubwindowsRequest(window);
     var buffer = X11WriteBuffer();
@@ -369,6 +378,7 @@ class X11Client {
     return _sendRequest(9, buffer.data);
   }
 
+  /// Unmaps [window].
   int unmapWindow(int window) {
     var request = X11UnmapWindowRequest(window);
     var buffer = X11WriteBuffer();
@@ -376,6 +386,7 @@ class X11Client {
     return _sendRequest(10, buffer.data);
   }
 
+  /// Unmaps all mapped children of [window] in bottom-to-top stacking order.
   int unmapSubwindows(int window) {
     var request = X11UnmapSubwindowsRequest(window);
     var buffer = X11WriteBuffer();
@@ -383,6 +394,9 @@ class X11Client {
     return _sendRequest(11, buffer.data);
   }
 
+  /// Changes the configuration of [window].
+  ///
+  /// The dimensions of the window are changed if one or more of [x], [y], [width] and [height] are set.
   int configureWindow(int window,
       {int x,
       int y,
@@ -390,7 +404,7 @@ class X11Client {
       int height,
       int borderWidth,
       int sibling,
-      int stackMode}) {
+      X11StackMode stackMode}) {
     var request = X11ConfigureWindowRequest(window,
         x: x,
         y: y,
@@ -404,14 +418,15 @@ class X11Client {
     return _sendRequest(12, buffer.data);
   }
 
-  int circulateWindow(int window, int direction) {
-    // FIXME: enum
+  /// Changes the stacking order of [window].
+  int circulateWindow(int window, X11CirculateDirection direction) {
     var request = X11CirculateWindowRequest(window, direction);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(13, buffer.data);
   }
 
+  /// Gets the current geometry of [drawable].
   Future<X11GetGeometryReply> getGeometry(int drawable) async {
     var request = X11GetGeometryRequest(drawable);
     var buffer = X11WriteBuffer();
@@ -421,6 +436,7 @@ class X11Client {
         sequenceNumber, X11GetGeometryReply.fromBuffer);
   }
 
+  /// Gets the root, parent and children of [window].
   Future<X11QueryTreeReply> queryTree(int window) async {
     var request = X11QueryTreeRequest(window);
     var buffer = X11WriteBuffer();
@@ -430,6 +446,7 @@ class X11Client {
         sequenceNumber, X11QueryTreeReply.fromBuffer);
   }
 
+  /// Gets the atom with [name]. If [onlyIfExists] is false this will always return a value (new atoms will be created).
   Future<int> internAtom(String name, {bool onlyIfExists = false}) async {
     var id = atoms[name];
     if (id != null) {
@@ -444,6 +461,7 @@ class X11Client {
     return reply.atom;
   }
 
+  /// Gets the name of [atom].
   Future<String> getAtomName(int atom) async {
     var request = X11GetAtomNameRequest(atom);
     var buffer = X11WriteBuffer();
@@ -455,21 +473,25 @@ class X11Client {
         .catchError((error) => null);
   }
 
+  // Changes a property of [window] to [value].
   int changePropertyUint8(int window, int property, int type, List<int> value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
     return _changeProperty(window, property, type, 8, value, mode: mode);
   }
 
+  // Changes a property of [window] to [value].
   int changePropertyUint16(int window, int property, int type, List<int> value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
     return _changeProperty(window, property, type, 16, value, mode: mode);
   }
 
+  // Changes a property of [window] to [value].
   int changePropertyUint32(int window, int property, int type, List<int> value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
     return _changeProperty(window, property, type, 32, value, mode: mode);
   }
 
+  // Changes a property of [window] to [value].
   int changePropertyString(int window, int property, int type, String value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
     return _changeProperty(window, property, type, 8, utf8.encode(value),

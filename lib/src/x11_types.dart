@@ -10,20 +10,15 @@ String _formatPixel(int pixel) {
   return _formatHex32(pixel);
 }
 
-enum X11ImageByteOrder { lsbFirst, msbFirst }
+enum X11BackingStore { never, whenMapped, always }
 
 enum X11BitmapFormatBitOrder { leastSignificant, mostSignificant }
 
-enum X11BackingStore { never, whenMapped, always }
+enum X11ChangePropertyMode { replace, prepend, append }
 
-enum X11VisualClass {
-  staticGray,
-  grayScale,
-  staticColor,
-  pseudoColor,
-  trueColor,
-  directColor
-}
+enum X11ChangeSetMode { insert, delete }
+
+enum X11CirculateDirection { raiseHighest, raiseLowest }
 
 enum X11ErrorCode {
   request,
@@ -72,7 +67,30 @@ enum X11EventMask {
   ownerGrabButton
 }
 
-enum X11ChangePropertyMode { replace, prepend, append }
+enum X11HostFamily {
+  internet,
+  decnet,
+  chaos,
+  unused3,
+  unused4,
+  serverInterpreted,
+  internetV6
+}
+
+enum X11ImageByteOrder { lsbFirst, msbFirst }
+
+enum X11StackMode { above, below, topIf, bottomIf, opposite }
+
+enum X11VisualClass {
+  staticGray,
+  grayScale,
+  staticColor,
+  pseudoColor,
+  trueColor,
+  directColor
+}
+
+enum X11WindowClass { copyFromParent, inputOutput, inputOnly }
 
 class X11CharacterInfo {
   final int leftSideBearing;
@@ -189,16 +207,6 @@ class X11Screen {
   @override
   String toString() =>
       'X11Window(window: ${_formatId(window)}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatPixel(whitePixel)}, blackPixel: ${_formatPixel(blackPixel)}, currentInputMasks: ${_formatHex32(currentInputMasks)}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
-}
-
-enum X11HostFamily {
-  internet,
-  decnet,
-  chaos,
-  unused3,
-  unused4,
-  serverInterpreted,
-  internetV6
 }
 
 class X11Arc {
@@ -337,5 +345,3 @@ class X11Visual {
   String toString() =>
       'X11Visual(visualId: ${visualId}, class: ${class_}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: ${_formatId(redMask)}, greenMask: ${_formatId(greenMask)}, blueMask: ${_formatId(blueMask)})';
 }
-
-enum X11WindowClass { copyFromParent, inputOutput, inputOnly }

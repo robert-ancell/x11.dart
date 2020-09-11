@@ -337,7 +337,7 @@ class X11Reply {
 }
 
 class X11CreateWindowRequest extends X11Request {
-  final int wid;
+  final int id;
   final int parent;
   final X11Rectangle geometry;
   final int depth;
@@ -360,7 +360,7 @@ class X11CreateWindowRequest extends X11Request {
   final int colormap;
   final int cursor;
 
-  X11CreateWindowRequest(this.wid, this.parent, this.geometry, this.depth,
+  X11CreateWindowRequest(this.id, this.parent, this.geometry, this.depth,
       {this.class_ = X11WindowClass.inputOutput,
       this.visual = 0,
       this.borderWidth = 0,
@@ -382,7 +382,7 @@ class X11CreateWindowRequest extends X11Request {
 
   factory X11CreateWindowRequest.fromBuffer(X11ReadBuffer buffer) {
     var depth = buffer.readUint8();
-    var wid = buffer.readUint32();
+    var id = buffer.readUint32();
     var parent = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
@@ -453,7 +453,7 @@ class X11CreateWindowRequest extends X11Request {
       cursor = buffer.readUint32();
     }
     return X11CreateWindowRequest(
-        wid, parent, X11Rectangle(x, y, width, height), depth,
+        id, parent, X11Rectangle(x, y, width, height), depth,
         class_: class_,
         visual: visual,
         borderWidth: borderWidth,
@@ -477,7 +477,7 @@ class X11CreateWindowRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(depth);
-    buffer.writeUint32(wid);
+    buffer.writeUint32(id);
     buffer.writeUint32(parent);
     buffer.writeInt16(geometry.x);
     buffer.writeInt16(geometry.y);
@@ -583,7 +583,7 @@ class X11CreateWindowRequest extends X11Request {
   @override
   String toString() {
     var string =
-        'X11CreateWindowRequest(wid: ${_formatId(wid)}, parent: ${_formatId(parent)}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth}, class_: ${class_}, visual: ${visual}';
+        'X11CreateWindowRequest(id: ${_formatId(id)}, parent: ${_formatId(parent)}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth}, class_: ${class_}, visual: ${visual}';
     if (backgroundPixmap != null) {
       string += ', backgroundPixmap: ${_formatId(backgroundPixmap)}';
     }
@@ -1015,19 +1015,19 @@ class X11DestroySubwindowsRequest extends X11Request {
 
 class X11ChangeSaveSetRequest extends X11Request {
   final int window;
-  final int mode;
+  final X11ChangeSetMode mode;
 
   X11ChangeSaveSetRequest(this.window, this.mode);
 
   factory X11ChangeSaveSetRequest.fromBuffer(X11ReadBuffer buffer) {
-    var mode = buffer.readUint8();
+    var mode = X11ChangeSetMode.values[buffer.readUint8()];
     var window = buffer.readUint32();
     return X11ChangeSaveSetRequest(window, mode);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(mode);
+    buffer.writeUint8(mode.index);
     buffer.writeUint32(window);
   }
 
@@ -1158,7 +1158,7 @@ class X11ConfigureWindowRequest extends X11Request {
   final int height;
   final int borderWidth;
   final int sibling;
-  final int stackMode;
+  final X11StackMode stackMode;
 
   X11ConfigureWindowRequest(this.window,
       {this.x,
@@ -1198,9 +1198,9 @@ class X11ConfigureWindowRequest extends X11Request {
     if ((valueMask & 0x20) != 0) {
       sibling = buffer.readUint32();
     }
-    int stackMode;
+    X11StackMode stackMode;
     if ((valueMask & 0x40) != 0) {
-      stackMode = buffer.readUint32();
+      stackMode = X11StackMode.values[buffer.readUint32()];
     }
     return X11ConfigureWindowRequest(window,
         x: x,
@@ -1259,30 +1259,30 @@ class X11ConfigureWindowRequest extends X11Request {
       buffer.writeUint32(sibling);
     }
     if (stackMode != null) {
-      buffer.writeUint32(stackMode);
+      buffer.writeUint32(stackMode.index);
     }
   }
 
   @override
   String toString() =>
-      'X11ConfigureWindowRequest(window: ${_formatId(window)}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, borderWidth: ${borderWidth}, sibling: ${sibling}, stackMode: ${stackMode})';
+      'X11ConfigureWindowRequest(window: ${_formatId(window)}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, borderWidth: ${borderWidth}, sibling: ${_formatId(sibling)}, stackMode: ${stackMode})';
 }
 
 class X11CirculateWindowRequest extends X11Request {
   final int window;
-  final int direction;
+  final X11CirculateDirection direction;
 
   X11CirculateWindowRequest(this.window, this.direction);
 
   factory X11CirculateWindowRequest.fromBuffer(X11ReadBuffer buffer) {
-    var direction = buffer.readUint8();
+    var direction = X11CirculateDirection.values[buffer.readUint8()];
     var window = buffer.readUint32();
     return X11CirculateWindowRequest(window, direction);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(direction);
+    buffer.writeUint8(direction.index);
     buffer.writeUint32(window);
   }
 
@@ -1309,8 +1309,7 @@ class X11GetGeometryRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11GetGeometryRequest(drawable: ${_formatId(drawable)})';
+  String toString() => 'X11GetGeometryRequest(${_formatId(drawable)})';
 }
 
 class X11GetGeometryReply extends X11Reply {
@@ -1706,7 +1705,7 @@ class X11GetPropertyReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetPropertyReply(type: ${type}, format: ${format}, value: ${value}, bytesAfter: ${bytesAfter})';
+      'X11GetPropertyReply(type: ${type}, format: ${format}, value: <${value.length} bytes>, bytesAfter: ${bytesAfter})';
 }
 
 class X11ListPropertiesRequest extends X11Request {
@@ -3289,7 +3288,7 @@ class X11FreePixmapRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FreePixmapRequest(pixmap: ${pixmap})';
+  String toString() => 'X11FreePixmapRequest(${_formatId(pixmap)})';
 }
 
 class X11CreateGCRequest extends X11Request {
