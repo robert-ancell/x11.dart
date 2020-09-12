@@ -164,13 +164,13 @@ class X11CharacterInfo {
 }
 
 class X11ColorItem {
-  int pixel;
-  X11Rgb color;
-  bool doRed;
-  bool doGreen;
-  bool doBlue;
+  final int pixel;
+  final X11Rgb color;
+  final bool doRed;
+  final bool doGreen;
+  final bool doBlue;
 
-  X11ColorItem(this.pixel, this.color,
+  const X11ColorItem(this.pixel, this.color,
       {this.doRed = true, this.doGreen = true, this.doBlue = true});
 
   @override
@@ -299,6 +299,8 @@ class X11Point {
   String toString() => 'X11Point(${x}, ${y})';
 }
 
+enum X11QueryClass { cursor, tile, stipple }
+
 class X11Rectangle {
   final int x;
   final int y;
@@ -316,7 +318,7 @@ class X11Rgb {
   final int green;
   final int blue;
 
-  X11Rgb(this.red, this.green, this.blue);
+  const X11Rgb(this.red, this.green, this.blue);
 
   @override
   String toString() => 'X11Rgb(${red}, ${green}, ${blue})';

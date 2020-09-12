@@ -1203,6 +1203,7 @@ class X11Client {
     return _sendRequest(80, buffer.data);
   }
 
+  /// Installs [cmap].
   int installColormap(int cmap) {
     var request = X11InstallColormapRequest(cmap);
     var buffer = X11WriteBuffer();
@@ -1210,6 +1211,7 @@ class X11Client {
     return _sendRequest(81, buffer.data);
   }
 
+  /// Uninstalls [cmap].
   int uninstallColormap(int cmap) {
     var request = X11UninstallColormapRequest(cmap);
     var buffer = X11WriteBuffer();
@@ -1296,6 +1298,7 @@ class X11Client {
     return _sendRequest(90, buffer.data);
   }
 
+  /// Gets the RGB color values for the [pixels] in [cmap].
   Future<List<X11Rgb>> queryColors(int cmap, List<int> pixels) async {
     var request = X11QueryColorsRequest(cmap, pixels);
     var buffer = X11WriteBuffer();
@@ -1306,6 +1309,7 @@ class X11Client {
     return reply.colors;
   }
 
+  /// Gets the RGB values associated with the color with [name] in [cmap].
   Future<X11LookupColorReply> lookupColor(int cmap, String name) async {
     var request = X11LookupColorRequest(cmap, name);
     var buffer = X11WriteBuffer();
@@ -1315,27 +1319,45 @@ class X11Client {
         sequenceNumber, X11LookupColorReply.fromBuffer);
   }
 
-  int createCursor(
-      int cid, int source, X11Rgb fore, X11Rgb back, X11Point hotspot,
-      {int mask = 0}) {
-    var request =
-        X11CreateCursorRequest(cid, source, fore, back, hotspot, mask: mask);
+  /// Creates a cursor with [id] from [sourcePixmap].
+  ///
+  /// If set, [maskPixmap] defines the shape of the cursor.
+  /// When no longer required, the cursor should be deleted with [freeCursor].
+  int createCursor(int id, int sourcePixmap,
+      {X11Rgb foreground = const X11Rgb(65535, 65535, 65535),
+      X11Rgb background = const X11Rgb(0, 0, 0),
+      X11Point hotspot = const X11Point(0, 0),
+      int maskPixmap = 0}) {
+    var request = X11CreateCursorRequest(id, sourcePixmap,
+        foreground: foreground,
+        background: foreground,
+        hotspot: hotspot,
+        maskPixmap: maskPixmap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(93, buffer.data);
   }
 
-  int createGlyphCursor(
-      int cid, int sourceFont, int sourceChar, X11Rgb fore, X11Rgb back,
-      {int maskFont = 0, int maskChar = 0}) {
-    var request = X11CreateGlyphCursorRequest(
-        cid, sourceFont, sourceChar, fore, back,
-        maskFont: maskFont, maskChar: maskChar);
+  /// Creates a cursor from [sourceChar] in [sourceFont].
+  ///
+  /// If set, [maskChar] and [maskFont] define the shape of the cursor.
+  /// When no longer required, the cursor should be deleted with [freeCursor].
+  int createGlyphCursor(int id, int sourceFont, int sourceChar,
+      {X11Rgb foreground = const X11Rgb(65535, 65535, 65535),
+      X11Rgb background = const X11Rgb(0, 0, 0),
+      int maskFont = 0,
+      int maskChar = 0}) {
+    var request = X11CreateGlyphCursorRequest(id, sourceFont, sourceChar,
+        foreground: foreground,
+        background: background,
+        maskFont: maskFont,
+        maskChar: maskChar);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(94, buffer.data);
   }
 
+  /// Deletes the reference to a [cursor] created in [createCursor] or [createGlyphCursor].
   int freeCursor(int cursor) {
     var request = X11FreeCursorRequest(cursor);
     var buffer = X11WriteBuffer();
@@ -1343,14 +1365,37 @@ class X11Client {
     return _sendRequest(95, buffer.data);
   }
 
-  int recolorCursor(int cursor, X11Rgb fore, X11Rgb back) {
-    var request = X11RecolorCursorRequest(cursor, fore, back);
+  /// Changes the [foreground] and [background] colors of [cursor].
+  int recolorCursor(int cursor,
+      {X11Rgb foreground = const X11Rgb(65535, 65535, 65535),
+      X11Rgb background = const X11Rgb(0, 0, 0)}) {
+    var request = X11RecolorCursorRequest(cursor,
+        foreground: foreground, background: background);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(96, buffer.data);
   }
 
-  Future<X11Size> queryBestSize(int drawable, int class_, X11Size size) async {
+  /// Gets the largest cursor size on the screen containing [drawable].
+  /// The size will be no larger than maximumSize].
+  Future<X11Size> queryBestSizeCursor(int drawable, X11Size maximumSize) async {
+    return _queryBestSize(drawable, X11QueryClass.cursor, maximumSize);
+  }
+
+  /// Gets the size that tiles fastest on the screen containing [drawable].
+  /// The size will be no larger than [maximumSize].
+  Future<X11Size> queryBestSizeTile(int drawable, X11Size maximumSize) async {
+    return _queryBestSize(drawable, X11QueryClass.tile, maximumSize);
+  }
+
+  /// Gets the size that stipples fastest on the screen containing [drawable].
+  /// The size will be no larger than [maximumSize].
+  Future<X11Size> queryBestSizeStipple(int drawable, X11Size size) async {
+    return _queryBestSize(drawable, X11QueryClass.stipple, size);
+  }
+
+  Future<X11Size> _queryBestSize(
+      int drawable, X11QueryClass class_, X11Size size) async {
     var request = X11QueryBestSizeRequest(drawable, class_, size);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1360,6 +1405,7 @@ class X11Client {
     return reply.size;
   }
 
+  /// Gets information about the extension with [name].
   Future<X11QueryExtensionReply> queryExtension(String name) async {
     var request = X11QueryExtensionRequest(name);
     var buffer = X11WriteBuffer();
@@ -1369,6 +1415,7 @@ class X11Client {
         sequenceNumber, X11QueryExtensionReply.fromBuffer);
   }
 
+  /// Gets the names of the available extensions.
   Future<List<String>> listExtensions() async {
     var request = X11ListExtensionsRequest();
     var buffer = X11WriteBuffer();
@@ -1379,15 +1426,17 @@ class X11Client {
     return reply.names;
   }
 
-  int changeKeyboardMapping(int firstKeycode, List<List<int>> map) {
-    var request = X11ChangeKeyboardMappingRequest(firstKeycode, map);
+  /// Sets the keyboard [mapping].
+  int changeKeyboardMapping(List<List<int>> mapping, {int firstKeycode = 0}) {
+    var request = X11ChangeKeyboardMappingRequest(firstKeycode, mapping);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(100, buffer.data);
   }
 
+  /// Gets the keyboard mapping.
   Future<List<List<int>>> getKeyboardMapping(
-      int firstKeycode, int count) async {
+      {int firstKeycode = 0, int count = 255}) async {
     var request = X11GetKeyboardMappingRequest(firstKeycode, count);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1500,6 +1549,7 @@ class X11Client {
     return _sendRequest(109, buffer.data);
   }
 
+  /// Gets the access control list and whether use of the list at connection setup is currently enabled or disabled.
   Future<X11ListHostsReply> listHosts() async {
     var request = X11ListHostsRequest();
     var buffer = X11WriteBuffer();
@@ -1509,8 +1559,9 @@ class X11Client {
         sequenceNumber, X11ListHostsReply.fromBuffer);
   }
 
-  int setAccessControl(int mode) {
-    var request = X11SetAccessControlRequest(mode);
+  /// Enables or disables the use of the access control list at connection setups.
+  int setAccessControl(bool enabled) {
+    var request = X11SetAccessControlRequest(enabled);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(111, buffer.data);

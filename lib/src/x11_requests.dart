@@ -5666,21 +5666,23 @@ class X11LookupColorReply extends X11Reply {
 
 class X11CreateCursorRequest extends X11Request {
   final int cid;
-  final int source;
-  final int mask;
+  final int sourcePixmap;
+  final int maskPixmap;
   final X11Rgb foreground;
   final X11Rgb background;
   final X11Point hotspot;
 
-  X11CreateCursorRequest(
-      this.cid, this.source, this.foreground, this.background, this.hotspot,
-      {this.mask = 0});
+  X11CreateCursorRequest(this.cid, this.sourcePixmap,
+      {this.foreground = const X11Rgb(65535, 65535, 65535),
+      this.background = const X11Rgb(0, 0, 0),
+      this.hotspot = const X11Point(0, 0),
+      this.maskPixmap = 0});
 
   factory X11CreateCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var cid = buffer.readUint32();
-    var source = buffer.readUint32();
-    var mask = buffer.readUint32();
+    var sourcePixmap = buffer.readUint32();
+    var maskPixmap = buffer.readUint32();
     var foreRed = buffer.readUint16();
     var foreGreen = buffer.readUint16();
     var foreBlue = buffer.readUint16();
@@ -5689,21 +5691,19 @@ class X11CreateCursorRequest extends X11Request {
     var backBlue = buffer.readUint16();
     var x = buffer.readUint16();
     var y = buffer.readUint16();
-    return X11CreateCursorRequest(
-        cid,
-        source,
-        X11Rgb(foreRed, foreGreen, foreBlue),
-        X11Rgb(backRed, backGreen, backBlue),
-        X11Point(x, y),
-        mask: mask);
+    return X11CreateCursorRequest(cid, sourcePixmap,
+        foreground: X11Rgb(foreRed, foreGreen, foreBlue),
+        background: X11Rgb(backRed, backGreen, backBlue),
+        hotspot: X11Point(x, y),
+        maskPixmap: maskPixmap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(cid);
-    buffer.writeUint32(source);
-    buffer.writeUint32(mask);
+    buffer.writeUint32(sourcePixmap);
+    buffer.writeUint32(maskPixmap);
     buffer.writeUint16(foreground.red);
     buffer.writeUint16(foreground.green);
     buffer.writeUint16(foreground.blue);
@@ -5716,7 +5716,7 @@ class X11CreateCursorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CreateCursorRequest(cid: ${_formatId(cid)}, source: ${source}, mask: ${mask}, foreground: ${foreground}, background: ${background}, hotspot: ${hotspot})';
+      'X11CreateCursorRequest(cid: ${_formatId(cid)}, sourcePixmap: ${sourcePixmap}, maskPixmap: ${maskPixmap}, foreground: ${foreground}, background: ${background}, hotspot: ${hotspot})';
 }
 
 class X11CreateGlyphCursorRequest extends X11Request {
@@ -5729,8 +5729,10 @@ class X11CreateGlyphCursorRequest extends X11Request {
   final X11Rgb background;
 
   X11CreateGlyphCursorRequest(this.cid, this.sourceFont, this.sourceChar,
-      this.foreground, this.background,
-      {this.maskFont = 0, this.maskChar = 0});
+      {this.foreground = const X11Rgb(65535, 65535, 65535),
+      this.background = const X11Rgb(0, 0, 0),
+      this.maskFont = 0,
+      this.maskChar = 0});
 
   factory X11CreateGlyphCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -5745,12 +5747,9 @@ class X11CreateGlyphCursorRequest extends X11Request {
     var backRed = buffer.readUint16();
     var backGreen = buffer.readUint16();
     var backBlue = buffer.readUint16();
-    return X11CreateGlyphCursorRequest(
-        cid,
-        sourceFont,
-        sourceChar,
-        X11Rgb(foreRed, foreGreen, foreBlue),
-        X11Rgb(backRed, backGreen, backBlue),
+    return X11CreateGlyphCursorRequest(cid, sourceFont, sourceChar,
+        foreground: X11Rgb(foreRed, foreGreen, foreBlue),
+        background: X11Rgb(backRed, backGreen, backBlue),
         maskFont: maskFont,
         maskChar: maskChar);
   }
@@ -5802,7 +5801,9 @@ class X11RecolorCursorRequest extends X11Request {
   final X11Rgb foreground;
   final X11Rgb background;
 
-  X11RecolorCursorRequest(this.cursor, this.foreground, this.background);
+  X11RecolorCursorRequest(this.cursor,
+      {this.foreground = const X11Rgb(65535, 65535, 65535),
+      this.background = const X11Rgb(0, 0, 0)});
 
   factory X11RecolorCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -5813,8 +5814,9 @@ class X11RecolorCursorRequest extends X11Request {
     var backRed = buffer.readUint16();
     var backGreen = buffer.readUint16();
     var backBlue = buffer.readUint16();
-    return X11RecolorCursorRequest(cursor, X11Rgb(foreRed, foreGreen, foreBlue),
-        X11Rgb(backRed, backGreen, backBlue));
+    return X11RecolorCursorRequest(cursor,
+        foreground: X11Rgb(foreRed, foreGreen, foreBlue),
+        background: X11Rgb(backRed, backGreen, backBlue));
   }
 
   @override
@@ -5836,13 +5838,13 @@ class X11RecolorCursorRequest extends X11Request {
 
 class X11QueryBestSizeRequest extends X11Request {
   final int drawable;
-  final int class_;
+  final X11QueryClass class_;
   final X11Size size;
 
   X11QueryBestSizeRequest(this.drawable, this.class_, this.size);
 
   factory X11QueryBestSizeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var class_ = buffer.readUint8();
+    var class_ = X11QueryClass.values[buffer.readUint8()];
     var drawable = buffer.readUint32();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
@@ -5851,7 +5853,7 @@ class X11QueryBestSizeRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(class_);
+    buffer.writeUint8(class_.index);
     buffer.writeUint32(drawable);
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
@@ -6611,13 +6613,13 @@ class X11ListHostsRequest extends X11Request {
 }
 
 class X11ListHostsReply extends X11Reply {
-  final int mode;
+  final bool enabled;
   final List<X11Host> hosts;
 
-  X11ListHostsReply(this.mode, this.hosts);
+  X11ListHostsReply(this.enabled, this.hosts);
 
   static X11ListHostsReply fromBuffer(X11ReadBuffer buffer) {
-    var mode = buffer.readUint8();
+    var enabled = buffer.readUint8() != 0;
     var hostsLength = buffer.readUint16();
     buffer.skip(22);
     var hosts = <X11Host>[];
@@ -6632,12 +6634,12 @@ class X11ListHostsReply extends X11Reply {
       buffer.skip(pad(addressLength));
       hosts.add(X11Host(family, address));
     }
-    return X11ListHostsReply(mode, hosts);
+    return X11ListHostsReply(enabled, hosts);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(mode);
+    buffer.writeUint8(enabled ? 1 : 0);
     buffer.writeUint16(hosts.length);
     buffer.skip(22);
     for (var host in hosts) {
@@ -6652,26 +6654,27 @@ class X11ListHostsReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ListHostsReply(mode: ${mode}, hosts: ${hosts})';
+  String toString() =>
+      'X11ListHostsReply(enabled: ${enabled}, hosts: ${hosts})';
 }
 
 class X11SetAccessControlRequest extends X11Request {
-  final int mode;
+  final bool enabled;
 
-  X11SetAccessControlRequest(this.mode);
+  X11SetAccessControlRequest(this.enabled);
 
   factory X11SetAccessControlRequest.fromBuffer(X11ReadBuffer buffer) {
-    var mode = buffer.readUint8();
-    return X11SetAccessControlRequest(mode);
+    var enabled = buffer.readUint8() != 0;
+    return X11SetAccessControlRequest(enabled);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(mode);
+    buffer.writeUint8(enabled ? 1 : 0);
   }
 
   @override
-  String toString() => 'X11SetAccessControlRequest(mode: ${mode})';
+  String toString() => 'X11SetAccessControlRequest(${enabled})';
 }
 
 class X11SetCloseDownModeRequest extends X11Request {
@@ -6690,7 +6693,7 @@ class X11SetCloseDownModeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11SetCloseDownModeRequest(mode: ${mode})';
+  String toString() => 'X11SetCloseDownModeRequest(${mode})';
 }
 
 class X11KillClientRequest extends X11Request {
