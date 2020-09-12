@@ -1290,31 +1290,31 @@ class X11Client {
     return _sendRequest(78, buffer.data);
   }
 
-  int freeColormap(int cmap) {
-    var request = X11FreeColormapRequest(cmap);
+  int freeColormap(int colormap) {
+    var request = X11FreeColormapRequest(colormap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(79, buffer.data);
   }
 
-  int copyColormapAndFree(int id, int srcCmap) {
-    var request = X11CopyColormapAndFreeRequest(id, srcCmap);
+  int copyColormapAndFree(int id, int srcColormap) {
+    var request = X11CopyColormapAndFreeRequest(id, srcColormap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(80, buffer.data);
   }
 
-  /// Installs [cmap].
-  int installColormap(int cmap) {
-    var request = X11InstallColormapRequest(cmap);
+  /// Installs [colormap].
+  int installColormap(int colormap) {
+    var request = X11InstallColormapRequest(colormap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(81, buffer.data);
   }
 
-  /// Uninstalls [cmap].
-  int uninstallColormap(int cmap) {
-    var request = X11UninstallColormapRequest(cmap);
+  /// Uninstalls [colormap].
+  int uninstallColormap(int colormap) {
+    var request = X11UninstallColormapRequest(colormap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(82, buffer.data);
@@ -1331,9 +1331,9 @@ class X11Client {
     return reply.cmaps;
   }
 
-  /// Allocates a read-only colormap entry in [cmap] for the closest RGB value to [color].
-  Future<X11AllocColorReply> allocColor(int cmap, X11Rgb color) async {
-    var request = X11AllocColorRequest(cmap, color);
+  /// Allocates a read-only colormap entry in [colormap] for the closest RGB value to [color].
+  Future<X11AllocColorReply> allocColor(int colormap, X11Rgb color) async {
+    var request = X11AllocColorRequest(colormap, color);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(84, buffer.data);
@@ -1341,9 +1341,10 @@ class X11Client {
         sequenceNumber, X11AllocColorReply.fromBuffer);
   }
 
-  /// Allocates a read-only colormap entry in [cmap] for the color with [name].
-  Future<X11AllocNamedColorReply> allocNamedColor(int cmap, String name) async {
-    var request = X11AllocNamedColorRequest(cmap, name);
+  /// Allocates a read-only colormap entry in [colormap] for the color with [name].
+  Future<X11AllocNamedColorReply> allocNamedColor(
+      int colormap, String name) async {
+    var request = X11AllocNamedColorRequest(colormap, name);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(85, buffer.data);
@@ -1351,9 +1352,9 @@ class X11Client {
         sequenceNumber, X11AllocNamedColorReply.fromBuffer);
   }
 
-  Future<X11AllocColorCellsReply> allocColorCells(int cmap, int colors,
+  Future<X11AllocColorCellsReply> allocColorCells(int colormap, int colors,
       {int planes = 0, bool contiguous = false}) async {
-    var request = X11AllocColorCellsRequest(cmap, colors,
+    var request = X11AllocColorCellsRequest(colormap, colors,
         planes: planes, contiguous: contiguous);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1362,12 +1363,12 @@ class X11Client {
         sequenceNumber, X11AllocColorCellsReply.fromBuffer);
   }
 
-  Future<X11AllocColorPlanesReply> allocColorPlanes(int cmap, int colors,
+  Future<X11AllocColorPlanesReply> allocColorPlanes(int colormap, int colors,
       {int reds = 0,
       int greens = 0,
       int blues = 0,
       bool contiguous = false}) async {
-    var request = X11AllocColorPlanesRequest(cmap, colors,
+    var request = X11AllocColorPlanesRequest(colormap, colors,
         reds: reds, greens: greens, blues: blues, contiguous: contiguous);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1376,32 +1377,32 @@ class X11Client {
         sequenceNumber, X11AllocColorPlanesReply.fromBuffer);
   }
 
-  int freeColors(int cmap, List<int> pixels, int planeMask) {
-    var request = X11FreeColorsRequest(cmap, pixels, planeMask);
+  int freeColors(int colormap, List<int> pixels, int planeMask) {
+    var request = X11FreeColorsRequest(colormap, pixels, planeMask);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(88, buffer.data);
   }
 
-  int storeColors(int cmap, List<X11ColorItem> items) {
-    var request = X11StoreColorsRequest(cmap, items);
+  int storeColors(int colormap, List<X11ColorItem> items) {
+    var request = X11StoreColorsRequest(colormap, items);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(89, buffer.data);
   }
 
-  int storeNamedColor(int cmap, int pixel, String name,
+  int storeNamedColor(int colormap, int pixel, String name,
       {doRed = true, doGreen = true, doBlue = true}) {
-    var request = X11StoreNamedColorRequest(cmap, pixel, name,
+    var request = X11StoreNamedColorRequest(colormap, pixel, name,
         doRed: doRed, doGreen: doGreen, doBlue: doBlue);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(90, buffer.data);
   }
 
-  /// Gets the RGB color values for the [pixels] in [cmap].
-  Future<List<X11Rgb>> queryColors(int cmap, List<int> pixels) async {
-    var request = X11QueryColorsRequest(cmap, pixels);
+  /// Gets the RGB color values for the [pixels] in [colormap].
+  Future<List<X11Rgb>> queryColors(int colormap, List<int> pixels) async {
+    var request = X11QueryColorsRequest(colormap, pixels);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(91, buffer.data);
@@ -1410,9 +1411,9 @@ class X11Client {
     return reply.colors;
   }
 
-  /// Gets the RGB values associated with the color with [name] in [cmap].
-  Future<X11LookupColorReply> lookupColor(int cmap, String name) async {
-    var request = X11LookupColorRequest(cmap, name);
+  /// Gets the RGB values associated with the color with [name] in [colormap].
+  Future<X11LookupColorReply> lookupColor(int colormap, String name) async {
+    var request = X11LookupColorRequest(colormap, name);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(92, buffer.data);
