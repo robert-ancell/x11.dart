@@ -833,6 +833,7 @@ class X11Client {
         sequenceNumber, X11QueryPointerReply.fromBuffer);
   }
 
+  /// Gets pointer motion events that occured within [window] between [start] and [stop] time.
   Future<List<X11TimeCoord>> getMotionEvents(
       int window, int start, int stop) async {
     var request = X11GetMotionEventsRequest(window, start, stop);
