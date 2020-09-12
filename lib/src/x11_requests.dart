@@ -4023,16 +4023,22 @@ class X11ChangeGCRequest extends X11Request {
 class X11CopyGCRequest extends X11Request {
   final int sourceGc;
   final int destinationGc;
-  final int valueMask;
+  final Set<X11GCValue> values;
 
-  X11CopyGCRequest(this.sourceGc, this.destinationGc, this.valueMask);
+  X11CopyGCRequest(this.sourceGc, this.destinationGc, this.values);
 
   factory X11CopyGCRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var sourceGc = buffer.readUint32();
     var destinationGc = buffer.readUint32();
     var valueMask = buffer.readUint32();
-    return X11CopyGCRequest(sourceGc, destinationGc, valueMask);
+    var values = <X11GCValue>{};
+    for (var value in X11GCValue.values) {
+      if ((valueMask & (1 << value.index)) != 0) {
+        values.add(value);
+      }
+    }
+    return X11CopyGCRequest(sourceGc, destinationGc, values);
   }
 
   @override
@@ -4040,12 +4046,16 @@ class X11CopyGCRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(sourceGc);
     buffer.writeUint32(destinationGc);
+    var valueMask = 0;
+    for (var value in values) {
+      valueMask |= 1 << value.index;
+    }
     buffer.writeUint32(valueMask);
   }
 
   @override
   String toString() =>
-      'X11CopyGCRequest(sourceGc: ${sourceGc}, destinationGc: ${destinationGc}, valueMask: ${valueMask})';
+      'X11CopyGCRequest(sourceGc: ${sourceGc}, destinationGc: ${destinationGc}, values: ${values})';
 }
 
 class X11SetDashesRequest extends X11Request {

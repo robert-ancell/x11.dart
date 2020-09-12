@@ -96,6 +96,32 @@ enum X11FocusRevertTo { none, pointerRoot, parent }
 
 enum X11ForceScreenSaverMode { activate, reset }
 
+enum X11GCValue {
+  function,
+  planeMask,
+  foreground,
+  background,
+  lineWidth,
+  lineStyle,
+  capStyle,
+  joinStyle,
+  fillStyle,
+  fillRule,
+  tile,
+  stipple,
+  tileStippleXOrigin,
+  tileStippleYOrigin,
+  font,
+  subwindowMode,
+  graphicsExposures,
+  clipXOrigin,
+  clipYOrigin,
+  clipMask,
+  dashOffset,
+  dashes,
+  arcMode,
+}
+
 enum X11GraphicsFunction {
   clear,
   and,

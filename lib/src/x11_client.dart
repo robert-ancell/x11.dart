@@ -1117,8 +1117,9 @@ class X11Client {
     return _sendRequest(56, buffer.data);
   }
 
-  int copyGC(int sourceGc, int destinationGc, int valueMask) {
-    var request = X11CopyGCRequest(sourceGc, destinationGc, valueMask);
+  /// Copies [values] from [sourceGc] to [destinationGc].
+  int copyGC(int sourceGc, int destinationGc, Set<X11GCValue> values) {
+    var request = X11CopyGCRequest(sourceGc, destinationGc, values);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(57, buffer.data);
