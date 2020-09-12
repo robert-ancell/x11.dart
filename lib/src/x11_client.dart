@@ -355,8 +355,17 @@ class X11Client {
     return _sendRequest(5, buffer.data);
   }
 
-  /// Adds or removes [window] from the clients save-set.
-  int changeSaveSet(int window, X11ChangeSetMode mode) {
+  /// Adds [window] to the clients save-set.
+  int insertSaveSet(int window) {
+    return _changeSaveSet(window, X11ChangeSetMode.insert);
+  }
+
+  /// Removes [window] from the clients save-set.
+  int deleteSaveSet(int window) {
+    return _changeSaveSet(window, X11ChangeSetMode.delete);
+  }
+
+  int _changeSaveSet(int window, X11ChangeSetMode mode) {
     var request = X11ChangeSaveSetRequest(window, mode);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -647,7 +656,7 @@ class X11Client {
       propertyAtom = await internAtom(property);
     }
     var request = X11ConvertSelectionRequest(
-        selectionAtom, requestor, targetAtom,
+        selectionAtom, requestorWindow, targetAtom,
         property: propertyAtom, time: time);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1317,7 +1326,7 @@ class X11Client {
     return reply.cmaps;
   }
 
-  /// Allocates a read-only colormap entry in [cmap] for the closest RGB values to [color].
+  /// Allocates a read-only colormap entry in [cmap] for the closest RGB value to [color].
   Future<X11AllocColorReply> allocColor(int cmap, X11Rgb color) async {
     var request = X11AllocColorRequest(cmap, color);
     var buffer = X11WriteBuffer();
