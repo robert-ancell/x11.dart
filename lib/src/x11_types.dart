@@ -29,6 +29,8 @@ enum X11BitmapFormatBitOrder { leastSignificant, mostSignificant }
 
 enum X11CapStyle { notLast, butt, round, projecting }
 
+enum X11ChangeHostsMode { insert, delete }
+
 enum X11ChangePropertyMode { replace, prepend, append }
 
 enum X11ChangeSetMode { insert, delete }
@@ -91,6 +93,8 @@ enum X11FillRule { evenOdd, winding }
 enum X11FillStyle { solid, tiled, stippled, opaqueStippled }
 
 enum X11FocusRevertTo { none, pointerRoot, parent }
+
+enum X11ForceScreenSaverMode { activate, reset }
 
 enum X11GraphicsFunction {
   clear,

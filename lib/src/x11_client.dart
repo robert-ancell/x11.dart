@@ -1542,7 +1542,17 @@ class X11Client {
         sequenceNumber, X11GetScreenSaverReply.fromBuffer);
   }
 
-  int changeHosts(int mode, int family, List<int> address) {
+  /// Adds a host to the access control list.
+  int insertHost(int family, List<int> address) {
+    return _changeHosts(X11ChangeHostsMode.insert, family, address);
+  }
+
+  /// Removes a host from the access control list.
+  int deleteHost(int family, List<int> address) {
+    return _changeHosts(X11ChangeHostsMode.delete, family, address);
+  }
+
+  int _changeHosts(X11ChangeHostsMode mode, int family, List<int> address) {
     var request = X11ChangeHostsRequest(mode, family, address);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1583,14 +1593,25 @@ class X11Client {
     return _sendRequest(113, buffer.data);
   }
 
-  int rotateProperties(int window, int delta, List<int> atoms) {
-    var request = X11RotatePropertiesRequest(window, delta, atoms);
+  /// Rotates the [properties] of [window] by [delta] steps.
+  int rotateProperties(int window, int delta, List<int> properties) {
+    var request = X11RotatePropertiesRequest(window, delta, properties);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(114, buffer.data);
   }
 
-  int forceScreenSaver(int mode) {
+  /// Activates the screen-saver immediately.
+  int activateScreenSaver() {
+    return _forceScreenSaver(X11ForceScreenSaverMode.activate);
+  }
+
+  /// Resets the screen-saver timeout.
+  int resetScreenSaver() {
+    return _forceScreenSaver(X11ForceScreenSaverMode.reset);
+  }
+
+  int _forceScreenSaver(X11ForceScreenSaverMode mode) {
     var request = X11ForceScreenSaverRequest(mode);
     var buffer = X11WriteBuffer();
     request.encode(buffer);

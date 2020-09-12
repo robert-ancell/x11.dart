@@ -6559,14 +6559,14 @@ class X11GetScreenSaverReply extends X11Reply {
 }
 
 class X11ChangeHostsRequest extends X11Request {
-  final int mode;
+  final X11ChangeHostsMode mode;
   final int family;
   final List<int> address;
 
   X11ChangeHostsRequest(this.mode, this.family, this.address);
 
   factory X11ChangeHostsRequest.fromBuffer(X11ReadBuffer buffer) {
-    var mode = buffer.readUint8();
+    var mode = X11ChangeHostsMode.values[buffer.readUint8()];
     var family = buffer.readUint8();
     buffer.skip(1);
     var addressLength = buffer.readUint16();
@@ -6580,7 +6580,7 @@ class X11ChangeHostsRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(mode);
+    buffer.writeUint8(mode.index);
     buffer.writeUint8(family);
     buffer.skip(1);
     buffer.writeUint16(address.length);
@@ -6753,18 +6753,18 @@ class X11RotatePropertiesRequest extends X11Request {
 }
 
 class X11ForceScreenSaverRequest extends X11Request {
-  final int mode;
+  final X11ForceScreenSaverMode mode;
 
   X11ForceScreenSaverRequest(this.mode);
 
   factory X11ForceScreenSaverRequest.fromBuffer(X11ReadBuffer buffer) {
-    var mode = buffer.readUint8();
+    var mode = X11ForceScreenSaverMode.values[buffer.readUint8()];
     return X11ForceScreenSaverRequest(mode);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(mode);
+    buffer.writeUint8(mode.index);
   }
 
   @override
