@@ -680,9 +680,13 @@ class X11Client {
     return _sendRequest(25, buffer.data);
   }
 
-  Future<int> grabPointer(int grabWindow, bool ownerEvents, int eventMask,
-      int pointerMode, int keyboardMode,
-      {int time = 0, int confineTo = 0, int cursor = 0}) async {
+  /// Establishes an active grab of the pointer to [grabWindow].
+  Future<int> grabPointer(
+      int grabWindow, int eventMask, int pointerMode, int keyboardMode,
+      {bool ownerEvents = true,
+      int confineTo = 0,
+      int cursor = 0,
+      int time = 0}) async {
     var request = X11GrabPointerRequest(grabWindow, ownerEvents, eventMask,
         pointerMode, keyboardMode, confineTo, cursor, time);
     var buffer = X11WriteBuffer();
@@ -701,10 +705,13 @@ class X11Client {
     return _sendRequest(27, buffer.data);
   }
 
-  int grabButton(int grabWindow, bool ownerEvents, int eventMask,
-      int pointerMode, int keyboardMode,
+  /// Establishes a passive grab of [button]/[modifers] to [grabWindow].
+  /// If [button] is 0, all buttons are grabbed.
+  int grabButton(
+      int grabWindow, int eventMask, int pointerMode, int keyboardMode,
       {int button = 0,
       int modifiers = 0x8000,
+      bool ownerEvents = true,
       int confineTo = 0,
       int cursor = 0}) {
     var request = X11GrabButtonRequest(grabWindow, ownerEvents, eventMask,
@@ -714,6 +721,8 @@ class X11Client {
     return _sendRequest(28, buffer.data);
   }
 
+  /// Releases a passive grab of [button]/[modifiers] from [grabWindow].
+  /// If [button] is 0, this releases all button grabs on this window.
   int ungrabButton(int grabWindow, {int button = 0, int modifiers = 0x8000}) {
     var request = X11UngrabButtonRequest(grabWindow, button, modifiers);
     var buffer = X11WriteBuffer();
@@ -729,8 +738,9 @@ class X11Client {
     return _sendRequest(30, buffer.data);
   }
 
+  /// Establishes an active grab of the keyboard to [grabWindow].
   Future<int> grabKeyboard(int grabWindow,
-      {bool ownerEvents = false,
+      {bool ownerEvents = true,
       int pointerMode = 0,
       int keyboardMode = 0,
       int time = 0}) async {
@@ -755,9 +765,10 @@ class X11Client {
     return _sendRequest(32, buffer.data);
   }
 
+  /// Establishes a passive grab of [key]/[modifers] to [grabWindow].
   int grabKey(int grabWindow, int key,
       {int modifiers = 0,
-      bool ownerEvents = false,
+      bool ownerEvents = true,
       int pointerMode = 0,
       int keyboardMode = 0}) {
     var request = X11GrabKeyRequest(grabWindow, key,
