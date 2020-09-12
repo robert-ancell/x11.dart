@@ -17,7 +17,7 @@ void main() async {
 
   client.createWindow(
       window, client.roots[0].window, X11Rectangle(0, 0, 400, 300),
-      eventMask: {X11EventMask.exposure}, backgroundPixel: 0x00000000);
+      events: {X11EventType.exposure}, backgroundPixel: 0x00000000);
   client.openFont(font, '*');
   client.createGC(gc, window, font: font);
   await client.changePropertyString(window, 'WM_NAME', 'Font Example');

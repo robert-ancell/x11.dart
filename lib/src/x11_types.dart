@@ -60,7 +60,7 @@ enum X11ErrorCode {
   implementation
 }
 
-enum X11EventMask {
+enum X11EventType {
   keyPress,
   keyRelease,
   buttonPress,

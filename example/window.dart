@@ -12,7 +12,7 @@ void main() async {
 
   var id = client.generateId();
   client.createWindow(id, client.roots[0].window, X11Rectangle(0, 0, 400, 300),
-      eventMask: {X11EventMask.exposure}, backgroundPixel: 0x00000000);
+      events: {X11EventType.exposure}, backgroundPixel: 0x00000000);
   await client.changePropertyString(id, 'WM_NAME', 'x11.dart');
   client.mapWindow(id);
 }

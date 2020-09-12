@@ -259,15 +259,15 @@ class X11Client {
       int backingPixel,
       bool overrideRedirect,
       bool saveUnder,
-      Set<X11EventMask> eventMask,
+      Set<X11EventType> events,
       int doNotPropagateMask,
       int colormap,
       int cursor}) {
-    int eventMaskValue;
-    if (eventMask != null) {
-      eventMaskValue = 0;
-      for (var event in eventMask) {
-        eventMaskValue |= 1 << event.index;
+    int eventMask;
+    if (events != null) {
+      eventMask = 0;
+      for (var event in events) {
+        eventMask |= 1 << event.index;
       }
     }
     var request = X11CreateWindowRequest(id, parent, geometry, depth,
@@ -285,7 +285,7 @@ class X11Client {
         backingPixel: backingPixel,
         overrideRedirect: overrideRedirect,
         saveUnder: saveUnder,
-        eventMask: eventMaskValue,
+        eventMask: eventMask,
         doNotPropagateMask: doNotPropagateMask,
         colormap: colormap,
         cursor: cursor);
@@ -308,10 +308,17 @@ class X11Client {
       int backingPixel,
       bool overrideRedirect,
       bool saveUnder,
-      int eventMask,
+      Set<X11EventType> events,
       int doNotPropagateMask,
       int colormap,
       int cursor}) {
+    int eventMask;
+    if (events != null) {
+      eventMask = 0;
+      for (var event in events) {
+        eventMask |= 1 << event.index;
+      }
+    }
     var request = X11ChangeWindowAttributesRequest(window,
         backgroundPixmap: backgroundPixmap,
         backgroundPixel: backgroundPixel,
@@ -677,7 +684,11 @@ class X11Client {
 
   /// Sends [event] to [destination].
   int sendEvent(int destination, X11Event event,
-      {bool propagate = false, int eventMask = 0}) {
+      {bool propagate = false, Set<X11EventType> events = const {}}) {
+    var eventMask = 0;
+    for (var event in events) {
+      eventMask |= 1 << event.index;
+    }
     var request = X11SendEventRequest(destination, event,
         propagate: propagate,
         eventMask: eventMask,
@@ -688,12 +699,16 @@ class X11Client {
   }
 
   /// Establishes an active grab of the pointer to [grabWindow].
-  Future<int> grabPointer(
-      int grabWindow, int eventMask, int pointerMode, int keyboardMode,
-      {bool ownerEvents = true,
+  Future<int> grabPointer(int grabWindow, int pointerMode, int keyboardMode,
+      {Set<X11EventType> events = const {},
+      bool ownerEvents = true,
       int confineTo = 0,
       int cursor = 0,
       int time = 0}) async {
+    var eventMask = 0;
+    for (var event in events) {
+      eventMask |= 1 << event.index;
+    }
     var request = X11GrabPointerRequest(grabWindow, ownerEvents, eventMask,
         pointerMode, keyboardMode, confineTo, cursor, time);
     var buffer = X11WriteBuffer();
@@ -714,13 +729,17 @@ class X11Client {
 
   /// Establishes a passive grab of [button]/[modifers] to [grabWindow].
   /// If [button] is 0, all buttons are grabbed.
-  int grabButton(
-      int grabWindow, int eventMask, int pointerMode, int keyboardMode,
+  int grabButton(int grabWindow, int pointerMode, int keyboardMode,
       {int button = 0,
       int modifiers = 0x8000,
+      Set<X11EventType> events = const {},
       bool ownerEvents = true,
       int confineTo = 0,
       int cursor = 0}) {
+    var eventMask = 0;
+    for (var event in events) {
+      eventMask |= 1 << event.index;
+    }
     var request = X11GrabButtonRequest(grabWindow, ownerEvents, eventMask,
         pointerMode, keyboardMode, confineTo, cursor, button, modifiers);
     var buffer = X11WriteBuffer();
@@ -737,7 +756,12 @@ class X11Client {
     return _sendRequest(29, buffer.data);
   }
 
-  int changeActivePointerGrab(int eventMask, {int cursor = 0, int time = 0}) {
+  int changeActivePointerGrab(Set<X11EventType> events,
+      {int cursor = 0, int time = 0}) {
+    var eventMask = 0;
+    for (var event in events) {
+      eventMask |= 1 << event.index;
+    }
     var request = X11ChangeActivePointerGrabRequest(eventMask,
         cursor: cursor, time: time);
     var buffer = X11WriteBuffer();
