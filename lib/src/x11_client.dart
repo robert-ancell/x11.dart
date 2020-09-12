@@ -788,7 +788,9 @@ class X11Client {
     return _sendRequest(33, buffer.data);
   }
 
-  int ungrabKey(int grabWindow, int key, {int modifiers = 0}) {
+  /// Releases a passive grab of [key]/[modifiers] from [grabWindow].
+  /// If [key] is 0, this releases all key grabs on this window.
+  int ungrabKey(int grabWindow, {int key = 0, int modifiers = 0}) {
     var request = X11UngrabKeyRequest(grabWindow, key, modifiers: modifiers);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
