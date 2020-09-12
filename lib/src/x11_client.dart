@@ -474,28 +474,44 @@ class X11Client {
         .catchError((error) => null);
   }
 
-  // Changes a property of [window] to [value].
-  int changePropertyUint8(int window, int property, int type, List<int> value,
-      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
-    return _changeProperty(window, property, type, 8, value, mode: mode);
+  // Changes a [property] of [window] to [value].
+  Future<int> changePropertyUint8(
+      int window, String property, String type, List<int> value,
+      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
+    var propertyAtom = await internAtom(property);
+    var typeAtom = await internAtom(type);
+    return _changeProperty(window, propertyAtom, typeAtom, 8, value,
+        mode: mode);
   }
 
-  // Changes a property of [window] to [value].
-  int changePropertyUint16(int window, int property, int type, List<int> value,
-      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
-    return _changeProperty(window, property, type, 16, value, mode: mode);
+  // Changes a [property] of [window] to [value].
+  Future<int> changePropertyUint16(
+      int window, String property, String type, List<int> value,
+      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
+    var propertyAtom = await internAtom(property);
+    var typeAtom = await internAtom(type);
+    return _changeProperty(window, propertyAtom, typeAtom, 16, value,
+        mode: mode);
   }
 
-  // Changes a property of [window] to [value].
-  int changePropertyUint32(int window, int property, int type, List<int> value,
-      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
-    return _changeProperty(window, property, type, 32, value, mode: mode);
+  // Changes a [property] of [window] to [value].
+  Future<int> changePropertyUint32(
+      int window, String property, String type, List<int> value,
+      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
+    var propertyAtom = await internAtom(property);
+    var typeAtom = await internAtom(type);
+    return _changeProperty(window, propertyAtom, typeAtom, 32, value,
+        mode: mode);
   }
 
-  // Changes a property of [window] to [value].
-  int changePropertyString(int window, int property, int type, String value,
-      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
-    return _changeProperty(window, property, type, 8, utf8.encode(value),
+  // Changes a [property] of [window] to [value].
+  Future<int> changePropertyString(int window, String property, String value,
+      {String type = 'STRING',
+      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
+    var propertyAtom = await internAtom(property);
+    var typeAtom = await internAtom(type);
+    return _changeProperty(
+        window, propertyAtom, typeAtom, 8, utf8.encode(value),
         mode: mode);
   }
 
@@ -510,8 +526,9 @@ class X11Client {
   }
 
   /// Deletes the [property] from [window].
-  int deleteProperty(int window, int property) {
-    var request = X11DeletePropertyRequest(window, property);
+  Future<int> deleteProperty(int window, String property) async {
+    var propertyAtom = await internAtom(property);
+    var request = X11DeletePropertyRequest(window, propertyAtom);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(19, buffer.data);
@@ -519,14 +536,20 @@ class X11Client {
 
   /// Gets the value of the [property] on [window].
   ///
+  /// If [type] is not null, the property must match the requested type.
   /// If [delete] is true the property is removed.
-  Future<X11GetPropertyReply> getProperty(int window, int property,
-      {int type = 0,
+  Future<X11GetPropertyReply> getProperty(int window, String property,
+      {String type,
       int longOffset = 0,
       int longLength = 4294967295,
       bool delete = false}) async {
-    var request = X11GetPropertyRequest(window, property,
-        type: type,
+    var propertyAtom = await internAtom(property);
+    var typeAtom = 0;
+    if (type != null) {
+      typeAtom = await internAtom(type);
+    }
+    var request = X11GetPropertyRequest(window, propertyAtom,
+        type: typeAtom,
         longOffset: longOffset,
         longLength: longLength,
         delete: delete);
@@ -538,9 +561,8 @@ class X11Client {
   }
 
   /// Gets a string [property] on [window].
-  Future<String> getPropertyString(int window, int property) async {
-    var stringAtom = await internAtom('STRING');
-    var reply = await getProperty(window, property, type: stringAtom);
+  Future<String> getPropertyString(int window, String property) async {
+    var reply = await getProperty(window, property, type: 'STRING');
     if (reply.format == 8) {
       return utf8.decode(reply.value);
     } else {
@@ -556,19 +578,22 @@ class X11Client {
     var sequenceNumber = _sendRequest(21, buffer.data);
     var reply = await _awaitReply<X11ListPropertiesReply>(
         sequenceNumber, X11ListPropertiesReply.fromBuffer);
-    return reply.atoms;
+    return reply.atoms; // FIXME: Convert to strings
   }
 
   /// Sets the owner of [selection] to [owner].
-  int setSelectionOwner(int selection, int owner, {int time = 0}) {
-    var request = X11SetSelectionOwnerRequest(selection, owner, time: time);
+  Future<int> setSelectionOwner(String selection, int owner,
+      {int time = 0}) async {
+    var selectionAtom = await internAtom(selection);
+    var request = X11SetSelectionOwnerRequest(selectionAtom, owner, time: time);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(22, buffer.data);
   }
 
-  Future<int> getSelectionOwner(int selection) async {
-    var request = X11GetSelectionOwnerRequest(selection);
+  Future<int> getSelectionOwner(String selection) async {
+    var selectionAtom = await internAtom(selection);
+    var request = X11GetSelectionOwnerRequest(selectionAtom);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(23, buffer.data);
@@ -577,10 +602,17 @@ class X11Client {
     return reply.owner;
   }
 
-  int convertSelection(int selection, int requestor, int target,
-      {int property = 0, int time = 0}) {
-    var request = X11ConvertSelectionRequest(selection, requestor, target,
-        property: property, time: time);
+  Future<int> convertSelection(String selection, int requestor, String target,
+      {String property, int time = 0}) async {
+    var selectionAtom = await internAtom(selection);
+    var targetAtom = await internAtom(target);
+    var propertyAtom = 0;
+    if (property != null) {
+      propertyAtom = await internAtom(property);
+    }
+    var request = X11ConvertSelectionRequest(
+        selectionAtom, requestor, targetAtom,
+        property: propertyAtom, time: time);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(24, buffer.data);
@@ -804,6 +836,7 @@ class X11Client {
     return _sendRequest(46, buffer.data);
   }
 
+  // FIXME: Convert font atoms?
   Future<X11QueryFontReply> queryFont(int font) async {
     var request = X11QueryFontRequest(font);
     var buffer = X11WriteBuffer();
@@ -1596,8 +1629,13 @@ class X11Client {
   }
 
   /// Rotates the [properties] of [window] by [delta] steps.
-  int rotateProperties(int window, int delta, List<int> properties) {
-    var request = X11RotatePropertiesRequest(window, delta, properties);
+  Future<int> rotateProperties(
+      int window, int delta, List<String> properties) async {
+    var propertyAtoms = <int>[];
+    for (var property in properties) {
+      propertyAtoms.add(await internAtom(property));
+    }
+    var request = X11RotatePropertiesRequest(window, delta, propertyAtoms);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(114, buffer.data);

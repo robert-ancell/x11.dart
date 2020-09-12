@@ -20,8 +20,6 @@ void main() async {
       eventMask: {X11EventMask.exposure}, backgroundPixel: 0x00000000);
   client.openFont(font, '*');
   client.createGC(gc, window, font: font);
-  var wmNameAtom = await client.internAtom('WM_NAME');
-  var stringAtom = await client.internAtom('STRING');
-  client.changePropertyString(window, wmNameAtom, stringAtom, 'Font Example');
+  await client.changePropertyString(window, 'WM_NAME', 'Font Example');
   client.mapWindow(window);
 }
