@@ -864,13 +864,15 @@ class X11Client {
     return reply.keys;
   }
 
-  int openFont(int fid, String name) {
-    var request = X11OpenFontRequest(fid, name);
+  /// Opens the font with the given [name] and assigns it [id].
+  int openFont(int id, String name) {
+    var request = X11OpenFontRequest(id, name);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(45, buffer.data);
   }
 
+  /// Deletes the reference to a [font] opened in [openFont].
   int closeFont(int font) {
     var request = X11CloseFontRequest(font);
     var buffer = X11WriteBuffer();
@@ -879,6 +881,7 @@ class X11Client {
   }
 
   // FIXME: Convert font atoms?
+  /// Gets information on [font].
   Future<X11QueryFontReply> queryFont(int font) async {
     var request = X11QueryFontRequest(font);
     var buffer = X11WriteBuffer();
@@ -888,6 +891,7 @@ class X11Client {
         sequenceNumber, X11QueryFontReply.fromBuffer);
   }
 
+  /// Gets the dimensions rendering [string] with [font] will use.
   Future<X11QueryTextExtentsReply> queryTextExtents(
       int font, String string) async {
     var request = X11QueryTextExtentsRequest(font, string);
@@ -926,6 +930,7 @@ class X11Client {
         X11ListFontsWithInfoReply.fromBuffer, (reply) => reply.name.isEmpty);
   }
 
+  /// Sets the search paths for fonts.
   int setFontPath(List<String> path) {
     var request = X11SetFontPathRequest(path);
     var buffer = X11WriteBuffer();
@@ -933,6 +938,7 @@ class X11Client {
     return _sendRequest(51, buffer.data);
   }
 
+  /// Gets the current search paths for fonts.
   Future<List<String>> getFontPath() async {
     var request = X11GetFontPathRequest();
     var buffer = X11WriteBuffer();

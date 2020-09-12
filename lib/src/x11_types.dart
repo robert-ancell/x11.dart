@@ -189,7 +189,7 @@ class X11FontProperty {
   X11FontProperty(this.name, this.value);
 
   @override
-  String toString() => 'X11FontProperty(name: ${name}, value: ${value})';
+  String toString() => 'X11FontProperty(${name}, ${value})';
 }
 
 class X11ModifierMap {
