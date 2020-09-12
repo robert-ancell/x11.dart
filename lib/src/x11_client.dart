@@ -106,78 +106,87 @@ class X11Client {
   Stream<X11Error> get errorStream => _errorStreamController.stream;
   Stream<X11Event> get eventStream => _eventStreamController.stream;
 
-  final Map<String, int> atoms = {
-    'PRIMARY': 1,
-    'SECONDARY': 2,
-    'ARC': 3,
-    'ATOM': 4,
-    'BITMAP': 5,
-    'CARDINAL': 6,
-    'COLORMAP': 7,
-    'CURSOR': 8,
-    'CUT_BUFFER0': 9,
-    'CUT_BUFFER1': 10,
-    'CUT_BUFFER2': 11,
-    'CUT_BUFFER3': 12,
-    'CUT_BUFFER4': 13,
-    'CUT_BUFFER5': 14,
-    'CUT_BUFFER6': 15,
-    'CUT_BUFFER7': 16,
-    'DRAWABLE': 17,
-    'FONT': 18,
-    'INTEGER': 19,
-    'PIXMAP': 20,
-    'POINT': 21,
-    'RECTANGLE': 22,
-    'RESOURCE_MANAGER': 23,
-    'RGB_COLOR_MAP': 24,
-    'RGB_BEST_MAP': 25,
-    'RGB_BLUE_MAP': 26,
-    'RGB_DEFAULT_MAP': 27,
-    'RGB_GRAY_MAP': 28,
-    'RGB_GREEN_MAP': 29,
-    'RGB_RED_MAP': 30,
-    'STRING': 31,
-    'VISUALID': 32,
-    'WINDOW': 33,
-    'WM_COMMAND': 34,
-    'WM_HINTS': 35,
-    'WM_CLIENT_MACHINE': 36,
-    'WM_ICON_NAME': 37,
-    'WM_ICON_SIZE': 38,
-    'WM_NAME': 39,
-    'WM_NORMAL_HINTS': 40,
-    'WM_SIZE_HINTS': 41,
-    'WM_ZOOM_HINTS': 42,
-    'MIN_SPACE': 43,
-    'NORM_SPACE': 44,
-    'MAX_SPACE': 45,
-    'END_SPACE': 46,
-    'SUPERSCRIPT_X': 47,
-    'SUPERSCRIPT_Y': 48,
-    'SUBSCRIPT_X': 49,
-    'SUBSCRIPT_Y': 50,
-    'UNDERLINE_POSITION': 51,
-    'UNDERLINE_THICKNESS': 52,
-    'STRIKEOUT_ASCENT': 53,
-    'STRIKEOUT_DESCENT': 54,
-    'ITALIC_ANGLE': 55,
-    'X_HEIGHT': 56,
-    'QUAD_WIDTH': 57,
-    'WEIGHT': 58,
-    'POINT_SIZE': 59,
-    'RESOLUTION': 60,
-    'COPYRIGHT': 61,
-    'NOTICE': 62,
-    'FONT_NAME': 63,
-    'FAMILY_NAME': 64,
-    'FULL_NAME': 65,
-    'CAP_HEIGHT': 66,
-    'WM_CLASS': 67,
-    'WM_TRANSIENT_FOR': 68
-  };
+  final atoms = <String, int>{};
+  final atomNames = <int, String>{};
 
-  X11Client();
+  X11Client() {
+    final builtinAtoms = [
+      null,
+      'PRIMARY',
+      'SECONDARY',
+      'ARC',
+      'ATOM',
+      'BITMAP',
+      'CARDINAL',
+      'COLORMAP',
+      'CURSOR',
+      'CUT_BUFFER0',
+      'CUT_BUFFER1',
+      'CUT_BUFFER2',
+      'CUT_BUFFER3',
+      'CUT_BUFFER4',
+      'CUT_BUFFER5',
+      'CUT_BUFFER6',
+      'CUT_BUFFER7',
+      'DRAWABLE',
+      'FONT',
+      'INTEGER',
+      'PIXMAP',
+      'POINT',
+      'RECTANGLE',
+      'RESOURCE_MANAGER',
+      'RGB_COLOR_MAP',
+      'RGB_BEST_MAP',
+      'RGB_BLUE_MAP',
+      'RGB_DEFAULT_MAP',
+      'RGB_GRAY_MAP',
+      'RGB_GREEN_MAP',
+      'RGB_RED_MAP',
+      'STRING',
+      'VISUALID',
+      'WINDOW',
+      'WM_COMMAND',
+      'WM_HINTS',
+      'WM_CLIENT_MACHINE',
+      'WM_ICON_NAME',
+      'WM_ICON_SIZE',
+      'WM_NAME',
+      'WM_NORMAL_HINTS',
+      'WM_SIZE_HINTS',
+      'WM_ZOOM_HINTS',
+      'MIN_SPACE',
+      'NORM_SPACE',
+      'MAX_SPACE',
+      'END_SPACE',
+      'SUPERSCRIPT_X',
+      'SUPERSCRIPT_Y',
+      'SUBSCRIPT_X',
+      'SUBSCRIPT_Y',
+      'UNDERLINE_POSITION',
+      'UNDERLINE_THICKNESS',
+      'STRIKEOUT_ASCENT',
+      'STRIKEOUT_DESCENT',
+      'ITALIC_ANGLE',
+      'X_HEIGHT',
+      'QUAD_WIDTH',
+      'WEIGHT',
+      'POINT_SIZE',
+      'RESOLUTION',
+      'COPYRIGHT',
+      'NOTICE',
+      'FONT_NAME',
+      'FAMILY_NAME',
+      'FULL_NAME',
+      'CAP_HEIGHT',
+      'WM_CLASS',
+      'WM_TRANSIENT_FOR'
+    ];
+    for (var i = 0; i < builtinAtoms.length; i++) {
+      var name = builtinAtoms[i];
+      atoms[name] = i;
+      atomNames[i] = name;
+    }
+  }
 
   void connect() async {
     var display = Platform.environment['DISPLAY'];
@@ -449,29 +458,44 @@ class X11Client {
 
   /// Gets the atom with [name]. If [onlyIfExists] is false this will always return a value (new atoms will be created).
   Future<int> internAtom(String name, {bool onlyIfExists = false}) async {
+    // Check if already in cache.
     var id = atoms[name];
     if (id != null) {
       return id;
     }
+
     var request = X11InternAtomRequest(name, onlyIfExists);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(16, buffer.data);
     var reply = await _awaitReply<X11InternAtomReply>(
         sequenceNumber, X11InternAtomReply.fromBuffer);
+
+    // Cache result.
+    atoms[name] = reply.atom;
+
     return reply.atom;
   }
 
   /// Gets the name of [atom].
   Future<String> getAtomName(int atom) async {
+    // Check if already in cache.
+    var name = atomNames[atom];
+    if (name != null) {
+      return name;
+    }
+
     var request = X11GetAtomNameRequest(atom);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(17, buffer.data);
-    return _awaitReply<X11GetAtomNameReply>(
-            sequenceNumber, X11GetAtomNameReply.fromBuffer)
-        .then<String>((reply) => reply.name)
-        .catchError((error) => null);
+    var reply = await _awaitReply<X11GetAtomNameReply>(
+        sequenceNumber, X11GetAtomNameReply.fromBuffer);
+
+    // Cache result.
+    atomNames[atom] = reply.name;
+
+    return reply.name;
   }
 
   // Changes a [property] of [window] to [value].
@@ -571,14 +595,18 @@ class X11Client {
   }
 
   /// Gets the properties on [window].
-  Future<List<int>> listProperties(int window) async {
+  Future<List<String>> listProperties(int window) async {
     var request = X11ListPropertiesRequest(window);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(21, buffer.data);
     var reply = await _awaitReply<X11ListPropertiesReply>(
         sequenceNumber, X11ListPropertiesReply.fromBuffer);
-    return reply.atoms; // FIXME: Convert to strings
+    var properties = <String>[];
+    for (var atom in reply.atoms) {
+      properties.add(await getAtomName(atom));
+    }
+    return properties;
   }
 
   /// Sets the owner of [selection] to [owner].

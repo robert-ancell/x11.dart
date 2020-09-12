@@ -13,12 +13,8 @@ void main() async {
       var reply = await client.getGeometry(window);
       var attributes = await client.getWindowAttributes(window);
       var properties = await client.listProperties(window);
-      var propertyNames = <String>[];
-      for (var atom in properties) {
-        propertyNames.add(await client.getAtomName(atom));
-      }
       print(
-          '${indent}0x${formatId(window)} ${reply.geometry.x},${reply.geometry.y} ${reply.geometry.width}x${reply.geometry.height} ${attributes.class_} ${propertyNames.join(', ')}');
+          '${indent}0x${formatId(window)} ${reply.geometry.x},${reply.geometry.y} ${reply.geometry.width}x${reply.geometry.height} ${attributes.class_} ${properties.join(', ')}');
       var wmName = await client.getPropertyString(window, 'WM_NAME');
       if (wmName != null) {
         print('  ${indent} "${wmName}"');
