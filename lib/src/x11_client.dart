@@ -609,16 +609,23 @@ class X11Client {
     return properties;
   }
 
-  /// Sets the owner of [selection] to [owner].
-  Future<int> setSelectionOwner(String selection, int owner,
+  /// Sets the owner of [selection] to [ownerWindow].
+  Future<int> setSelectionOwner(String selection, int ownerWindow,
       {int time = 0}) async {
     var selectionAtom = await internAtom(selection);
-    var request = X11SetSelectionOwnerRequest(selectionAtom, owner, time: time);
+    var request =
+        X11SetSelectionOwnerRequest(selectionAtom, ownerWindow, time: time);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(22, buffer.data);
   }
 
+  /// Clears the owner of [selection].
+  Future<int> clearSelectionOwner(String selection, {int time = 0}) async {
+    return setSelectionOwner(selection, 0, time: time);
+  }
+
+  /// Gets the current owner of [selection].
   Future<int> getSelectionOwner(String selection) async {
     var selectionAtom = await internAtom(selection);
     var request = X11GetSelectionOwnerRequest(selectionAtom);
@@ -630,7 +637,8 @@ class X11Client {
     return reply.owner;
   }
 
-  Future<int> convertSelection(String selection, int requestor, String target,
+  Future<int> convertSelection(
+      String selection, int requestorWindow, String target,
       {String property, int time = 0}) async {
     var selectionAtom = await internAtom(selection);
     var targetAtom = await internAtom(target);
@@ -671,6 +679,7 @@ class X11Client {
     return reply.status;
   }
 
+  /// Releases the pointer from [grabPointer] or [grabButton] and releases any queued events.
   int ungrabPointer({int time = 0}) {
     var request = X11UngrabPointerRequest(time);
     var buffer = X11WriteBuffer();
@@ -724,6 +733,7 @@ class X11Client {
     return reply.status;
   }
 
+  /// Releases the keyboard from [grabKeyboard] or [grabKey] and releases any queued events.
   int ungrabKeyboard({int time = 0}) {
     var request = X11UngrabKeyboardRequest(time: time);
     var buffer = X11WriteBuffer();
@@ -761,6 +771,9 @@ class X11Client {
     return _sendRequest(35, buffer.data);
   }
 
+  /// Disables processing of requests on all other clients.
+  ///
+  /// Call [ungrabServer] when processing can continue.
   int grabServer() {
     var request = X11GrabServerRequest();
     var buffer = X11WriteBuffer();
@@ -768,6 +781,7 @@ class X11Client {
     return _sendRequest(36, buffer.data);
   }
 
+  /// Restarts processing of requests disabled by [grabServer].
   int ungrabServer() {
     var request = X11UngrabServerRequest();
     var buffer = X11WriteBuffer();
