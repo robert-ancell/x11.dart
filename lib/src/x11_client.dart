@@ -824,10 +824,11 @@ class X11Client {
     return reply.events;
   }
 
-  /// Gets the position [src] on [srcWindow] relative to [dstWindow].
+  /// Gets the position [source] on [sourceWindow] relative to [destinationWindow].
   Future<X11TranslateCoordinatesReply> translateCoordinates(
-      int srcWindow, X11Point src, int dstWindow) async {
-    var request = X11TranslateCoordinatesRequest(srcWindow, src, dstWindow);
+      int sourceWindow, X11Point source, int destinationWindow) async {
+    var request =
+        X11TranslateCoordinatesRequest(sourceWindow, source, destinationWindow);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(40, buffer.data);
@@ -835,12 +836,14 @@ class X11Client {
         sequenceNumber, X11TranslateCoordinatesReply.fromBuffer);
   }
 
-  int warpPointer(X11Point dst,
-      {int dstWindow = 0,
-      int srcWindow = 0,
-      X11Rectangle src = const X11Rectangle(0, 0, 0, 0)}) {
-    var request = X11WarpPointerRequest(dst,
-        dstWindow: dstWindow, srcWindow: srcWindow, src: src);
+  int warpPointer(X11Point destination,
+      {int destinationWindow = 0,
+      int sourceWindow = 0,
+      X11Rectangle source = const X11Rectangle(0, 0, 0, 0)}) {
+    var request = X11WarpPointerRequest(destination,
+        destinationWindow: destinationWindow,
+        sourceWindow: sourceWindow,
+        source: source);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(41, buffer.data);
@@ -1091,8 +1094,8 @@ class X11Client {
     return _sendRequest(56, buffer.data);
   }
 
-  int copyGC(int srcGc, int dstGc, int valueMask) {
-    var request = X11CopyGCRequest(srcGc, dstGc, valueMask);
+  int copyGC(int sourceGc, int destinationGc, int valueMask) {
+    var request = X11CopyGCRequest(sourceGc, destinationGc, valueMask);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(57, buffer.data);
@@ -1297,8 +1300,8 @@ class X11Client {
     return _sendRequest(79, buffer.data);
   }
 
-  int copyColormapAndFree(int id, int srcColormap) {
-    var request = X11CopyColormapAndFreeRequest(id, srcColormap);
+  int copyColormapAndFree(int id, int sourceColormap) {
+    var request = X11CopyColormapAndFreeRequest(id, sourceColormap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(80, buffer.data);
@@ -1328,7 +1331,7 @@ class X11Client {
     var sequenceNumber = _sendRequest(83, buffer.data);
     var reply = await _awaitReply<X11ListInstalledColormapsReply>(
         sequenceNumber, X11ListInstalledColormapsReply.fromBuffer);
-    return reply.cmaps;
+    return reply.colormaps;
   }
 
   /// Allocates a read-only colormap entry in [colormap] for the closest RGB value to [color].

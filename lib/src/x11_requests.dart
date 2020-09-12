@@ -2465,49 +2465,52 @@ class X11GetMotionEventsReply extends X11Reply {
 }
 
 class X11TranslateCoordinatesRequest extends X11Request {
-  final int srcWindow;
-  final X11Point src;
-  final int dstWindow;
+  final int sourceWindow;
+  final X11Point source;
+  final int destinationWindow;
 
-  X11TranslateCoordinatesRequest(this.srcWindow, this.src, this.dstWindow);
+  X11TranslateCoordinatesRequest(
+      this.sourceWindow, this.source, this.destinationWindow);
 
   factory X11TranslateCoordinatesRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var srcWindow = buffer.readUint32();
-    var dstWindow = buffer.readUint32();
-    var srcX = buffer.readInt16();
-    var srcY = buffer.readInt16();
+    var sourceWindow = buffer.readUint32();
+    var destinationWindow = buffer.readUint32();
+    var sourceX = buffer.readInt16();
+    var sourceY = buffer.readInt16();
     return X11TranslateCoordinatesRequest(
-        srcWindow, X11Point(srcX, srcY), dstWindow);
+        sourceWindow, X11Point(sourceX, sourceY), destinationWindow);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(srcWindow);
-    buffer.writeUint32(dstWindow);
-    buffer.writeInt16(src.x);
-    buffer.writeInt16(src.y);
+    buffer.writeUint32(sourceWindow);
+    buffer.writeUint32(destinationWindow);
+    buffer.writeInt16(source.x);
+    buffer.writeInt16(source.y);
   }
 
   @override
   String toString() =>
-      'X11TranslateCoordinatesRequest(srcWindow: ${srcWindow}, src: ${src}, dstWindow: ${dstWindow})';
+      'X11TranslateCoordinatesRequest(sourceWindow: ${sourceWindow}, source: ${source}, destinationWindow: ${destinationWindow})';
 }
 
 class X11TranslateCoordinatesReply extends X11Reply {
   final int child;
-  final X11Point dst;
+  final X11Point destination;
   final bool sameScreen;
 
-  X11TranslateCoordinatesReply(this.child, this.dst, {this.sameScreen = true});
+  X11TranslateCoordinatesReply(this.child, this.destination,
+      {this.sameScreen = true});
 
   static X11TranslateCoordinatesReply fromBuffer(X11ReadBuffer buffer) {
     var sameScreen = buffer.readBool();
     var child = buffer.readUint32();
-    var dstX = buffer.readInt16();
-    var dstY = buffer.readInt16();
-    return X11TranslateCoordinatesReply(child, X11Point(dstX, dstY),
+    var destinationX = buffer.readInt16();
+    var destinationY = buffer.readInt16();
+    return X11TranslateCoordinatesReply(
+        child, X11Point(destinationX, destinationY),
         sameScreen: sameScreen);
   }
 
@@ -2515,58 +2518,58 @@ class X11TranslateCoordinatesReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(sameScreen);
     buffer.writeUint32(child);
-    buffer.writeInt16(dst.x);
-    buffer.writeInt16(dst.y);
+    buffer.writeInt16(destination.x);
+    buffer.writeInt16(destination.y);
   }
 
   @override
   String toString() =>
-      'X11TranslateCoordinatesReply(child: ${child}, dst: ${dst}, sameScreen: ${sameScreen})';
+      'X11TranslateCoordinatesReply(child: ${child}, destination: ${destination}, sameScreen: ${sameScreen})';
 }
 
 class X11WarpPointerRequest extends X11Request {
-  final X11Point dst;
-  final int srcWindow;
-  final int dstWindow;
-  final X11Rectangle src;
+  final X11Point destination;
+  final int sourceWindow;
+  final int destinationWindow;
+  final X11Rectangle source;
 
-  X11WarpPointerRequest(this.dst,
-      {this.dstWindow = 0,
-      this.srcWindow = 0,
-      this.src = const X11Rectangle(0, 0, 0, 0)});
+  X11WarpPointerRequest(this.destination,
+      {this.destinationWindow = 0,
+      this.sourceWindow = 0,
+      this.source = const X11Rectangle(0, 0, 0, 0)});
 
   factory X11WarpPointerRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var srcWindow = buffer.readUint32();
-    var dstWindow = buffer.readUint32();
-    var srcX = buffer.readInt16();
-    var srcY = buffer.readInt16();
-    var srcWidth = buffer.readUint16();
-    var srcHeight = buffer.readUint16();
-    var dstX = buffer.readInt16();
-    var dstY = buffer.readInt16();
-    return X11WarpPointerRequest(X11Point(dstX, dstY),
-        dstWindow: dstWindow,
-        srcWindow: srcWindow,
-        src: X11Rectangle(srcX, srcY, srcWidth, srcHeight));
+    var sourceWindow = buffer.readUint32();
+    var destinationWindow = buffer.readUint32();
+    var sourceX = buffer.readInt16();
+    var sourceY = buffer.readInt16();
+    var sourceWidth = buffer.readUint16();
+    var sourceHeight = buffer.readUint16();
+    var destinationX = buffer.readInt16();
+    var destinationY = buffer.readInt16();
+    return X11WarpPointerRequest(X11Point(destinationX, destinationY),
+        destinationWindow: destinationWindow,
+        sourceWindow: sourceWindow,
+        source: X11Rectangle(sourceX, sourceY, sourceWidth, sourceHeight));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(srcWindow);
-    buffer.writeUint32(dstWindow);
-    buffer.writeInt16(src.x);
-    buffer.writeInt16(src.y);
-    buffer.writeUint16(src.width);
-    buffer.writeUint16(src.height);
-    buffer.writeInt16(dst.x);
-    buffer.writeInt16(dst.y);
+    buffer.writeUint32(sourceWindow);
+    buffer.writeUint32(destinationWindow);
+    buffer.writeInt16(source.x);
+    buffer.writeInt16(source.y);
+    buffer.writeUint16(source.width);
+    buffer.writeUint16(source.height);
+    buffer.writeInt16(destination.x);
+    buffer.writeInt16(destination.y);
   }
 
   @override
   String toString() =>
-      'X11WarpPointerRequest(dst: ${dst}, srcWindow: ${srcWindow}, dstWindow: ${dstWindow}, src: ${src})';
+      'X11WarpPointerRequest(destination: ${destination}, sourceWindow: ${sourceWindow}, destinationWindow: ${destinationWindow}, source: ${source})';
 }
 
 class X11SetInputFocusRequest extends X11Request {
@@ -4018,31 +4021,31 @@ class X11ChangeGCRequest extends X11Request {
 }
 
 class X11CopyGCRequest extends X11Request {
-  final int srcGc;
-  final int dstGc;
+  final int sourceGc;
+  final int destinationGc;
   final int valueMask;
 
-  X11CopyGCRequest(this.srcGc, this.dstGc, this.valueMask);
+  X11CopyGCRequest(this.sourceGc, this.destinationGc, this.valueMask);
 
   factory X11CopyGCRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var srcGc = buffer.readUint32();
-    var dstGc = buffer.readUint32();
+    var sourceGc = buffer.readUint32();
+    var destinationGc = buffer.readUint32();
     var valueMask = buffer.readUint32();
-    return X11CopyGCRequest(srcGc, dstGc, valueMask);
+    return X11CopyGCRequest(sourceGc, destinationGc, valueMask);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(srcGc);
-    buffer.writeUint32(dstGc);
+    buffer.writeUint32(sourceGc);
+    buffer.writeUint32(destinationGc);
     buffer.writeUint32(valueMask);
   }
 
   @override
   String toString() =>
-      'X11CopyGCRequest(srcGc: ${srcGc}, dstGc: ${dstGc}, valueMask: ${valueMask})';
+      'X11CopyGCRequest(sourceGc: ${sourceGc}, destinationGc: ${destinationGc}, valueMask: ${valueMask})';
 }
 
 class X11SetDashesRequest extends X11Request {
@@ -4183,99 +4186,103 @@ class X11ClearAreaRequest extends X11Request {
 }
 
 class X11CopyAreaRequest extends X11Request {
-  final int srcDrawable;
-  final int dstDrawable;
+  final int sourceDrawable;
+  final int destinationDrawable;
   final int gc;
-  final X11Rectangle srcArea;
-  final X11Point dstPosition;
+  final X11Rectangle sourceArea;
+  final X11Point destinationPosition;
 
-  X11CopyAreaRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcArea,
-      this.dstPosition);
+  X11CopyAreaRequest(this.sourceDrawable, this.destinationDrawable, this.gc,
+      this.sourceArea, this.destinationPosition);
 
   factory X11CopyAreaRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var srcDrawable = buffer.readUint32();
-    var dstDrawable = buffer.readUint32();
+    var sourceDrawable = buffer.readUint32();
+    var destinationDrawable = buffer.readUint32();
     var gc = buffer.readUint32();
-    var srcX = buffer.readInt16();
-    var srcY = buffer.readInt16();
-    var dstX = buffer.readInt16();
-    var dstY = buffer.readInt16();
+    var sourceX = buffer.readInt16();
+    var sourceY = buffer.readInt16();
+    var destinationX = buffer.readInt16();
+    var destinationY = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11CopyAreaRequest(srcDrawable, dstDrawable, gc,
-        X11Rectangle(srcX, srcY, width, height), X11Point(dstX, dstY));
+    return X11CopyAreaRequest(
+        sourceDrawable,
+        destinationDrawable,
+        gc,
+        X11Rectangle(sourceX, sourceY, width, height),
+        X11Point(destinationX, destinationY));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(srcDrawable);
-    buffer.writeUint32(dstDrawable);
+    buffer.writeUint32(sourceDrawable);
+    buffer.writeUint32(destinationDrawable);
     buffer.writeUint32(gc);
-    buffer.writeInt16(srcArea.x);
-    buffer.writeInt16(srcArea.y);
-    buffer.writeInt16(dstPosition.x);
-    buffer.writeInt16(dstPosition.y);
-    buffer.writeUint16(srcArea.width);
-    buffer.writeUint16(srcArea.height);
+    buffer.writeInt16(sourceArea.x);
+    buffer.writeInt16(sourceArea.y);
+    buffer.writeInt16(destinationPosition.x);
+    buffer.writeInt16(destinationPosition.y);
+    buffer.writeUint16(sourceArea.width);
+    buffer.writeUint16(sourceArea.height);
   }
 
   @override
   String toString() =>
-      'X11CopyAreaRequest(srcDrawable: ${srcDrawable}, dstDrawable: ${dstDrawable}, gc: ${_formatId(gc)}, srcArea: ${srcArea}, dstPosition: ${dstPosition})';
+      'X11CopyAreaRequest(sourceDrawable: ${sourceDrawable}, destinationDrawable: ${destinationDrawable}, gc: ${_formatId(gc)}, sourceArea: ${sourceArea}, destinationPosition: ${destinationPosition})';
 }
 
 class X11CopyPlaneRequest extends X11Request {
-  final int srcDrawable;
-  final int dstDrawable;
+  final int sourceDrawable;
+  final int destinationDrawable;
   final int gc;
-  final X11Rectangle srcArea;
-  final X11Point dstPosition;
+  final X11Rectangle sourceArea;
+  final X11Point destinationPosition;
   final int bitPlane;
 
-  X11CopyPlaneRequest(this.srcDrawable, this.dstDrawable, this.gc, this.srcArea,
-      this.dstPosition, this.bitPlane);
+  X11CopyPlaneRequest(this.sourceDrawable, this.destinationDrawable, this.gc,
+      this.sourceArea, this.destinationPosition, this.bitPlane);
 
   factory X11CopyPlaneRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var srcDrawable = buffer.readUint32();
-    var dstDrawable = buffer.readUint32();
+    var sourceDrawable = buffer.readUint32();
+    var destinationDrawable = buffer.readUint32();
     var gc = buffer.readUint32();
-    var srcX = buffer.readInt16();
-    var srcY = buffer.readInt16();
-    var dstX = buffer.readInt16();
-    var dstY = buffer.readInt16();
+    var sourceX = buffer.readInt16();
+    var sourceY = buffer.readInt16();
+    var destinationX = buffer.readInt16();
+    var destinationY = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     var bitPlane = buffer.readUint32();
     return X11CopyPlaneRequest(
-        srcDrawable,
-        dstDrawable,
+        sourceDrawable,
+        destinationDrawable,
         gc,
-        X11Rectangle(srcX, srcY, width, height),
-        X11Point(dstX, dstY),
+        X11Rectangle(sourceX, sourceY, width, height),
+        X11Point(destinationX, destinationY),
         bitPlane);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(srcDrawable);
-    buffer.writeUint32(dstDrawable);
+    buffer.writeUint32(sourceDrawable);
+    buffer.writeUint32(destinationDrawable);
     buffer.writeUint32(gc);
-    buffer.writeInt16(srcArea.x);
-    buffer.writeInt16(srcArea.y);
-    buffer.writeInt16(dstPosition.x);
-    buffer.writeInt16(dstPosition.y);
-    buffer.writeUint16(srcArea.width);
-    buffer.writeUint16(srcArea.height);
+    buffer.writeInt16(sourceArea.x);
+    buffer.writeInt16(sourceArea.y);
+    buffer.writeInt16(destinationPosition.x);
+    buffer.writeInt16(destinationPosition.y);
+    buffer.writeUint16(sourceArea.width);
+    buffer.writeUint16(sourceArea.height);
     buffer.writeUint32(bitPlane);
   }
 
   @override
   String toString() =>
-      'X11CopyPlaneRequest(srcDrawable: ${srcDrawable}, dstDrawable: ${dstDrawable}, gc: ${_formatId(gc)}, srcArea: ${srcArea}, dstPosition: ${dstPosition}, bitPlane: ${bitPlane})';
+      'X11CopyPlaneRequest(sourceDrawable: ${sourceDrawable}, destinationDrawable: ${destinationDrawable}, gc: ${_formatId(gc)}, sourceArea: ${sourceArea}, destinationPosition: ${destinationPosition}, bitPlane: ${bitPlane})';
 }
 
 class X11PolyPointRequest extends X11Request {
@@ -4631,8 +4638,8 @@ class X11PutImageRequest extends X11Request {
     var gc = buffer.readUint32();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    var dstX = buffer.readInt16();
-    var dstY = buffer.readInt16();
+    var destinationX = buffer.readInt16();
+    var destinationY = buffer.readInt16();
     var leftPad = buffer.readUint8();
     var depth = buffer.readUint8();
     buffer.skip(2);
@@ -4641,8 +4648,8 @@ class X11PutImageRequest extends X11Request {
     while (buffer.remaining > 0) {
       data.add(buffer.readUint8());
     }
-    return X11PutImageRequest(
-        drawable, gc, X11Rectangle(dstX, dstY, width, height), data,
+    return X11PutImageRequest(drawable, gc,
+        X11Rectangle(destinationX, destinationY, width, height), data,
         format: format, depth: depth, leftPad: leftPad);
   }
 
@@ -4967,91 +4974,91 @@ class X11CreateColormapRequest extends X11Request {
 }
 
 class X11FreeColormapRequest extends X11Request {
-  final int cmap;
+  final int colormap;
 
-  X11FreeColormapRequest(this.cmap);
+  X11FreeColormapRequest(this.colormap);
 
   factory X11FreeColormapRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmap = buffer.readUint32();
-    return X11FreeColormapRequest(cmap);
+    var colormap = buffer.readUint32();
+    return X11FreeColormapRequest(colormap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
   }
 
   @override
-  String toString() => 'X11FreeColormapRequest(${cmap})';
+  String toString() => 'X11FreeColormapRequest(${colormap})';
 }
 
 class X11CopyColormapAndFreeRequest extends X11Request {
   final int mid;
-  final int srcCmap;
+  final int sourceColormap;
 
-  X11CopyColormapAndFreeRequest(this.mid, this.srcCmap);
+  X11CopyColormapAndFreeRequest(this.mid, this.sourceColormap);
 
   factory X11CopyColormapAndFreeRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var mid = buffer.readUint32();
-    var srcCmap = buffer.readUint32();
-    return X11CopyColormapAndFreeRequest(mid, srcCmap);
+    var sourceColormap = buffer.readUint32();
+    return X11CopyColormapAndFreeRequest(mid, sourceColormap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(mid);
-    buffer.writeUint32(srcCmap);
+    buffer.writeUint32(sourceColormap);
   }
 
   @override
   String toString() =>
-      'X11CopyColormapAndFreeRequest(mid: ${mid}, srcCmap: ${srcCmap})';
+      'X11CopyColormapAndFreeRequest(mid: ${mid}, sourceColormap: ${sourceColormap})';
 }
 
 class X11InstallColormapRequest extends X11Request {
-  final int cmap;
+  final int colormap;
 
-  X11InstallColormapRequest(this.cmap);
+  X11InstallColormapRequest(this.colormap);
 
   factory X11InstallColormapRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmap = buffer.readUint32();
-    return X11InstallColormapRequest(cmap);
+    var colormap = buffer.readUint32();
+    return X11InstallColormapRequest(colormap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
   }
 
   @override
-  String toString() => 'X11InstallColormapRequest(${cmap})';
+  String toString() => 'X11InstallColormapRequest(${colormap})';
 }
 
 class X11UninstallColormapRequest extends X11Request {
-  final int cmap;
+  final int colormap;
 
-  X11UninstallColormapRequest(this.cmap);
+  X11UninstallColormapRequest(this.colormap);
 
   factory X11UninstallColormapRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmap = buffer.readUint32();
-    return X11UninstallColormapRequest(cmap);
+    var colormap = buffer.readUint32();
+    return X11UninstallColormapRequest(colormap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
   }
 
   @override
-  String toString() => 'X11UninstallColormapRequest(${cmap})';
+  String toString() => 'X11UninstallColormapRequest(${colormap})';
 }
 
 class X11ListInstalledColormapsRequest extends X11Request {
@@ -5077,55 +5084,56 @@ class X11ListInstalledColormapsRequest extends X11Request {
 }
 
 class X11ListInstalledColormapsReply extends X11Reply {
-  final List<int> cmaps;
+  final List<int> colormaps;
 
-  X11ListInstalledColormapsReply(this.cmaps);
+  X11ListInstalledColormapsReply(this.colormaps);
 
   static X11ListInstalledColormapsReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmapsLength = buffer.readUint16();
+    var colormapsLength = buffer.readUint16();
     buffer.skip(22);
-    var cmaps = <int>[];
-    for (var i = 0; i < cmapsLength; i++) {
-      cmaps.add(buffer.readUint32());
+    var colormaps = <int>[];
+    for (var i = 0; i < colormapsLength; i++) {
+      colormaps.add(buffer.readUint32());
     }
-    return X11ListInstalledColormapsReply(cmaps);
+    return X11ListInstalledColormapsReply(colormaps);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint16(cmaps.length);
+    buffer.writeUint16(colormaps.length);
     buffer.skip(22);
-    for (var cmap in cmaps) {
-      buffer.writeUint32(cmap);
+    for (var colormap in colormaps) {
+      buffer.writeUint32(colormap);
     }
   }
 
   @override
-  String toString() => 'X11ListInstalledColormapsReply(cmaps: ${cmaps})';
+  String toString() =>
+      'X11ListInstalledColormapsReply(colormaps: ${colormaps})';
 }
 
 class X11AllocColorRequest extends X11Request {
-  final int cmap;
+  final int colormap;
   final X11Rgb color;
 
-  X11AllocColorRequest(this.cmap, this.color);
+  X11AllocColorRequest(this.colormap, this.color);
 
   factory X11AllocColorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmap = buffer.readUint32();
+    var colormap = buffer.readUint32();
     var red = buffer.readUint16();
     var green = buffer.readUint16();
     var blue = buffer.readUint16();
     buffer.skip(2);
-    return X11AllocColorRequest(cmap, X11Rgb(red, green, blue));
+    return X11AllocColorRequest(colormap, X11Rgb(red, green, blue));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
     buffer.writeUint16(color.red);
     buffer.writeUint16(color.green);
     buffer.writeUint16(color.blue);
@@ -5133,7 +5141,8 @@ class X11AllocColorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11AllocColorRequest(cmap: ${cmap}, color: ${color})';
+  String toString() =>
+      'X11AllocColorRequest(colormap: ${colormap}, color: ${color})';
 }
 
 class X11AllocColorReply extends X11Reply {
@@ -5167,25 +5176,25 @@ class X11AllocColorReply extends X11Reply {
 }
 
 class X11AllocNamedColorRequest extends X11Request {
-  final int cmap;
+  final int colormap;
   final String name;
 
-  X11AllocNamedColorRequest(this.cmap, this.name);
+  X11AllocNamedColorRequest(this.colormap, this.name);
 
   factory X11AllocNamedColorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmap = buffer.readUint32();
+    var colormap = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
-    return X11AllocNamedColorRequest(cmap, name);
+    return X11AllocNamedColorRequest(colormap, name);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint16(nameLength);
     buffer.skip(2);
@@ -5195,7 +5204,7 @@ class X11AllocNamedColorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11AllocNamedColorRequest(cmap: ${cmap}, name: ${name})';
+      'X11AllocNamedColorRequest(colormap: ${colormap}, name: ${name})';
 }
 
 class X11AllocNamedColorReply extends X11Reply {
@@ -5238,34 +5247,34 @@ class X11AllocNamedColorReply extends X11Reply {
 }
 
 class X11AllocColorCellsRequest extends X11Request {
-  final int cmap;
+  final int colormap;
   final int colors;
   final int planes;
   final bool contiguous;
 
-  X11AllocColorCellsRequest(this.cmap, this.colors,
+  X11AllocColorCellsRequest(this.colormap, this.colors,
       {this.planes = 0, this.contiguous = false});
 
   factory X11AllocColorCellsRequest.fromBuffer(X11ReadBuffer buffer) {
     var contiguous = buffer.readBool();
-    var cmap = buffer.readUint32();
+    var colormap = buffer.readUint32();
     var colors = buffer.readUint16();
     var planes = buffer.readUint16();
-    return X11AllocColorCellsRequest(cmap, colors,
+    return X11AllocColorCellsRequest(colormap, colors,
         planes: planes, contiguous: contiguous);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(contiguous);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
     buffer.writeUint16(colors);
     buffer.writeUint16(planes);
   }
 
   @override
   String toString() =>
-      'X11AllocColorCellsRequest(cmap: ${cmap}, colors: ${colors}, planes: ${planes}, contiguous: ${contiguous})';
+      'X11AllocColorCellsRequest(colormap: ${colormap}, colors: ${colors}, planes: ${planes}, contiguous: ${contiguous})';
 }
 
 class X11AllocColorCellsReply extends X11Reply {
@@ -5310,14 +5319,14 @@ class X11AllocColorCellsReply extends X11Reply {
 }
 
 class X11AllocColorPlanesRequest extends X11Request {
-  final int cmap;
+  final int colormap;
   final int colors;
   final int reds;
   final int greens;
   final int blues;
   final bool contiguous;
 
-  X11AllocColorPlanesRequest(this.cmap, this.colors,
+  X11AllocColorPlanesRequest(this.colormap, this.colors,
       {this.reds = 0,
       this.greens = 0,
       this.blues = 0,
@@ -5325,19 +5334,19 @@ class X11AllocColorPlanesRequest extends X11Request {
 
   factory X11AllocColorPlanesRequest.fromBuffer(X11ReadBuffer buffer) {
     var contiguous = buffer.readBool();
-    var cmap = buffer.readUint32();
+    var colormap = buffer.readUint32();
     var colors = buffer.readUint16();
     var reds = buffer.readUint16();
     var greens = buffer.readUint16();
     var blues = buffer.readUint16();
-    return X11AllocColorPlanesRequest(cmap, colors,
+    return X11AllocColorPlanesRequest(colormap, colors,
         reds: reds, greens: greens, blues: blues, contiguous: contiguous);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(contiguous);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
     buffer.writeUint16(colors);
     buffer.writeUint16(reds);
     buffer.writeUint16(greens);
@@ -5346,7 +5355,7 @@ class X11AllocColorPlanesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11AllocColorPlanesRequest(cmap: ${cmap}, colors: ${colors}, reds: ${reds}, greens: ${greens}, blues: ${blues}, contiguous: ${contiguous})';
+      'X11AllocColorPlanesRequest(colormap: ${colormap}, colors: ${colors}, reds: ${reds}, greens: ${greens}, blues: ${blues}, contiguous: ${contiguous})';
 }
 
 class X11AllocColorPlanesReply extends X11Reply {
@@ -5393,27 +5402,27 @@ class X11AllocColorPlanesReply extends X11Reply {
 }
 
 class X11FreeColorsRequest extends X11Request {
-  final int cmap;
+  final int colormap;
   final List<int> pixels;
   final int planeMask;
 
-  X11FreeColorsRequest(this.cmap, this.pixels, this.planeMask);
+  X11FreeColorsRequest(this.colormap, this.pixels, this.planeMask);
 
   factory X11FreeColorsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmap = buffer.readUint32();
+    var colormap = buffer.readUint32();
     var planeMask = buffer.readUint32();
     var pixels = <int>[];
     while (buffer.remaining > 0) {
       pixels.add(buffer.readUint32());
     }
-    return X11FreeColorsRequest(cmap, pixels, planeMask);
+    return X11FreeColorsRequest(colormap, pixels, planeMask);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
     buffer.writeUint32(planeMask);
     for (var pixel in pixels) {
       buffer.writeUint32(pixel);
@@ -5422,18 +5431,18 @@ class X11FreeColorsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FreeColorsRequest(cmap: ${cmap}, planeMask: ${planeMask}, pixels: ${pixels})';
+      'X11FreeColorsRequest(colormap: ${colormap}, planeMask: ${planeMask}, pixels: ${pixels})';
 }
 
 class X11StoreColorsRequest extends X11Request {
-  final int cmap;
+  final int colormap;
   final List<X11ColorItem> items;
 
-  X11StoreColorsRequest(this.cmap, this.items);
+  X11StoreColorsRequest(this.colormap, this.items);
 
   factory X11StoreColorsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmap = buffer.readUint32();
+    var colormap = buffer.readUint32();
     var items = <X11ColorItem>[];
     while (buffer.remaining > 0) {
       var pixel = buffer.readUint32();
@@ -5448,13 +5457,13 @@ class X11StoreColorsRequest extends X11Request {
       items.add(X11ColorItem(pixel, X11Rgb(red, green, blue),
           doRed: doRed, doGreen: doGreen, doBlue: doBlue));
     }
-    return X11StoreColorsRequest(cmap, items);
+    return X11StoreColorsRequest(colormap, items);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
     for (var item in items) {
       buffer.writeUint32(item.pixel);
       buffer.writeUint16(item.color.red);
@@ -5476,18 +5485,19 @@ class X11StoreColorsRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11StoreColorsRequest(cmap: ${cmap}, items: ${items})';
+  String toString() =>
+      'X11StoreColorsRequest(colormap: ${colormap}, items: ${items})';
 }
 
 class X11StoreNamedColorRequest extends X11Request {
-  final int cmap;
+  final int colormap;
   final int pixel;
   final String name;
   final bool doRed;
   final bool doGreen;
   final bool doBlue;
 
-  X11StoreNamedColorRequest(this.cmap, this.pixel, this.name,
+  X11StoreNamedColorRequest(this.colormap, this.pixel, this.name,
       {this.doRed = true, this.doGreen = true, this.doBlue = true});
 
   factory X11StoreNamedColorRequest.fromBuffer(X11ReadBuffer buffer) {
@@ -5495,13 +5505,13 @@ class X11StoreNamedColorRequest extends X11Request {
     var doRed = (flags & 0x1) != 0;
     var doGreen = (flags & 0x2) != 0;
     var doBlue = (flags & 0x4) != 0;
-    var cmap = buffer.readUint32();
+    var colormap = buffer.readUint32();
     var pixel = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
-    return X11StoreNamedColorRequest(cmap, pixel, name,
+    return X11StoreNamedColorRequest(colormap, pixel, name,
         doRed: doRed, doGreen: doGreen, doBlue: doBlue);
   }
 
@@ -5518,7 +5528,7 @@ class X11StoreNamedColorRequest extends X11Request {
       flags |= 0x4;
     }
     buffer.writeUint8(flags);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
     buffer.writeUint32(pixel);
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint16(nameLength);
@@ -5529,29 +5539,29 @@ class X11StoreNamedColorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11StoreNamedColorRequest(cmap: ${cmap}, pixel: ${pixel}, name: ${name}, doRed: ${doRed}, doGreen: ${doGreen}, doBlue: ${doBlue})';
+      'X11StoreNamedColorRequest(colormap: ${colormap}, pixel: ${pixel}, name: ${name}, doRed: ${doRed}, doGreen: ${doGreen}, doBlue: ${doBlue})';
 }
 
 class X11QueryColorsRequest extends X11Request {
-  final int cmap;
+  final int colormap;
   final List<int> pixels;
 
-  X11QueryColorsRequest(this.cmap, this.pixels);
+  X11QueryColorsRequest(this.colormap, this.pixels);
 
   factory X11QueryColorsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmap = buffer.readUint32();
+    var colormap = buffer.readUint32();
     var pixels = <int>[];
     while (buffer.remaining > 0) {
       pixels.add(buffer.readUint32());
     }
-    return X11QueryColorsRequest(cmap, pixels);
+    return X11QueryColorsRequest(colormap, pixels);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
     for (var pixel in pixels) {
       buffer.writeUint32(pixel);
     }
@@ -5559,7 +5569,7 @@ class X11QueryColorsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11QueryColorsRequest(cmap: ${cmap}, pixels: ${pixels})';
+      'X11QueryColorsRequest(colormap: ${colormap}, pixels: ${pixels})';
 }
 
 class X11QueryColorsReply extends X11Reply {
@@ -5600,25 +5610,25 @@ class X11QueryColorsReply extends X11Reply {
 }
 
 class X11LookupColorRequest extends X11Request {
-  final int cmap;
+  final int colormap;
   final String name;
 
-  X11LookupColorRequest(this.cmap, this.name);
+  X11LookupColorRequest(this.colormap, this.name);
 
   factory X11LookupColorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cmap = buffer.readUint32();
+    var colormap = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
-    return X11LookupColorRequest(cmap, name);
+    return X11LookupColorRequest(colormap, name);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cmap);
+    buffer.writeUint32(colormap);
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint16(nameLength);
     buffer.skip(2);
@@ -5627,7 +5637,8 @@ class X11LookupColorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11LookupColorRequest(cmap: ${cmap}, name: ${name})';
+  String toString() =>
+      'X11LookupColorRequest(colormap: ${colormap}, name: ${name})';
 }
 
 class X11LookupColorReply extends X11Reply {
