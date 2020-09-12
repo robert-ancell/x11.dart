@@ -92,22 +92,27 @@ class _RequestStreamHandler<T> extends _RequestHandler {
 }
 
 class X11Client {
+  /// Screens provided by the X server.
+  List<X11Screen> screens;
+
+  /// Stream of errors from the X server.
+  Stream<X11Error> get errorStream => _errorStreamController.stream;
+
+  /// Stream of events from the X server.
+  Stream<X11Event> get eventStream => _eventStreamController.stream;
+
   Socket _socket;
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
   int _sequenceNumber = 0;
   int _resourceIdBase;
   int _resourceCount = 0;
-  List<X11Screen> roots;
   final _errorStreamController = StreamController<X11Error>();
   final _eventStreamController = StreamController<X11Event>();
   final _requests = <int, _RequestHandler>{};
 
-  Stream<X11Error> get errorStream => _errorStreamController.stream;
-  Stream<X11Event> get eventStream => _eventStreamController.stream;
-
-  final atoms = <String, int>{};
-  final atomNames = <int, String>{};
+  final _atoms = <String, int>{};
+  final _atomNames = <int, String>{};
 
   X11Client() {
     final builtinAtoms = [
@@ -183,8 +188,8 @@ class X11Client {
     ];
     for (var i = 0; i < builtinAtoms.length; i++) {
       var name = builtinAtoms[i];
-      atoms[name] = i;
-      atomNames[i] = name;
+      _atoms[name] = i;
+      _atomNames[i] = name;
     }
   }
 
@@ -480,7 +485,7 @@ class X11Client {
   /// Gets the atom with [name]. If [onlyIfExists] is false this will always return a value (new atoms will be created).
   Future<int> internAtom(String name, {bool onlyIfExists = false}) async {
     // Check if already in cache.
-    var id = atoms[name];
+    var id = _atoms[name];
     if (id != null) {
       return id;
     }
@@ -493,7 +498,7 @@ class X11Client {
         sequenceNumber, X11InternAtomReply.fromBuffer);
 
     // Cache result.
-    atoms[name] = reply.atom;
+    _atoms[name] = reply.atom;
 
     return reply.atom;
   }
@@ -501,7 +506,7 @@ class X11Client {
   /// Gets the name of [atom].
   Future<String> getAtomName(int atom) async {
     // Check if already in cache.
-    var name = atomNames[atom];
+    var name = _atomNames[atom];
     if (name != null) {
       return name;
     }
@@ -514,7 +519,7 @@ class X11Client {
         sequenceNumber, X11GetAtomNameReply.fromBuffer);
 
     // Cache result.
-    atomNames[atom] = reply.name;
+    _atomNames[atom] = reply.name;
 
     return reply.name;
   }
@@ -1874,7 +1879,7 @@ class X11Client {
       // Success
       var reply = X11SetupSuccessReply.fromBuffer(replyBuffer);
       _resourceIdBase = reply.resourceIdBase;
-      roots = reply.roots;
+      screens = reply.roots;
     } else if (result == 2) {
       // Authenticate
       var reply = X11SetupAuthenticateReply.fromBuffer(replyBuffer);

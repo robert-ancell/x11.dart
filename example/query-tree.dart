@@ -24,7 +24,7 @@ void main() async {
     }
   }
 
-  var rootWindows = client.roots.map((screen) => screen.window).toList();
+  var rootWindows = client.screens.map((screen) => screen.window).toList();
   await printChildren(rootWindows);
 
   await client.close();
