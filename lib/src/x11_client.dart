@@ -360,12 +360,12 @@ class X11Client {
     return _sendRequest(5, buffer.data);
   }
 
-  /// Adds [window] to the clients save-set.
+  /// Inserts [window] into the clients save-set.
   int insertSaveSet(int window) {
     return _changeSaveSet(window, X11ChangeSetMode.insert);
   }
 
-  /// Removes [window] from the clients save-set.
+  /// Deletes [window] from the clients save-set.
   int deleteSaveSet(int window) {
     return _changeSaveSet(window, X11ChangeSetMode.delete);
   }
@@ -1643,12 +1643,12 @@ class X11Client {
         sequenceNumber, X11GetScreenSaverReply.fromBuffer);
   }
 
-  /// Adds a host to the access control list.
+  /// Inserts a host to the access control list.
   int insertHost(int family, List<int> address) {
     return _changeHosts(X11ChangeHostsMode.insert, family, address);
   }
 
-  /// Removes a host from the access control list.
+  /// Deletes a host from the access control list.
   int deleteHost(int family, List<int> address) {
     return _changeHosts(X11ChangeHostsMode.delete, family, address);
   }
