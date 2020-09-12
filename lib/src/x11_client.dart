@@ -1309,6 +1309,8 @@ class X11Client {
   }
 
   /// Creates a colormap with [id] with [visual] format for the screen that contains [window].
+  ///
+  /// When no longer required, the colormap reference should be deleted with [freeColormap].
   int createColormap(int id, int window, int visual, {int alloc = 0}) {
     var request = X11CreateColormapRequest(id, window, visual, alloc: alloc);
     var buffer = X11WriteBuffer();
@@ -1316,6 +1318,7 @@ class X11Client {
     return _sendRequest(78, buffer.data);
   }
 
+  /// Deletes the reference to a [colormap] created in [createColormap].
   int freeColormap(int colormap) {
     var request = X11FreeColormapRequest(colormap);
     var buffer = X11WriteBuffer();
@@ -1323,6 +1326,9 @@ class X11Client {
     return _sendRequest(79, buffer.data);
   }
 
+  /// Creates a new colormap with [id] that moves the allocations from [sourceColormap].
+  ///
+  /// When no longer required, the colormap reference should be deleted with [freeColormap].
   int copyColormapAndFree(int id, int sourceColormap) {
     var request = X11CopyColormapAndFreeRequest(id, sourceColormap);
     var buffer = X11WriteBuffer();
