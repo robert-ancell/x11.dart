@@ -903,6 +903,7 @@ class X11Client {
   }
 
   /// Opens the font with the given [name] and assigns it [id].
+  /// When no longer required, the font reference should be deleted with [closeFont].
   int openFont(int id, String name) {
     var request = X11OpenFontRequest(id, name);
     var buffer = X11WriteBuffer();
@@ -988,7 +989,7 @@ class X11Client {
   }
 
   /// Creates a new pixmap with [id].
-  /// When no longer required, the pixmap should be deleted with [freePixmap].
+  /// When no longer required, the pixmap reference should be deleted with [freePixmap].
   int createPixmap(int id, int drawable, X11Size size, {int depth = 24}) {
     var request = X11CreatePixmapRequest(id, drawable, size, depth);
     var buffer = X11WriteBuffer();
@@ -1448,7 +1449,7 @@ class X11Client {
   /// Creates a cursor with [id] from [sourcePixmap].
   ///
   /// If set, [maskPixmap] defines the shape of the cursor.
-  /// When no longer required, the cursor should be deleted with [freeCursor].
+  /// When no longer required, the cursor reference should be deleted with [freeCursor].
   int createCursor(int id, int sourcePixmap,
       {X11Rgb foreground = const X11Rgb(65535, 65535, 65535),
       X11Rgb background = const X11Rgb(0, 0, 0),
@@ -1467,7 +1468,7 @@ class X11Client {
   /// Creates a cursor from [sourceChar] in [sourceFont].
   ///
   /// If set, [maskChar] and [maskFont] define the shape of the cursor.
-  /// When no longer required, the cursor should be deleted with [freeCursor].
+  /// When no longer required, the cursor reference should be deleted with [freeCursor].
   int createGlyphCursor(int id, int sourceFont, int sourceChar,
       {X11Rgb foreground = const X11Rgb(65535, 65535, 65535),
       X11Rgb background = const X11Rgb(0, 0, 0),
