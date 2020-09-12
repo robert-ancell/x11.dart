@@ -93,7 +93,7 @@ class _RequestStreamHandler<T> extends _RequestHandler {
 
 class X11Client {
   /// Screens provided by the X server.
-  List<X11Screen> screens;
+  List<X11Screen> get screens => _roots;
 
   /// Stream of errors from the X server.
   Stream<X11Error> get errorStream => _errorStreamController.stream;
@@ -107,6 +107,7 @@ class X11Client {
   int _sequenceNumber = 0;
   int _resourceIdBase;
   int _resourceCount = 0;
+  List<X11Screen> _roots;
   final _errorStreamController = StreamController<X11Error>();
   final _eventStreamController = StreamController<X11Event>();
   final _requests = <int, _RequestHandler>{};
@@ -1879,7 +1880,7 @@ class X11Client {
       // Success
       var reply = X11SetupSuccessReply.fromBuffer(replyBuffer);
       _resourceIdBase = reply.resourceIdBase;
-      screens = reply.roots;
+      _roots = reply.roots;
     } else if (result == 2) {
       // Authenticate
       var reply = X11SetupAuthenticateReply.fromBuffer(replyBuffer);
