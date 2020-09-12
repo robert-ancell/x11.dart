@@ -221,16 +221,17 @@ class X11Client {
     return _connectCompleter.future;
   }
 
+  /// Generates a new resource ID for use in [createWindow], [createGC], [createPixmap] etc.
   int generateId() {
     var id = _resourceIdBase + _resourceCount;
     _resourceCount++;
     return id;
   }
 
-  /// Creates a new window.
+  /// Creates a new window with [id] and [geometry] as a child of [parent].
   int createWindow(int id, int parent, X11Rectangle geometry,
       {X11WindowClass class_ = X11WindowClass.inputOutput,
-      int depth = 0,
+      int depth = 24,
       int visual = 0,
       int borderWidth = 0,
       int backgroundPixmap,
@@ -867,13 +868,16 @@ class X11Client {
     return reply.path;
   }
 
-  int createPixmap(int pid, int drawable, X11Size size, int depth) {
-    var request = X11CreatePixmapRequest(pid, drawable, size, depth);
+  /// Creates a new pixmap with [id].
+  /// When no longer required, the pixmap should be deleted with [freePixmap].
+  int createPixmap(int id, int drawable, X11Size size, {int depth = 24}) {
+    var request = X11CreatePixmapRequest(id, drawable, size, depth);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(53, buffer.data);
   }
 
+  /// Deletes the reference to a [pixmap] created in [createPixmap].
   int freePixmap(int pixmap) {
     var request = X11FreePixmapRequest(pixmap);
     var buffer = X11WriteBuffer();
@@ -881,7 +885,8 @@ class X11Client {
     return _sendRequest(54, buffer.data);
   }
 
-  /// Creates a graphics context for drawing on [drawable].
+  /// Creates a graphics context with [id] for drawing on [drawable].
+  /// When no longer required, the graphics context should be deleted with [freeGC].
   int createGC(int id, int drawable,
       {X11GraphicsFunction function,
       int planeMask,
@@ -1015,6 +1020,7 @@ class X11Client {
     return _sendRequest(59, buffer.data);
   }
 
+  /// Deletes the reference to a [gc] created in [createGC].
   int freeGC(int gc) {
     var request = X11FreeGCRequest(gc);
     var buffer = X11WriteBuffer();
