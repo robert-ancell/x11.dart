@@ -854,6 +854,7 @@ class X11Client {
         sequenceNumber, X11TranslateCoordinatesReply.fromBuffer);
   }
 
+  /// Moves the pointer to [destination].
   int warpPointer(X11Point destination,
       {int destinationWindow = 0,
       int sourceWindow = 0,
