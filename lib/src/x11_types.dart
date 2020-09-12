@@ -129,6 +129,8 @@ enum X11JoinStyle { miter, round, bevel }
 
 enum X11LineStyle { solid, onOffDash, doubleDash }
 
+enum X11PolygonShape { complex, nonconvex, convex }
+
 enum X11StackMode { above, below, topIf, bottomIf, opposite }
 
 enum X11SubwindowMode { clipByChildren, includeInferiors }

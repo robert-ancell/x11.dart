@@ -4484,17 +4484,18 @@ class X11FillPolyRequest extends X11Request {
   final int drawable;
   final int gc;
   final List<X11Point> points;
-  final int shape;
+  final X11PolygonShape shape;
   final X11CoordinateMode coordinateMode;
 
   X11FillPolyRequest(this.drawable, this.gc, this.points,
-      {this.shape = 0, this.coordinateMode = X11CoordinateMode.origin});
+      {this.shape = X11PolygonShape.complex,
+      this.coordinateMode = X11CoordinateMode.origin});
 
   factory X11FillPolyRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var drawable = buffer.readUint32();
     var gc = buffer.readUint32();
-    var shape = buffer.readUint8();
+    var shape = X11PolygonShape.values[buffer.readUint8()];
     var coordinateMode = X11CoordinateMode.values[buffer.readUint8()];
     buffer.skip(2);
     var points = <X11Point>[];
@@ -4512,6 +4513,9 @@ class X11FillPolyRequest extends X11Request {
     buffer.writeUint8(coordinateMode.index);
     buffer.writeUint32(drawable);
     buffer.writeUint32(gc);
+    buffer.writeUint8(shape.index);
+    buffer.writeUint8(coordinateMode.index);
+    buffer.skip(2);
     for (var point in points) {
       buffer.writeInt16(point.x);
       buffer.writeInt16(point.y);
@@ -4933,19 +4937,20 @@ class X11ImageText16Request extends X11Request {
 }
 
 class X11CreateColormapRequest extends X11Request {
-  final int alloc;
   final int mid;
   final int window;
   final int visual;
+  final int alloc;
 
-  X11CreateColormapRequest(this.alloc, this.mid, this.window, this.visual);
+  X11CreateColormapRequest(this.mid, this.window, this.visual,
+      {this.alloc = 0});
 
   factory X11CreateColormapRequest.fromBuffer(X11ReadBuffer buffer) {
     var alloc = buffer.readUint8();
     var mid = buffer.readUint32();
     var window = buffer.readUint32();
     var visual = buffer.readUint32();
-    return X11CreateColormapRequest(alloc, mid, window, visual);
+    return X11CreateColormapRequest(mid, window, visual, alloc: alloc);
   }
 
   @override

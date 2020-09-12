@@ -935,7 +935,9 @@ class X11Client {
     return _sendRequest(55, buffer.data);
   }
 
-  // Changes properties of [gc].
+  /// Changes properties of [gc].
+  ///
+  /// The properties are the same as in [createGC].
   int changeGC(int gc,
       {X11GraphicsFunction function,
       int planeMask,
@@ -1028,19 +1030,23 @@ class X11Client {
     return _sendRequest(61, buffer.data);
   }
 
-  /// Copies [area] from [source] onto [drawable] at [position].
-  int copyArea(
-      int gc, int drawable, int source, X11Rectangle area, X11Point position) {
-    var request = X11CopyAreaRequest(source, drawable, gc, area, position);
+  /// Copies [sourceArea] from [sourceDrawable] onto [destinationDrawable] at [destinationPosition].
+  int copyArea(int gc, int sourceDrawable, X11Rectangle sourceArea,
+      int destinationDrawable, X11Point destinationPosition) {
+    var request = X11CopyAreaRequest(sourceDrawable, destinationDrawable, gc,
+        sourceArea, destinationPosition);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(62, buffer.data);
   }
 
-  int copyPlane(int gc, int drawable, int source, X11Rectangle area,
-      X11Point position, int bitPlane) {
-    var request =
-        X11CopyPlaneRequest(source, drawable, gc, area, position, bitPlane);
+  /// Copies the [sourceArea] from [sourceDrawable] onto [destinationDrawable] at [destinationPosition].
+  /// Only the bits in [bitPlane] from each pixel are copied.
+  /// [bitPlane] must have a single bit set within the depth of the data being copied.
+  int copyPlane(int gc, int sourceDrawable, X11Rectangle sourceArea,
+      int destinationDrawable, X11Point destinationPosition, int bitPlane) {
+    var request = X11CopyPlaneRequest(sourceDrawable, destinationDrawable, gc,
+        sourceArea, destinationPosition, bitPlane);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(63, buffer.data);
@@ -1073,6 +1079,7 @@ class X11Client {
     return _sendRequest(66, buffer.data);
   }
 
+  /// Draws [rectangles] onto [drawable.
   int polyRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyRectangleRequest(drawable, gc, rectangles);
     var buffer = X11WriteBuffer();
@@ -1080,6 +1087,7 @@ class X11Client {
     return _sendRequest(67, buffer.data);
   }
 
+  /// Draws [arcs] onto [drawable.
   int polyArc(int gc, int drawable, List<X11Arc> arcs) {
     var request = X11PolyArcRequest(drawable, gc, arcs);
     var buffer = X11WriteBuffer();
@@ -1087,8 +1095,9 @@ class X11Client {
     return _sendRequest(68, buffer.data);
   }
 
+  /// Draws a filled polygon made from [points] onto [drawable].
   int fillPoly(int gc, int drawable, List<X11Point> points,
-      {int shape = 0,
+      {X11PolygonShape shape = X11PolygonShape.complex,
       X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11FillPolyRequest(drawable, gc, points,
         shape: shape, coordinateMode: coordinateMode);
@@ -1097,6 +1106,7 @@ class X11Client {
     return _sendRequest(69, buffer.data);
   }
 
+  /// Draws filled [rectangles] onto [drawable].
   int polyFillRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyFillRectangleRequest(drawable, gc, rectangles);
     var buffer = X11WriteBuffer();
@@ -1104,6 +1114,7 @@ class X11Client {
     return _sendRequest(70, buffer.data);
   }
 
+  /// Draws a filled polygon made from [args] onto [drawable].
   int polyFillArc(int gc, int drawable, List<X11Arc> arcs) {
     var request = X11PolyFillArcRequest(drawable, gc, arcs);
     var buffer = X11WriteBuffer();
@@ -1136,6 +1147,7 @@ class X11Client {
         sequenceNumber, X11GetImageReply.fromBuffer);
   }
 
+  /// Draws text onto [drawable] at [position].
   int polyText8(
       int gc, int drawable, X11Point position, List<X11TextItem> items) {
     var request = X11PolyText8Request(drawable, gc, position, items);
@@ -1144,6 +1156,7 @@ class X11Client {
     return _sendRequest(74, buffer.data);
   }
 
+  /// Draws text onto [drawable] at [position].
   int polyText16(
       int gc, int drawable, X11Point position, List<X11TextItem> items) {
     var request = X11PolyText16Request(drawable, gc, position, items);
@@ -1152,6 +1165,7 @@ class X11Client {
     return _sendRequest(75, buffer.data);
   }
 
+  /// Draws [string] text onto [drawable] at [position]. [string] contains single byte characters.
   int imageText8(int gc, int drawable, X11Point position, String string) {
     var request = X11ImageText8Request(drawable, gc, position, string);
     var buffer = X11WriteBuffer();
@@ -1159,6 +1173,7 @@ class X11Client {
     return _sendRequest(76, buffer.data);
   }
 
+  /// Draws [string] text onto [drawable] at [position]. [string] contains two byte characters.
   int imageText16(int gc, int drawable, X11Point position, String string) {
     var request = X11ImageText16Request(drawable, gc, position, string);
     var buffer = X11WriteBuffer();
@@ -1166,8 +1181,9 @@ class X11Client {
     return _sendRequest(77, buffer.data);
   }
 
-  int createColormap(int alloc, int mid, int window, int visual) {
-    var request = X11CreateColormapRequest(alloc, mid, window, visual);
+  /// Creates a colormap with [id] with [visual] format for the screen that contains [window].
+  int createColormap(int id, int window, int visual, {int alloc = 0}) {
+    var request = X11CreateColormapRequest(id, window, visual, alloc: alloc);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(78, buffer.data);
@@ -1180,8 +1196,8 @@ class X11Client {
     return _sendRequest(79, buffer.data);
   }
 
-  int copyColormapAndFree(int mid, int srcCmap) {
-    var request = X11CopyColormapAndFreeRequest(mid, srcCmap);
+  int copyColormapAndFree(int id, int srcCmap) {
+    var request = X11CopyColormapAndFreeRequest(id, srcCmap);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(80, buffer.data);
@@ -1201,6 +1217,7 @@ class X11Client {
     return _sendRequest(82, buffer.data);
   }
 
+  /// Gets the installed colormaps on the screen containing [window].
   Future<List<int>> listInstalledColormaps(int window) async {
     var request = X11ListInstalledColormapsRequest(window);
     var buffer = X11WriteBuffer();
@@ -1211,6 +1228,7 @@ class X11Client {
     return reply.cmaps;
   }
 
+  /// Allocates a read-only colormap entry in [cmap] for the closest RGB values to [color].
   Future<X11AllocColorReply> allocColor(int cmap, X11Rgb color) async {
     var request = X11AllocColorRequest(cmap, color);
     var buffer = X11WriteBuffer();
@@ -1220,6 +1238,7 @@ class X11Client {
         sequenceNumber, X11AllocColorReply.fromBuffer);
   }
 
+  /// Allocates a read-only colormap entry in [cmap] for the color with [name].
   Future<X11AllocNamedColorReply> allocNamedColor(int cmap, String name) async {
     var request = X11AllocNamedColorRequest(cmap, name);
     var buffer = X11WriteBuffer();
