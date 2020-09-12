@@ -543,6 +543,13 @@ class X11Client {
   }
 
   // Changes a [property] of [window] to [value].
+  Future<int> changePropertyAtom(int window, String property, String value,
+      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
+    var valueAtom = await internAtom(value);
+    return await changePropertyUint32(window, property, 'ATOM', [valueAtom]);
+  }
+
+  // Changes a [property] of [window] to [value].
   Future<int> changePropertyString(int window, String property, String value,
       {String type = 'STRING',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
