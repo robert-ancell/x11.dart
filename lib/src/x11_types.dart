@@ -230,6 +230,16 @@ class X11Format {
       'X11Format(depth: ${depth}, bitsPerPixel: ${bitsPerPixel}, scanlinePad: ${scanlinePad})';
 }
 
+class X11Fraction {
+  final int numerator;
+  final int denominator;
+
+  X11Fraction(this.numerator, this.denominator);
+
+  @override
+  String toString() => 'X11Fraction(${numerator}, ${denominator})';
+}
+
 class X11Screen {
   final int window;
   final int defaultColormap;

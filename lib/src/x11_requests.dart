@@ -6363,18 +6363,10 @@ class X11BellRequest extends X11Request {
 }
 
 class X11ChangePointerControlRequest extends X11Request {
-  final bool doAcceleration;
-  final int accelerationNumerator;
-  final int accelerationDenominator;
-  final bool doThreshold;
+  final X11Fraction acceleration;
   final int threshold;
 
-  X11ChangePointerControlRequest(
-      {this.doAcceleration = false,
-      this.accelerationNumerator = 0,
-      this.accelerationDenominator = 0,
-      this.doThreshold = false,
-      this.threshold = 0});
+  X11ChangePointerControlRequest({this.acceleration, this.threshold});
 
   factory X11ChangePointerControlRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -6384,26 +6376,25 @@ class X11ChangePointerControlRequest extends X11Request {
     var doAcceleration = buffer.readBool();
     var doThreshold = buffer.readBool();
     return X11ChangePointerControlRequest(
-        doAcceleration: doAcceleration,
-        accelerationNumerator: accelerationNumerator,
-        accelerationDenominator: accelerationDenominator,
-        doThreshold: doThreshold,
-        threshold: threshold);
+        acceleration: doAcceleration
+            ? X11Fraction(accelerationNumerator, accelerationDenominator)
+            : null,
+        threshold: doThreshold ? threshold : null);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeInt16(accelerationNumerator);
-    buffer.writeInt16(accelerationDenominator);
-    buffer.writeInt16(threshold);
-    buffer.writeBool(doAcceleration);
-    buffer.writeBool(doThreshold);
+    buffer.writeInt16(acceleration != null ? acceleration.numerator : 0);
+    buffer.writeInt16(acceleration != null ? acceleration.denominator : 0);
+    buffer.writeInt16(threshold ?? 0);
+    buffer.writeBool(acceleration != null);
+    buffer.writeBool(threshold != null);
   }
 
   @override
   String toString() =>
-      'X11ChangePointerControlRequest(accelerationNumerator: ${accelerationNumerator}, accelerationDenominator: ${accelerationDenominator}, threshold: ${threshold}, doAcceleration: ${doAcceleration}, doThreshold: ${doThreshold})';
+      'X11ChangePointerControlRequest(acceleration: ${acceleration}, threshold: ${threshold})';
 }
 
 class X11GetPointerControlRequest extends X11Request {
@@ -6424,14 +6415,10 @@ class X11GetPointerControlRequest extends X11Request {
 }
 
 class X11GetPointerControlReply extends X11Reply {
-  final int accelerationNumerator;
-  final int accelerationDenominator;
+  final X11Fraction acceleration;
   final int threshold;
 
-  X11GetPointerControlReply(
-      {this.accelerationNumerator,
-      this.accelerationDenominator,
-      this.threshold});
+  X11GetPointerControlReply(this.acceleration, this.threshold);
 
   static X11GetPointerControlReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -6440,23 +6427,21 @@ class X11GetPointerControlReply extends X11Reply {
     var threshold = buffer.readUint16();
     buffer.skip(18);
     return X11GetPointerControlReply(
-        accelerationNumerator: accelerationNumerator,
-        accelerationDenominator: accelerationDenominator,
-        threshold: threshold);
+        X11Fraction(accelerationNumerator, accelerationDenominator), threshold);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint16(accelerationNumerator);
-    buffer.writeUint16(accelerationDenominator);
+    buffer.writeUint16(acceleration.numerator);
+    buffer.writeUint16(acceleration.denominator);
     buffer.writeUint16(threshold);
     buffer.skip(18);
   }
 
   @override
   String toString() =>
-      'X11GetPointerControlReply(accelerationNumerator: ${accelerationNumerator}, accelerationDenominator: ${accelerationDenominator}, threshold: ${threshold})';
+      'X11GetPointerControlReply(acceleration: ${acceleration}, threshold: ${threshold})';
 }
 
 class X11SetScreenSaverRequest extends X11Request {

@@ -1490,23 +1490,19 @@ class X11Client {
     return _sendRequest(104, buffer.data);
   }
 
-  int changePointerControl(
-      {bool doAcceleration = false,
-      int accelerationNumerator = 0,
-      int accelerationDenominator = 0,
-      bool doThreshold = false,
-      int threshold = 0}) {
+  /// sets the pointer control settings.
+  ///
+  /// [acceleration] is the movement multiplier or null to leave unchanged.
+  /// [threshold] is the number of pixels to move before acceleration begins. Setting [threshold] to -1 resets it to the default.
+  int changePointerControl({X11Fraction acceleration, int threshold}) {
     var request = X11ChangePointerControlRequest(
-        doAcceleration: doAcceleration,
-        accelerationNumerator: accelerationNumerator,
-        accelerationDenominator: accelerationDenominator,
-        doThreshold: doThreshold,
-        threshold: threshold);
+        acceleration: acceleration, threshold: threshold);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(105, buffer.data);
   }
 
+  /// Gets the current pointer control settings.
   Future<X11GetPointerControlReply> getPointerControl() async {
     var request = X11GetPointerControlRequest();
     var buffer = X11WriteBuffer();
@@ -1618,6 +1614,7 @@ class X11Client {
     return _sendRequest(115, buffer.data);
   }
 
+  /// Sets the pointer button [map].
   Future<int> setPointerMapping(List<int> map) async {
     var request = X11SetPointerMappingRequest(map);
     var buffer = X11WriteBuffer();
@@ -1628,6 +1625,7 @@ class X11Client {
     return reply.status;
   }
 
+  /// Gets the current mapping of the pointer buttons.
   Future<List<int>> getPointerMapping() async {
     var request = X11GetPointerMappingRequest();
     var buffer = X11WriteBuffer();
@@ -1638,6 +1636,7 @@ class X11Client {
     return reply.map;
   }
 
+  /// Sets the keyboard modifier [map].
   Future<int> setModifierMapping(X11ModifierMap map) async {
     var request = X11SetModifierMappingRequest(map);
     var buffer = X11WriteBuffer();
@@ -1648,6 +1647,7 @@ class X11Client {
     return reply.status;
   }
 
+  /// Gets the current mapping of the keyboard modifiers.
   Future<X11ModifierMap> getModifierMapping() async {
     var request = X11GetModifierMappingRequest();
     var buffer = X11WriteBuffer();
