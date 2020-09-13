@@ -671,8 +671,9 @@ class X11Client {
     return reply.owner;
   }
 
+  /// Requests that [selection] is conveted to [target] and a [SelectionNotify] event generated to [requestorWindow] with the result.
   Future<int> convertSelection(
-      String selection, int requestorWindow, String target,
+      String selection, String target, int requestorWindow,
       {String property, int time = 0}) async {
     var selectionAtom = await internAtom(selection);
     var targetAtom = await internAtom(target);
@@ -762,6 +763,7 @@ class X11Client {
     return _sendRequest(29, buffer.data);
   }
 
+  /// Changes properies of the pointer grab established with [grabPointer].
   int changeActivePointerGrab(Set<X11EventType> events,
       {int cursor = 0, int time = 0}) {
     var eventMask = 0;
@@ -923,14 +925,26 @@ class X11Client {
         sequenceNumber, X11GetInputFocusReply.fromBuffer);
   }
 
-  Future<List<int>> queryKeymap() async {
+  /// Gets the current state of the keyboard. If a key is pressed its value is true.
+  Future<List<bool>> queryKeymap() async {
     var request = X11QueryKeymapRequest();
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(44, buffer.data);
     var reply = await _awaitReply<X11QueryKeymapReply>(
         sequenceNumber, X11QueryKeymapReply.fromBuffer);
-    return reply.keys;
+    var state = <bool>[];
+    for (var key in reply.keys) {
+      state.add(key & 0x01 != 0);
+      state.add(key & 0x02 != 0);
+      state.add(key & 0x04 != 0);
+      state.add(key & 0x08 != 0);
+      state.add(key & 0x10 != 0);
+      state.add(key & 0x20 != 0);
+      state.add(key & 0x40 != 0);
+      state.add(key & 0x80 != 0);
+    }
+    return state;
   }
 
   /// Opens the font with the given [name] and assigns it [id].
@@ -1155,18 +1169,20 @@ class X11Client {
     return _sendRequest(57, buffer.data);
   }
 
-  int setDashes(int gc, int dashOffset, List<int> dashes) {
-    var request = X11SetDashesRequest(gc, dashOffset, dashes);
+  /// Sets the dash pattern used when drawing wiht [gc]. [dashes] contains the length in pixels of each part of the dash pattern.
+  int setDashes(int gc, List<int> dashes, {int dashOffset = 0}) {
+    var request = X11SetDashesRequest(gc, dashes, dashOffset: dashOffset);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(58, buffer.data);
   }
 
-  int setClipRectangles(
-      int gc, X11Point clipOrigin, List<X11Rectangle> rectangles,
-      {int ordering = 0}) {
-    var request = X11SetClipRectanglesRequest(gc, clipOrigin, rectangles,
-        ordering: ordering);
+  /// Sets the clipping [rectangles] used when drawing with [gc].
+  int setClipRectangles(int gc, List<X11Rectangle> rectangles,
+      {X11Point clipOrigin = const X11Point(0, 0),
+      X11ClipOrdering ordering = X11ClipOrdering.unSorted}) {
+    var request = X11SetClipRectanglesRequest(gc, rectangles,
+        clipOrigin: clipOrigin, ordering: ordering);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(59, buffer.data);
@@ -1220,7 +1236,7 @@ class X11Client {
     return _sendRequest(64, buffer.data);
   }
 
-  /// Draws lines on [drawable] between each pair of [points].
+  /// Draws a line on [drawable] made up of [points].
   int polyLine(int gc, int drawable, List<X11Point> points,
       {X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11PolyLineRequest(drawable, gc, points,
@@ -1230,6 +1246,7 @@ class X11Client {
     return _sendRequest(65, buffer.data);
   }
 
+  /// Draws line [segments] on [drawable].
   int polySegment(int gc, int drawable, List<X11Segment> segments) {
     var request = X11PolySegmentRequest(drawable, gc, segments);
     var buffer = X11WriteBuffer();
@@ -1395,6 +1412,7 @@ class X11Client {
   }
 
   /// Allocates a read-only colormap entry in [colormap] for the closest RGB value to [color].
+  // When no longer requires the allocated color can be freed with [freeColors].
   Future<X11AllocColorReply> allocColor(int colormap, X11Rgb color) async {
     var request = X11AllocColorRequest(colormap, color);
     var buffer = X11WriteBuffer();
@@ -1405,6 +1423,7 @@ class X11Client {
   }
 
   /// Allocates a read-only colormap entry in [colormap] for the color with [name].
+  // When no longer requires the allocated color can be freed with [freeColors].
   Future<X11AllocNamedColorReply> allocNamedColor(
       int colormap, String name) async {
     var request = X11AllocNamedColorRequest(colormap, name);
@@ -1415,9 +1434,11 @@ class X11Client {
         sequenceNumber, X11AllocNamedColorReply.fromBuffer);
   }
 
-  Future<X11AllocColorCellsReply> allocColorCells(int colormap, int colors,
+  /// Allocates [colorCount] colors in [colormap].
+  // When no longer requires the allocated colors can be freed with [freeColors].
+  Future<X11AllocColorCellsReply> allocColorCells(int colormap, int colorCount,
       {int planes = 0, bool contiguous = false}) async {
-    var request = X11AllocColorCellsRequest(colormap, colors,
+    var request = X11AllocColorCellsRequest(colormap, colorCount,
         planes: planes, contiguous: contiguous);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
@@ -1426,13 +1447,20 @@ class X11Client {
         sequenceNumber, X11AllocColorCellsReply.fromBuffer);
   }
 
-  Future<X11AllocColorPlanesReply> allocColorPlanes(int colormap, int colors,
-      {int reds = 0,
-      int greens = 0,
-      int blues = 0,
+  /// Allocates [colorCount] colors in [colormap] with [redDepth], [greenDepth] and [blueDepth] bits per color channel.
+  // If [contiguous] is true then each returned color channel mask will have contiguous bits set.
+  // When no longer requires the allocated colors can be freed with [freeColors].
+  Future<X11AllocColorPlanesReply> allocColorPlanes(
+      int colormap, int colorCount,
+      {int redDepth = 0,
+      int greenDepth = 0,
+      int blueDepth = 0,
       bool contiguous = false}) async {
-    var request = X11AllocColorPlanesRequest(colormap, colors,
-        reds: reds, greens: greens, blues: blues, contiguous: contiguous);
+    var request = X11AllocColorPlanesRequest(colormap, colorCount,
+        redDepth: redDepth,
+        greenDepth: greenDepth,
+        blueDepth: blueDepth,
+        contiguous: contiguous);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(87, buffer.data);
@@ -1440,13 +1468,15 @@ class X11Client {
         sequenceNumber, X11AllocColorPlanesReply.fromBuffer);
   }
 
-  int freeColors(int colormap, List<int> pixels, int planeMask) {
-    var request = X11FreeColorsRequest(colormap, pixels, planeMask);
+  /// Frees [pixels] in [colormap] that were previously allocated with [allocColor], [allocNamedColor], [allocColorCells] or [allocColorPlanes].
+  int freeColors(int colormap, List<int> pixels, {int planeMask = 0xFFFFFFFF}) {
+    var request = X11FreeColorsRequest(colormap, pixels, planeMask: planeMask);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     return _sendRequest(88, buffer.data);
   }
 
+  /// Sets the RGB values of pixels in [colormap].
   int storeColors(int colormap, List<X11ColorItem> items) {
     var request = X11StoreColorsRequest(colormap, items);
     var buffer = X11WriteBuffer();
@@ -1454,6 +1484,8 @@ class X11Client {
     return _sendRequest(89, buffer.data);
   }
 
+  /// Sets the values of a [pixel] in [colormap] to the color with [name].
+  /// Color channels can be filtered out by setting [doRed], [doGreen] and [doBlue] to false.
   int storeNamedColor(int colormap, int pixel, String name,
       {doRed = true, doGreen = true, doBlue = true}) {
     var request = X11StoreNamedColorRequest(colormap, pixel, name,
@@ -1611,6 +1643,7 @@ class X11Client {
     return reply.map;
   }
 
+  /// Changes settings for the keyboard.
   int changeKeyboardControl(
       {int keyClickPercent,
       int bellPercent,
@@ -1634,6 +1667,7 @@ class X11Client {
     return _sendRequest(102, buffer.data);
   }
 
+  /// Gets the current settings for the keyboard.
   Future<X11GetKeyboardControlReply> getKeyboardControl() async {
     var request = X11GetKeyboardControlRequest();
     var buffer = X11WriteBuffer();

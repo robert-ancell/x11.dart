@@ -4063,7 +4063,7 @@ class X11SetDashesRequest extends X11Request {
   final int dashOffset;
   final List<int> dashes;
 
-  X11SetDashesRequest(this.gc, this.dashOffset, this.dashes);
+  X11SetDashesRequest(this.gc, this.dashes, {this.dashOffset = 0});
 
   factory X11SetDashesRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -4075,7 +4075,7 @@ class X11SetDashesRequest extends X11Request {
       dashes.add(buffer.readUint8());
     }
     buffer.skip(pad(dashesLength));
-    return X11SetDashesRequest(gc, dashOffset, dashes);
+    return X11SetDashesRequest(gc, dashes, dashOffset: dashOffset);
   }
 
   @override
@@ -4099,13 +4099,14 @@ class X11SetClipRectanglesRequest extends X11Request {
   final int gc;
   final X11Point clipOrigin;
   final List<X11Rectangle> rectangles;
-  final int ordering;
+  final X11ClipOrdering ordering;
 
-  X11SetClipRectanglesRequest(this.gc, this.clipOrigin, this.rectangles,
-      {this.ordering = 0});
+  X11SetClipRectanglesRequest(this.gc, this.rectangles,
+      {this.clipOrigin = const X11Point(0, 0),
+      this.ordering = X11ClipOrdering.unSorted});
 
   factory X11SetClipRectanglesRequest.fromBuffer(X11ReadBuffer buffer) {
-    var ordering = buffer.readUint8();
+    var ordering = X11ClipOrdering.values[buffer.readUint8()];
     var gc = buffer.readUint32();
     var clipXOrigin = buffer.readInt16();
     var clipYOrigin = buffer.readInt16();
@@ -4117,14 +4118,13 @@ class X11SetClipRectanglesRequest extends X11Request {
       var height = buffer.readUint16();
       rectangles.add(X11Rectangle(x, y, width, height));
     }
-    return X11SetClipRectanglesRequest(
-        gc, X11Point(clipXOrigin, clipYOrigin), rectangles,
-        ordering: ordering);
+    return X11SetClipRectanglesRequest(gc, rectangles,
+        clipOrigin: X11Point(clipXOrigin, clipYOrigin), ordering: ordering);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(ordering);
+    buffer.writeUint8(ordering.index);
     buffer.writeUint32(gc);
     buffer.writeInt16(clipOrigin.x);
     buffer.writeInt16(clipOrigin.y);
@@ -5258,19 +5258,19 @@ class X11AllocNamedColorReply extends X11Reply {
 
 class X11AllocColorCellsRequest extends X11Request {
   final int colormap;
-  final int colors;
+  final int colorCount;
   final int planes;
   final bool contiguous;
 
-  X11AllocColorCellsRequest(this.colormap, this.colors,
+  X11AllocColorCellsRequest(this.colormap, this.colorCount,
       {this.planes = 0, this.contiguous = false});
 
   factory X11AllocColorCellsRequest.fromBuffer(X11ReadBuffer buffer) {
     var contiguous = buffer.readBool();
     var colormap = buffer.readUint32();
-    var colors = buffer.readUint16();
+    var colorCount = buffer.readUint16();
     var planes = buffer.readUint16();
-    return X11AllocColorCellsRequest(colormap, colors,
+    return X11AllocColorCellsRequest(colormap, colorCount,
         planes: planes, contiguous: contiguous);
   }
 
@@ -5278,13 +5278,13 @@ class X11AllocColorCellsRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(contiguous);
     buffer.writeUint32(colormap);
-    buffer.writeUint16(colors);
+    buffer.writeUint16(colorCount);
     buffer.writeUint16(planes);
   }
 
   @override
   String toString() =>
-      'X11AllocColorCellsRequest(colormap: ${colormap}, colors: ${colors}, planes: ${planes}, contiguous: ${contiguous})';
+      'X11AllocColorCellsRequest(colormap: ${colormap}, colorCount: ${colorCount}, planes: ${planes}, contiguous: ${contiguous})';
 }
 
 class X11AllocColorCellsReply extends X11Reply {
@@ -5330,42 +5330,45 @@ class X11AllocColorCellsReply extends X11Reply {
 
 class X11AllocColorPlanesRequest extends X11Request {
   final int colormap;
-  final int colors;
-  final int reds;
-  final int greens;
-  final int blues;
+  final int colorCount;
+  final int redDepth;
+  final int greenDepth;
+  final int blueDepth;
   final bool contiguous;
 
-  X11AllocColorPlanesRequest(this.colormap, this.colors,
-      {this.reds = 0,
-      this.greens = 0,
-      this.blues = 0,
+  X11AllocColorPlanesRequest(this.colormap, this.colorCount,
+      {this.redDepth = 0,
+      this.greenDepth = 0,
+      this.blueDepth = 0,
       this.contiguous = false});
 
   factory X11AllocColorPlanesRequest.fromBuffer(X11ReadBuffer buffer) {
     var contiguous = buffer.readBool();
     var colormap = buffer.readUint32();
-    var colors = buffer.readUint16();
-    var reds = buffer.readUint16();
-    var greens = buffer.readUint16();
-    var blues = buffer.readUint16();
-    return X11AllocColorPlanesRequest(colormap, colors,
-        reds: reds, greens: greens, blues: blues, contiguous: contiguous);
+    var colorCount = buffer.readUint16();
+    var redDepth = buffer.readUint16();
+    var greenDepth = buffer.readUint16();
+    var blueDepth = buffer.readUint16();
+    return X11AllocColorPlanesRequest(colormap, colorCount,
+        redDepth: redDepth,
+        greenDepth: greenDepth,
+        blueDepth: blueDepth,
+        contiguous: contiguous);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(contiguous);
     buffer.writeUint32(colormap);
-    buffer.writeUint16(colors);
-    buffer.writeUint16(reds);
-    buffer.writeUint16(greens);
-    buffer.writeUint16(blues);
+    buffer.writeUint16(colorCount);
+    buffer.writeUint16(redDepth);
+    buffer.writeUint16(greenDepth);
+    buffer.writeUint16(blueDepth);
   }
 
   @override
   String toString() =>
-      'X11AllocColorPlanesRequest(colormap: ${colormap}, colors: ${colors}, reds: ${reds}, greens: ${greens}, blues: ${blues}, contiguous: ${contiguous})';
+      'X11AllocColorPlanesRequest(colormap: ${colormap}, colorCount: ${colorCount}, redDepth: ${redDepth}, greenDepth: ${greenDepth}, blueDepth: ${blueDepth}, contiguous: ${contiguous})';
 }
 
 class X11AllocColorPlanesReply extends X11Reply {
@@ -5416,7 +5419,8 @@ class X11FreeColorsRequest extends X11Request {
   final List<int> pixels;
   final int planeMask;
 
-  X11FreeColorsRequest(this.colormap, this.pixels, this.planeMask);
+  X11FreeColorsRequest(this.colormap, this.pixels,
+      {this.planeMask = 0xFFFFFFFF});
 
   factory X11FreeColorsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -5426,7 +5430,7 @@ class X11FreeColorsRequest extends X11Request {
     while (buffer.remaining > 0) {
       pixels.add(buffer.readUint32());
     }
-    return X11FreeColorsRequest(colormap, pixels, planeMask);
+    return X11FreeColorsRequest(colormap, pixels, planeMask: planeMask);
   }
 
   @override
@@ -5464,8 +5468,10 @@ class X11StoreColorsRequest extends X11Request {
       var doGreen = (flags & 0x2) != 0;
       var doBlue = (flags & 0x4) != 0;
       buffer.skip(1);
-      items.add(X11ColorItem(pixel, X11Rgb(red, green, blue),
-          doRed: doRed, doGreen: doGreen, doBlue: doBlue));
+      items.add(X11ColorItem(pixel,
+          red: doRed ? red : null,
+          green: doGreen ? green : null,
+          blue: doBlue ? blue : null));
     }
     return X11StoreColorsRequest(colormap, items);
   }
@@ -5476,17 +5482,17 @@ class X11StoreColorsRequest extends X11Request {
     buffer.writeUint32(colormap);
     for (var item in items) {
       buffer.writeUint32(item.pixel);
-      buffer.writeUint16(item.color.red);
-      buffer.writeUint16(item.color.green);
-      buffer.writeUint16(item.color.blue);
+      buffer.writeUint16(item.red ?? 0);
+      buffer.writeUint16(item.green ?? 0);
+      buffer.writeUint16(item.blue ?? 0);
       var flags = 0;
-      if (item.doRed) {
+      if (item.red != null) {
         flags |= 0x1;
       }
-      if (item.doGreen) {
+      if (item.green != null) {
         flags |= 0x2;
       }
-      if (item.doBlue) {
+      if (item.blue != null) {
         flags |= 0x4;
       }
       buffer.writeUint8(flags);

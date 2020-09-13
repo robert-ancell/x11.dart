@@ -37,6 +37,8 @@ enum X11ChangeSetMode { insert, delete }
 
 enum X11CirculateDirection { raiseHighest, raiseLowest }
 
+enum X11ClipOrdering { unSorted, ySorted, yxSorted, yxBanded }
+
 enum X11CloseDownMode { destroy, retainPermanent, retainTemporary }
 
 enum X11CoordinateMode { origin, previous }
@@ -195,17 +197,15 @@ class X11CharacterInfo {
 
 class X11ColorItem {
   final int pixel;
-  final X11Rgb color;
-  final bool doRed;
-  final bool doGreen;
-  final bool doBlue;
+  final int red;
+  final int green;
+  final int blue;
 
-  const X11ColorItem(this.pixel, this.color,
-      {this.doRed = true, this.doGreen = true, this.doBlue = true});
+  const X11ColorItem(this.pixel, {this.red, this.green, this.blue});
 
   @override
   String toString() =>
-      'X11ColorItem(pixel: ${_formatPixel(pixel)}, color: ${color}, doRed: ${doRed}, doGreen: ${doGreen}, doBlue: ${doBlue})';
+      'X11ColorItem(pixel: ${_formatPixel(pixel)}, red: ${red}, green: ${green}, blue: ${blue})';
 }
 
 class X11FontProperty {
