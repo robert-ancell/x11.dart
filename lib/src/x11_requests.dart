@@ -188,15 +188,15 @@ class X11SetupSuccessReply {
         buffer.skip(4);
         var visuals = <X11Visual>[];
         for (var k = 0; k < visualsCount; k++) {
-          var visualId = buffer.readUint32();
-          var class_ = X11VisualClass.values[buffer.readUint8()];
+          var id = buffer.readUint32();
+          var visualClass = X11VisualClass.values[buffer.readUint8()];
           var bitsPerRgbValue = buffer.readUint8();
           var colormapEntries = buffer.readUint16();
           var redMask = buffer.readUint32();
           var greenMask = buffer.readUint32();
           var blueMask = buffer.readUint32();
           buffer.skip(4);
-          visuals.add(X11Visual(visualId, class_,
+          visuals.add(X11Visual(id, visualClass,
               bitsPerRgbValue: bitsPerRgbValue,
               colormapEntries: colormapEntries,
               redMask: redMask,
@@ -288,8 +288,8 @@ class X11SetupSuccessReply {
         buffer.writeUint16(visuals.length);
         buffer.skip(4);
         for (var visual in visuals) {
-          buffer.writeUint32(visual.visualId);
-          buffer.writeUint8(visual.class_.index);
+          buffer.writeUint32(visual.id);
+          buffer.writeUint8(visual.visualClass.index);
           buffer.writeUint8(visual.bitsPerRgbValue);
           buffer.writeUint16(visual.colormapEntries);
           buffer.writeUint32(visual.redMask);
@@ -342,7 +342,7 @@ class X11CreateWindowRequest extends X11Request {
   final X11Rectangle geometry;
   final int depth;
   final int borderWidth;
-  final X11WindowClass class_;
+  final X11WindowClass windowClass;
   final int visual;
   final int backgroundPixmap;
   final int backgroundPixel;
@@ -361,7 +361,7 @@ class X11CreateWindowRequest extends X11Request {
   final int cursor;
 
   X11CreateWindowRequest(this.id, this.parent, this.geometry, this.depth,
-      {this.class_ = X11WindowClass.inputOutput,
+      {this.windowClass = X11WindowClass.inputOutput,
       this.visual = 0,
       this.borderWidth = 0,
       this.backgroundPixmap,
@@ -389,7 +389,7 @@ class X11CreateWindowRequest extends X11Request {
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     var borderWidth = buffer.readUint16();
-    var class_ = X11WindowClass.values[buffer.readUint16()];
+    var windowClass = X11WindowClass.values[buffer.readUint16()];
     var visual = buffer.readUint32();
     var valueMask = buffer.readUint32();
     int backgroundPixmap;
@@ -454,7 +454,7 @@ class X11CreateWindowRequest extends X11Request {
     }
     return X11CreateWindowRequest(
         id, parent, X11Rectangle(x, y, width, height), depth,
-        class_: class_,
+        windowClass: windowClass,
         visual: visual,
         borderWidth: borderWidth,
         backgroundPixmap: backgroundPixmap,
@@ -484,7 +484,7 @@ class X11CreateWindowRequest extends X11Request {
     buffer.writeUint16(geometry.width);
     buffer.writeUint16(geometry.height);
     buffer.writeUint16(borderWidth);
-    buffer.writeUint16(class_.index);
+    buffer.writeUint16(windowClass.index);
     buffer.writeUint32(visual);
     var valueMask = 0;
     if (backgroundPixmap != null) {
@@ -583,7 +583,7 @@ class X11CreateWindowRequest extends X11Request {
   @override
   String toString() {
     var string =
-        'X11CreateWindowRequest(id: ${_formatId(id)}, parent: ${_formatId(parent)}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth}, class_: ${class_}, visual: ${visual}';
+        'X11CreateWindowRequest(id: ${_formatId(id)}, parent: ${_formatId(parent)}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth}, windowClass: ${windowClass}, visual: ${visual}';
     if (backgroundPixmap != null) {
       string += ', backgroundPixmap: ${_formatId(backgroundPixmap)}';
     }
@@ -879,7 +879,7 @@ class X11GetWindowAttributesRequest extends X11Request {
 class X11GetWindowAttributesReply extends X11Reply {
   final int backingStore;
   final int visual;
-  final X11WindowClass class_;
+  final X11WindowClass windowClass;
   final int bitGravity;
   final int winGravity;
   final int backingPlanes;
@@ -896,7 +896,7 @@ class X11GetWindowAttributesReply extends X11Reply {
   X11GetWindowAttributesReply(
       {this.backingStore,
       this.visual,
-      this.class_,
+      this.windowClass,
       this.bitGravity,
       this.winGravity,
       this.backingPlanes,
@@ -913,7 +913,7 @@ class X11GetWindowAttributesReply extends X11Reply {
   static X11GetWindowAttributesReply fromBuffer(X11ReadBuffer buffer) {
     var backingStore = buffer.readUint8();
     var visual = buffer.readUint32();
-    var class_ = X11WindowClass.values[buffer.readUint16()];
+    var windowClass = X11WindowClass.values[buffer.readUint16()];
     var bitGravity = buffer.readUint8();
     var winGravity = buffer.readUint8();
     var backingPlanes = buffer.readUint32();
@@ -930,7 +930,7 @@ class X11GetWindowAttributesReply extends X11Reply {
     return X11GetWindowAttributesReply(
         backingStore: backingStore,
         visual: visual,
-        class_: class_,
+        windowClass: windowClass,
         bitGravity: bitGravity,
         winGravity: winGravity,
         backingPlanes: backingPlanes,
@@ -949,7 +949,7 @@ class X11GetWindowAttributesReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(backingStore);
     buffer.writeUint32(visual);
-    buffer.writeUint16(class_.index);
+    buffer.writeUint16(windowClass.index);
     buffer.writeUint8(bitGravity);
     buffer.writeUint8(winGravity);
     buffer.writeUint32(backingPlanes);
@@ -967,7 +967,7 @@ class X11GetWindowAttributesReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetWindowAttributesReply(backingStore: ${backingStore}, visual: ${visual}, class_: ${class_}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, saveUnder: ${saveUnder}, mapIsInstalled: ${mapIsInstalled}, mapState: ${mapState}, overrideRedirect: ${overrideRedirect}, colormap: ${colormap}, allEventMasks: ${allEventMasks}, yourEventMask: ${yourEventMask}, doNotPropagateMask: ${doNotPropagateMask})';
+      'X11GetWindowAttributesReply(backingStore: ${backingStore}, visual: ${visual}, windowClass: ${windowClass}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, saveUnder: ${saveUnder}, mapIsInstalled: ${mapIsInstalled}, mapState: ${mapState}, overrideRedirect: ${overrideRedirect}, colormap: ${colormap}, allEventMasks: ${allEventMasks}, yourEventMask: ${yourEventMask}, doNotPropagateMask: ${doNotPropagateMask})';
 }
 
 class X11DestroyWindowRequest extends X11Request {
@@ -5865,22 +5865,23 @@ class X11RecolorCursorRequest extends X11Request {
 
 class X11QueryBestSizeRequest extends X11Request {
   final int drawable;
-  final X11QueryClass class_;
+  final X11QueryClass queryClass;
   final X11Size size;
 
-  X11QueryBestSizeRequest(this.drawable, this.class_, this.size);
+  X11QueryBestSizeRequest(this.drawable, this.queryClass, this.size);
 
   factory X11QueryBestSizeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var class_ = X11QueryClass.values[buffer.readUint8()];
+    var queryClass = X11QueryClass.values[buffer.readUint8()];
     var drawable = buffer.readUint32();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11QueryBestSizeRequest(drawable, class_, X11Size(width, height));
+    return X11QueryBestSizeRequest(
+        drawable, queryClass, X11Size(width, height));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(class_.index);
+    buffer.writeUint8(queryClass.index);
     buffer.writeUint32(drawable);
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
@@ -5888,7 +5889,7 @@ class X11QueryBestSizeRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11QueryBestSizeRequest(drawable: ${_formatId(drawable)}, class_: ${class_}, size: ${size})';
+      'X11QueryBestSizeRequest(drawable: ${_formatId(drawable)}, queryClass: ${queryClass}, size: ${size})';
 }
 
 class X11QueryBestSizeReply extends X11Reply {

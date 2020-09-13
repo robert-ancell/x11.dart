@@ -250,7 +250,7 @@ class X11Client {
 
   /// Creates a new window with [id] and [geometry] as a child of [parent].
   int createWindow(int id, int parent, X11Rectangle geometry,
-      {X11WindowClass class_ = X11WindowClass.inputOutput,
+      {X11WindowClass windowClass = X11WindowClass.inputOutput,
       int depth = 24,
       int visual = 0,
       int borderWidth = 0,
@@ -278,7 +278,7 @@ class X11Client {
     }
     var request = X11CreateWindowRequest(id, parent, geometry, depth,
         borderWidth: borderWidth,
-        class_: class_,
+        windowClass: windowClass,
         visual: visual,
         backgroundPixmap: backgroundPixmap,
         backgroundPixel: backgroundPixel,
@@ -1592,8 +1592,8 @@ class X11Client {
   }
 
   Future<X11Size> _queryBestSize(
-      int drawable, X11QueryClass class_, X11Size size) async {
-    var request = X11QueryBestSizeRequest(drawable, class_, size);
+      int drawable, X11QueryClass queryClass, X11Size size) async {
+    var request = X11QueryBestSizeRequest(drawable, queryClass, size);
     var buffer = X11WriteBuffer();
     request.encode(buffer);
     var sequenceNumber = _sendRequest(97, buffer.data);

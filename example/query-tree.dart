@@ -14,7 +14,7 @@ void main() async {
       var attributes = await client.getWindowAttributes(window);
       var properties = await client.listProperties(window);
       print(
-          '${indent}0x${formatId(window)} ${reply.geometry.x},${reply.geometry.y} ${reply.geometry.width}x${reply.geometry.height} ${attributes.class_} ${properties.join(', ')}');
+          '${indent}0x${formatId(window)} ${reply.geometry.x},${reply.geometry.y} ${reply.geometry.width}x${reply.geometry.height} ${attributes.windowClass} ${properties.join(', ')}');
       var wmName = await client.getPropertyString(window, 'WM_NAME');
       if (wmName != null) {
         print('  ${indent} "${wmName}"');

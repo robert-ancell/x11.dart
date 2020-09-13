@@ -167,6 +167,17 @@ enum X11StackMode { above, below, topIf, bottomIf, opposite }
 
 enum X11SubwindowMode { clipByChildren, includeInferiors }
 
+/// The class of visual.
+///
+/// For [staticColor] and [pseudoColor] each pixel value indexes a colormap of RGB values.
+/// The colormap entries can be changed dynamically in [pseudoColor]; they are prefefined and read-only in [staticColor].
+///
+/// [staticGrey] and [grayScale] are the same as [staticColor] and [pseudoColor] except the display doesn't support color and any only one of the RGB channels is used.
+/// Each color channel should be set to the same value as it is undefined which one will be used.
+///
+/// [directColor] and [trueColor] look up a colormap for each red, green and blue component of a color.
+/// The [X11Visual] will define bit masks for these components.
+/// The colormap entries can be changed dynamically in [directColor]; they are prefefined and read-only in [trueColor].
 enum X11VisualClass {
   staticGray,
   grayScale,
@@ -176,6 +187,10 @@ enum X11VisualClass {
   directColor
 }
 
+/// The class of a window.
+///
+/// [inputOutput] are rendered to the screen, [inputOnly] windows are only used for getting input events.
+/// [copyFromParent] is used when creating a new window.
 enum X11WindowClass { copyFromParent, inputOutput, inputOnly }
 
 class X11CharacterInfo {
@@ -421,23 +436,38 @@ class X11TimeCoord {
   String toString() => 'X11TimeCoord(x: ${x}, y: ${y}, time: ${time})';
 }
 
+/// Information about a visual supported by the X server.
 class X11Visual {
-  final int visualId;
-  final X11VisualClass class_;
+  /// Unique ID for this visual.
+  final int id;
+
+  /// The class of visual.
+  final X11VisualClass visualClass;
+
+  /// The number of bits used for displaying colors.
   final int bitsPerRgbValue;
+
+  /// Maximum number of colormap entries in a colormap that uses this visual.
   final int colormapEntries;
+
+  /// Bit mask that covers the red channel in pixels for visuals with class [X11VisualClass.directColor] or [X11VisualClass.trueColor].
   final int redMask;
+
+  /// Bit mask that covers the green channel in pixels for visuals with class [X11VisualClass.directColor] or [X11VisualClass.trueColor].
   final int greenMask;
+
+  /// Bit mask that covers the blue channel in pixels for visuals with class [X11VisualClass.directColor] or [X11VisualClass.trueColor].
   final int blueMask;
 
-  const X11Visual(this.visualId, this.class_,
-      {this.bitsPerRgbValue = 0,
+  /// Creates a new visual.
+  const X11Visual(this.id, this.visualClass,
+      {this.bitsPerRgbValue = 24,
       this.colormapEntries = 0,
-      this.redMask = 0,
-      this.greenMask = 0,
-      this.blueMask = 0});
+      this.redMask = 0x000000FF,
+      this.greenMask = 0x0000FF00,
+      this.blueMask = 0x00FF0000});
 
   @override
   String toString() =>
-      'X11Visual(visualId: ${visualId}, class: ${class_}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: ${_formatId(redMask)}, greenMask: ${_formatId(greenMask)}, blueMask: ${_formatId(blueMask)})';
+      'X11Visual(id: ${id}, visualClass: ${visualClass}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: ${_formatId(redMask)}, greenMask: ${_formatId(greenMask)}, blueMask: ${_formatId(blueMask)})';
 }
