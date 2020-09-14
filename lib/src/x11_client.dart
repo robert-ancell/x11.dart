@@ -295,9 +295,7 @@ class X11Client {
         doNotPropagateMask: doNotPropagateMask,
         colormap: colormap,
         cursor: cursor);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(1, buffer.data);
+    return _sendRequest(1, request);
   }
 
   /// Changes the attributes of [window].
@@ -341,17 +339,13 @@ class X11Client {
         doNotPropagateMask: doNotPropagateMask,
         colormap: colormap,
         cursor: cursor);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(2, buffer.data);
+    return _sendRequest(2, request);
   }
 
   /// Gets the attributes of [window].
   Future<X11GetWindowAttributesReply> getWindowAttributes(int window) async {
     var request = X11GetWindowAttributesRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(3, buffer.data);
+    var sequenceNumber = _sendRequest(3, request);
     return _awaitReply<X11GetWindowAttributesReply>(
         sequenceNumber, X11GetWindowAttributesReply.fromBuffer);
   }
@@ -359,18 +353,13 @@ class X11Client {
   /// Destroys [window].
   int destroyWindow(int window) {
     var request = X11DestroyWindowRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    request.encode(buffer);
-    return _sendRequest(4, buffer.data);
+    return _sendRequest(4, request);
   }
 
   /// Destroys the children of [window] in bottom-to-top stacking order.
   int destroySubwindows(int window) {
     var request = X11DestroySubwindowsRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(5, buffer.data);
+    return _sendRequest(5, request);
   }
 
   /// Inserts [window] into the clients save-set.
@@ -385,50 +374,38 @@ class X11Client {
 
   int _changeSaveSet(int window, X11ChangeSetMode mode) {
     var request = X11ChangeSaveSetRequest(window, mode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(6, buffer.data);
+    return _sendRequest(6, request);
   }
 
   /// Moves [window] to be a child of [parent]. The window is placed [position] relative to [parent].
   int reparentWindow(int window, int parent,
       {X11Point position = const X11Point(0, 0)}) {
     var request = X11ReparentWindowRequest(window, parent, position);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(7, buffer.data);
+    return _sendRequest(7, request);
   }
 
   /// Maps [window].
   int mapWindow(int window) {
     var request = X11MapWindowRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(8, buffer.data);
+    return _sendRequest(8, request);
   }
 
   /// Maps all unmapped children of [window] in top-to-bottom stacking order.
   int mapSubwindows(int window) {
     var request = X11MapSubwindowsRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(9, buffer.data);
+    return _sendRequest(9, request);
   }
 
   /// Unmaps [window].
   int unmapWindow(int window) {
     var request = X11UnmapWindowRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(10, buffer.data);
+    return _sendRequest(10, request);
   }
 
   /// Unmaps all mapped children of [window] in bottom-to-top stacking order.
   int unmapSubwindows(int window) {
     var request = X11UnmapSubwindowsRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(11, buffer.data);
+    return _sendRequest(11, request);
   }
 
   /// Changes the configuration of [window].
@@ -450,25 +427,19 @@ class X11Client {
         borderWidth: borderWidth,
         sibling: sibling,
         stackMode: stackMode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(12, buffer.data);
+    return _sendRequest(12, request);
   }
 
   /// Changes the stacking order of [window].
   int circulateWindow(int window, X11CirculateDirection direction) {
     var request = X11CirculateWindowRequest(window, direction);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(13, buffer.data);
+    return _sendRequest(13, request);
   }
 
   /// Gets the current geometry of [drawable].
   Future<X11GetGeometryReply> getGeometry(int drawable) async {
     var request = X11GetGeometryRequest(drawable);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(14, buffer.data);
+    var sequenceNumber = _sendRequest(14, request);
     return _awaitReply<X11GetGeometryReply>(
         sequenceNumber, X11GetGeometryReply.fromBuffer);
   }
@@ -476,9 +447,7 @@ class X11Client {
   /// Gets the root, parent and children of [window].
   Future<X11QueryTreeReply> queryTree(int window) async {
     var request = X11QueryTreeRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(15, buffer.data);
+    var sequenceNumber = _sendRequest(15, request);
     return _awaitReply<X11QueryTreeReply>(
         sequenceNumber, X11QueryTreeReply.fromBuffer);
   }
@@ -492,9 +461,7 @@ class X11Client {
     }
 
     var request = X11InternAtomRequest(name, onlyIfExists);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(16, buffer.data);
+    var sequenceNumber = _sendRequest(16, request);
     var reply = await _awaitReply<X11InternAtomReply>(
         sequenceNumber, X11InternAtomReply.fromBuffer);
 
@@ -513,9 +480,7 @@ class X11Client {
     }
 
     var request = X11GetAtomNameRequest(atom);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(17, buffer.data);
+    var sequenceNumber = _sendRequest(17, request);
     var reply = await _awaitReply<X11GetAtomNameReply>(
         sequenceNumber, X11GetAtomNameReply.fromBuffer);
 
@@ -578,18 +543,14 @@ class X11Client {
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) {
     var request =
         X11ChangePropertyRequest(window, mode, property, type, format, value);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(18, buffer.data);
+    return _sendRequest(18, request);
   }
 
   /// Deletes the [property] from [window].
   Future<int> deleteProperty(int window, String property) async {
     var propertyAtom = await internAtom(property);
     var request = X11DeletePropertyRequest(window, propertyAtom);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(19, buffer.data);
+    return _sendRequest(19, request);
   }
 
   /// Gets the value of the [property] on [window].
@@ -611,9 +572,7 @@ class X11Client {
         longOffset: longOffset,
         longLength: longLength,
         delete: delete);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(20, buffer.data);
+    var sequenceNumber = _sendRequest(20, request);
     return _awaitReply<X11GetPropertyReply>(
         sequenceNumber, X11GetPropertyReply.fromBuffer);
   }
@@ -631,9 +590,7 @@ class X11Client {
   /// Gets the properties on [window].
   Future<List<String>> listProperties(int window) async {
     var request = X11ListPropertiesRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(21, buffer.data);
+    var sequenceNumber = _sendRequest(21, request);
     var reply = await _awaitReply<X11ListPropertiesReply>(
         sequenceNumber, X11ListPropertiesReply.fromBuffer);
     var properties = <String>[];
@@ -649,9 +606,7 @@ class X11Client {
     var selectionAtom = await internAtom(selection);
     var request =
         X11SetSelectionOwnerRequest(selectionAtom, ownerWindow, time: time);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(22, buffer.data);
+    return _sendRequest(22, request);
   }
 
   /// Clears the owner of [selection].
@@ -663,9 +618,7 @@ class X11Client {
   Future<int> getSelectionOwner(String selection) async {
     var selectionAtom = await internAtom(selection);
     var request = X11GetSelectionOwnerRequest(selectionAtom);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(23, buffer.data);
+    var sequenceNumber = _sendRequest(23, request);
     var reply = await _awaitReply<X11GetSelectionOwnerReply>(
         sequenceNumber, X11GetSelectionOwnerReply.fromBuffer);
     return reply.owner;
@@ -684,9 +637,7 @@ class X11Client {
     var request = X11ConvertSelectionRequest(
         selectionAtom, requestorWindow, targetAtom,
         property: propertyAtom, time: time);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(24, buffer.data);
+    return _sendRequest(24, request);
   }
 
   /// Sends [event] to [destination].
@@ -700,9 +651,7 @@ class X11Client {
         propagate: propagate,
         eventMask: eventMask,
         sequenceNumber: _sequenceNumber);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(25, buffer.data);
+    return _sendRequest(25, request);
   }
 
   /// Establishes an active grab of the pointer to [grabWindow].
@@ -718,9 +667,7 @@ class X11Client {
     }
     var request = X11GrabPointerRequest(grabWindow, ownerEvents, eventMask,
         pointerMode, keyboardMode, confineTo, cursor, time);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(26, buffer.data);
+    var sequenceNumber = _sendRequest(26, request);
     var reply = await _awaitReply<X11GrabPointerReply>(
         sequenceNumber, X11GrabPointerReply.fromBuffer);
     return reply.status;
@@ -729,9 +676,7 @@ class X11Client {
   /// Releases the pointer from [grabPointer] or [grabButton] and releases any queued events.
   int ungrabPointer({int time = 0}) {
     var request = X11UngrabPointerRequest(time);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(27, buffer.data);
+    return _sendRequest(27, request);
   }
 
   /// Establishes a passive grab of [button]/[modifers] to [grabWindow].
@@ -749,18 +694,14 @@ class X11Client {
     }
     var request = X11GrabButtonRequest(grabWindow, ownerEvents, eventMask,
         pointerMode, keyboardMode, confineTo, cursor, button, modifiers);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(28, buffer.data);
+    return _sendRequest(28, request);
   }
 
   /// Releases a passive grab of [button]/[modifiers] from [grabWindow].
   /// If [button] is 0, this releases all button grabs on this window.
   int ungrabButton(int grabWindow, {int button = 0, int modifiers = 0x8000}) {
     var request = X11UngrabButtonRequest(grabWindow, button, modifiers);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(29, buffer.data);
+    return _sendRequest(29, request);
   }
 
   /// Changes properies of the pointer grab established with [grabPointer].
@@ -772,9 +713,7 @@ class X11Client {
     }
     var request = X11ChangeActivePointerGrabRequest(eventMask,
         cursor: cursor, time: time);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(30, buffer.data);
+    return _sendRequest(30, request);
   }
 
   /// Establishes an active grab of the keyboard to [grabWindow].
@@ -788,9 +727,7 @@ class X11Client {
         pointerMode: pointerMode,
         keyboardMode: keyboardMode,
         time: time);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(31, buffer.data);
+    var sequenceNumber = _sendRequest(31, request);
     var reply = await _awaitReply<X11GrabKeyboardReply>(
         sequenceNumber, X11GrabKeyboardReply.fromBuffer);
     return reply.status;
@@ -799,9 +736,7 @@ class X11Client {
   /// Releases the keyboard from [grabKeyboard] or [grabKey] and releases any queued events.
   int ungrabKeyboard({int time = 0}) {
     var request = X11UngrabKeyboardRequest(time: time);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(32, buffer.data);
+    return _sendRequest(32, request);
   }
 
   /// Establishes a passive grab of [key]/[modifers] to [grabWindow].
@@ -815,26 +750,20 @@ class X11Client {
         ownerEvents: ownerEvents,
         pointerMode: pointerMode,
         keyboardMode: keyboardMode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(33, buffer.data);
+    return _sendRequest(33, request);
   }
 
   /// Releases a passive grab of [key]/[modifiers] from [grabWindow].
   /// If [key] is 0, this releases all key grabs on this window.
   int ungrabKey(int grabWindow, {int key = 0, int modifiers = 0}) {
     var request = X11UngrabKeyRequest(grabWindow, key, modifiers: modifiers);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(34, buffer.data);
+    return _sendRequest(34, request);
   }
 
   /// Releases queued events.
   int allowEvents(X11AllowEventsMode mode, {int time = 0}) {
     var request = X11AllowEventsRequest(mode, time: time);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(35, buffer.data);
+    return _sendRequest(35, request);
   }
 
   /// Disables processing of requests on all other clients.
@@ -842,25 +771,19 @@ class X11Client {
   /// Call [ungrabServer] when processing can continue.
   int grabServer() {
     var request = X11GrabServerRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(36, buffer.data);
+    return _sendRequest(36, request);
   }
 
   /// Restarts processing of requests disabled by [grabServer].
   int ungrabServer() {
     var request = X11UngrabServerRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(37, buffer.data);
+    return _sendRequest(37, request);
   }
 
   /// Gets the location of the pointer relative to [window].
   Future<X11QueryPointerReply> queryPointer(int window) async {
     var request = X11QueryPointerRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(38, buffer.data);
+    var sequenceNumber = _sendRequest(38, request);
     return _awaitReply<X11QueryPointerReply>(
         sequenceNumber, X11QueryPointerReply.fromBuffer);
   }
@@ -869,9 +792,7 @@ class X11Client {
   Future<List<X11TimeCoord>> getMotionEvents(
       int window, int start, int stop) async {
     var request = X11GetMotionEventsRequest(window, start, stop);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(39, buffer.data);
+    var sequenceNumber = _sendRequest(39, request);
     var reply = await _awaitReply<X11GetMotionEventsReply>(
         sequenceNumber, X11GetMotionEventsReply.fromBuffer);
     return reply.events;
@@ -882,9 +803,7 @@ class X11Client {
       int sourceWindow, X11Point source, int destinationWindow) async {
     var request =
         X11TranslateCoordinatesRequest(sourceWindow, source, destinationWindow);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(40, buffer.data);
+    var sequenceNumber = _sendRequest(40, request);
     return _awaitReply<X11TranslateCoordinatesReply>(
         sequenceNumber, X11TranslateCoordinatesReply.fromBuffer);
   }
@@ -898,9 +817,7 @@ class X11Client {
         destinationWindow: destinationWindow,
         sourceWindow: sourceWindow,
         source: source);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(41, buffer.data);
+    return _sendRequest(41, request);
   }
 
   /// Sets the input focus state.
@@ -910,17 +827,13 @@ class X11Client {
       int time = 0}) {
     var request =
         X11SetInputFocusRequest(window: window, revertTo: revertTo, time: time);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(42, buffer.data);
+    return _sendRequest(42, request);
   }
 
   /// Gets the current input focus state.
   Future<X11GetInputFocusReply> getInputFocus() async {
     var request = X11GetInputFocusRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(43, buffer.data);
+    var sequenceNumber = _sendRequest(43, request);
     return _awaitReply<X11GetInputFocusReply>(
         sequenceNumber, X11GetInputFocusReply.fromBuffer);
   }
@@ -928,9 +841,7 @@ class X11Client {
   /// Gets the current state of the keyboard. If a key is pressed its value is true.
   Future<List<bool>> queryKeymap() async {
     var request = X11QueryKeymapRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(44, buffer.data);
+    var sequenceNumber = _sendRequest(44, request);
     var reply = await _awaitReply<X11QueryKeymapReply>(
         sequenceNumber, X11QueryKeymapReply.fromBuffer);
     var state = <bool>[];
@@ -951,26 +862,20 @@ class X11Client {
   /// When no longer required, the font reference should be deleted with [closeFont].
   int openFont(int id, String name) {
     var request = X11OpenFontRequest(id, name);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(45, buffer.data);
+    return _sendRequest(45, request);
   }
 
   /// Deletes the reference to a [font] opened in [openFont].
   int closeFont(int font) {
     var request = X11CloseFontRequest(font);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(46, buffer.data);
+    return _sendRequest(46, request);
   }
 
   // FIXME: Convert font atoms?
   /// Gets information on [font].
   Future<X11QueryFontReply> queryFont(int font) async {
     var request = X11QueryFontRequest(font);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(47, buffer.data);
+    var sequenceNumber = _sendRequest(47, request);
     return _awaitReply<X11QueryFontReply>(
         sequenceNumber, X11QueryFontReply.fromBuffer);
   }
@@ -979,9 +884,7 @@ class X11Client {
   Future<X11QueryTextExtentsReply> queryTextExtents(
       int font, String string) async {
     var request = X11QueryTextExtentsRequest(font, string);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(48, buffer.data);
+    var sequenceNumber = _sendRequest(48, request);
     return _awaitReply<X11QueryTextExtentsReply>(
         sequenceNumber, X11QueryTextExtentsReply.fromBuffer);
   }
@@ -992,9 +895,7 @@ class X11Client {
   Future<List<String>> listFonts(
       {String pattern = '*', int maxNames = 65535}) async {
     var request = X11ListFontsRequest(pattern: pattern, maxNames: maxNames);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(49, buffer.data);
+    var sequenceNumber = _sendRequest(49, request);
     var reply = await _awaitReply<X11ListFontsReply>(
         sequenceNumber, X11ListFontsReply.fromBuffer);
     return reply.names;
@@ -1007,9 +908,7 @@ class X11Client {
       {String pattern = '*', int maxNames = 65535}) {
     var request =
         X11ListFontsWithInfoRequest(maxNames: maxNames, pattern: pattern);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(50, buffer.data);
+    var sequenceNumber = _sendRequest(50, request);
     return _awaitReplyStream<X11ListFontsWithInfoReply>(sequenceNumber,
         X11ListFontsWithInfoReply.fromBuffer, (reply) => reply.name.isEmpty);
   }
@@ -1017,17 +916,13 @@ class X11Client {
   /// Sets the search paths for fonts.
   int setFontPath(List<String> path) {
     var request = X11SetFontPathRequest(path);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(51, buffer.data);
+    return _sendRequest(51, request);
   }
 
   /// Gets the current search paths for fonts.
   Future<List<String>> getFontPath() async {
     var request = X11GetFontPathRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(52, buffer.data);
+    var sequenceNumber = _sendRequest(52, request);
     var reply = await _awaitReply<X11GetFontPathReply>(
         sequenceNumber, X11GetFontPathReply.fromBuffer);
     return reply.path;
@@ -1037,17 +932,13 @@ class X11Client {
   /// When no longer required, the pixmap reference should be deleted with [freePixmap].
   int createPixmap(int id, int drawable, X11Size size, {int depth = 24}) {
     var request = X11CreatePixmapRequest(id, drawable, size, depth);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(53, buffer.data);
+    return _sendRequest(53, request);
   }
 
   /// Deletes the reference to a [pixmap] created in [createPixmap].
   int freePixmap(int pixmap) {
     var request = X11FreePixmapRequest(pixmap);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(54, buffer.data);
+    return _sendRequest(54, request);
   }
 
   /// Creates a graphics context with [id] for drawing on [drawable].
@@ -1100,9 +991,7 @@ class X11Client {
         dashOffset: dashOffset,
         dashes: dashes,
         arcMode: arcMode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(55, buffer.data);
+    return _sendRequest(55, request);
   }
 
   /// Changes properties of [gc].
@@ -1156,25 +1045,19 @@ class X11Client {
         dashOffset: dashOffset,
         dashes: dashes,
         arcMode: arcMode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(56, buffer.data);
+    return _sendRequest(56, request);
   }
 
   /// Copies [values] from [sourceGc] to [destinationGc].
   int copyGC(int sourceGc, int destinationGc, Set<X11GCValue> values) {
     var request = X11CopyGCRequest(sourceGc, destinationGc, values);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(57, buffer.data);
+    return _sendRequest(57, request);
   }
 
   /// Sets the dash pattern used when drawing wiht [gc]. [dashes] contains the length in pixels of each part of the dash pattern.
   int setDashes(int gc, List<int> dashes, {int dashOffset = 0}) {
     var request = X11SetDashesRequest(gc, dashes, dashOffset: dashOffset);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(58, buffer.data);
+    return _sendRequest(58, request);
   }
 
   /// Sets the clipping [rectangles] used when drawing with [gc].
@@ -1183,25 +1066,19 @@ class X11Client {
       X11ClipOrdering ordering = X11ClipOrdering.unSorted}) {
     var request = X11SetClipRectanglesRequest(gc, rectangles,
         clipOrigin: clipOrigin, ordering: ordering);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(59, buffer.data);
+    return _sendRequest(59, request);
   }
 
   /// Deletes the reference to a [gc] created in [createGC].
   int freeGC(int gc) {
     var request = X11FreeGCRequest(gc);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(60, buffer.data);
+    return _sendRequest(60, request);
   }
 
   /// Clears [area] on [window] to its backing color / pixmap.
   int clearArea(int window, X11Rectangle area, {bool exposures = false}) {
     var request = X11ClearAreaRequest(window, area, exposures: exposures);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(61, buffer.data);
+    return _sendRequest(61, request);
   }
 
   /// Copies [sourceArea] from [sourceDrawable] onto [destinationDrawable] at [destinationPosition].
@@ -1209,9 +1086,7 @@ class X11Client {
       int destinationDrawable, X11Point destinationPosition) {
     var request = X11CopyAreaRequest(sourceDrawable, destinationDrawable, gc,
         sourceArea, destinationPosition);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(62, buffer.data);
+    return _sendRequest(62, request);
   }
 
   /// Copies the [sourceArea] from [sourceDrawable] onto [destinationDrawable] at [destinationPosition].
@@ -1221,9 +1096,7 @@ class X11Client {
       int destinationDrawable, X11Point destinationPosition, int bitPlane) {
     var request = X11CopyPlaneRequest(sourceDrawable, destinationDrawable, gc,
         sourceArea, destinationPosition, bitPlane);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(63, buffer.data);
+    return _sendRequest(63, request);
   }
 
   /// Draws [points] on [drawable].
@@ -1231,9 +1104,7 @@ class X11Client {
       {X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11PolyPointRequest(drawable, gc, points,
         coordinateMode: coordinateMode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(64, buffer.data);
+    return _sendRequest(64, request);
   }
 
   /// Draws a line on [drawable] made up of [points].
@@ -1241,33 +1112,25 @@ class X11Client {
       {X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11PolyLineRequest(drawable, gc, points,
         coordinateMode: coordinateMode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(65, buffer.data);
+    return _sendRequest(65, request);
   }
 
   /// Draws line [segments] on [drawable].
   int polySegment(int gc, int drawable, List<X11Segment> segments) {
     var request = X11PolySegmentRequest(drawable, gc, segments);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(66, buffer.data);
+    return _sendRequest(66, request);
   }
 
   /// Draws [rectangles] onto [drawable.
   int polyRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyRectangleRequest(drawable, gc, rectangles);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(67, buffer.data);
+    return _sendRequest(67, request);
   }
 
   /// Draws [arcs] onto [drawable.
   int polyArc(int gc, int drawable, List<X11Arc> arcs) {
     var request = X11PolyArcRequest(drawable, gc, arcs);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(68, buffer.data);
+    return _sendRequest(68, request);
   }
 
   /// Draws a filled polygon made from [points] onto [drawable].
@@ -1276,25 +1139,19 @@ class X11Client {
       X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11FillPolyRequest(drawable, gc, points,
         shape: shape, coordinateMode: coordinateMode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(69, buffer.data);
+    return _sendRequest(69, request);
   }
 
   /// Draws filled [rectangles] onto [drawable].
   int polyFillRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyFillRectangleRequest(drawable, gc, rectangles);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(70, buffer.data);
+    return _sendRequest(70, request);
   }
 
   /// Draws a filled polygon made from [args] onto [drawable].
   int polyFillArc(int gc, int drawable, List<X11Arc> arcs) {
     var request = X11PolyFillArcRequest(drawable, gc, arcs);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(71, buffer.data);
+    return _sendRequest(71, request);
   }
 
   /// Sets the contents of [area] on [drawable].
@@ -1304,9 +1161,7 @@ class X11Client {
       int leftPad = 0}) {
     var request = X11PutImageRequest(drawable, gc, area, data,
         depth: depth, format: format, leftPad: leftPad);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(72, buffer.data);
+    return _sendRequest(72, request);
   }
 
   /// Gets the contents of [area] on [drawable].
@@ -1315,9 +1170,7 @@ class X11Client {
       int planeMask = 0xFFFFFFFF}) async {
     var request = X11GetImageRequest(drawable, area,
         planeMask: planeMask, format: format);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(73, buffer.data);
+    var sequenceNumber = _sendRequest(73, request);
     return _awaitReply<X11GetImageReply>(
         sequenceNumber, X11GetImageReply.fromBuffer);
   }
@@ -1326,34 +1179,26 @@ class X11Client {
   int polyText8(
       int gc, int drawable, X11Point position, List<X11TextItem> items) {
     var request = X11PolyText8Request(drawable, gc, position, items);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(74, buffer.data);
+    return _sendRequest(74, request);
   }
 
   /// Draws text onto [drawable] at [position].
   int polyText16(
       int gc, int drawable, X11Point position, List<X11TextItem> items) {
     var request = X11PolyText16Request(drawable, gc, position, items);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(75, buffer.data);
+    return _sendRequest(75, request);
   }
 
   /// Draws [string] text onto [drawable] at [position]. [string] contains single byte characters.
   int imageText8(int gc, int drawable, X11Point position, String string) {
     var request = X11ImageText8Request(drawable, gc, position, string);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(76, buffer.data);
+    return _sendRequest(76, request);
   }
 
   /// Draws [string] text onto [drawable] at [position]. [string] contains two byte characters.
   int imageText16(int gc, int drawable, X11Point position, String string) {
     var request = X11ImageText16Request(drawable, gc, position, string);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(77, buffer.data);
+    return _sendRequest(77, request);
   }
 
   /// Creates a colormap with [id] with [visual] format for the screen that contains [window].
@@ -1361,17 +1206,13 @@ class X11Client {
   /// When no longer required, the colormap reference should be deleted with [freeColormap].
   int createColormap(int id, int window, int visual, {int alloc = 0}) {
     var request = X11CreateColormapRequest(id, window, visual, alloc: alloc);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(78, buffer.data);
+    return _sendRequest(78, request);
   }
 
   /// Deletes the reference to a [colormap] created in [createColormap].
   int freeColormap(int colormap) {
     var request = X11FreeColormapRequest(colormap);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(79, buffer.data);
+    return _sendRequest(79, request);
   }
 
   /// Creates a new colormap with [id] that moves the allocations from [sourceColormap].
@@ -1379,33 +1220,25 @@ class X11Client {
   /// When no longer required, the colormap reference should be deleted with [freeColormap].
   int copyColormapAndFree(int id, int sourceColormap) {
     var request = X11CopyColormapAndFreeRequest(id, sourceColormap);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(80, buffer.data);
+    return _sendRequest(80, request);
   }
 
   /// Installs [colormap].
   int installColormap(int colormap) {
     var request = X11InstallColormapRequest(colormap);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(81, buffer.data);
+    return _sendRequest(81, request);
   }
 
   /// Uninstalls [colormap].
   int uninstallColormap(int colormap) {
     var request = X11UninstallColormapRequest(colormap);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(82, buffer.data);
+    return _sendRequest(82, request);
   }
 
   /// Gets the installed colormaps on the screen containing [window].
   Future<List<int>> listInstalledColormaps(int window) async {
     var request = X11ListInstalledColormapsRequest(window);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(83, buffer.data);
+    var sequenceNumber = _sendRequest(83, request);
     var reply = await _awaitReply<X11ListInstalledColormapsReply>(
         sequenceNumber, X11ListInstalledColormapsReply.fromBuffer);
     return reply.colormaps;
@@ -1415,9 +1248,7 @@ class X11Client {
   // When no longer requires the allocated color can be freed with [freeColors].
   Future<X11AllocColorReply> allocColor(int colormap, X11Rgb color) async {
     var request = X11AllocColorRequest(colormap, color);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(84, buffer.data);
+    var sequenceNumber = _sendRequest(84, request);
     return _awaitReply<X11AllocColorReply>(
         sequenceNumber, X11AllocColorReply.fromBuffer);
   }
@@ -1427,9 +1258,7 @@ class X11Client {
   Future<X11AllocNamedColorReply> allocNamedColor(
       int colormap, String name) async {
     var request = X11AllocNamedColorRequest(colormap, name);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(85, buffer.data);
+    var sequenceNumber = _sendRequest(85, request);
     return _awaitReply<X11AllocNamedColorReply>(
         sequenceNumber, X11AllocNamedColorReply.fromBuffer);
   }
@@ -1440,9 +1269,7 @@ class X11Client {
       {int planes = 0, bool contiguous = false}) async {
     var request = X11AllocColorCellsRequest(colormap, colorCount,
         planes: planes, contiguous: contiguous);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(86, buffer.data);
+    var sequenceNumber = _sendRequest(86, request);
     return _awaitReply<X11AllocColorCellsReply>(
         sequenceNumber, X11AllocColorCellsReply.fromBuffer);
   }
@@ -1461,9 +1288,7 @@ class X11Client {
         greenDepth: greenDepth,
         blueDepth: blueDepth,
         contiguous: contiguous);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(87, buffer.data);
+    var sequenceNumber = _sendRequest(87, request);
     return _awaitReply<X11AllocColorPlanesReply>(
         sequenceNumber, X11AllocColorPlanesReply.fromBuffer);
   }
@@ -1471,17 +1296,13 @@ class X11Client {
   /// Frees [pixels] in [colormap] that were previously allocated with [allocColor], [allocNamedColor], [allocColorCells] or [allocColorPlanes].
   int freeColors(int colormap, List<int> pixels, {int planeMask = 0xFFFFFFFF}) {
     var request = X11FreeColorsRequest(colormap, pixels, planeMask: planeMask);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(88, buffer.data);
+    return _sendRequest(88, request);
   }
 
   /// Sets the RGB values of pixels in [colormap].
   int storeColors(int colormap, List<X11ColorItem> items) {
     var request = X11StoreColorsRequest(colormap, items);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(89, buffer.data);
+    return _sendRequest(89, request);
   }
 
   /// Sets the values of a [pixel] in [colormap] to the color with [name].
@@ -1490,17 +1311,13 @@ class X11Client {
       {doRed = true, doGreen = true, doBlue = true}) {
     var request = X11StoreNamedColorRequest(colormap, pixel, name,
         doRed: doRed, doGreen: doGreen, doBlue: doBlue);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(90, buffer.data);
+    return _sendRequest(90, request);
   }
 
   /// Gets the RGB color values for the [pixels] in [colormap].
   Future<List<X11Rgb>> queryColors(int colormap, List<int> pixels) async {
     var request = X11QueryColorsRequest(colormap, pixels);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(91, buffer.data);
+    var sequenceNumber = _sendRequest(91, request);
     var reply = await _awaitReply<X11QueryColorsReply>(
         sequenceNumber, X11QueryColorsReply.fromBuffer);
     return reply.colors;
@@ -1509,9 +1326,7 @@ class X11Client {
   /// Gets the RGB values associated with the color with [name] in [colormap].
   Future<X11LookupColorReply> lookupColor(int colormap, String name) async {
     var request = X11LookupColorRequest(colormap, name);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(92, buffer.data);
+    var sequenceNumber = _sendRequest(92, request);
     return _awaitReply<X11LookupColorReply>(
         sequenceNumber, X11LookupColorReply.fromBuffer);
   }
@@ -1530,9 +1345,7 @@ class X11Client {
         background: foreground,
         hotspot: hotspot,
         maskPixmap: maskPixmap);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(93, buffer.data);
+    return _sendRequest(93, request);
   }
 
   /// Creates a cursor from [sourceChar] in [sourceFont].
@@ -1549,17 +1362,13 @@ class X11Client {
         background: background,
         maskFont: maskFont,
         maskChar: maskChar);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(94, buffer.data);
+    return _sendRequest(94, request);
   }
 
   /// Deletes the reference to a [cursor] created in [createCursor] or [createGlyphCursor].
   int freeCursor(int cursor) {
     var request = X11FreeCursorRequest(cursor);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(95, buffer.data);
+    return _sendRequest(95, request);
   }
 
   /// Changes the [foreground] and [background] colors of [cursor].
@@ -1568,9 +1377,7 @@ class X11Client {
       X11Rgb background = const X11Rgb(0, 0, 0)}) {
     var request = X11RecolorCursorRequest(cursor,
         foreground: foreground, background: background);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(96, buffer.data);
+    return _sendRequest(96, request);
   }
 
   /// Gets the largest cursor size on the screen containing [drawable].
@@ -1594,9 +1401,7 @@ class X11Client {
   Future<X11Size> _queryBestSize(
       int drawable, X11QueryClass queryClass, X11Size size) async {
     var request = X11QueryBestSizeRequest(drawable, queryClass, size);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(97, buffer.data);
+    var sequenceNumber = _sendRequest(97, request);
     var reply = await _awaitReply<X11QueryBestSizeReply>(
         sequenceNumber, X11QueryBestSizeReply.fromBuffer);
     return reply.size;
@@ -1605,9 +1410,7 @@ class X11Client {
   /// Gets information about the extension with [name].
   Future<X11QueryExtensionReply> queryExtension(String name) async {
     var request = X11QueryExtensionRequest(name);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(98, buffer.data);
+    var sequenceNumber = _sendRequest(98, request);
     return _awaitReply<X11QueryExtensionReply>(
         sequenceNumber, X11QueryExtensionReply.fromBuffer);
   }
@@ -1615,9 +1418,7 @@ class X11Client {
   /// Gets the names of the available extensions.
   Future<List<String>> listExtensions() async {
     var request = X11ListExtensionsRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(99, buffer.data);
+    var sequenceNumber = _sendRequest(99, request);
     var reply = await _awaitReply<X11ListExtensionsReply>(
         sequenceNumber, X11ListExtensionsReply.fromBuffer);
     return reply.names;
@@ -1626,18 +1427,14 @@ class X11Client {
   /// Sets the keyboard [mapping].
   int changeKeyboardMapping(List<List<int>> mapping, {int firstKeycode = 0}) {
     var request = X11ChangeKeyboardMappingRequest(firstKeycode, mapping);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(100, buffer.data);
+    return _sendRequest(100, request);
   }
 
   /// Gets the keyboard mapping.
   Future<List<List<int>>> getKeyboardMapping(
       {int firstKeycode = 0, int count = 255}) async {
     var request = X11GetKeyboardMappingRequest(firstKeycode, count);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(101, buffer.data);
+    var sequenceNumber = _sendRequest(101, request);
     var reply = await _awaitReply<X11GetKeyboardMappingReply>(
         sequenceNumber, X11GetKeyboardMappingReply.fromBuffer);
     return reply.map;
@@ -1662,17 +1459,13 @@ class X11Client {
         ledMode: ledMode,
         key: key,
         autoRepeatMode: autoRepeatMode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(102, buffer.data);
+    return _sendRequest(102, request);
   }
 
   /// Gets the current settings for the keyboard.
   Future<X11GetKeyboardControlReply> getKeyboardControl() async {
     var request = X11GetKeyboardControlRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(103, buffer.data);
+    var sequenceNumber = _sendRequest(103, request);
     return _awaitReply<X11GetKeyboardControlReply>(
         sequenceNumber, X11GetKeyboardControlReply.fromBuffer);
   }
@@ -1684,9 +1477,7 @@ class X11Client {
   /// If [percent] is in the range [-100, 0] the volume ranges between minimum and the default.
   int bell({int percent = 0}) {
     var request = X11BellRequest(percent);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(104, buffer.data);
+    return _sendRequest(104, request);
   }
 
   /// sets the pointer control settings.
@@ -1696,17 +1487,13 @@ class X11Client {
   int changePointerControl({X11Fraction acceleration, int threshold}) {
     var request = X11ChangePointerControlRequest(
         acceleration: acceleration, threshold: threshold);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(105, buffer.data);
+    return _sendRequest(105, request);
   }
 
   /// Gets the current pointer control settings.
   Future<X11GetPointerControlReply> getPointerControl() async {
     var request = X11GetPointerControlRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(106, buffer.data);
+    var sequenceNumber = _sendRequest(106, request);
     return _awaitReply<X11GetPointerControlReply>(
         sequenceNumber, X11GetPointerControlReply.fromBuffer);
   }
@@ -1722,17 +1509,13 @@ class X11Client {
         interval: interval,
         preferBlanking: preferBlanking,
         allowExposures: allowExposures);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(107, buffer.data);
+    return _sendRequest(107, request);
   }
 
   /// Gets the screensaver state.
   Future<X11GetScreenSaverReply> getScreenSaver() async {
     var request = X11GetScreenSaverRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(108, buffer.data);
+    var sequenceNumber = _sendRequest(108, request);
     return _awaitReply<X11GetScreenSaverReply>(
         sequenceNumber, X11GetScreenSaverReply.fromBuffer);
   }
@@ -1749,17 +1532,13 @@ class X11Client {
 
   int _changeHosts(X11ChangeHostsMode mode, int family, List<int> address) {
     var request = X11ChangeHostsRequest(mode, family, address);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(109, buffer.data);
+    return _sendRequest(109, request);
   }
 
   /// Gets the access control list and whether use of the list at connection setup is currently enabled or disabled.
   Future<X11ListHostsReply> listHosts() async {
     var request = X11ListHostsRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(110, buffer.data);
+    var sequenceNumber = _sendRequest(110, request);
     return _awaitReply<X11ListHostsReply>(
         sequenceNumber, X11ListHostsReply.fromBuffer);
   }
@@ -1767,25 +1546,19 @@ class X11Client {
   /// Enables or disables the use of the access control list at connection setups.
   int setAccessControl(bool enabled) {
     var request = X11SetAccessControlRequest(enabled);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(111, buffer.data);
+    return _sendRequest(111, request);
   }
 
   /// Sets the behaviour of this clients resources when its connection is closed.
   int setCloseDownMode(X11CloseDownMode mode) {
     var request = X11SetCloseDownModeRequest(mode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(112, buffer.data);
+    return _sendRequest(112, request);
   }
 
   /// Closes the client that controls [resource].
   int killClient(int resource) {
     var request = X11KillClientRequest(resource);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(113, buffer.data);
+    return _sendRequest(113, request);
   }
 
   /// Rotates the [properties] of [window] by [delta] steps.
@@ -1796,9 +1569,7 @@ class X11Client {
       propertyAtoms.add(await internAtom(property));
     }
     var request = X11RotatePropertiesRequest(window, delta, propertyAtoms);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(114, buffer.data);
+    return _sendRequest(114, request);
   }
 
   /// Activates the screen-saver immediately.
@@ -1813,17 +1584,13 @@ class X11Client {
 
   int _forceScreenSaver(X11ForceScreenSaverMode mode) {
     var request = X11ForceScreenSaverRequest(mode);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(115, buffer.data);
+    return _sendRequest(115, request);
   }
 
   /// Sets the pointer button [map].
   Future<int> setPointerMapping(List<int> map) async {
     var request = X11SetPointerMappingRequest(map);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(116, buffer.data);
+    var sequenceNumber = _sendRequest(116, request);
     var reply = await _awaitReply<X11SetPointerMappingReply>(
         sequenceNumber, X11SetPointerMappingReply.fromBuffer);
     return reply.status;
@@ -1832,9 +1599,7 @@ class X11Client {
   /// Gets the current mapping of the pointer buttons.
   Future<List<int>> getPointerMapping() async {
     var request = X11GetPointerMappingRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(117, buffer.data);
+    var sequenceNumber = _sendRequest(117, request);
     var reply = await _awaitReply<X11GetPointerMappingReply>(
         sequenceNumber, X11GetPointerMappingReply.fromBuffer);
     return reply.map;
@@ -1843,9 +1608,7 @@ class X11Client {
   /// Sets the keyboard modifier [map].
   Future<int> setModifierMapping(X11ModifierMap map) async {
     var request = X11SetModifierMappingRequest(map);
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(118, buffer.data);
+    var sequenceNumber = _sendRequest(118, request);
     var reply = await _awaitReply<X11SetModifierMappingReply>(
         sequenceNumber, X11SetModifierMappingReply.fromBuffer);
     return reply.status;
@@ -1854,9 +1617,7 @@ class X11Client {
   /// Gets the current mapping of the keyboard modifiers.
   Future<X11ModifierMap> getModifierMapping() async {
     var request = X11GetModifierMappingRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    var sequenceNumber = _sendRequest(119, buffer.data);
+    var sequenceNumber = _sendRequest(119, request);
     var reply = await _awaitReply<X11GetModifierMappingReply>(
         sequenceNumber, X11GetModifierMappingReply.fromBuffer);
     return reply.map;
@@ -1865,9 +1626,7 @@ class X11Client {
   /// Sends an empty request.
   int noOperation() {
     var request = X11NoOperationRequest();
-    var buffer = X11WriteBuffer();
-    request.encode(buffer);
-    return _sendRequest(127, buffer.data);
+    return _sendRequest(127, request);
   }
 
   void _processData(Uint8List data) {
@@ -1983,19 +1742,23 @@ class X11Client {
     return true;
   }
 
-  int _sendRequest(int opcode, List<int> data) {
+  int _sendRequest(int opcode, X11Request request) {
+    var buffer = X11WriteBuffer();
+    request.encode(buffer);
+
     _sequenceNumber++;
     if (_sequenceNumber >= 65536) {
       _sequenceNumber = 0;
     }
 
     // In a quirk of X11 there is a one byte field in the header that we take from the data.
-    var buffer = X11WriteBuffer();
-    buffer.writeUint8(opcode);
-    buffer.writeUint8(data[0]);
-    buffer.writeUint16(1 + (data.length - 1) ~/ 4); // FIXME: Pad to 4 bytes
-    _socket.add(buffer.data);
-    _socket.add(data.sublist(1));
+    var headerBuffer = X11WriteBuffer();
+    headerBuffer.writeUint8(opcode);
+    headerBuffer.writeUint8(buffer.data[0]);
+    headerBuffer.writeUint16(
+        1 + (buffer.data.length - 1) ~/ 4); // FIXME: Pad to 4 bytes
+    _socket.add(headerBuffer.data);
+    _socket.add(buffer.data.sublist(1));
 
     return _sequenceNumber;
   }
