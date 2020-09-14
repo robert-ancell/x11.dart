@@ -91,6 +91,26 @@ class _RequestStreamHandler<T> extends _RequestHandler {
   }
 }
 
+class X11Extension {
+  final X11Client _client;
+  final int _majorOpcode;
+
+  X11Extension(this._client, this._majorOpcode);
+}
+
+class X11BigRequestsExtension extends X11Extension {
+  X11BigRequestsExtension(X11Client client, int majorOpcode)
+      : super(client, majorOpcode);
+
+  Future<int> bigReqEnable() async {
+    var request = X11BigReqEnableRequest();
+    var sequenceNumber = _client._sendRequest(_majorOpcode + 0, request);
+    var reply = await _client._awaitReply<X11BigReqEnableReply>(
+        sequenceNumber, X11BigReqEnableReply.fromBuffer);
+    return reply.maximumRequestLength;
+  }
+}
+
 class X11Client {
   /// Screens provided by the X server.
   List<X11Screen> get screens => _roots;
@@ -105,7 +125,8 @@ class X11Client {
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
   int _sequenceNumber = 0;
-  int _resourceIdBase;
+  int _resourceIdBase = 0;
+  int _maximumRequestLength = 0;
   int _resourceCount = 0;
   List<X11Screen> _roots;
   final _errorStreamController = StreamController<X11Error>();
@@ -238,7 +259,14 @@ class X11Client {
     request.encode(buffer);
     _socket.add(buffer.data);
 
-    return _connectCompleter.future;
+    await _connectCompleter.future;
+
+    // NOTE(robert-ancell): We could do this on-demand only if we need it - less round trips on first start.
+    var reply = await queryExtension('BIG-REQUESTS');
+    if (reply.present) {
+      var bigRequests = X11BigRequestsExtension(this, reply.majorOpcode);
+      _maximumRequestLength = await bigRequests.bigReqEnable();
+    }
   }
 
   /// Generates a new resource ID for use in [createWindow], [createGC], [createPixmap] etc.
@@ -1673,6 +1701,7 @@ class X11Client {
       // Success
       var reply = X11SetupSuccessReply.fromBuffer(replyBuffer);
       _resourceIdBase = reply.resourceIdBase;
+      _maximumRequestLength = reply.maximumRequestLength;
       _roots = reply.roots;
     } else if (result == 2) {
       // Authenticate
@@ -1751,12 +1780,25 @@ class X11Client {
       _sequenceNumber = 0;
     }
 
+    var dataLength = buffer.data.length - 1;
+    if (dataLength % 4 != 0) {
+      throw 'Request is not padded to 32 bit boundary';
+    }
+    var length = 1 + dataLength ~/ 4;
+    if (length > _maximumRequestLength) {
+      throw 'Request of ${dataLength} is larger than maximum ${_maximumRequestLength}';
+    }
+
     // In a quirk of X11 there is a one byte field in the header that we take from the data.
     var headerBuffer = X11WriteBuffer();
     headerBuffer.writeUint8(opcode);
     headerBuffer.writeUint8(buffer.data[0]);
-    headerBuffer.writeUint16(
-        1 + (buffer.data.length - 1) ~/ 4); // FIXME: Pad to 4 bytes
+    if (length < 65535) {
+      headerBuffer.writeUint16(length);
+    } else {
+      headerBuffer.writeUint16(0);
+      headerBuffer.writeUint32(length);
+    }
     _socket.add(headerBuffer.data);
     _socket.add(buffer.data.sublist(1));
 
