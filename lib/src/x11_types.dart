@@ -163,6 +163,53 @@ enum X11LineStyle { solid, onOffDash, doubleDash }
 
 enum X11PolygonShape { complex, nonconvex, convex }
 
+enum X11RandrConfigStatus { success, invalidConfigTime, invalidTime, failed }
+
+enum X11RandrModeFlag {
+  hSyncPositive,
+  hSyncNegative,
+  vSyncPositive,
+  vSyncNegative,
+  interlace,
+  doubleScan,
+  cSync,
+  cSyncPositive,
+  cSyncNegative,
+  hSkewPresent,
+  bCast,
+  pixelMultiplex,
+  doubleClock,
+  clockDivideBy2
+}
+
+enum X11RandrRotation {
+  rotate0,
+  rotate90,
+  rotate180,
+  rotate270,
+  reflectX,
+  reflectY
+}
+
+enum X11RandrSelectMask {
+  screenChangeNotifyMask,
+  crtcChangeNotifyMask,
+  outputChangeNotifyMask,
+  outputPropertyNotifyMask,
+  providerChangeNotifyMask,
+  providerPropertyNotifyMask,
+  resourceChangeNotifyMask
+}
+
+enum X11RenderSubPixelOrder {
+  unknown,
+  horizontalRgb,
+  horizontalBgr,
+  verticalRgb,
+  verticalBgr,
+  none
+}
+
 enum X11StackMode { above, below, topIf, bottomIf, opposite }
 
 enum X11SubwindowMode { clipByChildren, includeInferiors }
@@ -355,6 +402,84 @@ class X11Point {
 }
 
 enum X11QueryClass { cursor, tile, stipple }
+
+class X11RandrModeInfo {
+  final int id;
+  final String name;
+  final X11Size sizeInPixels;
+  final int dotClock;
+  final int hSyncStart;
+  final int hSyncEnd;
+  final int hTotal;
+  final int hSkew;
+  final int vSyncStart;
+  final int vSyncEnd;
+  final int vTotal;
+  final Set<X11RandrModeFlag> modeFlags;
+
+  const X11RandrModeInfo(
+      {this.id,
+      this.name,
+      this.sizeInPixels,
+      this.dotClock,
+      this.hSyncStart,
+      this.hSyncEnd,
+      this.hTotal,
+      this.hSkew,
+      this.vSyncStart,
+      this.vSyncEnd,
+      this.vTotal,
+      this.modeFlags});
+
+  @override
+  String toString() =>
+      "X11RandrModeInfo(id: ${id}, name: '${name}', sizeInPixels: ${sizeInPixels}, dotClock: ${dotClock}, hSyncStart: ${hSyncStart}, hSyncEnd: ${hSyncEnd}, hTotal: ${hTotal}, hSkew: ${hSkew}, vSyncStart: ${vSyncStart}, vSyncEnd: ${vSyncEnd}, vTotal: ${vTotal}, modeFlags: ${modeFlags})";
+}
+
+class X11RandrMonitorInfo {
+  final int name;
+  final bool primary;
+  final bool automatic;
+  final X11Point location; // FIXME: X11Rectangle area
+  final X11Size sizeInPixels;
+  final X11Size sizeInMillimeters;
+  final List<int> outputs; // FIXME: or crtcs? spec is unclear
+
+  const X11RandrMonitorInfo(
+      {this.name,
+      this.primary,
+      this.automatic,
+      this.location,
+      this.sizeInPixels,
+      this.sizeInMillimeters,
+      this.outputs});
+}
+
+class X11RandrScreenSize {
+  final X11Size sizeInPixels;
+  final X11Size sizeInMillimeters;
+  final List<int> rates;
+
+  const X11RandrScreenSize(this.sizeInPixels,
+      {this.sizeInMillimeters = const X11Size(0, 0), this.rates = const []});
+
+  @override
+  String toString() =>
+      'X11RandrScreenSize(${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, rates: ${rates})';
+}
+
+class X11RandrTransform {
+  final double p11, p12, p13;
+  final double p21, p22, p23;
+  final double p31, p32, p33;
+
+  const X11RandrTransform(this.p11, this.p12, this.p13, this.p21, this.p22,
+      this.p23, this.p31, this.p32, this.p33);
+
+  @override
+  String toString() =>
+      'X11RandrTransform(${p11}, ${p12}, ${p13}, ${p21}, ${p22}, ${p23}, ${p31}, ${p32}, ${p33})';
+}
 
 class X11Rectangle {
   final int x;

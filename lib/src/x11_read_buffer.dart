@@ -64,6 +64,43 @@ class X11ReadBuffer {
     return ByteData.view(_readBytes(4)).getInt32(0, Endian.little);
   }
 
+  double readFixed() {
+    var v = readUint32();
+    return (v >> 16).toDouble(); // FIXME + fraction
+  }
+
+  List<int> readListOfUint16(int length) {
+    var values = <int>[];
+    for (var i = 0; i < length; i++) {
+      values.add(readUint16());
+    }
+    return values;
+  }
+
+  List<int> readListOfUint32(int length) {
+    var values = <int>[];
+    for (var i = 0; i < length; i++) {
+      values.add(readUint32());
+    }
+    return values;
+  }
+
+  List<int> readListOfInt32(int length) {
+    var values = <int>[];
+    for (var i = 0; i < length; i++) {
+      values.add(readInt32());
+    }
+    return values;
+  }
+
+  List<double> readListOfFixed(int length) {
+    var values = <double>[];
+    for (var i = 0; i < length; i++) {
+      values.add(readFixed());
+    }
+    return values;
+  }
+
   int readValueUint8() {
     skip(3);
     return readUint8();

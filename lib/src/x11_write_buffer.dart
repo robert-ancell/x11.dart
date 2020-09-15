@@ -52,6 +52,35 @@ class X11WriteBuffer {
     _data.addAll(bytes.asUint8List());
   }
 
+  void writeFixed(double value) {
+    var v = value.truncate() << 16; // FIXME fraction
+    writeUint32(v);
+  }
+
+  void writeListOfUint16(List<int> value) {
+    for (var v in value) {
+      writeUint16(v);
+    }
+  }
+
+  void writeListOfUint32(List<int> value) {
+    for (var v in value) {
+      writeUint32(v);
+    }
+  }
+
+  void writeListOfInt32(List<int> value) {
+    for (var v in value) {
+      writeInt32(v);
+    }
+  }
+
+  void writeListOfFixed(List<double> value) {
+    for (var v in value) {
+      writeFixed(v);
+    }
+  }
+
   void writeValueUint8(int value) {
     skip(3);
     writeUint8(value);
