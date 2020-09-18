@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'x11_events.dart';
 import 'x11_read_buffer.dart';
 import 'x11_types.dart';
 import 'x11_write_buffer.dart';
@@ -1865,12 +1864,13 @@ class X11ConvertSelectionRequest extends X11Request {
 
 class X11SendEventRequest extends X11Request {
   final int destination;
-  final X11Event event;
+  final int code;
+  final List<int> event;
   final bool propagate;
   final int eventMask;
   final int sequenceNumber;
 
-  X11SendEventRequest(this.destination, this.event,
+  X11SendEventRequest(this.destination, this.code, this.event,
       {this.propagate = false, this.eventMask = 0, this.sequenceNumber = 0});
 
   factory X11SendEventRequest.fromBuffer(X11ReadBuffer buffer) {
@@ -1878,14 +1878,10 @@ class X11SendEventRequest extends X11Request {
     var destination = buffer.readUint32();
     var eventMask = buffer.readUint32();
     var code = buffer.readUint8();
-    var eventBuffer = X11ReadBuffer();
-    eventBuffer.add(buffer.readUint8());
+    var event = [buffer.readUint8()];
     var sequenceNumber = buffer.readUint16();
-    for (var i = 0; i < 28; i++) {
-      eventBuffer.add(buffer.readUint8());
-    }
-    var event = X11Event.fromBuffer(code, eventBuffer);
-    return X11SendEventRequest(destination, event,
+    event.addAll(buffer.readListOfUint8(28));
+    return X11SendEventRequest(destination, code, event,
         propagate: propagate,
         eventMask: eventMask,
         sequenceNumber: sequenceNumber);
@@ -1896,20 +1892,15 @@ class X11SendEventRequest extends X11Request {
     buffer.writeBool(propagate);
     buffer.writeUint32(destination);
     buffer.writeUint32(eventMask);
-    var eventBuffer = X11WriteBuffer();
-    var code = event.encode(eventBuffer);
     buffer.writeUint8(code);
-    buffer.writeUint8(eventBuffer.data[0]);
+    buffer.writeUint8(event[0]);
     buffer.writeUint16(sequenceNumber);
-    for (var i = 1; i < eventBuffer.length; i++) {
-      buffer.writeUint8(eventBuffer.data[i]);
-    }
-    event.encode(buffer);
+    buffer.writeListOfUint8(event.sublist(1));
   }
 
   @override
   String toString() =>
-      'X11SendEventRequest(propagate: ${propagate}, destination: ${destination}, eventMask: ${eventMask}, event: ${event})';
+      'X11SendEventRequest(destination: ${destination}, code: ${code}, event: ${event}, propagate: ${propagate}, eventMask: ${eventMask}, sequenceNumber: ${sequenceNumber})';
 }
 
 class X11GrabPointerRequest extends X11Request {
