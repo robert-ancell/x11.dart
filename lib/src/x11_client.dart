@@ -70,13 +70,24 @@ class _RequestStreamHandler<T> extends _RequestHandler {
 class X11Extension {
   final X11Client _client;
   final int _majorOpcode;
+  final int _firstEvent;
+  final int _firstError;
 
-  X11Extension(this._client, this._majorOpcode);
+  X11Extension(
+      this._client, this._majorOpcode, this._firstEvent, this._firstError);
+
+  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+    return null;
+  }
+
+  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+    return null;
+  }
 }
 
 class X11BigRequestsExtension extends X11Extension {
   X11BigRequestsExtension(X11Client client, int majorOpcode)
-      : super(client, majorOpcode);
+      : super(client, majorOpcode, 0, 0);
 
   Future<int> bigReqEnable() async {
     var request = X11BigReqEnableRequest();
@@ -90,8 +101,9 @@ class X11BigRequestsExtension extends X11Extension {
 class X11RandrExtension extends X11Extension {
   var _configTimestamp = 0;
 
-  X11RandrExtension(X11Client client, int majorOpcode)
-      : super(client, majorOpcode);
+  X11RandrExtension(
+      X11Client client, int majorOpcode, int firstEvent, int firstError)
+      : super(client, majorOpcode, firstEvent, firstError);
 
   /// Gets the RANDR extension version supported by the X server.
   Future<X11RandrQueryVersionReply> queryVersion(
@@ -611,6 +623,7 @@ class X11RandrExtension extends X11Extension {
     return _client._sendRequest(_majorOpcode, request);
   }
 
+  /// Creates a new lease with [id] on the screen containing [window].
   Future<int> createLease(int window, int id,
       {List<int> crtcs = const [], List<int> outputs = const []}) async {
     var request =
@@ -621,9 +634,55 @@ class X11RandrExtension extends X11Extension {
     return reply.nfd;
   }
 
+  /// Frees [lease] created in [createLease].
   int freeLease(int lease, {bool terminate = false}) {
     var request = X11RandrFreeLeaseRequest(lease, terminate: terminate);
     return _client._sendRequest(_majorOpcode, request);
+  }
+
+  @override
+  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+    if (code == _firstEvent) {
+      return X11RandrScreenChangeNotifyEvent.fromBuffer(_firstEvent, buffer);
+    } else if (code == _firstEvent + 1) {
+      var subCode = buffer.readUint8();
+      if (subCode == 0) {
+        return X11RandrCrtcChangeNotifyEvent.fromBuffer(_firstEvent, buffer);
+      } else if (subCode == 1) {
+        return X11RandrOutputChangeNotifyEvent.fromBuffer(_firstEvent, buffer);
+      } else if (subCode == 2) {
+        return X11RandrOutputPropertyNotifyEvent.fromBuffer(
+            _firstEvent, buffer);
+      } else if (subCode == 3) {
+        return X11RandrProviderChangeNotifyEvent.fromBuffer(
+            _firstEvent, buffer);
+      } else if (subCode == 4) {
+        return X11RandrProviderPropertyNotifyEvent.fromBuffer(
+            _firstEvent, buffer);
+      } else if (subCode == 5) {
+        return X11RandrResourceChangeNotifyEvent.fromBuffer(
+            _firstEvent, buffer);
+      } else {
+        return X11RandrUnknownEvent.fromBuffer(_firstEvent, subCode, buffer);
+      }
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+    if (code == _firstError) {
+      return X11RandrOutputError.fromBuffer(sequenceNumber, buffer);
+    } else if (code == _firstError + 1) {
+      return X11RandrCrtcError.fromBuffer(sequenceNumber, buffer);
+    } else if (code == _firstError + 2) {
+      return X11RandrModeError.fromBuffer(sequenceNumber, buffer);
+    } else if (code == _firstError + 3) {
+      return X11RandrProviderError.fromBuffer(sequenceNumber, buffer);
+    } else {
+      return null;
+    }
   }
 }
 
@@ -790,7 +849,8 @@ class X11Client {
     }
     reply = await queryExtension('RANDR');
     if (reply.present) {
-      _randr = X11RandrExtension(this, reply.majorOpcode);
+      _randr = X11RandrExtension(
+          this, reply.majorOpcode, reply.firstEvent, reply.firstError);
     }
   }
 
@@ -1192,7 +1252,9 @@ class X11Client {
     for (var event in events) {
       eventMask |= 1 << event.index;
     }
-    var request = X11SendEventRequest(destination, event,
+    var buffer = X11WriteBuffer();
+    var code = event.encode(buffer);
+    var request = X11SendEventRequest(destination, code, buffer.data,
         propagate: propagate,
         eventMask: eventMask,
         sequenceNumber: _sequenceNumber);
@@ -2282,9 +2344,10 @@ class X11Client {
         error = X11LengthError.fromBuffer(sequenceNumber, errorBuffer);
       } else if (code == 17) {
         error = X11ImplementationError.fromBuffer(sequenceNumber, errorBuffer);
-      } else {
-        error = X11UnknownError.fromBuffer(code, sequenceNumber, errorBuffer);
       }
+
+      error ??= randr.decodeError(code, sequenceNumber, errorBuffer);
+      error ??= X11UnknownError.fromBuffer(code, sequenceNumber, errorBuffer);
 
       var handler = _requests[error.sequenceNumber];
       if (handler != null) {
@@ -2322,7 +2385,78 @@ class X11Client {
       for (var i = 0; i < 28; i++) {
         eventBuffer.add(_buffer.readUint8());
       }
-      var event = X11Event.fromBuffer(code, eventBuffer);
+      X11Event event;
+      if (code == 2) {
+        event = X11KeyPressEvent.fromBuffer(eventBuffer);
+      } else if (code == 3) {
+        event = X11KeyReleaseEvent.fromBuffer(eventBuffer);
+      } else if (code == 4) {
+        event = X11ButtonPressEvent.fromBuffer(eventBuffer);
+      } else if (code == 5) {
+        event = X11ButtonReleaseEvent.fromBuffer(eventBuffer);
+      } else if (code == 6) {
+        event = X11MotionNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 7) {
+        event = X11EnterNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 8) {
+        event = X11LeaveNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 9) {
+        event = X11FocusInEvent.fromBuffer(eventBuffer);
+      } else if (code == 10) {
+        event = X11FocusOutEvent.fromBuffer(eventBuffer);
+      } else if (code == 11) {
+        event = X11KeymapNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 12) {
+        event = X11ExposeEvent.fromBuffer(eventBuffer);
+      } else if (code == 13) {
+        event = X11GraphicsExposureEvent.fromBuffer(eventBuffer);
+      } else if (code == 14) {
+        event = X11NoExposureEvent.fromBuffer(eventBuffer);
+      } else if (code == 15) {
+        event = X11VisibilityNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 16) {
+        event = X11CreateNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 17) {
+        event = X11DestroyNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 18) {
+        event = X11UnmapNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 19) {
+        event = X11MapNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 20) {
+        event = X11MapRequestEvent.fromBuffer(eventBuffer);
+      } else if (code == 21) {
+        event = X11ReparentNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 22) {
+        event = X11ConfigureNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 23) {
+        event = X11ConfigureRequestEvent.fromBuffer(eventBuffer);
+      } else if (code == 24) {
+        event = X11GravityNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 25) {
+        event = X11ResizeRequestEvent.fromBuffer(eventBuffer);
+      } else if (code == 26) {
+        event = X11CirculateNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 27) {
+        event = X11CirculateRequestEvent.fromBuffer(eventBuffer);
+      } else if (code == 28) {
+        event = X11PropertyNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 29) {
+        event = X11SelectionClearEvent.fromBuffer(eventBuffer);
+      } else if (code == 30) {
+        event = X11SelectionRequestEvent.fromBuffer(eventBuffer);
+      } else if (code == 31) {
+        event = X11SelectionNotifyEvent.fromBuffer(eventBuffer);
+      } else if (code == 32) {
+        event = X11ColormapNotifyEvent.fromBuffer(eventBuffer);
+        /*} else if (code == 33) {
+        event = X11ClientMessageEvent.fromBuffer(eventBuffer);*/
+      } else if (code == 34) {
+        event = X11MappingNotifyEvent.fromBuffer(eventBuffer);
+      }
+
+      event ??= randr.decodeEvent(code, eventBuffer);
+      event ??= X11UnknownEvent.fromBuffer(code, eventBuffer);
+
       _eventStreamController.add(event);
     }
 

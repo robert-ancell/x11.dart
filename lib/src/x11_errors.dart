@@ -320,3 +320,63 @@ class X11UnknownError extends X11Error {
     buffer.writeListOfUint8(data);
   }
 }
+
+class X11RandrOutputError extends X11Error {
+  const X11RandrOutputError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11RandrOutputError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11RandrOutputError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11RandrCrtcError extends X11Error {
+  const X11RandrCrtcError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11RandrCrtcError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11RandrCrtcError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11RandrModeError extends X11Error {
+  const X11RandrModeError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11RandrModeError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11RandrModeError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11RandrProviderError extends X11Error {
+  const X11RandrProviderError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11RandrProviderError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11RandrProviderError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
