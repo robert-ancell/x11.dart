@@ -69,6 +69,14 @@ class X11ReadBuffer {
     return (v >> 16).toDouble(); // FIXME + fraction
   }
 
+  List<int> readListOfUint8(int length) {
+    var values = <int>[];
+    for (var i = 0; i < length; i++) {
+      values.add(readUint8());
+    }
+    return values;
+  }
+
   List<int> readListOfUint16(int length) {
     var values = <int>[];
     for (var i = 0; i < length; i++) {

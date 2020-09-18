@@ -3,36 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'x11_errors.dart';
 import 'x11_events.dart';
 import 'x11_requests.dart';
 import 'x11_read_buffer.dart';
 import 'x11_types.dart';
 import 'x11_write_buffer.dart';
-
-class X11Error {
-  final X11ErrorCode code;
-  final int sequenceNumber;
-  final int resourceId;
-  final int majorOpcode;
-  final int minorOpcode;
-
-  X11Error(this.code, this.sequenceNumber, this.resourceId, this.majorOpcode,
-      this.minorOpcode);
-
-  factory X11Error.fromBuffer(X11ReadBuffer buffer) {
-    var code = X11ErrorCode.values[buffer.readUint8() + 1];
-    var sequenceNumber = buffer.readUint16();
-    var resourceId = buffer.readUint32();
-    var minorOpcode = buffer.readUint16();
-    var majorOpcode = buffer.readUint8();
-    buffer.skip(21);
-    return X11Error(code, sequenceNumber, resourceId, majorOpcode, minorOpcode);
-  }
-
-  @override
-  String toString() =>
-      'X11Error(code: ${code}, sequenceNumber: ${sequenceNumber}, resourceId: ${resourceId}, majorOpcode: ${majorOpcode}, minorOpcode: ${minorOpcode})';
-}
 
 abstract class _RequestHandler {
   bool get done;
@@ -2266,7 +2242,50 @@ class X11Client {
     var reply = _buffer.readUint8();
 
     if (reply == 0) {
-      var error = X11Error.fromBuffer(_buffer);
+      var errorBuffer = X11ReadBuffer();
+      var code = _buffer.readUint8();
+      var sequenceNumber = _buffer.readUint16();
+      errorBuffer.addAll(_buffer.readListOfUint8(28));
+
+      X11Error error;
+      if (code == 1) {
+        error = X11RequestError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 2) {
+        error = X11ValueError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 3) {
+        error = X11WindowError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 4) {
+        error = X11PixmapError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 5) {
+        error = X11AtomError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 6) {
+        error = X11CursorError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 7) {
+        error = X11FontError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 8) {
+        error = X11MatchError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 9) {
+        error = X11DrawableError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 10) {
+        error = X11AccessError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 11) {
+        error = X11AllocError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 12) {
+        error = X11ColormapError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 13) {
+        error = X11GContextError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 14) {
+        error = X11IdChoiceError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 15) {
+        error = X11NameError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 16) {
+        error = X11LengthError.fromBuffer(sequenceNumber, errorBuffer);
+      } else if (code == 17) {
+        error = X11ImplementationError.fromBuffer(sequenceNumber, errorBuffer);
+      } else {
+        error = X11UnknownError.fromBuffer(code, sequenceNumber, errorBuffer);
+      }
+
       var handler = _requests[error.sequenceNumber];
       if (handler != null) {
         handler.replyError(error);
