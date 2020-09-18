@@ -57,6 +57,12 @@ class X11WriteBuffer {
     writeUint32(v);
   }
 
+  void writeListOfUint8(List<int> value) {
+    for (var v in value) {
+      writeUint8(v);
+    }
+  }
+
   void writeListOfUint16(List<int> value) {
     for (var v in value) {
       writeUint16(v);

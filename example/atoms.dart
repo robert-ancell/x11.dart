@@ -5,12 +5,13 @@ void main() async {
   await client.connect();
   var atom = 1;
   while (true) {
-    var name = await client.getAtomName(atom);
-    if (name == null) {
-      break;
+    try {
+      var name = await client.getAtomName(atom);
+      print(name);
+    } catch (X11AtomError) {
+      await client.close();
+      return;
     }
-    print(name);
     atom++;
   }
-  await client.close();
 }

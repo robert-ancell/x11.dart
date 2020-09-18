@@ -43,25 +43,6 @@ enum X11CloseDownMode { destroy, retainPermanent, retainTemporary }
 
 enum X11CoordinateMode { origin, previous }
 
-enum X11ErrorCode {
-  request,
-  value,
-  window,
-  pixmap,
-  atom,
-  cursor,
-  match,
-  drawable,
-  access,
-  alloc,
-  colormap,
-  gContext,
-  idChoice,
-  name,
-  length,
-  implementation
-}
-
 enum X11EventType {
   keyPress,
   keyRelease,
