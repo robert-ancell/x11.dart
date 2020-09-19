@@ -1,3 +1,7 @@
+String _formatHex(int id) {
+  return '0x' + id.toRadixString(16);
+}
+
 String _formatHex32(int id) {
   return '0x' + id.toRadixString(16).padLeft(8, '0');
 }
@@ -142,7 +146,69 @@ enum X11JoinStyle { miter, round, bevel }
 
 enum X11LineStyle { solid, onOffDash, doubleDash }
 
+enum X11PictureOperation {
+  clear,
+  src,
+  dst,
+  over,
+  overReverse,
+  in_,
+  inReverse,
+  out,
+  outReverse,
+  atop,
+  atopReverse,
+  xor,
+  add,
+  saturate,
+  disjointClear,
+  disjointSrc,
+  disjointDst,
+  disjointOver,
+  disjointOverReverse,
+  disjointIn,
+  disjointInReverse,
+  disjointOut,
+  disjointOutReverse,
+  disjointAtop,
+  disjointAtopReverse,
+  disjointXor,
+  conjointClear,
+  conjointSrc,
+  conjointDst,
+  conjointOver,
+  conjointOverReverse,
+  conjointIn,
+  conjointInReverse,
+  conjointOut,
+  conjointOutReverse,
+  conjointAtop,
+  conjointAtopReverse,
+  conjointXor,
+  multiply,
+  screen,
+  overlay,
+  darken,
+  lighten,
+  colorDodge,
+  colorBurn,
+  hardLight,
+  softLight,
+  difference,
+  exclusion,
+  hslHue,
+  hslSaturation,
+  hslColor,
+  hslLuminosity
+}
+
+enum X11PictureType { indexed, direct }
+
 enum X11PolygonShape { complex, nonconvex, convex }
+
+enum X11PolyEdge { sharp, smooth }
+
+enum X11PolyMode { precise, imprecise }
 
 enum X11RandrConfigStatus { success, invalidConfigTime, invalidTime, failed }
 
@@ -182,7 +248,11 @@ enum X11RandrSelectMask {
   resourceChangeNotifyMask
 }
 
-enum X11RenderSubPixelOrder {
+enum X11Repeat { none, regular, pad, reflect }
+
+enum X11StackMode { above, below, topIf, bottomIf, opposite }
+
+enum X11SubPixelOrder {
   unknown,
   horizontalRgb,
   horizontalBgr,
@@ -190,8 +260,6 @@ enum X11RenderSubPixelOrder {
   verticalBgr,
   none
 }
-
-enum X11StackMode { above, below, topIf, bottomIf, opposite }
 
 enum X11SubwindowMode { clipByChildren, includeInferiors }
 
@@ -238,17 +306,43 @@ class X11CharacterInfo {
       this.attributes = 0});
 }
 
-class X11ColorItem {
+class X11ColorStop {
+  final double point;
+  final X11Rgba color;
+
+  const X11ColorStop(this.point, this.color);
+
+  @override
+  String toString() => 'X11ColorStop(${point}, ${color})';
+}
+
+class X11RgbColorItem {
   final int pixel;
   final int red;
   final int green;
   final int blue;
 
-  const X11ColorItem(this.pixel, {this.red, this.green, this.blue});
+  const X11RgbColorItem(this.pixel,
+      {this.red = 0, this.green = 0, this.blue = 0});
 
   @override
   String toString() =>
-      'X11ColorItem(pixel: ${_formatPixel(pixel)}, red: ${red}, green: ${green}, blue: ${blue})';
+      'X11RgbColorItem(pixel: ${_formatPixel(pixel)}, red: ${red}, green: ${green}, blue: ${blue})';
+}
+
+class X11RgbaColorItem {
+  final int pixel;
+  final int red;
+  final int green;
+  final int blue;
+  final int alpha;
+
+  const X11RgbaColorItem(this.pixel,
+      {this.red = 0, this.green = 0, this.blue = 0, this.alpha = 0});
+
+  @override
+  String toString() =>
+      'X11RgbaColorItem(pixel: ${_formatPixel(pixel)}, red: ${red}, green: ${green}, blue: ${blue}, alpha: ${alpha})';
 }
 
 class X11FontProperty {
@@ -259,6 +353,40 @@ class X11FontProperty {
 
   @override
   String toString() => 'X11FontProperty(${name}, ${value})';
+}
+
+class X11GlyphInfo {
+  final int id;
+  final X11Rectangle area;
+  final X11Point offset;
+
+  const X11GlyphInfo(this.id, this.area, {this.offset = const X11Point(0, 0)});
+
+  @override
+  String toString() => 'X11GlyphInfo(${id}, ${area}, offset: ${offset})';
+}
+
+abstract class X11GlyphItem {
+  const X11GlyphItem();
+}
+
+class X11GlyphItemGlyphable extends X11GlyphItem {
+  final int glyphable;
+
+  const X11GlyphItemGlyphable(this.glyphable);
+
+  @override
+  String toString() => 'X11GlyphItemGlyphable(${_formatId(glyphable)})';
+}
+
+class X11GlyphItemGlyphs extends X11GlyphItem {
+  final X11Point offset;
+  final List<int> glyphs;
+
+  const X11GlyphItemGlyphs(this.glyphs, {this.offset = const X11Point(0, 0)});
+
+  @override
+  String toString() => 'X11GlyphItemGlyphs(${glyphs}, offset: ${offset})';
 }
 
 class X11ModifierMap {
@@ -346,6 +474,16 @@ class X11Screen {
       'X11Window(window: ${_formatId(window)}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatPixel(whitePixel)}, blackPixel: ${_formatPixel(blackPixel)}, currentInputMasks: ${_formatHex32(currentInputMasks)}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
 }
 
+class X11AnimatedCursorFrame {
+  /// The cursor that this frame uses.
+  final int cursor;
+
+  /// The number of milliseconds to show this frame.
+  final int delay;
+
+  const X11AnimatedCursorFrame(this.cursor, this.delay);
+}
+
 class X11Arc {
   final int x;
   final int y;
@@ -372,6 +510,16 @@ class X11Host {
   String toString() => 'X11Host(family: ${family}, address: ${address})';
 }
 
+class X11LineFixed {
+  final X11PointFixed p1;
+  final X11PointFixed p2;
+
+  const X11LineFixed(this.p1, this.p2);
+
+  @override
+  String toString() => 'X11LineFixed(${p1}, ${p2})';
+}
+
 class X11Point {
   final int x;
   final int y;
@@ -380,6 +528,16 @@ class X11Point {
 
   @override
   String toString() => 'X11Point(${x}, ${y})';
+}
+
+class X11PointFixed {
+  final double x;
+  final double y;
+
+  const X11PointFixed(this.x, this.y);
+
+  @override
+  String toString() => 'X11PointFixed(${x}, ${y})';
 }
 
 enum X11QueryClass { cursor, tile, stipple }
@@ -449,19 +607,6 @@ class X11RandrScreenSize {
       'X11RandrScreenSize(${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, rates: ${rates})';
 }
 
-class X11RandrTransform {
-  final double p11, p12, p13;
-  final double p21, p22, p23;
-  final double p31, p32, p33;
-
-  const X11RandrTransform(this.p11, this.p12, this.p13, this.p21, this.p22,
-      this.p23, this.p31, this.p32, this.p33);
-
-  @override
-  String toString() =>
-      'X11RandrTransform(${p11}, ${p12}, ${p13}, ${p21}, ${p22}, ${p23}, ${p31}, ${p32}, ${p33})';
-}
-
 class X11Rectangle {
   final int x;
   final int y;
@@ -472,6 +617,51 @@ class X11Rectangle {
 
   @override
   String toString() => 'X11Rectangle(${x}, ${y}, ${width}, ${height})';
+}
+
+class X11RenderPictFormatInfo {
+  final int id;
+  final X11PictureType type;
+  final int depth;
+  final int redShift;
+  final int redMask;
+  final int greenShift;
+  final int greenMask;
+  final int blueShift;
+  final int blueMask;
+  final int alphaShift;
+  final int alphaMask;
+  final int colormap;
+
+  const X11RenderPictFormatInfo(this.id,
+      {this.type = X11PictureType.direct,
+      this.depth = 24,
+      this.redShift = 0,
+      this.redMask = 0,
+      this.greenShift = 0,
+      this.greenMask = 0,
+      this.blueShift = 0,
+      this.blueMask = 0,
+      this.alphaShift = 0,
+      this.alphaMask = 0,
+      this.colormap = 0});
+
+  @override
+  String toString() =>
+      'X11RenderPictFormatInfo(${_formatId(id)}, type: ${type}, depth: ${depth}, redShift: ${redShift}, redMask: ${_formatHex(redMask)}, greenShift: ${greenShift}, greenMask: ${_formatHex(greenMask)}, blueShift: ${blueShift}, blueMask: ${_formatHex(blueMask)}, alphaShift: ${alphaShift}, alphaMask: ${_formatHex(alphaMask)}, colormap: ${colormap})';
+}
+
+class X11RenderPictScreen {
+  final Map<int, Map<int, int>> visuals;
+  final int fallback;
+  final X11SubPixelOrder subPixelOrder;
+
+  const X11RenderPictScreen(this.visuals,
+      {this.fallback = 0, this.subPixelOrder = X11SubPixelOrder.unknown});
+
+  @override
+  String toString() =>
+      'X11RenderPictScreen(${visuals}, fallback: ${fallback}, subPixelOrder: ${subPixelOrder})';
 }
 
 class X11Rgb {
@@ -485,16 +675,26 @@ class X11Rgb {
   String toString() => 'X11Rgb(${red}, ${green}, ${blue})';
 }
 
-class X11Segment {
-  final int x1;
-  final int y1;
-  final int x2;
-  final int y2;
+class X11Rgba {
+  final int red;
+  final int green;
+  final int blue;
+  final int alpha;
 
-  const X11Segment(this.x1, this.y1, this.x2, this.y2);
+  const X11Rgba(this.red, this.green, this.blue, this.alpha);
 
   @override
-  String toString() => 'X11Segment(x1: ${x1}, y1: ${y1}, x2: ${x2}, y2: ${y2})';
+  String toString() => 'X11Rgba(${red}, ${green}, ${blue}, ${alpha})';
+}
+
+class X11Segment {
+  final X11Point p1;
+  final X11Point p2;
+
+  const X11Segment(this.p1, this.p2);
+
+  @override
+  String toString() => 'X11Segment(p1: ${p1}, p2: ${p2})';
 }
 
 class X11Size {
@@ -540,6 +740,60 @@ class X11TimeCoord {
 
   @override
   String toString() => 'X11TimeCoord(x: ${x}, y: ${y}, time: ${time})';
+}
+
+class X11Transform {
+  final double p11, p12, p13;
+  final double p21, p22, p23;
+  final double p31, p32, p33;
+
+  const X11Transform(this.p11, this.p12, this.p13, this.p21, this.p22, this.p23,
+      this.p31, this.p32, this.p33);
+
+  @override
+  String toString() =>
+      'X11Transform(${p11}, ${p12}, ${p13}, ${p21}, ${p22}, ${p23}, ${p31}, ${p32}, ${p33})';
+}
+
+/// This format for trapezoids is deprecated, use [X11Trapezoid] instead.
+class X11Trap {
+  final double top;
+  final double bottom;
+  final X11LineFixed left;
+  final X11LineFixed right;
+
+  const X11Trap(this.top, this.bottom, this.left, this.right);
+
+  @override
+  String toString() =>
+      'X11Trap(top: ${top}, bottom: ${bottom}, left: ${left}, right: ${right})';
+}
+
+class X11Trapezoid {
+  final double topLeft;
+  final double topRight;
+  final double topY;
+  final double bottomLeft;
+  final double bottomRight;
+  final double bottomY;
+
+  const X11Trapezoid(this.topLeft, this.topRight, this.topY, this.bottomLeft,
+      this.bottomRight, this.bottomY);
+
+  @override
+  String toString() =>
+      'X11Trapezoid(topLeft: ${topLeft}, topRight: ${topRight}, topY: ${topY}, bottomLeft: ${bottomLeft}, bottomRight: ${bottomRight}, bottomY: ${bottomY})';
+}
+
+class X11Triangle {
+  final X11PointFixed p1;
+  final X11PointFixed p2;
+  final X11PointFixed p3;
+
+  const X11Triangle(this.p1, this.p2, this.p3);
+
+  @override
+  String toString() => 'X11Triangle(${p1}, ${p2}, ${p3})';
 }
 
 /// Information about a visual supported by the X server.
