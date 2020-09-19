@@ -321,6 +321,81 @@ class X11UnknownError extends X11Error {
   }
 }
 
+class X11RenderPictFormatError extends X11Error {
+  const X11RenderPictFormatError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11RenderPictFormatError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11RenderPictFormatError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11RenderPictureError extends X11Error {
+  const X11RenderPictureError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11RenderPictureError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11RenderPictureError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11RenderPictOpError extends X11Error {
+  const X11RenderPictOpError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11RenderPictOpError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11RenderPictOpError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11RenderGlyphSetError extends X11Error {
+  const X11RenderGlyphSetError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11RenderGlyphSetError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11RenderGlyphSetError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11RenderGlyphError extends X11Error {
+  const X11RenderGlyphError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11RenderGlyphError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11RenderGlyphError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
 class X11RandrOutputError extends X11Error {
   const X11RandrOutputError(int sequenceNumber) : super(sequenceNumber);
 

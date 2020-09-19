@@ -1264,7 +1264,7 @@ class X11RandrScreenChangeNotifyEvent extends X11Event {
   final X11Size sizeInMillimeters;
   final Set<X11RandrRotation> rotation;
   final int sizeId;
-  final X11RenderSubPixelOrder subPixelOrder;
+  final X11SubPixelOrder subPixelOrder;
   final int timestamp;
   final int configTimestamp;
 
@@ -1275,7 +1275,7 @@ class X11RandrScreenChangeNotifyEvent extends X11Event {
       this.sizeInMillimeters = const X11Size(0, 0),
       this.rotation = const {X11RandrRotation.rotate0},
       this.sizeId = 0,
-      this.subPixelOrder = X11RenderSubPixelOrder.unknown,
+      this.subPixelOrder = X11SubPixelOrder.unknown,
       this.timestamp = 0,
       this.configTimestamp = 0});
 
@@ -1287,7 +1287,7 @@ class X11RandrScreenChangeNotifyEvent extends X11Event {
     var root = buffer.readUint32();
     var requestWindow = buffer.readUint32();
     var sizeId = buffer.readUint16();
-    var subPixelOrder = X11RenderSubPixelOrder.values[buffer.readUint16()];
+    var subPixelOrder = X11SubPixelOrder.values[buffer.readUint16()];
     var widthInPixels = buffer.readUint16();
     var heightInPixels = buffer.readUint16();
     var widthInMillimeters = buffer.readUint16();
@@ -1392,7 +1392,7 @@ class X11RandrOutputChangeNotifyEvent extends X11Event {
   final int mode;
   final Set<X11RandrRotation> rotation;
   final int connection;
-  final X11RenderSubPixelOrder subPixelOrder;
+  final X11SubPixelOrder subPixelOrder;
   final int timestamp;
   final int configTimestamp;
 
@@ -1403,7 +1403,7 @@ class X11RandrOutputChangeNotifyEvent extends X11Event {
       this.mode = 0,
       this.rotation = const {X11RandrRotation.rotate0},
       this.connection = 0,
-      this.subPixelOrder = X11RenderSubPixelOrder.unknown,
+      this.subPixelOrder = X11SubPixelOrder.unknown,
       this.timestamp = 0,
       this.configTimestamp = 0});
 
@@ -1417,7 +1417,7 @@ class X11RandrOutputChangeNotifyEvent extends X11Event {
     var mode = buffer.readUint32();
     var rotation = _decodeX11RandrRotation(buffer.readUint16());
     var connection = buffer.readUint8();
-    var subPixelOrder = X11RenderSubPixelOrder.values[buffer.readUint8()];
+    var subPixelOrder = X11SubPixelOrder.values[buffer.readUint8()];
     return X11RandrOutputChangeNotifyEvent(firstEventCode,
         requestWindow: requestWindow,
         output: output,
