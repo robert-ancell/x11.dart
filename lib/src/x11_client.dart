@@ -1490,7 +1490,7 @@ class X11Client {
     return reply.name;
   }
 
-  // Changes a [property] of [window] to [value].
+  /// Changes a [property] of [window] to [value].
   Future<int> changePropertyUint8(int window, String property, List<int> value,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
@@ -1498,7 +1498,7 @@ class X11Client {
         type: type, format: 8, mode: mode);
   }
 
-  // Changes a [property] of [window] to [value].
+  /// Changes a [property] of [window] to [value].
   Future<int> changePropertyUint16(int window, String property, List<int> value,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
@@ -1506,7 +1506,7 @@ class X11Client {
         type: type, format: 16, mode: mode);
   }
 
-  // Changes a [property] of [window] to [value].
+  /// Changes a [property] of [window] to [value].
   Future<int> changePropertyUint32(int window, String property, List<int> value,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
@@ -1514,7 +1514,7 @@ class X11Client {
         type: type, format: 32, mode: mode);
   }
 
-  // Changes a [property] of [window] to [value].
+  /// Changes a [property] of [window] to [value].
   Future<int> changePropertyAtom(int window, String property, String value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     var valueAtom = await internAtom(value);
@@ -1522,7 +1522,7 @@ class X11Client {
         type: 'ATOM', mode: mode);
   }
 
-  // Changes a [property] of [window] to [value].
+  /// Changes a [property] of [window] to [value].
   Future<int> changePropertyString(int window, String property, String value,
       {String type = 'STRING',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
