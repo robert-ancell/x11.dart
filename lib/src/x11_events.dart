@@ -849,13 +849,13 @@ class X11ConfigureNotifyEvent extends X11Event {
 }
 
 class X11ConfigureRequestEvent extends X11Event {
+  final int window;
+  final X11Rectangle geometry;
   final int stackMode;
   final int parent;
-  final int window;
   final int sibling;
-  final X11Rectangle geometry;
   final int borderWidth;
-  final int valueMask;
+  final int valueMask; // FIXME
 
   X11ConfigureRequestEvent(this.window, this.geometry,
       {this.stackMode,

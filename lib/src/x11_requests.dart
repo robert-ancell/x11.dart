@@ -335,6 +335,24 @@ class X11Reply {
   void encode(X11WriteBuffer buffer) {}
 }
 
+Set<X11EventType> _decodeEventMask(int flags) {
+  var mask = <X11EventType>{};
+  for (var value in X11EventType.values) {
+    if ((flags & (1 << value.index)) != 0) {
+      mask.add(value);
+    }
+  }
+  return mask;
+}
+
+int _encodeEventMask(Set<X11EventType> mask) {
+  var flags = 0;
+  for (var value in mask) {
+    flags |= 1 << value.index;
+  }
+  return flags;
+}
+
 class X11CreateWindowRequest extends X11Request {
   final int id;
   final int parent;
@@ -347,15 +365,15 @@ class X11CreateWindowRequest extends X11Request {
   final int backgroundPixel;
   final int borderPixmap;
   final int borderPixel;
-  final int bitGravity;
-  final int winGravity;
-  final int backingStore; // FIXME: enum
+  final X11BitGravity bitGravity;
+  final X11WinGravity winGravity;
+  final X11BackingStore backingStore;
   final int backingPlanes;
   final int backingPixel;
   final bool overrideRedirect;
   final bool saveUnder;
-  final int eventMask;
-  final int doNotPropagateMask;
+  final Set<X11EventType> events;
+  final Set<X11EventType> doNotPropagate;
   final int colormap;
   final int cursor;
 
@@ -374,8 +392,8 @@ class X11CreateWindowRequest extends X11Request {
       this.backingPixel,
       this.overrideRedirect,
       this.saveUnder,
-      this.eventMask,
-      this.doNotPropagateMask,
+      this.events,
+      this.doNotPropagate,
       this.colormap,
       this.cursor});
 
@@ -407,17 +425,17 @@ class X11CreateWindowRequest extends X11Request {
     if ((valueMask & 0x0008) != 0) {
       borderPixel = buffer.readUint32();
     }
-    int bitGravity;
+    X11BitGravity bitGravity;
     if ((valueMask & 0x0010) != 0) {
-      bitGravity = buffer.readValueUint8();
+      bitGravity = X11BitGravity.values[buffer.readValueUint8()];
     }
-    int winGravity;
+    X11WinGravity winGravity;
     if ((valueMask & 0x0020) != 0) {
-      winGravity = buffer.readValueUint8();
+      winGravity = X11WinGravity.values[buffer.readValueUint8()];
     }
-    int backingStore;
+    X11BackingStore backingStore;
     if ((valueMask & 0x0040) != 0) {
-      backingStore = buffer.readUint32();
+      backingStore = X11BackingStore.values[buffer.readValueUint8()];
     }
     int backingPlanes;
     if ((valueMask & 0x0080) != 0) {
@@ -435,13 +453,13 @@ class X11CreateWindowRequest extends X11Request {
     if ((valueMask & 0x0400) != 0) {
       saveUnder = buffer.readValueBool();
     }
-    int eventMask;
+    Set<X11EventType> events;
     if ((valueMask & 0x0800) != 0) {
-      eventMask = buffer.readUint32();
+      events = _decodeEventMask(buffer.readUint32());
     }
-    int doNotPropagateMask;
+    Set<X11EventType> doNotPropagate;
     if ((valueMask & 0x1000) != 0) {
-      doNotPropagateMask = buffer.readUint32();
+      doNotPropagate = _decodeEventMask(buffer.readValueUint16());
     }
     int colormap;
     if ((valueMask & 0x2000) != 0) {
@@ -467,8 +485,8 @@ class X11CreateWindowRequest extends X11Request {
         backingPixel: backingPixel,
         overrideRedirect: overrideRedirect,
         saveUnder: saveUnder,
-        eventMask: eventMask,
-        doNotPropagateMask: doNotPropagateMask,
+        events: events,
+        doNotPropagate: doNotPropagate,
         colormap: colormap,
         cursor: cursor);
   }
@@ -519,10 +537,10 @@ class X11CreateWindowRequest extends X11Request {
     if (saveUnder != null) {
       valueMask |= 0x0400;
     }
-    if (eventMask != null) {
+    if (events != null) {
       valueMask |= 0x0800;
     }
-    if (doNotPropagateMask != null) {
+    if (doNotPropagate != null) {
       valueMask |= 0x1000;
     }
     if (colormap != null) {
@@ -545,13 +563,13 @@ class X11CreateWindowRequest extends X11Request {
       buffer.writeUint32(borderPixel);
     }
     if (bitGravity != null) {
-      buffer.writeValueUint8(bitGravity);
+      buffer.writeValueUint8(bitGravity.index);
     }
     if (winGravity != null) {
-      buffer.writeValueUint8(winGravity);
+      buffer.writeValueUint8(winGravity.index);
     }
     if (backingStore != null) {
-      buffer.writeUint32(backingStore);
+      buffer.writeValueUint8(backingStore.index);
     }
     if (backingPlanes != null) {
       buffer.writeUint32(backingPlanes);
@@ -565,11 +583,11 @@ class X11CreateWindowRequest extends X11Request {
     if (saveUnder != null) {
       buffer.writeValueBool(saveUnder);
     }
-    if (eventMask != null) {
-      buffer.writeUint32(eventMask);
+    if (events != null) {
+      buffer.writeUint32(_encodeEventMask(events));
     }
-    if (doNotPropagateMask != null) {
-      buffer.writeUint32(doNotPropagateMask);
+    if (doNotPropagate != null) {
+      buffer.writeUint32(_encodeEventMask(doNotPropagate));
     }
     if (colormap != null) {
       buffer.writeUint32(colormap);
@@ -616,11 +634,11 @@ class X11CreateWindowRequest extends X11Request {
     if (saveUnder != null) {
       string += ', saveUnder: ${saveUnder}';
     }
-    if (eventMask != null) {
-      string += ', eventMask: ${eventMask}';
+    if (events != null) {
+      string += ', events: ${events}';
     }
-    if (doNotPropagateMask != null) {
-      string += ', doNotPropagateMask: ${doNotPropagateMask}';
+    if (doNotPropagate != null) {
+      string += ', doNotPropagate: ${doNotPropagate}';
     }
     if (colormap != null) {
       string += ', colormap: ${colormap}';
@@ -639,15 +657,15 @@ class X11ChangeWindowAttributesRequest extends X11Request {
   final int backgroundPixel;
   final int borderPixmap;
   final int borderPixel;
-  final int bitGravity;
-  final int winGravity;
-  final int backingStore;
+  final X11BitGravity bitGravity;
+  final X11WinGravity winGravity;
+  final X11BackingStore backingStore;
   final int backingPlanes;
   final int backingPixel;
   final bool overrideRedirect;
   final bool saveUnder;
-  final int eventMask;
-  final int doNotPropagateMask;
+  final Set<X11EventType> events;
+  final Set<X11EventType> doNotPropagate;
   final int colormap;
   final int cursor;
 
@@ -663,8 +681,8 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       this.backingPixel,
       this.overrideRedirect,
       this.saveUnder,
-      this.eventMask,
-      this.doNotPropagateMask,
+      this.events,
+      this.doNotPropagate,
       this.colormap,
       this.cursor});
 
@@ -688,17 +706,17 @@ class X11ChangeWindowAttributesRequest extends X11Request {
     if ((valueMask & 0x0008) != 0) {
       borderPixel = buffer.readUint32();
     }
-    int bitGravity;
+    X11BitGravity bitGravity;
     if ((valueMask & 0x0010) != 0) {
-      bitGravity = buffer.readValueUint8();
+      bitGravity = X11BitGravity.values[buffer.readValueUint8()];
     }
-    int winGravity;
+    X11WinGravity winGravity;
     if ((valueMask & 0x0020) != 0) {
-      winGravity = buffer.readValueUint8();
+      winGravity = X11WinGravity.values[buffer.readValueUint8()];
     }
-    int backingStore;
+    X11BackingStore backingStore;
     if ((valueMask & 0x0040) != 0) {
-      backingStore = buffer.readUint32();
+      backingStore = X11BackingStore.values[buffer.readValueUint8()];
     }
     int backingPlanes;
     if ((valueMask & 0x0080) != 0) {
@@ -716,13 +734,13 @@ class X11ChangeWindowAttributesRequest extends X11Request {
     if ((valueMask & 0x0400) != 0) {
       saveUnder = buffer.readValueBool();
     }
-    int eventMask;
+    Set<X11EventType> events;
     if ((valueMask & 0x0800) != 0) {
-      eventMask = buffer.readUint32();
+      events = _decodeEventMask(buffer.readUint32());
     }
-    int doNotPropagateMask;
+    Set<X11EventType> doNotPropagate;
     if ((valueMask & 0x1000) != 0) {
-      doNotPropagateMask = buffer.readUint32();
+      doNotPropagate = _decodeEventMask(buffer.readValueUint16());
     }
     int colormap;
     if ((valueMask & 0x2000) != 0) {
@@ -744,8 +762,8 @@ class X11ChangeWindowAttributesRequest extends X11Request {
         backingPixel: backingPixel,
         overrideRedirect: overrideRedirect,
         saveUnder: saveUnder,
-        eventMask: eventMask,
-        doNotPropagateMask: doNotPropagateMask,
+        events: events,
+        doNotPropagate: doNotPropagate,
         colormap: colormap,
         cursor: cursor);
   }
@@ -788,10 +806,10 @@ class X11ChangeWindowAttributesRequest extends X11Request {
     if (saveUnder != null) {
       valueMask |= 0x0400;
     }
-    if (eventMask != null) {
+    if (events != null) {
       valueMask |= 0x0800;
     }
-    if (doNotPropagateMask != null) {
+    if (doNotPropagate != null) {
       valueMask |= 0x1000;
     }
     if (colormap != null) {
@@ -814,13 +832,13 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       buffer.writeUint32(borderPixel);
     }
     if (bitGravity != null) {
-      buffer.writeValueUint8(bitGravity);
+      buffer.writeValueUint8(bitGravity.index);
     }
     if (winGravity != null) {
-      buffer.writeValueUint8(winGravity);
+      buffer.writeValueUint8(winGravity.index);
     }
     if (backingStore != null) {
-      buffer.writeUint32(backingStore);
+      buffer.writeValueUint8(backingStore.index);
     }
     if (backingPlanes != null) {
       buffer.writeUint32(backingPlanes);
@@ -834,11 +852,11 @@ class X11ChangeWindowAttributesRequest extends X11Request {
     if (saveUnder != null) {
       buffer.writeValueBool(saveUnder);
     }
-    if (eventMask != null) {
-      buffer.writeUint32(eventMask);
+    if (events != null) {
+      buffer.writeUint32(_encodeEventMask(events));
     }
-    if (doNotPropagateMask != null) {
-      buffer.writeUint32(doNotPropagateMask);
+    if (doNotPropagate != null) {
+      buffer.writeUint32(_encodeEventMask(doNotPropagate));
     }
     if (colormap != null) {
       buffer.writeUint32(colormap);
@@ -850,7 +868,7 @@ class X11ChangeWindowAttributesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangeWindowAttributesRequest(window: ${_formatId(window)}, backgroundPixmap: ${backgroundPixmap}, backgroundPixel: ${backgroundPixel}, borderPixmap: ${borderPixmap}, borderPixel: ${borderPixel}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingStore: ${backingStore}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, overrideRedirect: ${overrideRedirect}, saveUnder: ${saveUnder}, eventMask: ${eventMask}, doNotPropagateMask: ${doNotPropagateMask}, colormap: ${colormap}, cursor: ${cursor})';
+      'X11ChangeWindowAttributesRequest(window: ${_formatId(window)}, backgroundPixmap: ${backgroundPixmap}, backgroundPixel: ${backgroundPixel}, borderPixmap: ${borderPixmap}, borderPixel: ${borderPixel}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingStore: ${backingStore}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, overrideRedirect: ${overrideRedirect}, saveUnder: ${saveUnder}, events: ${events}, doNotPropagate: ${doNotPropagate}, colormap: ${colormap}, cursor: ${cursor})';
 }
 
 class X11GetWindowAttributesRequest extends X11Request {
@@ -876,11 +894,11 @@ class X11GetWindowAttributesRequest extends X11Request {
 }
 
 class X11GetWindowAttributesReply extends X11Reply {
-  final int backingStore;
   final int visual;
   final X11WindowClass windowClass;
-  final int bitGravity;
-  final int winGravity;
+  final X11BitGravity bitGravity;
+  final X11WinGravity winGravity;
+  final X11BackingStore backingStore;
   final int backingPlanes;
   final int backingPixel;
   final bool saveUnder;
@@ -888,16 +906,16 @@ class X11GetWindowAttributesReply extends X11Reply {
   final int mapState;
   final bool overrideRedirect;
   final int colormap;
-  final int allEventMasks; // FIXME: set
-  final int yourEventMask; // FIXME: set
-  final int doNotPropagateMask; // FIXME: set
+  final Set<X11EventType> allEvents;
+  final Set<X11EventType> yourEvents;
+  final Set<X11EventType> doNotPropagate;
 
   X11GetWindowAttributesReply(
-      {this.backingStore,
-      this.visual,
+      {this.visual,
       this.windowClass,
       this.bitGravity,
       this.winGravity,
+      this.backingStore,
       this.backingPlanes,
       this.backingPixel,
       this.saveUnder,
@@ -905,16 +923,16 @@ class X11GetWindowAttributesReply extends X11Reply {
       this.mapState,
       this.overrideRedirect,
       this.colormap,
-      this.allEventMasks,
-      this.yourEventMask,
-      this.doNotPropagateMask});
+      this.allEvents,
+      this.yourEvents,
+      this.doNotPropagate});
 
   static X11GetWindowAttributesReply fromBuffer(X11ReadBuffer buffer) {
-    var backingStore = buffer.readUint8();
+    var backingStore = X11BackingStore.values[buffer.readUint8()];
     var visual = buffer.readUint32();
     var windowClass = X11WindowClass.values[buffer.readUint16()];
-    var bitGravity = buffer.readUint8();
-    var winGravity = buffer.readUint8();
+    var bitGravity = X11BitGravity.values[buffer.readUint8()];
+    var winGravity = X11WinGravity.values[buffer.readUint8()];
     var backingPlanes = buffer.readUint32();
     var backingPixel = buffer.readUint32();
     var saveUnder = buffer.readBool();
@@ -922,16 +940,16 @@ class X11GetWindowAttributesReply extends X11Reply {
     var mapState = buffer.readUint8();
     var overrideRedirect = buffer.readBool();
     var colormap = buffer.readUint32();
-    var allEventMasks = buffer.readUint32();
-    var yourEventMask = buffer.readUint32();
-    var doNotPropagateMask = buffer.readUint16();
+    var allEvents = _decodeEventMask(buffer.readUint32());
+    var yourEvents = _decodeEventMask(buffer.readUint32());
+    var doNotPropagate = _decodeEventMask(buffer.readUint16());
     buffer.skip(2);
     return X11GetWindowAttributesReply(
-        backingStore: backingStore,
         visual: visual,
         windowClass: windowClass,
         bitGravity: bitGravity,
         winGravity: winGravity,
+        backingStore: backingStore,
         backingPlanes: backingPlanes,
         backingPixel: backingPixel,
         saveUnder: saveUnder,
@@ -939,18 +957,18 @@ class X11GetWindowAttributesReply extends X11Reply {
         mapState: mapState,
         overrideRedirect: overrideRedirect,
         colormap: colormap,
-        allEventMasks: allEventMasks,
-        yourEventMask: yourEventMask,
-        doNotPropagateMask: doNotPropagateMask);
+        allEvents: allEvents,
+        yourEvents: yourEvents,
+        doNotPropagate: doNotPropagate);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint8(backingStore);
+    buffer.writeUint8(backingStore.index);
     buffer.writeUint32(visual);
     buffer.writeUint16(windowClass.index);
-    buffer.writeUint8(bitGravity);
-    buffer.writeUint8(winGravity);
+    buffer.writeUint8(bitGravity.index);
+    buffer.writeUint8(winGravity.index);
     buffer.writeUint32(backingPlanes);
     buffer.writeUint32(backingPixel);
     buffer.writeBool(saveUnder);
@@ -958,15 +976,15 @@ class X11GetWindowAttributesReply extends X11Reply {
     buffer.writeUint8(mapState);
     buffer.writeBool(overrideRedirect);
     buffer.writeUint32(colormap);
-    buffer.writeUint32(allEventMasks);
-    buffer.writeUint32(yourEventMask);
-    buffer.writeUint16(doNotPropagateMask);
+    buffer.writeUint32(_encodeEventMask(allEvents));
+    buffer.writeUint32(_encodeEventMask(yourEvents));
+    buffer.writeUint16(_encodeEventMask(doNotPropagate));
     buffer.skip(2);
   }
 
   @override
   String toString() =>
-      'X11GetWindowAttributesReply(backingStore: ${backingStore}, visual: ${visual}, windowClass: ${windowClass}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, saveUnder: ${saveUnder}, mapIsInstalled: ${mapIsInstalled}, mapState: ${mapState}, overrideRedirect: ${overrideRedirect}, colormap: ${colormap}, allEventMasks: ${allEventMasks}, yourEventMask: ${yourEventMask}, doNotPropagateMask: ${doNotPropagateMask})';
+      'X11GetWindowAttributesReply(visual: ${visual}, windowClass: ${windowClass}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingStore: ${backingStore}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, saveUnder: ${saveUnder}, mapIsInstalled: ${mapIsInstalled}, mapState: ${mapState}, overrideRedirect: ${overrideRedirect}, colormap: ${colormap}, allEvents: ${allEvents}, yourEvents: ${yourEvents}, doNotPropagate: ${doNotPropagate})';
 }
 
 class X11DestroyWindowRequest extends X11Request {
@@ -1867,31 +1885,31 @@ class X11SendEventRequest extends X11Request {
   final int code;
   final List<int> event;
   final bool propagate;
-  final int eventMask;
+  final Set<X11EventType> events;
   final int sequenceNumber;
 
   X11SendEventRequest(this.destination, this.code, this.event,
-      {this.propagate = false, this.eventMask = 0, this.sequenceNumber = 0});
+      {this.propagate = false,
+      this.events = const {},
+      this.sequenceNumber = 0});
 
   factory X11SendEventRequest.fromBuffer(X11ReadBuffer buffer) {
     var propagate = buffer.readBool();
     var destination = buffer.readUint32();
-    var eventMask = buffer.readUint32();
+    var events = _decodeEventMask(buffer.readUint32());
     var code = buffer.readUint8();
     var event = [buffer.readUint8()];
     var sequenceNumber = buffer.readUint16();
     event.addAll(buffer.readListOfUint8(28));
     return X11SendEventRequest(destination, code, event,
-        propagate: propagate,
-        eventMask: eventMask,
-        sequenceNumber: sequenceNumber);
+        propagate: propagate, events: events, sequenceNumber: sequenceNumber);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(propagate);
     buffer.writeUint32(destination);
-    buffer.writeUint32(eventMask);
+    buffer.writeUint32(_encodeEventMask(events));
     buffer.writeUint8(code);
     buffer.writeUint8(event[0]);
     buffer.writeUint16(sequenceNumber);
@@ -1900,13 +1918,13 @@ class X11SendEventRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SendEventRequest(destination: ${destination}, code: ${code}, event: ${event}, propagate: ${propagate}, eventMask: ${eventMask}, sequenceNumber: ${sequenceNumber})';
+      'X11SendEventRequest(destination: ${destination}, code: ${code}, event: ${event}, propagate: ${propagate}, events: ${events}, sequenceNumber: ${sequenceNumber})';
 }
 
 class X11GrabPointerRequest extends X11Request {
   final int grabWindow;
   final bool ownerEvents;
-  final int eventMask;
+  final Set<X11EventType> events;
   final int pointerMode;
   final int keyboardMode;
   final int confineTo;
@@ -1916,7 +1934,7 @@ class X11GrabPointerRequest extends X11Request {
   X11GrabPointerRequest(
       this.grabWindow,
       this.ownerEvents,
-      this.eventMask,
+      this.events,
       this.pointerMode,
       this.keyboardMode,
       this.confineTo,
@@ -1926,21 +1944,21 @@ class X11GrabPointerRequest extends X11Request {
   factory X11GrabPointerRequest.fromBuffer(X11ReadBuffer buffer) {
     var ownerEvents = buffer.readBool();
     var grabWindow = buffer.readUint32();
-    var eventMask = buffer.readUint16();
+    var events = _decodeEventMask(buffer.readUint16());
     var pointerMode = buffer.readUint8();
     var keyboardMode = buffer.readUint8();
     var confineTo = buffer.readUint32();
     var cursor = buffer.readUint32();
     var time = buffer.readUint32();
-    return X11GrabPointerRequest(grabWindow, ownerEvents, eventMask,
-        pointerMode, keyboardMode, confineTo, cursor, time);
+    return X11GrabPointerRequest(grabWindow, ownerEvents, events, pointerMode,
+        keyboardMode, confineTo, cursor, time);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(ownerEvents);
     buffer.writeUint32(grabWindow);
-    buffer.writeUint16(eventMask);
+    buffer.writeUint16(_encodeEventMask(events));
     buffer.writeUint8(pointerMode);
     buffer.writeUint8(keyboardMode);
     buffer.writeUint32(confineTo);
@@ -1950,7 +1968,7 @@ class X11GrabPointerRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GrabPointerRequest(grabWindow: ${grabWindow}, ownerEvents: ${ownerEvents}, eventMask: ${eventMask}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode}, confineTo: ${confineTo}, cursor: ${cursor}, time: ${time})';
+      'X11GrabPointerRequest(grabWindow: ${grabWindow}, ownerEvents: ${ownerEvents}, events: ${events}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode}, confineTo: ${confineTo}, cursor: ${cursor}, time: ${time})';
 }
 
 class X11GrabPointerReply extends X11Reply {
@@ -1996,7 +2014,7 @@ class X11UngrabPointerRequest extends X11Request {
 class X11GrabButtonRequest extends X11Request {
   final int grabWindow;
   final bool ownerEvents;
-  final int eventMask;
+  final Set<X11EventType> events;
   final int pointerMode;
   final int keyboardMode;
   final int confineTo;
@@ -2007,7 +2025,7 @@ class X11GrabButtonRequest extends X11Request {
   X11GrabButtonRequest(
       this.grabWindow,
       this.ownerEvents,
-      this.eventMask,
+      this.events,
       this.pointerMode,
       this.keyboardMode,
       this.confineTo,
@@ -2018,7 +2036,7 @@ class X11GrabButtonRequest extends X11Request {
   factory X11GrabButtonRequest.fromBuffer(X11ReadBuffer buffer) {
     var ownerEvents = buffer.readBool();
     var grabWindow = buffer.readUint32();
-    var eventMask = buffer.readUint16();
+    var events = _decodeEventMask(buffer.readUint16());
     var pointerMode = buffer.readUint8();
     var keyboardMode = buffer.readUint8();
     var confineTo = buffer.readUint32();
@@ -2026,7 +2044,7 @@ class X11GrabButtonRequest extends X11Request {
     var button = buffer.readUint8();
     buffer.skip(1);
     var modifiers = buffer.readUint16();
-    return X11GrabButtonRequest(grabWindow, ownerEvents, eventMask, pointerMode,
+    return X11GrabButtonRequest(grabWindow, ownerEvents, events, pointerMode,
         keyboardMode, confineTo, cursor, button, modifiers);
   }
 
@@ -2034,7 +2052,7 @@ class X11GrabButtonRequest extends X11Request {
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(ownerEvents);
     buffer.writeUint32(grabWindow);
-    buffer.writeUint16(eventMask);
+    buffer.writeUint16(_encodeEventMask(events));
     buffer.writeUint8(pointerMode);
     buffer.writeUint8(keyboardMode);
     buffer.writeUint32(confineTo);
@@ -2046,7 +2064,7 @@ class X11GrabButtonRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GrabButtonRequest(grabWindow: ${grabWindow}, ownerEvents: ${ownerEvents}, eventMask: ${eventMask}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode}, confineTo: ${confineTo}, cursor: ${cursor}, button: ${button}, modifiers: ${modifiers})';
+      'X11GrabButtonRequest(grabWindow: ${grabWindow}, ownerEvents: ${ownerEvents}, events: ${events}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode}, confineTo: ${confineTo}, cursor: ${cursor}, button: ${button}, modifiers: ${modifiers})';
 }
 
 class X11UngrabButtonRequest extends X11Request {
@@ -2078,20 +2096,20 @@ class X11UngrabButtonRequest extends X11Request {
 }
 
 class X11ChangeActivePointerGrabRequest extends X11Request {
-  final int eventMask;
+  final Set<X11EventType> events;
   final int cursor;
   final int time;
 
-  X11ChangeActivePointerGrabRequest(this.eventMask,
+  X11ChangeActivePointerGrabRequest(this.events,
       {this.cursor = 0, this.time = 0});
 
   factory X11ChangeActivePointerGrabRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var cursor = buffer.readUint32();
     var time = buffer.readUint32();
-    var eventMask = buffer.readUint16();
+    var events = _decodeEventMask(buffer.readUint16());
     buffer.skip(2);
-    return X11ChangeActivePointerGrabRequest(eventMask,
+    return X11ChangeActivePointerGrabRequest(events,
         cursor: cursor, time: time);
   }
 
@@ -2100,13 +2118,13 @@ class X11ChangeActivePointerGrabRequest extends X11Request {
     buffer.skip(1);
     buffer.writeUint32(cursor);
     buffer.writeUint32(time);
-    buffer.writeUint16(eventMask);
+    buffer.writeUint16(_encodeEventMask(events));
     buffer.skip(2);
   }
 
   @override
   String toString() =>
-      'X11ChangeActivePointerGrabRequest(eventMask: ${eventMask}, cursor: ${cursor}, time: ${time})';
+      'X11ChangeActivePointerGrabRequest(events: ${events}, cursor: ${cursor}, time: ${time})';
 }
 
 class X11GrabKeyboardRequest extends X11Request {

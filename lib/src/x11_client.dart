@@ -1099,6 +1099,8 @@ class X11Client {
   X11RenderExtension _render;
   X11RandrExtension _randr;
 
+  /// Creates a new X client.
+  /// Call [connect] or [connectToHost] to connect to an X server.
   X11Client() {
     final builtinAtoms = [
       null,
@@ -1249,33 +1251,42 @@ class X11Client {
   }
 
   /// Creates a new window with [id] and [geometry] as a child of [parent].
+  ///
+  /// The following window attributes are supported:
+  ///
+  /// * The [windowClass] defines if this window has output.
+  /// * The [events] this window should receive, and [doNotPropagate] the events that should not be propagated to ancestor windows.
+  /// * The [cursor] shown when the pointer is over this window.
+  /// * The [depth], [visual] and [colormap] this window is using.
+  /// * The background of the window can be set with [backgroundPixel] or [backgroundPixmap].
+  /// * The border of the window can be set with [borderWidth], [borderPixel] and [borderPixmap].
+  /// * When the window resizes [bitGravity] sets which region of the window is retained.
+  /// * When the windows parent is moved [winGravity] sets where this window will be positioned.
+  /// * If set to true [overrideRedirect] indicates to a window manager not to control this window.
+  /// * If set to true [saveUnder] advises the server that saving the contents of obscured windows would be useful.
+  /// * The server behaviour of maintaining the window contents when obscured is controlled using [backingStore].
+  ///   [backingPlanes] controls which information is stored in this case.
+  ///   [backingPixel] what default pixel value to use.
   int createWindow(int id, int parent, X11Rectangle geometry,
-      {X11WindowClass windowClass = X11WindowClass.inputOutput,
-      int depth = 24,
+      {X11WindowClass windowClass = X11WindowClass.copyFromParent,
       int visual = 0,
+      int depth = 24,
+      int colormap,
+      int cursor,
+      Set<X11EventType> events,
+      Set<X11EventType> doNotPropagate,
       int borderWidth = 0,
       int backgroundPixmap,
       int backgroundPixel,
       int borderPixmap,
       int borderPixel,
-      int bitGravity,
-      int winGravity,
-      int backingStore,
+      X11BitGravity bitGravity,
+      X11WinGravity winGravity,
+      X11BackingStore backingStore,
       int backingPlanes,
       int backingPixel,
       bool overrideRedirect,
-      bool saveUnder,
-      Set<X11EventType> events,
-      int doNotPropagateMask,
-      int colormap,
-      int cursor}) {
-    int eventMask;
-    if (events != null) {
-      eventMask = 0;
-      for (var event in events) {
-        eventMask |= 1 << event.index;
-      }
-    }
+      bool saveUnder}) {
     var request = X11CreateWindowRequest(id, parent, geometry, depth,
         borderWidth: borderWidth,
         windowClass: windowClass,
@@ -1291,38 +1302,32 @@ class X11Client {
         backingPixel: backingPixel,
         overrideRedirect: overrideRedirect,
         saveUnder: saveUnder,
-        eventMask: eventMask,
-        doNotPropagateMask: doNotPropagateMask,
+        events: events,
+        doNotPropagate: doNotPropagate,
         colormap: colormap,
         cursor: cursor);
     return _sendRequest(1, request);
   }
 
   /// Changes the attributes of [window].
+  /// The attributes are the same as [createWindow].
   int changeWindowAttributes(int window,
       {int borderWidth,
       int backgroundPixmap,
       int backgroundPixel,
       int borderPixmap,
       int borderPixel,
-      int bitGravity,
-      int winGravity,
-      int backingStore,
+      X11BitGravity bitGravity,
+      X11WinGravity winGravity,
+      X11BackingStore backingStore,
       int backingPlanes,
       int backingPixel,
       bool overrideRedirect,
       bool saveUnder,
       Set<X11EventType> events,
-      int doNotPropagateMask,
+      Set<X11EventType> doNotPropagate,
       int colormap,
       int cursor}) {
-    int eventMask;
-    if (events != null) {
-      eventMask = 0;
-      for (var event in events) {
-        eventMask |= 1 << event.index;
-      }
-    }
     var request = X11ChangeWindowAttributesRequest(window,
         backgroundPixmap: backgroundPixmap,
         backgroundPixel: backgroundPixel,
@@ -1335,8 +1340,8 @@ class X11Client {
         backingPixel: backingPixel,
         overrideRedirect: overrideRedirect,
         saveUnder: saveUnder,
-        eventMask: eventMask,
-        doNotPropagateMask: doNotPropagateMask,
+        events: events,
+        doNotPropagate: doNotPropagate,
         colormap: colormap,
         cursor: cursor);
     return _sendRequest(2, request);
@@ -1635,16 +1640,10 @@ class X11Client {
   /// Sends [event] to [destination].
   int sendEvent(int destination, X11Event event,
       {bool propagate = false, Set<X11EventType> events = const {}}) {
-    var eventMask = 0;
-    for (var event in events) {
-      eventMask |= 1 << event.index;
-    }
     var buffer = X11WriteBuffer();
     var code = event.encode(buffer);
     var request = X11SendEventRequest(destination, code, buffer.data,
-        propagate: propagate,
-        eventMask: eventMask,
-        sequenceNumber: _sequenceNumber);
+        propagate: propagate, events: events, sequenceNumber: _sequenceNumber);
     return _sendRequest(25, request);
   }
 
@@ -1655,11 +1654,7 @@ class X11Client {
       int confineTo = 0,
       int cursor = 0,
       int time = 0}) async {
-    var eventMask = 0;
-    for (var event in events) {
-      eventMask |= 1 << event.index;
-    }
-    var request = X11GrabPointerRequest(grabWindow, ownerEvents, eventMask,
+    var request = X11GrabPointerRequest(grabWindow, ownerEvents, events,
         pointerMode, keyboardMode, confineTo, cursor, time);
     var sequenceNumber = _sendRequest(26, request);
     var reply = await _awaitReply<X11GrabPointerReply>(
@@ -1682,11 +1677,7 @@ class X11Client {
       bool ownerEvents = true,
       int confineTo = 0,
       int cursor = 0}) {
-    var eventMask = 0;
-    for (var event in events) {
-      eventMask |= 1 << event.index;
-    }
-    var request = X11GrabButtonRequest(grabWindow, ownerEvents, eventMask,
+    var request = X11GrabButtonRequest(grabWindow, ownerEvents, events,
         pointerMode, keyboardMode, confineTo, cursor, button, modifiers);
     return _sendRequest(28, request);
   }
@@ -1701,12 +1692,8 @@ class X11Client {
   /// Changes properies of the pointer grab established with [grabPointer].
   int changeActivePointerGrab(Set<X11EventType> events,
       {int cursor = 0, int time = 0}) {
-    var eventMask = 0;
-    for (var event in events) {
-      eventMask |= 1 << event.index;
-    }
-    var request = X11ChangeActivePointerGrabRequest(eventMask,
-        cursor: cursor, time: time);
+    var request =
+        X11ChangeActivePointerGrabRequest(events, cursor: cursor, time: time);
     return _sendRequest(30, request);
   }
 

@@ -29,6 +29,20 @@ enum X11ArcMode { chord, pieSlice }
 
 enum X11BackingStore { never, whenMapped, always }
 
+enum X11BitGravity {
+  forget,
+  northWest,
+  north,
+  northEast,
+  west,
+  center,
+  east,
+  southWest,
+  south,
+  southEast,
+  static
+}
+
 enum X11BitmapFormatBitOrder { leastSignificant, mostSignificant }
 
 enum X11CapStyle { notLast, butt, round, projecting }
@@ -55,7 +69,7 @@ enum X11EventType {
   enterWindow,
   leaveWindow,
   pointerMotion,
-  pointerMotionH,
+  pointerMotionHint,
   button1Motion,
   button2Motion,
   button3Motion,
@@ -288,6 +302,20 @@ enum X11VisualClass {
 /// [inputOutput] are rendered to the screen, [inputOnly] windows are only used for getting input events.
 /// [copyFromParent] is used when creating a new window.
 enum X11WindowClass { copyFromParent, inputOutput, inputOnly }
+
+enum X11WinGravity {
+  unmap,
+  northWest,
+  north,
+  northEast,
+  west,
+  center,
+  east,
+  southWest,
+  south,
+  southEast,
+  static
+}
 
 class X11CharacterInfo {
   final int leftSideBearing;
