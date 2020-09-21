@@ -1,4 +1,4 @@
-[![Pub Package](https://img.shields.io/pub/v/x11.svg)](https://pub.dev/packages/x11.dart)
+[![Pub Package](https://img.shields.io/pub/v/x11.svg)](https://pub.dev/packages/x11)
 
 A native Dart implementation of the X window system protocol, version 11 (X11).
 
