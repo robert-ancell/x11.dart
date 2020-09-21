@@ -2302,7 +2302,7 @@ class X11Client {
   /// Sets the values of a [pixel] in [colormap] to the color with [name].
   /// Color channels can be filtered out by setting [doRed], [doGreen] and [doBlue] to false.
   int storeNamedColor(int colormap, int pixel, String name,
-      {doRed = true, doGreen = true, doBlue = true}) {
+      {bool doRed = true, bool doGreen = true, bool doBlue = true}) {
     var request = X11StoreNamedColorRequest(colormap, pixel, name,
         doRed: doRed, doGreen: doGreen, doBlue: doBlue);
     return _sendRequest(90, request);
