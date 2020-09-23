@@ -98,6 +98,84 @@ class X11BigRequestsExtension extends X11Extension {
   }
 }
 
+class X11FixesExtension extends X11Extension {
+  X11FixesExtension(X11Client client, int majorOpcode, int firstError)
+      : super(client, majorOpcode, 0, firstError);
+
+  /// Gets the XFIXES extension version supported by the X server.
+  /// [clientMajorVersion].[clientMinorVersion] is the maximum version supported by this client, the server will not return a value greater than this.
+  Future<X11FixesQueryVersionReply> queryVersion(
+      {int clientMajorVersion = 5, int clientMinorVersion = 0}) async {
+    var request = X11FixesQueryVersionRequest(
+        clientMajorVersion: clientMajorVersion,
+        clientMinorVersion: clientMinorVersion);
+    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
+    return _client._awaitReply<X11FixesQueryVersionReply>(
+        sequenceNumber, X11FixesQueryVersionReply.fromBuffer);
+  }
+
+  /// Inserts [window] into the clients save-set.
+  int insertSaveSet(int window,
+      {X11ChangeSetTarget target = X11ChangeSetTarget.nearest,
+      X11ChangeSetMap map = X11ChangeSetMap.map}) {
+    return _changeSaveSet(window, X11ChangeSetMode.insert, target, map);
+  }
+
+  /// Deletes [window] from the clients save-set.
+  int deleteSaveSet(int window,
+      {X11ChangeSetTarget target = X11ChangeSetTarget.nearest,
+      X11ChangeSetMap map = X11ChangeSetMap.map}) {
+    return _changeSaveSet(window, X11ChangeSetMode.delete, target, map);
+  }
+
+  int _changeSaveSet(int window, X11ChangeSetMode mode,
+      X11ChangeSetTarget target, X11ChangeSetMap map) {
+    var request =
+        X11FixesChangeSaveSetRequest(window, mode, target: target, map: map);
+    return _client._sendRequest(_majorOpcode, request);
+  }
+
+  int selectSelectionInput(
+      int window, int selection, Set<X11EventType> events) {
+    var request =
+        X11FixesSelectSelectionInputRequest(window, selection, events);
+    return _client._sendRequest(2, request);
+  }
+
+  int selectCursorInput(int window, Set<X11EventType> events) {
+    var request = X11FixesSelectCursorInputRequest(window, events);
+    return _client._sendRequest(3, request);
+  }
+
+  Future<X11FixesGetCursorImageReply> getCursorImage() async {
+    var request = X11FixesGetCursorImageRequest();
+    var sequenceNumber = _client._sendRequest(4, request);
+    return _client._awaitReply<X11FixesGetCursorImageReply>(
+        sequenceNumber, X11FixesGetCursorImageReply.fromBuffer);
+  }
+
+  int createRegion(int region, List<X11Rectangle> rectangles) {
+    var request = X11FixesCreateRegionRequest(region, rectangles);
+    return _client._sendRequest(5, request);
+  }
+
+  int createRegionFromBitmap(int region, int bitmap) {
+    var request = X11FixesCreateRegionFromBitmapRequest(region, bitmap);
+    return _client._sendRequest(6, request);
+  }
+
+  @override
+  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+    if (code == _firstError) {
+      return X11RegionError.fromBuffer(sequenceNumber, buffer);
+    } else if (code == _firstError + 1) {
+      return X11BarrierError.fromBuffer(sequenceNumber, buffer);
+    } else {
+      return null;
+    }
+  }
+}
+
 class X11RenderExtension extends X11Extension {
   X11RenderExtension(X11Client client, int majorOpcode, int firstError)
       : super(client, majorOpcode, 0, firstError);
@@ -1137,6 +1215,9 @@ class X11Client {
   /// Stream of events from the X server.
   Stream<X11Event> get eventStream => _eventStreamController.stream;
 
+  /// XFIXES extension, or null if it doesn't exist.
+  X11FixesExtension get fixes => _fixes;
+
   /// RENDER extension, or null if it doesn't exist.
   X11RenderExtension get render => _render;
 
@@ -1161,6 +1242,7 @@ class X11Client {
   final _atoms = <String, int>{};
   final _atomNames = <int, String>{};
 
+  X11FixesExtension _fixes;
   X11RenderExtension _render;
   X11RandrExtension _randr;
   X11DamageExtension _damage;
@@ -1297,6 +1379,10 @@ class X11Client {
     if (reply.present) {
       var bigRequests = X11BigRequestsExtension(this, reply.majorOpcode);
       _maximumRequestLength = await bigRequests.bigReqEnable();
+    }
+    reply = await queryExtension('XFIXES');
+    if (reply.present) {
+      _fixes = X11FixesExtension(this, reply.majorOpcode, reply.firstError);
     }
     reply = await queryExtension('RENDER');
     if (reply.present) {

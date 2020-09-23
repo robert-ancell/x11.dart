@@ -51,7 +51,11 @@ enum X11ChangeHostsMode { insert, delete }
 
 enum X11ChangePropertyMode { replace, prepend, append }
 
+enum X11ChangeSetMap { map, unmap }
+
 enum X11ChangeSetMode { insert, delete }
+
+enum X11ChangeSetTarget { nearest, root }
 
 enum X11CirculateDirection { raiseHighest, raiseLowest }
 

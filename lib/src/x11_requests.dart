@@ -7086,6 +7086,268 @@ class X11BigReqEnableReply extends X11Reply {
       'X11BigReqEnableReply(maximumRequestLength: ${maximumRequestLength})';
 }
 
+class X11FixesQueryVersionRequest extends X11Request {
+  final int clientMajorVersion;
+  final int clientMinorVersion;
+
+  X11FixesQueryVersionRequest(
+      {this.clientMajorVersion = 5, this.clientMinorVersion = 0});
+
+  factory X11FixesQueryVersionRequest.fromBuffer(X11ReadBuffer buffer) {
+    var clientMajorVersion = buffer.readUint32();
+    var clientMinorVersion = buffer.readUint32();
+    return X11FixesQueryVersionRequest(
+        clientMajorVersion: clientMajorVersion,
+        clientMinorVersion: clientMinorVersion);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(0);
+    buffer.writeUint32(clientMajorVersion);
+    buffer.writeUint32(clientMinorVersion);
+  }
+
+  @override
+  String toString() =>
+      'X11FixesQueryVersionRequest(clientMajorVersion: ${clientMajorVersion}, clientMinorVersion: ${clientMinorVersion})';
+}
+
+class X11FixesQueryVersionReply extends X11Reply {
+  final int majorVersion;
+  final int minorVersion;
+
+  X11FixesQueryVersionReply({this.majorVersion = 5, this.minorVersion = 0});
+
+  static X11FixesQueryVersionReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var majorVersion = buffer.readUint32();
+    var minorVersion = buffer.readUint32();
+    buffer.skip(16);
+    return X11FixesQueryVersionReply(
+        majorVersion: majorVersion, minorVersion: minorVersion);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(majorVersion);
+    buffer.writeUint32(minorVersion);
+    buffer.skip(16);
+  }
+
+  @override
+  String toString() =>
+      'X11FixesQueryVersionReply(majorVersion: ${majorVersion}, minorVersion: ${minorVersion})';
+}
+
+class X11FixesChangeSaveSetRequest extends X11Request {
+  final int window;
+  final X11ChangeSetMode mode;
+  final X11ChangeSetTarget target;
+  final X11ChangeSetMap map;
+
+  X11FixesChangeSaveSetRequest(this.window, this.mode,
+      {this.target = X11ChangeSetTarget.nearest,
+      this.map = X11ChangeSetMap.map});
+
+  factory X11FixesChangeSaveSetRequest.fromBuffer(X11ReadBuffer buffer) {
+    var mode = X11ChangeSetMode.values[buffer.readUint8()];
+    var target = X11ChangeSetTarget.values[buffer.readUint8()];
+    var map = X11ChangeSetMap.values[buffer.readUint8()];
+    buffer.skip(1);
+    var window = buffer.readUint32();
+    return X11FixesChangeSaveSetRequest(window, mode, target: target, map: map);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(1);
+    buffer.writeUint8(mode.index);
+    buffer.writeUint8(target.index);
+    buffer.writeUint8(map.index);
+    buffer.skip(1);
+    buffer.writeUint32(window);
+  }
+
+  @override
+  String toString() =>
+      'X11FixesChangeSaveSetRequest(${window}, ${mode}, target: ${target}, map: ${map})';
+}
+
+class X11FixesSelectSelectionInputRequest extends X11Request {
+  final int window;
+  final int selection;
+  final Set<X11EventType> events;
+
+  X11FixesSelectSelectionInputRequest(this.window, this.selection, this.events);
+
+  factory X11FixesSelectSelectionInputRequest.fromBuffer(X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var selection = buffer.readUint32();
+    var events = _decodeEventMask(buffer.readUint32());
+    return X11FixesSelectSelectionInputRequest(window, selection, events);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(2);
+    buffer.writeUint32(window);
+    buffer.writeUint32(selection);
+    buffer.writeUint32(_encodeEventMask(events));
+  }
+
+  @override
+  String toString() =>
+      'X11FixesSelectSelectionInputRequest(${window}, ${selection}, ${events})';
+}
+
+class X11FixesSelectCursorInputRequest extends X11Request {
+  final int window;
+  final Set<X11EventType> events;
+
+  X11FixesSelectCursorInputRequest(this.window, this.events);
+
+  factory X11FixesSelectCursorInputRequest.fromBuffer(X11ReadBuffer buffer) {
+    var window = buffer.readUint32();
+    var events = _decodeEventMask(buffer.readUint32());
+    return X11FixesSelectCursorInputRequest(window, events);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(3);
+    buffer.writeUint32(window);
+    buffer.writeUint32(_encodeEventMask(events));
+  }
+
+  @override
+  String toString() => 'X11FixesSelectCursorInputRequest(${window}, ${events})';
+}
+
+class X11FixesGetCursorImageRequest extends X11Request {
+  X11FixesGetCursorImageRequest();
+
+  factory X11FixesGetCursorImageRequest.fromBuffer(X11ReadBuffer buffer) {
+    return X11FixesGetCursorImageRequest();
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(4);
+  }
+
+  @override
+  String toString() => 'X11FixesGetCursorImageRequest()';
+}
+
+class X11FixesGetCursorImageReply extends X11Reply {
+  final X11Rectangle area;
+  final List<int> data;
+  final X11Point hotspot;
+  final int cursorSerial;
+
+  X11FixesGetCursorImageReply(
+    this.area,
+    this.data, {
+    this.hotspot = const X11Point(0, 0),
+    this.cursorSerial = 0,
+  });
+
+  static X11FixesGetCursorImageReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var x = buffer.readInt16();
+    var y = buffer.readInt16();
+    var width = buffer.readUint16();
+    var height = buffer.readUint16();
+    var hotspotX = buffer.readUint16();
+    var hotspotY = buffer.readUint16();
+    var cursorSerial = buffer.readUint32();
+    buffer.skip(8);
+    var data = buffer.readListOfUint8(buffer.remaining);
+    return X11FixesGetCursorImageReply(X11Rectangle(x, y, width, height), data,
+        hotspot: X11Point(hotspotX, hotspotY), cursorSerial: cursorSerial);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeInt16(area.x);
+    buffer.writeInt16(area.y);
+    buffer.writeUint16(area.width);
+    buffer.writeUint16(area.height);
+    buffer.writeUint16(hotspot.x);
+    buffer.writeUint16(hotspot.y);
+    buffer.writeUint32(cursorSerial);
+    buffer.skip(8);
+    buffer.writeListOfUint8(data);
+  }
+
+  @override
+  String toString() =>
+      'X11FixesGetCursorImageReply(${area}, <${data.length} bytes>, hotspot: ${hotspot}, cursorSerial: ${cursorSerial})';
+}
+
+class X11FixesCreateRegionRequest extends X11Request {
+  final int id;
+  final List<X11Rectangle> rectangles;
+
+  X11FixesCreateRegionRequest(this.id, this.rectangles);
+
+  factory X11FixesCreateRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+    var id = buffer.readUint32();
+    var rectangles = <X11Rectangle>[];
+    while (buffer.remaining > 0) {
+      var x = buffer.readUint16();
+      var y = buffer.readUint16();
+      var width = buffer.readUint16();
+      var height = buffer.readUint16();
+      rectangles.add(X11Rectangle(x, y, width, height));
+    }
+    return X11FixesCreateRegionRequest(id, rectangles);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(5);
+    buffer.writeUint32(id);
+    for (var rectangle in rectangles) {
+      buffer.writeUint16(rectangle.x);
+      buffer.writeUint16(rectangle.y);
+      buffer.writeUint16(rectangle.width);
+      buffer.writeUint16(rectangle.height);
+    }
+  }
+
+  @override
+  String toString() => 'X11FixesCreateRegionRequest(${id}, ${rectangles})';
+}
+
+class X11FixesCreateRegionFromBitmapRequest extends X11Request {
+  final int id;
+  final int bitmap;
+
+  X11FixesCreateRegionFromBitmapRequest(this.id, this.bitmap);
+
+  factory X11FixesCreateRegionFromBitmapRequest.fromBuffer(
+      X11ReadBuffer buffer) {
+    var id = buffer.readUint32();
+    var bitmap = buffer.readUint32();
+    return X11FixesCreateRegionFromBitmapRequest(id, bitmap);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(6);
+    buffer.writeUint32(id);
+    buffer.writeUint32(bitmap);
+  }
+
+  @override
+  String toString() =>
+      'X11FixesCreateRegionFromBitmapRequest(${id}, ${bitmap})';
+}
+
 class X11RenderQueryVersionRequest extends X11Request {
   final int clientMajorVersion;
   final int clientMinorVersion;

@@ -321,6 +321,43 @@ class X11UnknownError extends X11Error {
   }
 }
 
+class X11RegionError extends X11Error {
+  final int region;
+
+  const X11RegionError(int sequenceNumber, this.region) : super(sequenceNumber);
+
+  factory X11RegionError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
+    var region = buffer.readUint32();
+    buffer.skip(21);
+    return X11RegionError(sequenceNumber, region);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(region);
+    buffer.skip(21);
+  }
+}
+
+class X11BarrierError extends X11Error {
+  final int barrier;
+
+  const X11BarrierError(int sequenceNumber, this.barrier)
+      : super(sequenceNumber);
+
+  factory X11BarrierError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
+    var barrier = buffer.readUint32();
+    buffer.skip(21);
+    return X11BarrierError(sequenceNumber, barrier);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(barrier);
+    buffer.skip(21);
+  }
+}
+
 class X11RenderPictFormatError extends X11Error {
   const X11RenderPictFormatError(int sequenceNumber) : super(sequenceNumber);
 
