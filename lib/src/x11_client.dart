@@ -1401,34 +1401,42 @@ class X11Client {
 
     await _connectCompleter.future;
 
-    // NOTE(robert-ancell): We could do this on-demand only if we need it - less round trips on first start.
-    var reply = await queryExtension('BIG-REQUESTS');
-    if (reply.present) {
-      var bigRequests = X11BigRequestsExtension(this, reply.majorOpcode);
-      _maximumRequestLength = await bigRequests.bigReqEnable();
-    }
-    reply = await queryExtension('SHAPE');
-    if (reply.present) {
-      _shape = X11ShapeExtension(this, reply.majorOpcode, reply.firstEvent);
-    }
-    reply = await queryExtension('XFIXES');
-    if (reply.present) {
-      _fixes = X11FixesExtension(this, reply.majorOpcode, reply.firstError);
-    }
-    reply = await queryExtension('RENDER');
-    if (reply.present) {
-      _render = X11RenderExtension(this, reply.majorOpcode, reply.firstError);
-    }
-    reply = await queryExtension('RANDR');
-    if (reply.present) {
-      _randr = X11RandrExtension(
-          this, reply.majorOpcode, reply.firstEvent, reply.firstError);
-    }
-    reply = await queryExtension('DAMAGE');
-    if (reply.present) {
-      _damage = X11DamageExtension(
-          this, reply.majorOpcode, reply.firstEvent, reply.firstError);
-    }
+    await Future.wait(<Future>[
+      queryExtension('BIG-REQUESTS').then((reply) async {
+        if (reply.present) {
+          var bigRequests = X11BigRequestsExtension(this, reply.majorOpcode);
+          _maximumRequestLength = await bigRequests.bigReqEnable();
+        }
+      }),
+      queryExtension('SHAPE').then((reply) {
+        if (reply.present) {
+          _shape = X11ShapeExtension(this, reply.majorOpcode, reply.firstEvent);
+        }
+      }),
+      queryExtension('XFIXES').then((reply) {
+        if (reply.present) {
+          _fixes = X11FixesExtension(this, reply.majorOpcode, reply.firstError);
+        }
+      }),
+      queryExtension('RENDER').then((reply) {
+        if (reply.present) {
+          _render =
+              X11RenderExtension(this, reply.majorOpcode, reply.firstError);
+        }
+      }),
+      queryExtension('RANDR').then((reply) {
+        if (reply.present) {
+          _randr = X11RandrExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
+        }
+      }),
+      queryExtension('DAMAGE').then((reply) {
+        if (reply.present) {
+          _damage = X11DamageExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
+        }
+      }),
+    ]);
   }
 
   /// Generates a new resource ID for use in [createWindow], [createGC], [createPixmap] etc.
