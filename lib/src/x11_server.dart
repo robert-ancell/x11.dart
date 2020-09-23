@@ -43,10 +43,10 @@ class _X11Client {
 
     String failureReason;
 
-    if (!(request.protocolMajorVersion == 11 &&
-        request.protocolMinorVersion == 0)) {
+    if (!(request.protocolVersion.major == 11 &&
+        request.protocolVersion.minor == 0)) {
       failureReason =
-          'Unsupported version ${request.protocolMajorVersion}.${request.protocolMinorVersion}, expected 11.0';
+          'Unsupported version ${request.protocolVersion.major}.${request.protocolVersion.minor}, expected 11.0';
     }
 
     int result;

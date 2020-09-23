@@ -10,8 +10,8 @@ void main() async {
     return;
   }
 
-  var reply = await client.randr.queryVersion();
-  print('Server supports RANDR ${reply.majorVersion}.${reply.minorVersion}');
+  var version = await client.randr.queryVersion();
+  print('Server supports RANDR ${version.major}.${version.minor}');
 
   var root = client.screens[0].window;
   var screenInfo = await client.randr.getScreenInfo(root);

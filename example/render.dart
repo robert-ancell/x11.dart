@@ -10,8 +10,8 @@ void main() async {
     return;
   }
 
-  var reply = await client.render.queryVersion();
-  print('Server supports RENDER ${reply.majorVersion}.${reply.minorVersion}');
+  var version = await client.render.queryVersion();
+  print('Server supports RENDER ${version.major}.${version.minor}');
 
   var formatsReply = await client.render.queryPictFormats();
   print('Formats:');

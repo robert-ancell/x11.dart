@@ -841,6 +841,16 @@ class X11Triangle {
   String toString() => 'X11Triangle(${p1}, ${p2}, ${p3})';
 }
 
+class X11Version {
+  final int major;
+  final int minor;
+
+  const X11Version(this.major, this.minor);
+
+  @override
+  String toString() => 'X11Version(${major}, ${minor})';
+}
+
 /// Information about a visual supported by the X server.
 class X11Visual {
   /// Unique ID for this visual.

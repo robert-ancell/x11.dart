@@ -22,14 +22,12 @@ String _formatId(int id) {
 }
 
 class X11SetupRequest {
-  final int protocolMajorVersion;
-  final int protocolMinorVersion;
+  final X11Version protocolVersion;
   final String authorizationProtocolName;
   final List<int> authorizationProtocolData;
 
   const X11SetupRequest(
-      {this.protocolMajorVersion = 11,
-      this.protocolMinorVersion = 0,
+      {this.protocolVersion = const X11Version(11, 0),
       this.authorizationProtocolName = '',
       this.authorizationProtocolData = const []});
 
@@ -50,16 +48,15 @@ class X11SetupRequest {
     buffer.skip(2);
 
     return X11SetupRequest(
-        protocolMajorVersion: protocolMajorVersion,
-        protocolMinorVersion: protocolMinorVersion,
+        protocolVersion: X11Version(protocolMajorVersion, protocolMinorVersion),
         authorizationProtocolName: authorizationProtocolName,
         authorizationProtocolData: authorizationProtocolData);
   }
 
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint16(protocolMajorVersion);
-    buffer.writeUint16(protocolMinorVersion);
+    buffer.writeUint16(protocolVersion.major);
+    buffer.writeUint16(protocolVersion.minor);
     var authorizationProtocolNameLength =
         buffer.getString8Length(authorizationProtocolName);
     buffer.writeUint16(authorizationProtocolNameLength);
@@ -75,7 +72,7 @@ class X11SetupRequest {
 
   @override
   String toString() =>
-      "X11SetupRequest(protocolMajorVersion = ${protocolMajorVersion}, protocolMinorVersion = ${protocolMinorVersion}, authorizationProtocolName: '${authorizationProtocolName}', authorizationProtocolData: ${authorizationProtocolData})";
+      "X11SetupRequest(protocolVersion = ${protocolVersion}, authorizationProtocolName: '${authorizationProtocolName}', authorizationProtocolData: ${authorizationProtocolData})";
 }
 
 class X11SetupFailedReply {
@@ -7103,29 +7100,26 @@ class X11ShapeQueryVersionRequest extends X11Request {
 }
 
 class X11ShapeQueryVersionReply extends X11Reply {
-  final int majorVersion;
-  final int minorVersion;
+  final X11Version version;
 
-  X11ShapeQueryVersionReply({this.majorVersion = 1, this.minorVersion = 1});
+  X11ShapeQueryVersionReply([this.version = const X11Version(1, 1)]);
 
   static X11ShapeQueryVersionReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var majorVersion = buffer.readUint16();
     var minorVersion = buffer.readUint16();
-    return X11ShapeQueryVersionReply(
-        majorVersion: majorVersion, minorVersion: minorVersion);
+    return X11ShapeQueryVersionReply(X11Version(majorVersion, minorVersion));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint16(majorVersion);
-    buffer.writeUint16(minorVersion);
+    buffer.writeUint16(version.major);
+    buffer.writeUint16(version.minor);
   }
 
   @override
-  String toString() =>
-      'X11QueryVersionReply(majorVersion: ${majorVersion}, minorVersion: ${minorVersion})';
+  String toString() => 'X11QueryVersionReply(${version})';
 }
 
 class X11ShapeRectanglesRequest extends X11Request {
@@ -7526,58 +7520,51 @@ class X11ShapeGetRectanglesReply extends X11Reply {
 }
 
 class X11FixesQueryVersionRequest extends X11Request {
-  final int clientMajorVersion;
-  final int clientMinorVersion;
+  final X11Version clientVersion;
 
-  X11FixesQueryVersionRequest(
-      {this.clientMajorVersion = 5, this.clientMinorVersion = 0});
+  X11FixesQueryVersionRequest([this.clientVersion = const X11Version(5, 0)]);
 
   factory X11FixesQueryVersionRequest.fromBuffer(X11ReadBuffer buffer) {
     var clientMajorVersion = buffer.readUint32();
     var clientMinorVersion = buffer.readUint32();
     return X11FixesQueryVersionRequest(
-        clientMajorVersion: clientMajorVersion,
-        clientMinorVersion: clientMinorVersion);
+        X11Version(clientMajorVersion, clientMinorVersion));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(0);
-    buffer.writeUint32(clientMajorVersion);
-    buffer.writeUint32(clientMinorVersion);
+    buffer.writeUint32(clientVersion.major);
+    buffer.writeUint32(clientVersion.minor);
   }
 
   @override
-  String toString() =>
-      'X11FixesQueryVersionRequest(clientMajorVersion: ${clientMajorVersion}, clientMinorVersion: ${clientMinorVersion})';
+  String toString() => 'X11FixesQueryVersionRequest(${clientVersion})';
 }
 
 class X11FixesQueryVersionReply extends X11Reply {
-  final int majorVersion;
-  final int minorVersion;
+  final X11Version version;
 
-  X11FixesQueryVersionReply({this.majorVersion = 5, this.minorVersion = 0});
+  X11FixesQueryVersionReply([this.version = const X11Version(5, 0)]);
 
   static X11FixesQueryVersionReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var majorVersion = buffer.readUint32();
     var minorVersion = buffer.readUint32();
     buffer.skip(16);
-    return X11FixesQueryVersionReply(
-        majorVersion: majorVersion, minorVersion: minorVersion);
+    return X11FixesQueryVersionReply(X11Version(majorVersion, minorVersion));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(majorVersion);
-    buffer.writeUint32(minorVersion);
+    buffer.writeUint32(version.major);
+    buffer.writeUint32(version.minor);
     buffer.skip(16);
   }
 
   @override
-  String toString() =>
-      'X11FixesQueryVersionReply(majorVersion: ${majorVersion}, minorVersion: ${minorVersion})';
+  String toString() => 'X11FixesQueryVersionReply(${version})';
 }
 
 class X11FixesChangeSaveSetRequest extends X11Request {
@@ -7788,59 +7775,52 @@ class X11FixesCreateRegionFromBitmapRequest extends X11Request {
 }
 
 class X11RenderQueryVersionRequest extends X11Request {
-  final int clientMajorVersion;
-  final int clientMinorVersion;
+  final X11Version clientVersion;
 
-  X11RenderQueryVersionRequest(
-      {this.clientMajorVersion = 0, this.clientMinorVersion = 11});
+  X11RenderQueryVersionRequest([this.clientVersion = const X11Version(0, 11)]);
 
   factory X11RenderQueryVersionRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var clientMajorVersion = buffer.readUint32();
     var clientMinorVersion = buffer.readUint32();
     return X11RenderQueryVersionRequest(
-        clientMajorVersion: clientMajorVersion,
-        clientMinorVersion: clientMinorVersion);
+        X11Version(clientMajorVersion, clientMinorVersion));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(clientMajorVersion);
-    buffer.writeUint32(clientMinorVersion);
+    buffer.writeUint32(clientVersion.major);
+    buffer.writeUint32(clientVersion.minor);
   }
 
   @override
-  String toString() =>
-      'X11RenderQueryVersionRequest(clientMajorVersion: ${clientMajorVersion}, clientMinorVersion: ${clientMinorVersion})';
+  String toString() => 'X11RenderQueryVersionRequest(${clientVersion})';
 }
 
 class X11RenderQueryVersionReply extends X11Reply {
-  final int majorVersion;
-  final int minorVersion;
+  final X11Version version;
 
-  X11RenderQueryVersionReply({this.majorVersion = 0, this.minorVersion = 11});
+  X11RenderQueryVersionReply([this.version = const X11Version(0, 11)]);
 
   static X11RenderQueryVersionReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var majorVersion = buffer.readUint32();
     var minorVersion = buffer.readUint32();
     buffer.skip(16);
-    return X11RenderQueryVersionReply(
-        majorVersion: majorVersion, minorVersion: minorVersion);
+    return X11RenderQueryVersionReply(X11Version(majorVersion, minorVersion));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(majorVersion);
-    buffer.writeUint32(minorVersion);
+    buffer.writeUint32(version.major);
+    buffer.writeUint32(version.minor);
     buffer.skip(16);
   }
 
   @override
-  String toString() =>
-      'X11RenderQueryVersionReply(majorVersion: ${majorVersion}, minorVersion: ${minorVersion})';
+  String toString() => 'X11RenderQueryVersionReply(${version})';
 }
 
 class X11RenderQueryPictFormatsRequest extends X11Request {
@@ -9808,58 +9788,51 @@ class X11RenderCreateConicalGradientRequest extends X11Request {
 }
 
 class X11RandrQueryVersionRequest extends X11Request {
-  final int clientMajorVersion;
-  final int clientMinorVersion;
+  final X11Version clientVersion;
 
-  X11RandrQueryVersionRequest(
-      {this.clientMajorVersion = 1, this.clientMinorVersion = 5});
+  X11RandrQueryVersionRequest([this.clientVersion = const X11Version(1, 5)]);
 
   factory X11RandrQueryVersionRequest.fromBuffer(X11ReadBuffer buffer) {
     var clientMajorVersion = buffer.readUint32();
     var clientMinorVersion = buffer.readUint32();
     return X11RandrQueryVersionRequest(
-        clientMajorVersion: clientMajorVersion,
-        clientMinorVersion: clientMinorVersion);
+        X11Version(clientMajorVersion, clientMinorVersion));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(0);
-    buffer.writeUint32(clientMajorVersion);
-    buffer.writeUint32(clientMinorVersion);
+    buffer.writeUint32(clientVersion.major);
+    buffer.writeUint32(clientVersion.minor);
   }
 
   @override
-  String toString() =>
-      'X11RandrQueryVersionRequest(clientMajorVersion: ${clientMajorVersion}, clientMinorVersion: ${clientMinorVersion})';
+  String toString() => 'X11RandrQueryVersionRequest(${clientVersion})';
 }
 
 class X11RandrQueryVersionReply extends X11Reply {
-  final int majorVersion;
-  final int minorVersion;
+  final X11Version version;
 
-  X11RandrQueryVersionReply({this.majorVersion = 1, this.minorVersion = 5});
+  X11RandrQueryVersionReply([this.version = const X11Version(1, 5)]);
 
   static X11RandrQueryVersionReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var majorVersion = buffer.readUint32();
     var minorVersion = buffer.readUint32();
     buffer.skip(16);
-    return X11RandrQueryVersionReply(
-        majorVersion: majorVersion, minorVersion: minorVersion);
+    return X11RandrQueryVersionReply(X11Version(majorVersion, minorVersion));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(majorVersion);
-    buffer.writeUint32(minorVersion);
+    buffer.writeUint32(version.major);
+    buffer.writeUint32(version.minor);
     buffer.skip(16);
   }
 
   @override
-  String toString() =>
-      'X11RandrQueryVersionReply(majorVersion: ${majorVersion}, minorVersion: ${minorVersion})';
+  String toString() => 'X11RandrQueryVersionReply(${version})';
 }
 
 Set<X11RandrRotation> _decodeX11RandrRotation(int flags) {
@@ -12733,57 +12706,51 @@ class X11RandrFreeLeaseRequest extends X11Request {
 }
 
 class X11DamageQueryVersionRequest extends X11Request {
-  final int clientMajorVersion;
-  final int clientMinorVersion;
+  final X11Version clientVersion;
 
-  X11DamageQueryVersionRequest(
-      {this.clientMajorVersion = 1, this.clientMinorVersion = 1});
+  X11DamageQueryVersionRequest([this.clientVersion = const X11Version(1, 1)]);
 
   factory X11DamageQueryVersionRequest.fromBuffer(X11ReadBuffer buffer) {
     var clientMajorVersion = buffer.readUint32();
     var clientMinorVersion = buffer.readUint32();
     return X11DamageQueryVersionRequest(
-        clientMajorVersion: clientMajorVersion,
-        clientMinorVersion: clientMinorVersion);
+        X11Version(clientMajorVersion, clientMinorVersion));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(0);
-    buffer.writeUint32(clientMajorVersion);
-    buffer.writeUint32(clientMinorVersion);
+    buffer.writeUint32(clientVersion.major);
+    buffer.writeUint32(clientVersion.minor);
   }
 
   @override
-  String toString() =>
-      'X11DamageQueryVersionRequest(clientMajorVersion: ${clientMajorVersion}, clientMinorVersion: ${clientMinorVersion})';
+  String toString() => 'X11DamageQueryVersionRequest(${clientVersion})';
 }
 
 class X11DamageQueryVersionReply extends X11Reply {
-  final int majorVersion;
-  final int minorVersion;
+  final X11Version version;
 
-  X11DamageQueryVersionReply(this.majorVersion, this.minorVersion);
+  X11DamageQueryVersionReply(this.version);
 
   static X11DamageQueryVersionReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var majorVersion = buffer.readUint32();
     var minorVersion = buffer.readUint32();
     buffer.skip(16);
-    return X11DamageQueryVersionReply(majorVersion, minorVersion);
+    return X11DamageQueryVersionReply(X11Version(majorVersion, minorVersion));
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(majorVersion);
-    buffer.writeUint32(minorVersion);
+    buffer.writeUint32(version.major);
+    buffer.writeUint32(version.minor);
     buffer.skip(16);
   }
 
   @override
-  String toString() =>
-      'X11DamageQueryVersionReply(majorVersion: ${majorVersion}, minorVersion: ${minorVersion})';
+  String toString() => 'X11DamageQueryVersionReply(${version})';
 }
 
 class X11DamageCreateRequest extends X11Request {

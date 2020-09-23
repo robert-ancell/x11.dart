@@ -102,11 +102,12 @@ class X11ShapeExtension extends X11Extension {
   X11ShapeExtension(X11Client client, int majorOpcode, int firstEvent)
       : super(client, majorOpcode, firstEvent, 0);
 
-  Future<X11ShapeQueryVersionReply> queryVersion() async {
+  Future<X11Version> queryVersion() async {
     var request = X11ShapeQueryVersionRequest();
     var sequenceNumber = _client._sendRequest(0, request);
-    return _client._awaitReply<X11ShapeQueryVersionReply>(
+    var reply = await _client._awaitReply<X11ShapeQueryVersionReply>(
         sequenceNumber, X11ShapeQueryVersionReply.fromBuffer);
+    return reply.version;
   }
 
   @override
@@ -124,15 +125,14 @@ class X11FixesExtension extends X11Extension {
       : super(client, majorOpcode, 0, firstError);
 
   /// Gets the XFIXES extension version supported by the X server.
-  /// [clientMajorVersion].[clientMinorVersion] is the maximum version supported by this client, the server will not return a value greater than this.
-  Future<X11FixesQueryVersionReply> queryVersion(
-      {int clientMajorVersion = 5, int clientMinorVersion = 0}) async {
-    var request = X11FixesQueryVersionRequest(
-        clientMajorVersion: clientMajorVersion,
-        clientMinorVersion: clientMinorVersion);
+  /// [clientVersion] is the maximum version supported by this client, the server will not return a value greater than this.
+  Future<X11Version> queryVersion(
+      [X11Version version = const X11Version(5, 0)]) async {
+    var request = X11FixesQueryVersionRequest(version);
     var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11FixesQueryVersionReply>(
+    var reply = await _client._awaitReply<X11FixesQueryVersionReply>(
         sequenceNumber, X11FixesQueryVersionReply.fromBuffer);
+    return reply.version;
   }
 
   /// Inserts [window] into the clients save-set.
@@ -207,15 +207,14 @@ class X11RenderExtension extends X11Extension {
       : super(client, majorOpcode, 0, firstError);
 
   /// Gets the RENDER extension version supported by the X server.
-  /// [clientMajorVersion].[clientMinorVersion] is the maximum version supported by this client, the server will not return a value greater than this.
-  Future<X11RenderQueryVersionReply> queryVersion(
-      {int clientMajorVersion = 0, int clientMinorVersion = 11}) async {
-    var request = X11RenderQueryVersionRequest(
-        clientMajorVersion: clientMajorVersion,
-        clientMinorVersion: clientMinorVersion);
+  /// [clientVersion] is the maximum version supported by this client, the server will not return a value greater than this.
+  Future<X11Version> queryVersion(
+      [X11Version clientVersion = const X11Version(0, 11)]) async {
+    var request = X11RenderQueryVersionRequest(clientVersion);
     var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RenderQueryVersionReply>(
+    var reply = await _client._awaitReply<X11RenderQueryVersionReply>(
         sequenceNumber, X11RenderQueryVersionReply.fromBuffer);
+    return reply.version;
   }
 
   /// Get the picture formats supported by the X server.
@@ -587,15 +586,14 @@ class X11RandrExtension extends X11Extension {
       : super(client, majorOpcode, firstEvent, firstError);
 
   /// Gets the RANDR extension version supported by the X server.
-  /// [clientMajorVersion].[clientMinorVersion] is the maximum version supported by this client, the server will not return a value greater than this.
-  Future<X11RandrQueryVersionReply> queryVersion(
-      {int clientMajorVersion = 1, int clientMinorVersion = 5}) async {
-    var request = X11RandrQueryVersionRequest(
-        clientMajorVersion: clientMajorVersion,
-        clientMinorVersion: clientMinorVersion);
+  /// [clientVersion] is the maximum version supported by this client, the server will not return a value greater than this.
+  Future<X11Version> queryVersion(
+      [X11Version clientVersion = const X11Version(1, 5)]) async {
+    var request = X11RandrQueryVersionRequest(clientVersion);
     var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrQueryVersionReply>(
+    var reply = await _client._awaitReply<X11RandrQueryVersionReply>(
         sequenceNumber, X11RandrQueryVersionReply.fromBuffer);
+    return reply.version;
   }
 
   /// Sets the configuration of the screen [window] is on.
@@ -1175,15 +1173,14 @@ class X11DamageExtension extends X11Extension {
       : super(client, majorOpcode, firstEvent, firstError);
 
   /// Gets the DAMAGE extension version supported by the X server.
-  /// [clientMajorVersion].[clientMinorVersion] is the maximum version supported by this client, the server will not return a value greater than this.
-  Future<X11DamageQueryVersionReply> queryVersion(
-      {int clientMajorVersion = 1, int clientMinorVersion = 1}) async {
-    var request = X11DamageQueryVersionRequest(
-        clientMajorVersion: clientMajorVersion,
-        clientMinorVersion: clientMinorVersion);
+  /// [clientVersion] is the maximum version supported by this client, the server will not return a value greater than this.
+  Future<X11Version> queryVersion(
+      [X11Version clientVersion = const X11Version(1, 1)]) async {
+    var request = X11DamageQueryVersionRequest(clientVersion);
     var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11DamageQueryVersionReply>(
+    var reply = await _client._awaitReply<X11DamageQueryVersionReply>(
         sequenceNumber, X11DamageQueryVersionReply.fromBuffer);
+    return reply.version;
   }
 
   /// Creates a damage object with [id] to monitor changes to [drawable].
