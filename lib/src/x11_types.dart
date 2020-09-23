@@ -275,6 +275,12 @@ enum X11RandrSelectMask {
 
 enum X11Repeat { none, regular, pad, reflect }
 
+enum X11ShapeKind { bounding, clip, input }
+
+enum X11ShapeOperation { set, union, intersect, invert }
+
+enum X11ShapeOrdering { unSorted, ySorted, yxSorted, yxBanded }
+
 enum X11StackMode { above, below, topIf, bottomIf, opposite }
 
 enum X11SubPixelOrder {

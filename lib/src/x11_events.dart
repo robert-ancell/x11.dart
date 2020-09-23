@@ -1238,6 +1238,59 @@ class X11UnknownEvent extends X11Event {
   String toString() => 'X11UnknownEvent(code: ${code})';
 }
 
+class X11ShapeNotifyEvent extends X11Event {
+  final int firstEventCode;
+  final X11ShapeKind shapeKind;
+  final int affectedWindow;
+  final X11Rectangle extents;
+  final int serverTime;
+  final bool shaped;
+
+  X11ShapeNotifyEvent(this.firstEventCode,
+      {this.shapeKind = X11ShapeKind.bounding,
+      this.affectedWindow = 0,
+      this.extents = const X11Rectangle(0, 0, 0, 0),
+      this.serverTime = 0,
+      this.shaped = false});
+
+  factory X11ShapeNotifyEvent.fromBuffer(
+      int firstEventCode, X11ReadBuffer buffer) {
+    var shapeKind = X11ShapeKind.values[buffer.readUint8()];
+    var affectedWindow = buffer.readUint32();
+    var extentsX = buffer.readInt16();
+    var extentsY = buffer.readInt16();
+    var extentsWidth = buffer.readUint16();
+    var extentsHeight = buffer.readUint16();
+    var serverTime = buffer.readUint32();
+    var shaped = buffer.readBool();
+    buffer.skip(11);
+    return X11ShapeNotifyEvent(firstEventCode,
+        shapeKind: shapeKind,
+        affectedWindow: affectedWindow,
+        extents: X11Rectangle(extentsX, extentsY, extentsWidth, extentsHeight),
+        serverTime: serverTime,
+        shaped: shaped);
+  }
+
+  @override
+  int encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(shapeKind.index);
+    buffer.writeUint32(affectedWindow);
+    buffer.writeInt16(extents.x);
+    buffer.writeInt16(extents.y);
+    buffer.writeUint16(extents.width);
+    buffer.writeUint16(extents.height);
+    buffer.writeUint32(serverTime);
+    buffer.writeBool(shaped);
+    buffer.skip(11);
+    return firstEventCode;
+  }
+
+  @override
+  String toString() =>
+      'X11NotifyEvent(shapeKind: ${shapeKind}, affectedWindow: ${affectedWindow}, extents: ${extents}, serverTime: ${serverTime}, shaped: ${shaped})';
+}
+
 Set<X11RandrRotation> _decodeX11RandrRotation(int flags) {
   var rotation = <X11RandrRotation>{};
   for (var value in X11RandrRotation.values) {

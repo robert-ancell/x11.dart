@@ -98,6 +98,27 @@ class X11BigRequestsExtension extends X11Extension {
   }
 }
 
+class X11ShapeExtension extends X11Extension {
+  X11ShapeExtension(X11Client client, int majorOpcode, int firstEvent)
+      : super(client, majorOpcode, firstEvent, 0);
+
+  Future<X11ShapeQueryVersionReply> queryVersion() async {
+    var request = X11ShapeQueryVersionRequest();
+    var sequenceNumber = _client._sendRequest(0, request);
+    return _client._awaitReply<X11ShapeQueryVersionReply>(
+        sequenceNumber, X11ShapeQueryVersionReply.fromBuffer);
+  }
+
+  @override
+  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+    if (code == _firstEvent) {
+      return X11ShapeNotifyEvent.fromBuffer(_firstEvent, buffer);
+    } else {
+      return null;
+    }
+  }
+}
+
 class X11FixesExtension extends X11Extension {
   X11FixesExtension(X11Client client, int majorOpcode, int firstError)
       : super(client, majorOpcode, 0, firstError);
@@ -1220,6 +1241,9 @@ class X11Client {
   /// Stream of events from the X server.
   Stream<X11Event> get eventStream => _eventStreamController.stream;
 
+  /// SHAPE extension, or null if it doesn't exist.
+  X11ShapeExtension get shape => _shape;
+
   /// XFIXES extension, or null if it doesn't exist.
   X11FixesExtension get fixes => _fixes;
 
@@ -1247,6 +1271,7 @@ class X11Client {
   final _atoms = <String, int>{};
   final _atomNames = <int, String>{};
 
+  X11ShapeExtension _shape;
   X11FixesExtension _fixes;
   X11RenderExtension _render;
   X11RandrExtension _randr;
@@ -1384,6 +1409,10 @@ class X11Client {
     if (reply.present) {
       var bigRequests = X11BigRequestsExtension(this, reply.majorOpcode);
       _maximumRequestLength = await bigRequests.bigReqEnable();
+    }
+    reply = await queryExtension('SHAPE');
+    if (reply.present) {
+      _shape = X11ShapeExtension(this, reply.majorOpcode, reply.firstEvent);
     }
     reply = await queryExtension('XFIXES');
     if (reply.present) {
