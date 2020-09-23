@@ -455,3 +455,21 @@ class X11RandrProviderError extends X11Error {
     buffer.skip(25);
   }
 }
+
+class X11DamageError extends X11Error {
+  final int damage;
+
+  const X11DamageError(int sequenceNumber, this.damage) : super(sequenceNumber);
+
+  factory X11DamageError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
+    var damage = buffer.readUint32();
+    buffer.skip(21);
+    return X11DamageError(sequenceNumber, damage);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(damage);
+    buffer.skip(21);
+  }
+}

@@ -1065,6 +1065,68 @@ class X11RandrExtension extends X11Extension {
   }
 }
 
+class X11DamageExtension extends X11Extension {
+  X11DamageExtension(
+      X11Client client, int majorOpcode, int firstEvent, int firstError)
+      : super(client, majorOpcode, firstEvent, firstError);
+
+  /// Gets the DAMAGE extension version supported by the X server.
+  /// [clientMajorVersion].[clientMinorVersion] is the maximum version supported by this client, the server will not return a value greater than this.
+  Future<X11DamageQueryVersionReply> queryVersion(
+      {int clientMajorVersion = 1, int clientMinorVersion = 1}) async {
+    var request = X11DamageQueryVersionRequest(
+        clientMajorVersion: clientMajorVersion,
+        clientMinorVersion: clientMinorVersion);
+    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
+    return _client._awaitReply<X11DamageQueryVersionReply>(
+        sequenceNumber, X11DamageQueryVersionReply.fromBuffer);
+  }
+
+  /// Creates a damage object with [id] to monitor changes to [drawable].
+  /// When no longer required, the damage object reference should be deleted with [destroy].
+  int create(int id, int drawable, X11DamageReportLevel level) {
+    var request = X11DamageCreateRequest(id, drawable, level);
+    return _client._sendRequest(_majorOpcode, request);
+  }
+
+  /// Deletes the reference to [damage] created in [create].
+  int destroy(int damage) {
+    var request = X11DamageDestroyRequest(damage);
+    return _client._sendRequest(_majorOpcode, request);
+  }
+
+  /// Marks [repairRegion] from [damage] as repaired.
+  int subtract(int damage, int repairRegion, {int partsRegion = 0}) {
+    var request = X11DamageSubtractRequest(damage, repairRegion,
+        partsRegion: partsRegion);
+    return _client._sendRequest(_majorOpcode, request);
+  }
+
+  /// Reports damage in [region] of the [drawable].
+  int add(int drawable, int region) {
+    var request = X11DamageAddRequest(drawable, region);
+    return _client._sendRequest(_majorOpcode, request);
+  }
+
+  @override
+  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+    if (code == _firstEvent) {
+      return X11DamageNotifyEvent.fromBuffer(_firstEvent, buffer);
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+    if (code == _firstError) {
+      return X11DamageError.fromBuffer(sequenceNumber, buffer);
+    } else {
+      return null;
+    }
+  }
+}
+
 class X11Client {
   /// Screens provided by the X server.
   List<X11Screen> get screens => _roots;
@@ -1080,6 +1142,9 @@ class X11Client {
 
   /// RANDR extension, or null if it doesn't exist.
   X11RandrExtension get randr => _randr;
+
+  /// DAMAGE extension, or null if it doesn't exist.
+  X11DamageExtension get damage => _damage;
 
   Socket _socket;
   final _buffer = X11ReadBuffer();
@@ -1098,6 +1163,7 @@ class X11Client {
 
   X11RenderExtension _render;
   X11RandrExtension _randr;
+  X11DamageExtension _damage;
 
   /// Creates a new X client.
   /// Call [connect] or [connectToHost] to connect to an X server.
@@ -1239,6 +1305,11 @@ class X11Client {
     reply = await queryExtension('RANDR');
     if (reply.present) {
       _randr = X11RandrExtension(
+          this, reply.majorOpcode, reply.firstEvent, reply.firstError);
+    }
+    reply = await queryExtension('DAMAGE');
+    if (reply.present) {
+      _damage = X11DamageExtension(
           this, reply.majorOpcode, reply.firstEvent, reply.firstError);
     }
   }

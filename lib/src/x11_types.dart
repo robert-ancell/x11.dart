@@ -61,6 +61,13 @@ enum X11CloseDownMode { destroy, retainPermanent, retainTemporary }
 
 enum X11CoordinateMode { origin, previous }
 
+enum X11DamageReportLevel {
+  rawRectangles,
+  deltaRectangles,
+  boundingBox,
+  nonEmpty
+}
+
 enum X11EventType {
   keyPress,
   keyRelease,

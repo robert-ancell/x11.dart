@@ -12029,3 +12029,153 @@ class X11RandrFreeLeaseRequest extends X11Request {
   String toString() =>
       'X11RandrFreeLeaseRequest(${_formatId(lease)}, terminate: ${terminate})';
 }
+
+class X11DamageQueryVersionRequest extends X11Request {
+  final int clientMajorVersion;
+  final int clientMinorVersion;
+
+  X11DamageQueryVersionRequest(
+      {this.clientMajorVersion = 1, this.clientMinorVersion = 1});
+
+  factory X11DamageQueryVersionRequest.fromBuffer(X11ReadBuffer buffer) {
+    var clientMajorVersion = buffer.readUint32();
+    var clientMinorVersion = buffer.readUint32();
+    return X11DamageQueryVersionRequest(
+        clientMajorVersion: clientMajorVersion,
+        clientMinorVersion: clientMinorVersion);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(clientMajorVersion);
+    buffer.writeUint32(clientMinorVersion);
+  }
+
+  @override
+  String toString() =>
+      'X11DamageQueryVersionRequest(clientMajorVersion: ${clientMajorVersion}, clientMinorVersion: ${clientMinorVersion})';
+}
+
+class X11DamageQueryVersionReply extends X11Reply {
+  final int majorVersion;
+  final int minorVersion;
+
+  X11DamageQueryVersionReply(this.majorVersion, this.minorVersion);
+
+  static X11DamageQueryVersionReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var majorVersion = buffer.readUint32();
+    var minorVersion = buffer.readUint32();
+    buffer.skip(16);
+    return X11DamageQueryVersionReply(majorVersion, minorVersion);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint32(majorVersion);
+    buffer.writeUint32(minorVersion);
+    buffer.skip(16);
+  }
+
+  @override
+  String toString() =>
+      'X11DamageQueryVersionReply(majorVersion: ${majorVersion}, minorVersion: ${minorVersion})';
+}
+
+class X11DamageCreateRequest extends X11Request {
+  final int damage;
+  final int drawable;
+  final X11DamageReportLevel level;
+
+  X11DamageCreateRequest(this.damage, this.drawable, this.level);
+
+  factory X11DamageCreateRequest.fromBuffer(X11ReadBuffer buffer) {
+    var damage = buffer.readUint32();
+    var drawable = buffer.readUint32();
+    var level = X11DamageReportLevel.values[buffer.readUint8()];
+    buffer.skip(3);
+    return X11DamageCreateRequest(damage, drawable, level);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(damage);
+    buffer.writeUint32(drawable);
+    buffer.writeUint8(level.index);
+    buffer.skip(3);
+  }
+
+  @override
+  String toString() =>
+      'X11DamageCreateRequest(${damage}, ${drawable}, ${level})';
+}
+
+class X11DamageDestroyRequest extends X11Request {
+  final int damage;
+
+  X11DamageDestroyRequest(this.damage);
+
+  factory X11DamageDestroyRequest.fromBuffer(X11ReadBuffer buffer) {
+    var damage = buffer.readUint32();
+    return X11DamageDestroyRequest(damage);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(damage);
+  }
+
+  @override
+  String toString() => 'X11DamageDestroyRequest(${damage})';
+}
+
+class X11DamageSubtractRequest extends X11Request {
+  final int damage;
+  final int repairRegion;
+  final int partsRegion;
+
+  X11DamageSubtractRequest(this.damage, this.repairRegion,
+      {this.partsRegion = 0});
+
+  factory X11DamageSubtractRequest.fromBuffer(X11ReadBuffer buffer) {
+    var damage = buffer.readUint32();
+    var repairRegion = buffer.readUint32();
+    var partsRegion = buffer.readUint32();
+    return X11DamageSubtractRequest(damage, repairRegion,
+        partsRegion: partsRegion);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(damage);
+    buffer.writeUint32(repairRegion);
+    buffer.writeUint32(partsRegion);
+  }
+
+  @override
+  String toString() =>
+      'X11DamageSubtractRequest(${damage}, ${repairRegion}, ${partsRegion})';
+}
+
+class X11DamageAddRequest extends X11Request {
+  final int drawable;
+  final int region;
+
+  X11DamageAddRequest(this.drawable, this.region);
+
+  factory X11DamageAddRequest.fromBuffer(X11ReadBuffer buffer) {
+    var drawable = buffer.readUint32();
+    var region = buffer.readUint32();
+    return X11DamageAddRequest(drawable, region);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(drawable);
+    buffer.writeUint32(region);
+  }
+
+  @override
+  String toString() => 'X11DamageAddRequest(${drawable}, ${region})';
+}
