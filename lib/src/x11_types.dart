@@ -658,7 +658,7 @@ class X11Rectangle {
   String toString() => 'X11Rectangle(${x}, ${y}, ${width}, ${height})';
 }
 
-class X11RenderPictFormatInfo {
+class X11PictFormatInfo {
   final int id;
   final X11PictureType type;
   final int depth;
@@ -672,7 +672,7 @@ class X11RenderPictFormatInfo {
   final int alphaMask;
   final int colormap;
 
-  const X11RenderPictFormatInfo(this.id,
+  const X11PictFormatInfo(this.id,
       {this.type = X11PictureType.direct,
       this.depth = 24,
       this.redShift = 0,
@@ -687,20 +687,20 @@ class X11RenderPictFormatInfo {
 
   @override
   String toString() =>
-      'X11RenderPictFormatInfo(${_formatId(id)}, type: ${type}, depth: ${depth}, redShift: ${redShift}, redMask: ${_formatHex(redMask)}, greenShift: ${greenShift}, greenMask: ${_formatHex(greenMask)}, blueShift: ${blueShift}, blueMask: ${_formatHex(blueMask)}, alphaShift: ${alphaShift}, alphaMask: ${_formatHex(alphaMask)}, colormap: ${colormap})';
+      'X11PictFormatInfo(${_formatId(id)}, type: ${type}, depth: ${depth}, redShift: ${redShift}, redMask: ${_formatHex(redMask)}, greenShift: ${greenShift}, greenMask: ${_formatHex(greenMask)}, blueShift: ${blueShift}, blueMask: ${_formatHex(blueMask)}, alphaShift: ${alphaShift}, alphaMask: ${_formatHex(alphaMask)}, colormap: ${colormap})';
 }
 
-class X11RenderPictScreen {
+class X11PictScreen {
   final Map<int, Map<int, int>> visuals;
   final int fallback;
   final X11SubPixelOrder subPixelOrder;
 
-  const X11RenderPictScreen(this.visuals,
+  const X11PictScreen(this.visuals,
       {this.fallback = 0, this.subPixelOrder = X11SubPixelOrder.unknown});
 
   @override
   String toString() =>
-      'X11RenderPictScreen(${visuals}, fallback: ${fallback}, subPixelOrder: ${subPixelOrder})';
+      'X11PictScreen(${visuals}, fallback: ${fallback}, subPixelOrder: ${subPixelOrder})';
 }
 
 class X11Rgb {

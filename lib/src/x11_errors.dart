@@ -358,13 +358,13 @@ class X11BarrierError extends X11Error {
   }
 }
 
-class X11RenderPictFormatError extends X11Error {
-  const X11RenderPictFormatError(int sequenceNumber) : super(sequenceNumber);
+class X11PictFormatError extends X11Error {
+  const X11PictFormatError(int sequenceNumber) : super(sequenceNumber);
 
-  factory X11RenderPictFormatError.fromBuffer(
+  factory X11PictFormatError.fromBuffer(
       int sequenceNumber, X11ReadBuffer buffer) {
     buffer.skip(25);
-    return X11RenderPictFormatError(sequenceNumber);
+    return X11PictFormatError(sequenceNumber);
   }
 
   @override
@@ -373,13 +373,12 @@ class X11RenderPictFormatError extends X11Error {
   }
 }
 
-class X11RenderPictureError extends X11Error {
-  const X11RenderPictureError(int sequenceNumber) : super(sequenceNumber);
+class X11PictureError extends X11Error {
+  const X11PictureError(int sequenceNumber) : super(sequenceNumber);
 
-  factory X11RenderPictureError.fromBuffer(
-      int sequenceNumber, X11ReadBuffer buffer) {
+  factory X11PictureError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
     buffer.skip(25);
-    return X11RenderPictureError(sequenceNumber);
+    return X11PictureError(sequenceNumber);
   }
 
   @override
@@ -388,13 +387,12 @@ class X11RenderPictureError extends X11Error {
   }
 }
 
-class X11RenderPictOpError extends X11Error {
-  const X11RenderPictOpError(int sequenceNumber) : super(sequenceNumber);
+class X11PictOpError extends X11Error {
+  const X11PictOpError(int sequenceNumber) : super(sequenceNumber);
 
-  factory X11RenderPictOpError.fromBuffer(
-      int sequenceNumber, X11ReadBuffer buffer) {
+  factory X11PictOpError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
     buffer.skip(25);
-    return X11RenderPictOpError(sequenceNumber);
+    return X11PictOpError(sequenceNumber);
   }
 
   @override
@@ -403,13 +401,13 @@ class X11RenderPictOpError extends X11Error {
   }
 }
 
-class X11RenderGlyphSetError extends X11Error {
-  const X11RenderGlyphSetError(int sequenceNumber) : super(sequenceNumber);
+class X11GlyphSetError extends X11Error {
+  const X11GlyphSetError(int sequenceNumber) : super(sequenceNumber);
 
-  factory X11RenderGlyphSetError.fromBuffer(
+  factory X11GlyphSetError.fromBuffer(
       int sequenceNumber, X11ReadBuffer buffer) {
     buffer.skip(25);
-    return X11RenderGlyphSetError(sequenceNumber);
+    return X11GlyphSetError(sequenceNumber);
   }
 
   @override
@@ -418,13 +416,12 @@ class X11RenderGlyphSetError extends X11Error {
   }
 }
 
-class X11RenderGlyphError extends X11Error {
-  const X11RenderGlyphError(int sequenceNumber) : super(sequenceNumber);
+class X11GlyphError extends X11Error {
+  const X11GlyphError(int sequenceNumber) : super(sequenceNumber);
 
-  factory X11RenderGlyphError.fromBuffer(
-      int sequenceNumber, X11ReadBuffer buffer) {
+  factory X11GlyphError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
     buffer.skip(25);
-    return X11RenderGlyphError(sequenceNumber);
+    return X11GlyphError(sequenceNumber);
   }
 
   @override

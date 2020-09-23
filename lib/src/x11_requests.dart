@@ -7421,8 +7421,8 @@ class X11RenderQueryPictFormatsRequest extends X11Request {
 }
 
 class X11RenderQueryPictFormatsReply extends X11Reply {
-  final List<X11RenderPictFormatInfo> formats;
-  final List<X11RenderPictScreen> screens;
+  final List<X11PictFormatInfo> formats;
+  final List<X11PictScreen> screens;
 
   X11RenderQueryPictFormatsReply(
       {this.formats = const [], this.screens = const []});
@@ -7435,7 +7435,7 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
     buffer.skip(4); // visualsLength
     var subPixelsLength = buffer.readUint32();
     buffer.skip(4);
-    var formats = <X11RenderPictFormatInfo>[];
+    var formats = <X11PictFormatInfo>[];
     for (var i = 0; i < formatsLength; i++) {
       var id = buffer.readUint32();
       var type = X11PictureType.values[buffer.readUint8()];
@@ -7450,7 +7450,7 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
       var alphaShift = buffer.readUint16();
       var alphaMask = buffer.readUint16();
       var colormap = buffer.readUint32();
-      formats.add(X11RenderPictFormatInfo(id,
+      formats.add(X11PictFormatInfo(id,
           type: type,
           depth: depth,
           redShift: redShift,
@@ -7463,7 +7463,7 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
           alphaMask: alphaMask,
           colormap: colormap));
     }
-    var screensWithoutSubPixels = <X11RenderPictScreen>[];
+    var screensWithoutSubPixels = <X11PictScreen>[];
     for (var i = 0; i < screensLength; i++) {
       var depthsLength = buffer.readUint32();
       var fallback = buffer.readUint32();
@@ -7481,15 +7481,14 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
         }
         visuals[depth] = visualMap;
       }
-      screensWithoutSubPixels
-          .add(X11RenderPictScreen(visuals, fallback: fallback));
+      screensWithoutSubPixels.add(X11PictScreen(visuals, fallback: fallback));
     }
-    var screens = <X11RenderPictScreen>[];
+    var screens = <X11PictScreen>[];
     for (var i = 0; i < screensLength; i++) {
       var subPixelOrder = i < subPixelsLength
           ? X11SubPixelOrder.values[buffer.readUint32()]
           : X11SubPixelOrder.unknown;
-      screens.add(X11RenderPictScreen(screensWithoutSubPixels[i].visuals,
+      screens.add(X11PictScreen(screensWithoutSubPixels[i].visuals,
           fallback: screensWithoutSubPixels[i].fallback,
           subPixelOrder: subPixelOrder));
     }

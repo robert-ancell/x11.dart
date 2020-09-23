@@ -135,6 +135,7 @@ class X11FixesExtension extends X11Extension {
     return _client._sendRequest(_majorOpcode, request);
   }
 
+  /// Selects the selection [events] for [selection] to deliver to [window].
   int selectSelectionInput(
       int window, int selection, Set<X11EventType> events) {
     var request =
@@ -142,11 +143,13 @@ class X11FixesExtension extends X11Extension {
     return _client._sendRequest(2, request);
   }
 
+  /// Selects the cursor [events] to deliver to [window].
   int selectCursorInput(int window, Set<X11EventType> events) {
     var request = X11FixesSelectCursorInputRequest(window, events);
     return _client._sendRequest(3, request);
   }
 
+  /// Get the image of the current cursor.
   Future<X11FixesGetCursorImageReply> getCursorImage() async {
     var request = X11FixesGetCursorImageRequest();
     var sequenceNumber = _client._sendRequest(4, request);
@@ -154,13 +157,15 @@ class X11FixesExtension extends X11Extension {
         sequenceNumber, X11FixesGetCursorImageReply.fromBuffer);
   }
 
-  int createRegion(int region, List<X11Rectangle> rectangles) {
-    var request = X11FixesCreateRegionRequest(region, rectangles);
+  /// Creates a new region with [id] that covers the area containing the union of [rectangles].
+  int createRegion(int id, List<X11Rectangle> rectangles) {
+    var request = X11FixesCreateRegionRequest(id, rectangles);
     return _client._sendRequest(5, request);
   }
 
-  int createRegionFromBitmap(int region, int bitmap) {
-    var request = X11FixesCreateRegionFromBitmapRequest(region, bitmap);
+  /// Creates a new region with [id] that covers the area in [bitmap].
+  int createRegionFromBitmap(int id, int bitmap) {
+    var request = X11FixesCreateRegionFromBitmapRequest(id, bitmap);
     return _client._sendRequest(6, request);
   }
 
@@ -538,15 +543,15 @@ class X11RenderExtension extends X11Extension {
   @override
   X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
     if (code == _firstError) {
-      return X11RenderPictFormatError.fromBuffer(sequenceNumber, buffer);
+      return X11PictFormatError.fromBuffer(sequenceNumber, buffer);
     } else if (code == _firstError + 1) {
-      return X11RenderPictureError.fromBuffer(sequenceNumber, buffer);
+      return X11PictureError.fromBuffer(sequenceNumber, buffer);
     } else if (code == _firstError + 1) {
-      return X11RenderPictOpError.fromBuffer(sequenceNumber, buffer);
+      return X11PictOpError.fromBuffer(sequenceNumber, buffer);
     } else if (code == _firstError + 1) {
-      return X11RenderGlyphSetError.fromBuffer(sequenceNumber, buffer);
+      return X11GlyphSetError.fromBuffer(sequenceNumber, buffer);
     } else if (code == _firstError + 1) {
-      return X11RenderGlyphError.fromBuffer(sequenceNumber, buffer);
+      return X11GlyphError.fromBuffer(sequenceNumber, buffer);
     } else {
       return null;
     }
