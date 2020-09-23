@@ -11973,6 +11973,7 @@ class X11RandrCreateLeaseRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(45);
     buffer.writeUint32(window);
     buffer.writeUint32(id);
     buffer.writeUint16(crtcs.length);
@@ -12021,6 +12022,7 @@ class X11RandrFreeLeaseRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(46);
     buffer.writeUint32(lease);
     buffer.writeBool(terminate);
   }
@@ -12047,6 +12049,7 @@ class X11DamageQueryVersionRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(0);
     buffer.writeUint32(clientMajorVersion);
     buffer.writeUint32(clientMinorVersion);
   }
@@ -12100,6 +12103,7 @@ class X11DamageCreateRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(1);
     buffer.writeUint32(damage);
     buffer.writeUint32(drawable);
     buffer.writeUint8(level.index);
@@ -12123,6 +12127,7 @@ class X11DamageDestroyRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(2);
     buffer.writeUint32(damage);
   }
 
@@ -12148,6 +12153,7 @@ class X11DamageSubtractRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(3);
     buffer.writeUint32(damage);
     buffer.writeUint32(repairRegion);
     buffer.writeUint32(partsRegion);
@@ -12172,6 +12178,7 @@ class X11DamageAddRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(4);
     buffer.writeUint32(drawable);
     buffer.writeUint32(region);
   }
