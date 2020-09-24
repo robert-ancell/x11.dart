@@ -98,6 +98,20 @@ class X11BigRequestsExtension extends X11Extension {
   }
 }
 
+class X11SyncExtension extends X11Extension {
+  X11SyncExtension(
+      X11Client client, int majorOpcode, int firstEvent, int firstError)
+      : super(client, majorOpcode, firstEvent, firstError);
+
+  Future<X11SyncInitializeReply> initialize(
+      [X11Version clientVersion = const X11Version(3, 1)]) async {
+    var request = X11SyncInitializeRequest(clientVersion);
+    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
+    return _client._awaitReply<X11SyncInitializeReply>(
+        sequenceNumber, X11SyncInitializeReply.fromBuffer);
+  }
+}
+
 class X11ShapeExtension extends X11Extension {
   X11ShapeExtension(X11Client client, int majorOpcode, int firstEvent)
       : super(client, majorOpcode, firstEvent, 0);
@@ -1506,6 +1520,9 @@ class X11Client {
   /// Stream of events from the X server.
   Stream<X11Event> get eventStream => _eventStreamController.stream;
 
+  /// SYNC extension, or null if it doesn't exist.
+  X11SyncExtension get sync => _sync;
+
   /// SHAPE extension, or null if it doesn't exist.
   X11ShapeExtension get shape => _shape;
 
@@ -1536,6 +1553,7 @@ class X11Client {
   final _atoms = <String, int>{};
   final _atomNames = <int, String>{};
 
+  X11SyncExtension _sync;
   X11ShapeExtension _shape;
   X11FixesExtension _fixes;
   X11RenderExtension _render;
@@ -1674,6 +1692,12 @@ class X11Client {
         if (reply.present) {
           var bigRequests = X11BigRequestsExtension(this, reply.majorOpcode);
           _maximumRequestLength = await bigRequests.bigReqEnable();
+        }
+      }),
+      queryExtension('SYNC').then((reply) async {
+        if (reply.present) {
+          _sync = X11SyncExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
         }
       }),
       queryExtension('SHAPE').then((reply) {
