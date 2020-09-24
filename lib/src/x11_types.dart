@@ -29,6 +29,8 @@ enum X11ArcMode { chord, pieSlice }
 
 enum X11BackingStore { never, whenMapped, always }
 
+enum X11BarrierDirection { positiveX, positiveY, negativeX, negativeY }
+
 enum X11BitGravity {
   forget,
   northWest,
