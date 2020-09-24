@@ -113,7 +113,7 @@ class X11SetupSuccessReply {
   final int maxKeycode;
   final String vendor;
   final List<X11Format> pixmapFormats;
-  final List<X11Screen> roots;
+  final List<X11Screen> screens;
 
   const X11SetupSuccessReply(
       {this.releaseNumber = 0,
@@ -129,7 +129,7 @@ class X11SetupSuccessReply {
       this.maxKeycode = 255,
       this.vendor = '',
       this.pixmapFormats = const [],
-      this.roots = const []});
+      this.screens = const []});
 
   factory X11SetupSuccessReply.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -139,7 +139,7 @@ class X11SetupSuccessReply {
     var motionBufferSize = buffer.readUint32();
     var vendorLength = buffer.readUint16();
     var maximumRequestLength = buffer.readUint16();
-    var rootsCount = buffer.readUint8();
+    var screensCount = buffer.readUint8();
     var formatCount = buffer.readUint8();
     var imageByteOrder = X11ImageByteOrder.values[buffer.readUint8()];
     var bitmapFormatBitOrder =
@@ -160,8 +160,8 @@ class X11SetupSuccessReply {
       pixmapFormats.add(X11Format(
           depth: depth, bitsPerPixel: bitsPerPixel, scanlinePad: scanlinePad));
     }
-    var roots = <X11Screen>[];
-    for (var i = 0; i < rootsCount; i++) {
+    var screens = <X11Screen>[];
+    for (var i = 0; i < screensCount; i++) {
       var window = buffer.readUint32();
       var defaultColormap = buffer.readUint32();
       var whitePixel = buffer.readUint32();
@@ -201,7 +201,7 @@ class X11SetupSuccessReply {
         }
         allowedDepths[depth] = visuals;
       }
-      roots.add(X11Screen(
+      screens.add(X11Screen(
           window: window,
           defaultColormap: defaultColormap,
           whitePixel: whitePixel,
@@ -232,7 +232,7 @@ class X11SetupSuccessReply {
         maxKeycode: maxKeycode,
         vendor: vendor,
         pixmapFormats: pixmapFormats,
-        roots: roots);
+        screens: screens);
   }
 
   void encode(X11WriteBuffer buffer) {
@@ -244,7 +244,7 @@ class X11SetupSuccessReply {
     var vendorLength = buffer.getString8Length(vendor);
     buffer.writeUint16(vendorLength);
     buffer.writeUint16(maximumRequestLength);
-    buffer.writeUint8(roots.length);
+    buffer.writeUint8(screens.length);
     buffer.writeUint8(pixmapFormats.length);
     buffer.writeUint8(imageByteOrder.index);
     buffer.writeUint8(bitmapFormatBitOrder.index);
@@ -261,7 +261,7 @@ class X11SetupSuccessReply {
       buffer.writeUint8(format.scanlinePad);
       buffer.skip(5);
     }
-    for (var screen in roots) {
+    for (var screen in screens) {
       buffer.writeUint32(screen.window);
       buffer.writeUint32(screen.defaultColormap);
       buffer.writeUint32(screen.whitePixel);
@@ -299,7 +299,7 @@ class X11SetupSuccessReply {
 
   @override
   String toString() =>
-      "X11SetupSuccessReply(releaseNumber: ${releaseNumber}, resourceIdBase: ${_formatId(resourceIdBase)}, resourceIdMask: ${_formatId(resourceIdMask)}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, roots: ${roots})";
+      "X11SetupSuccessReply(releaseNumber: ${releaseNumber}, resourceIdBase: ${_formatId(resourceIdBase)}, resourceIdMask: ${_formatId(resourceIdMask)}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, screens: ${screens})";
 }
 
 class X11SetupAuthenticateReply {

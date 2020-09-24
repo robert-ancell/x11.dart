@@ -69,7 +69,7 @@ class _X11Client {
             blueMask: 0x000000ff)
       ];
       var allowedDepths = {24: visuals};
-      var roots = [
+      var screens = [
         X11Screen(
             window: 0x000007a5,
             whitePixel: 0xffffff,
@@ -85,7 +85,7 @@ class _X11Client {
           resourceIdBase: 0x04a00000,
           resourceIdMask: 0x001fffff,
           pixmapFormats: pixmapFormats,
-          roots: roots);
+          screens: screens);
 
       reply.encode(resultBuffer);
 

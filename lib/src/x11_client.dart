@@ -1512,7 +1512,7 @@ class X11DamageExtension extends X11Extension {
 
 class X11Client {
   /// Screens provided by the X server.
-  List<X11Screen> get screens => _roots;
+  List<X11Screen> get screens => _screens;
 
   /// Stream of errors from the X server.
   Stream<X11Error> get errorStream => _errorStreamController.stream;
@@ -1545,7 +1545,7 @@ class X11Client {
   int _resourceIdBase = 0;
   int _maximumRequestLength = 0;
   int _resourceCount = 0;
-  List<X11Screen> _roots;
+  List<X11Screen> _screens;
   final _errorStreamController = StreamController<X11Error>();
   final _eventStreamController = StreamController<X11Event>();
   final _requests = <int, _RequestHandler>{};
@@ -3143,7 +3143,7 @@ class X11Client {
       var reply = X11SetupSuccessReply.fromBuffer(replyBuffer);
       _resourceIdBase = reply.resourceIdBase;
       _maximumRequestLength = reply.maximumRequestLength;
-      _roots = reply.roots;
+      _screens = reply.screens;
     } else if (result == 2) {
       // Authenticate
       var reply = X11SetupAuthenticateReply.fromBuffer(replyBuffer);
