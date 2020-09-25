@@ -3,10 +3,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'x11_damage.dart';
 import 'x11_errors.dart';
 import 'x11_events.dart';
+import 'x11_fixes.dart';
+import 'x11_randr.dart';
 import 'x11_requests.dart';
 import 'x11_read_buffer.dart';
+import 'x11_render.dart';
+import 'x11_shape.dart';
+import 'x11_sync.dart';
 import 'x11_types.dart';
 import 'x11_write_buffer.dart';
 
@@ -68,14 +74,6 @@ class _RequestStreamHandler<T> extends _RequestHandler {
 }
 
 class X11Extension {
-  final X11Client _client;
-  final int _majorOpcode;
-  final int _firstEvent;
-  final int _firstError;
-
-  X11Extension(
-      this._client, this._majorOpcode, this._firstEvent, this._firstError);
-
   X11Event decodeEvent(int code, X11ReadBuffer buffer) {
     return null;
   }
@@ -86,1427 +84,17 @@ class X11Extension {
 }
 
 class X11BigRequestsExtension extends X11Extension {
-  X11BigRequestsExtension(X11Client client, int majorOpcode)
-      : super(client, majorOpcode, 0, 0);
+  final X11Client _client;
+  final int _majorOpcode;
+
+  X11BigRequestsExtension(this._client, this._majorOpcode);
 
   Future<int> bigReqEnable() async {
     var request = X11BigReqEnableRequest();
-    var sequenceNumber = _client._sendRequest(_majorOpcode + 0, request);
-    var reply = await _client._awaitReply<X11BigReqEnableReply>(
+    var sequenceNumber = _client.sendRequest(_majorOpcode + 0, request);
+    var reply = await _client.awaitReply<X11BigReqEnableReply>(
         sequenceNumber, X11BigReqEnableReply.fromBuffer);
     return reply.maximumRequestLength;
-  }
-}
-
-class X11SyncExtension extends X11Extension {
-  X11SyncExtension(
-      X11Client client, int majorOpcode, int firstEvent, int firstError)
-      : super(client, majorOpcode, firstEvent, firstError);
-
-  Future<X11SyncInitializeReply> initialize(
-      [X11Version clientVersion = const X11Version(3, 1)]) async {
-    var request = X11SyncInitializeRequest(clientVersion);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11SyncInitializeReply>(
-        sequenceNumber, X11SyncInitializeReply.fromBuffer);
-  }
-}
-
-class X11ShapeExtension extends X11Extension {
-  X11ShapeExtension(X11Client client, int majorOpcode, int firstEvent)
-      : super(client, majorOpcode, firstEvent, 0);
-
-  /// Gets the SHAPE extension version supported by the X server.
-  Future<X11Version> queryVersion() async {
-    var request = X11ShapeQueryVersionRequest();
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11ShapeQueryVersionReply>(
-        sequenceNumber, X11ShapeQueryVersionReply.fromBuffer);
-    return reply.version;
-  }
-
-  /// Modifies the shape of [window] with [rectangles].
-  int rectangles(int window, List<X11Rectangle> rectangles,
-      {X11ShapeOperation operation = X11ShapeOperation.set,
-      X11ShapeKind kind = X11ShapeKind.bounding,
-      X11ShapeOrdering ordering = X11ShapeOrdering.unSorted,
-      X11Point offset = const X11Point(0, 0)}) {
-    var request = X11ShapeRectanglesRequest(window, rectangles,
-        operation: operation, kind: kind, ordering: ordering, offset: offset);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Modifies the shape of [window] with [sourceBitmap].
-  int mask(int window, int sourceBitmap,
-      {X11ShapeOperation operation = X11ShapeOperation.set,
-      X11ShapeKind kind = X11ShapeKind.bounding,
-      X11Point sourceOffset = const X11Point(0, 0)}) {
-    var request = X11ShapeMaskRequest(window, sourceBitmap,
-        operation: operation, kind: kind, sourceOffset: sourceOffset);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Combine the shape of [sourceWindow] into [window].
-  int combine(int window, int sourceWindow,
-      {X11ShapeOperation operation = X11ShapeOperation.set,
-      X11ShapeKind kind = X11ShapeKind.bounding,
-      X11ShapeKind sourceKind = X11ShapeKind.bounding,
-      X11Point sourceOffset = const X11Point(0, 0)}) {
-    var request = X11ShapeCombineRequest(window, sourceWindow,
-        operation: operation,
-        kind: kind,
-        sourceKind: sourceKind,
-        sourceOffset: sourceOffset);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Move the shape of [window] by [offset].
-  int offset(int window,
-      {X11ShapeKind kind = X11ShapeKind.bounding,
-      X11Point offset = const X11Point(0, 0)}) {
-    var request = X11ShapeOffsetRequest(window, kind: kind, offset: offset);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Returns the shape extents of [window].
-  Future<X11ShapeQueryExtentsReply> queryExtents(int window) async {
-    var request = X11ShapeQueryExtentsRequest(window);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11ShapeQueryExtentsReply>(
-        sequenceNumber, X11ShapeQueryExtentsReply.fromBuffer);
-  }
-
-  /// Selects if [window] generates shape notify events to this cliet.
-  int selectInput(int window, bool enable) {
-    var request = X11ShapeSelectInputRequest(window, enable);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Returns true if shape notifiy events are generated to this client for [window].
-  Future<bool> inputSelected(int window) async {
-    var request = X11ShapeInputSelectedRequest(window);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11ShapeInputSelectedReply>(
-        sequenceNumber, X11ShapeInputSelectedReply.fromBuffer);
-    return reply.enabled;
-  }
-
-  /// Gets the rectangles of [kind] that make up the shape of [window].
-  Future<X11ShapeGetRectanglesReply> getRectangles(int window,
-      {X11ShapeKind kind = X11ShapeKind.bounding}) async {
-    var request = X11ShapeGetRectanglesRequest(window, kind: kind);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11ShapeGetRectanglesReply>(
-        sequenceNumber, X11ShapeGetRectanglesReply.fromBuffer);
-  }
-
-  @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
-    if (code == _firstEvent) {
-      return X11ShapeNotifyEvent.fromBuffer(_firstEvent, buffer);
-    } else {
-      return null;
-    }
-  }
-}
-
-class X11FixesExtension extends X11Extension {
-  X11FixesExtension(X11Client client, int majorOpcode, int firstError)
-      : super(client, majorOpcode, 0, firstError);
-
-  /// Gets the XFIXES extension version supported by the X server.
-  /// [clientVersion] is the maximum version supported by this client, the server will not return a value greater than this.
-  Future<X11Version> queryVersion(
-      [X11Version version = const X11Version(5, 0)]) async {
-    var request = X11FixesQueryVersionRequest(version);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11FixesQueryVersionReply>(
-        sequenceNumber, X11FixesQueryVersionReply.fromBuffer);
-    return reply.version;
-  }
-
-  /// Inserts [window] into the clients save-set.
-  int insertSaveSet(int window,
-      {X11ChangeSetTarget target = X11ChangeSetTarget.nearest,
-      X11ChangeSetMap map = X11ChangeSetMap.map}) {
-    return _changeSaveSet(window, X11ChangeSetMode.insert, target, map);
-  }
-
-  /// Deletes [window] from the clients save-set.
-  int deleteSaveSet(int window,
-      {X11ChangeSetTarget target = X11ChangeSetTarget.nearest,
-      X11ChangeSetMap map = X11ChangeSetMap.map}) {
-    return _changeSaveSet(window, X11ChangeSetMode.delete, target, map);
-  }
-
-  int _changeSaveSet(int window, X11ChangeSetMode mode,
-      X11ChangeSetTarget target, X11ChangeSetMap map) {
-    var request =
-        X11FixesChangeSaveSetRequest(window, mode, target: target, map: map);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Selects the selection [events] for [selection] to deliver to [window].
-  int selectSelectionInput(
-      int window, int selection, Set<X11EventType> events) {
-    var request =
-        X11FixesSelectSelectionInputRequest(window, selection, events);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Selects the cursor [events] to deliver to [window].
-  int selectCursorInput(int window, Set<X11EventType> events) {
-    var request = X11FixesSelectCursorInputRequest(window, events);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Get the image of the current cursor.
-  Future<X11FixesGetCursorImageReply> getCursorImage() async {
-    var request = X11FixesGetCursorImageRequest();
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11FixesGetCursorImageReply>(
-        sequenceNumber, X11FixesGetCursorImageReply.fromBuffer);
-  }
-
-  /// Creates a new region with [id] that covers the area containing the union of [rectangles].
-  /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegion(int id, List<X11Rectangle> rectangles) {
-    var request = X11FixesCreateRegionRequest(id, rectangles);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new region with [id] that covers the area in [bitmap].
-  /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegionFromBitmap(int id, int bitmap) {
-    var request = X11FixesCreateRegionFromBitmapRequest(id, bitmap);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new region with [id] that matches the [window] region.
-  /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegionFromWindow(int id, int window, X11ShapeKind kind) {
-    var request = X11FixesCreateRegionFromWindowRequest(id, window, kind: kind);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new region with [id] that matches the clip list of [gc].
-  /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegionFromGC(int id, int gc) {
-    var request = X11FixesCreateRegionFromGCRequest(id, gc);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new region with [id] that matches the clip list of [picture].
-  /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegionFromPicture(int id, int picture) {
-    var request = X11FixesCreateRegionFromPictureRequest(id, picture);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Deletes the reference to a [region] created in [createRegion], [createRegionFromBitmap], [createRegionFromWindow], [createRegionFromGC] or [createRegionFromPicture].
-  int destroyRegion(int region) {
-    var request = X11FixesDestroyRegionRequest(region);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets [region] to the union of [rectangles].
-  int setRegion(int region, List<X11Rectangle> rectangles) {
-    var request = X11FixesSetRegionRequest(region, rectangles);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets [region] to the contents of [sourceRegion].
-  int copyRegion(int region, int sourceRegion) {
-    var request = X11FixesCopyRegionRequest(region, sourceRegion);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets [region] to the union of [sourceRegion1] and [sourceRegion2].
-  int unionRegion(int region, int sourceRegion1, int sourceRegion2) {
-    var request =
-        X11FixesUnionRegionRequest(region, sourceRegion1, sourceRegion2);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets [region] to the intersection of [sourceRegion1] and [sourceRegion2].
-  int intersectRegion(int region, int sourceRegion1, int sourceRegion2) {
-    var request =
-        X11FixesIntersectRegionRequest(region, sourceRegion1, sourceRegion2);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Subtracts [sourceRegion2] from [sourceRegion1] and sets [region] to the result.
-  int subtractRegion(int region, int sourceRegion1, int sourceRegion2) {
-    var request =
-        X11FixesSubtractRegionRequest(region, sourceRegion1, sourceRegion2);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Takes [bounds] and subtracts [sourceRegion] and sets [region] to the result.
-  int invertRegion(int region, X11Rectangle bounds, int sourceRegion) {
-    var request = X11FixesInvertRegionRequest(region, bounds, sourceRegion);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Translates the [region] by [offset].
-  int translateRegion(int region, X11Point offset) {
-    var request = X11FixesTranslateRegionRequest(region, offset);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Takes the extents from [sourceRegion] and puts them into [region].
-  int regionExtents(int region, int sourceRegion) {
-    var request = X11FixesRegionExtentsRequest(region, sourceRegion);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the rectangles that make up [region].
-  Future<X11FixesFetchRegionReply> fetchRegion(int region) async {
-    var request = X11FixesFetchRegionRequest(region);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11FixesFetchRegionReply>(
-        sequenceNumber, X11FixesFetchRegionReply.fromBuffer);
-  }
-
-  /// Set the clip [region] of [gc].
-  int setGCClipRegion(int gc, int region,
-      {X11Point origin = const X11Point(0, 0)}) {
-    var request = X11FixesSetGCClipRegionRequest(gc, region, origin: origin);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets [region] as the shape of [window].
-  int setWindowShapeRegion(int window, int region,
-      {X11ShapeKind kind = X11ShapeKind.bounding,
-      offset = const X11Point(0, 0)}) {
-    var request = X11FixesSetWindowShapeRegionRequest(window, region,
-        kind: kind, offset: offset);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets the clip [region] of [picture].
-  int setPictureClipRegion(int picture, int region,
-      {X11Point origin = const X11Point(0, 0)}) {
-    var request =
-        X11FixesSetPictureClipRegionRequest(picture, region, origin: origin);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Set the [name] of [cursor].
-  int setCursorName(int cursor, String name) {
-    var request = X11FixesSetCursorNameRequest(cursor, name);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the name and atom of [cursor].
-  Future<X11FixesGetCursorNameReply> getCursorName(int cursor) async {
-    var request = X11FixesGetCursorNameRequest(cursor);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11FixesGetCursorNameReply>(
-        sequenceNumber, X11FixesGetCursorNameReply.fromBuffer);
-  }
-
-  /// Gets the image, name and atom of the current cursor.
-  Future<X11FixesGetCursorImageAndNameReply> getCursorImageAndName() async {
-    var request = X11FixesGetCursorImageAndNameRequest();
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11FixesGetCursorImageAndNameReply>(
-        sequenceNumber, X11FixesGetCursorImageAndNameReply.fromBuffer);
-  }
-
-  /// Changes users of [cursor] to [newCursor].
-  int changeCursor(int cursor, int newCursor) {
-    var request = X11FixesChangeCursorRequest(cursor, newCursor);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets all cursors with [name] to [cursor].
-  int changeCursorByName(String name, int cursor) {
-    var request = X11FixesChangeCursorByNameRequest(name, cursor);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets [region] to [sourceRegion] with each component rectangle expanded with [left], [right], [top] and [bottom] pixels.
-  int expandRegion(int region, int sourceRegion,
-      {int left = 0, int right = 0, int top = 0, int bottom = 0}) {
-    var request = X11FixesExpandRegionRequest(region, sourceRegion,
-        left: left, right: right, top: top, bottom: bottom);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Hides the cursor on [window].
-  int hideCursor(int window) {
-    var request = X11FixesHideCursorRequest(window);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Shows the cursor on [window].
-  int showCursor(int window) {
-    var request = X11FixesShowCursorRequest(window);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new pointer barrier with [id] on the screen containing [drawable] along [line].
-  int createPointerBarrier(int id, int drawable, X11Segment line,
-      {Set<X11BarrierDirection> directions = const {},
-      List<int> devices = const []}) {
-    var request = X11FixesCreatePointerBarrierRequest(id, drawable, line,
-        directions: directions, devices: devices);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Deletes the reference to a [barrier] created in [createPointerBarrier].
-  int deletePointerBarrier(int barrier) {
-    var request = X11FixesDeletePointerBarrierRequest(barrier);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
-    if (code == _firstEvent) {
-      return X11FixesSelectionNotifyEvent.fromBuffer(_firstEvent, buffer);
-    } else if (code == _firstEvent + 1) {
-      return X11CursorNotifyEvent.fromBuffer(_firstEvent, buffer);
-    } else {
-      return null;
-    }
-  }
-
-  @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
-    if (code == _firstError) {
-      return X11RegionError.fromBuffer(sequenceNumber, buffer);
-    } else if (code == _firstError + 1) {
-      return X11BarrierError.fromBuffer(sequenceNumber, buffer);
-    } else {
-      return null;
-    }
-  }
-}
-
-class X11RenderExtension extends X11Extension {
-  X11RenderExtension(X11Client client, int majorOpcode, int firstError)
-      : super(client, majorOpcode, 0, firstError);
-
-  /// Gets the RENDER extension version supported by the X server.
-  /// [clientVersion] is the maximum version supported by this client, the server will not return a value greater than this.
-  Future<X11Version> queryVersion(
-      [X11Version clientVersion = const X11Version(0, 11)]) async {
-    var request = X11RenderQueryVersionRequest(clientVersion);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RenderQueryVersionReply>(
-        sequenceNumber, X11RenderQueryVersionReply.fromBuffer);
-    return reply.version;
-  }
-
-  /// Get the picture formats supported by the X server.
-  Future<X11RenderQueryPictFormatsReply> queryPictFormats() async {
-    var request = X11RenderQueryPictFormatsRequest();
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RenderQueryPictFormatsReply>(
-        sequenceNumber, X11RenderQueryPictFormatsReply.fromBuffer);
-  }
-
-  /// Gets the mapping from pixels values to RGBA colors for [format].
-  Future<List<X11RgbaColorItem>> queryPictIndexValues(int format) async {
-    var request = X11RenderQueryPictIndexValuesRequest(format);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RenderQueryPictIndexValuesReply>(
-        sequenceNumber, X11RenderQueryPictIndexValuesReply.fromBuffer);
-    return reply.values;
-  }
-
-  /// Creates a new pixmap with [id] and [format] that will be rendered to [drawable].
-  /// When no longer required, the picture reference should be deleted with [freePicture].
-  Future<int> createPicture(
-    int id,
-    int drawable,
-    int format, {
-    X11Repeat repeat,
-    int alphaMap,
-    X11Point alphaOrigin,
-    X11Point clipOrigin,
-    int clipMask,
-    bool graphicsExposures,
-    X11SubwindowMode subwindowMode,
-    X11PolyEdge polyEdge,
-    X11PolyMode polyMode,
-    String dither,
-    bool componentAlpha,
-  }) async {
-    int ditherAtom;
-    if (dither != null) {
-      ditherAtom = await _client.internAtom(dither);
-    }
-    var request = X11RenderCreatePictureRequest(id, drawable, format,
-        repeat: repeat,
-        alphaMap: alphaMap,
-        alphaXOrigin: alphaOrigin != null ? alphaOrigin.x : null,
-        alphaYOrigin: alphaOrigin != null ? alphaOrigin.y : null,
-        clipXOrigin: clipOrigin != null ? clipOrigin.x : null,
-        clipYOrigin: clipOrigin != null ? clipOrigin.y : null,
-        clipMask: clipMask,
-        graphicsExposures: graphicsExposures,
-        subwindowMode: subwindowMode,
-        polyEdge: polyEdge,
-        polyMode: polyMode,
-        dither: ditherAtom,
-        componentAlpha: componentAlpha);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Changes the attributes of [picture].
-  /// The values are the same as [createPicture].
-  Future<int> changePicture(
-    int picture, {
-    X11Repeat repeat,
-    int alphaMap,
-    X11Point alphaOrigin,
-    X11Point clipOrigin,
-    int clipMask,
-    bool graphicsExposures,
-    X11SubwindowMode subwindowMode,
-    X11PolyEdge polyEdge,
-    X11PolyMode polyMode,
-    String dither,
-    bool componentAlpha,
-  }) async {
-    int ditherAtom;
-    if (dither != null) {
-      ditherAtom = await _client.internAtom(dither);
-    }
-    var request = X11RenderChangePictureRequest(picture,
-        repeat: repeat,
-        alphaMap: alphaMap,
-        alphaXOrigin: alphaOrigin != null ? alphaOrigin.x : null,
-        alphaYOrigin: alphaOrigin != null ? alphaOrigin.y : null,
-        clipXOrigin: clipOrigin != null ? clipOrigin.x : null,
-        clipYOrigin: clipOrigin != null ? clipOrigin.y : null,
-        clipMask: clipMask,
-        graphicsExposures: graphicsExposures,
-        subwindowMode: subwindowMode,
-        polyEdge: polyEdge,
-        polyMode: polyMode,
-        dither: ditherAtom,
-        componentAlpha: componentAlpha);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets the clip mask of [picture] to [rectangles].
-  int setPictureClipRectangles(int picture, List<X11Rectangle> rectangles,
-      {X11Point clipOrigin = const X11Point(0, 0)}) {
-    var request = X11RenderSetPictureClipRectanglesRequest(picture, rectangles,
-        clipOrigin: clipOrigin);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Deletes the reference to a [pixmap] created in [createPicture], [createSolidFill], [createLinearGradient], [createRadialGradient] or [createConicalGradient].
-  int freePicture(int picture) {
-    var request = X11RenderFreePictureRequest(picture);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Renders [area] from [sourcePicture] onto [destinationPicture].
-  int composite(int sourcePicture, int destinationPicture, X11Size area,
-      {X11PictureOperation op = X11PictureOperation.src,
-      X11Point sourceOrigin = const X11Point(0, 0),
-      X11Point destinationOrigin = const X11Point(0, 0),
-      int maskPicture = 0,
-      X11Point maskOrigin = const X11Point(0, 0)}) {
-    var request = X11RenderCompositeRequest(
-        sourcePicture, destinationPicture, area,
-        op: op,
-        sourceOrigin: sourceOrigin,
-        destinationOrigin: destinationOrigin,
-        maskPicture: maskPicture,
-        maskOrigin: maskOrigin);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Renders [trapezoids] from [sourcePicture] onto [destinationPicture].
-  /// This request is deprecated, use [addTrapezoids] instead.
-  int trapezoids(
-      int sourcePicture, int destinationPicture, List<X11Trap> trapezoids,
-      {X11PictureOperation op = X11PictureOperation.src,
-      X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
-    var request = X11RenderTrapezoidsRequest(
-        sourcePicture, destinationPicture, trapezoids,
-        op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Renders [triangles] from [sourcePicture] onto [destinationPicture].
-  int triangles(
-      int sourcePicture, int destinationPicture, List<X11Triangle> triangles,
-      {X11PictureOperation op = X11PictureOperation.src,
-      X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
-    var request = X11RenderTrianglesRequest(
-        sourcePicture, destinationPicture, triangles,
-        op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Renders a triangle strip made from [points] from [sourcePicture] onto [destinationPicture].
-  int triangleStrip(
-      int sourcePicture, int destinationPicture, List<X11PointFixed> points,
-      {X11PictureOperation op = X11PictureOperation.src,
-      X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
-    var request = X11RenderTriStripRequest(
-        sourcePicture, destinationPicture, points,
-        op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Renders a triangle fan made from [points] from [sourcePicture] onto [destinationPicture].
-  int triangleFan(
-      int sourcePicture, int destinationPicture, List<X11PointFixed> points,
-      {X11PictureOperation op = X11PictureOperation.src,
-      X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
-    var request = X11RenderTriFanRequest(
-        sourcePicture, destinationPicture, points,
-        op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new glyphset with [id] using [format].
-  /// When no longer required, the glyphset reference should be deleted with [freeGlyphSet].
-  int createGlyphSet(int id, int format) {
-    var request = X11RenderCreateGlyphSetRequest(id, format);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new reference to [existingGlyphset] with [id].
-  /// When no longer required, the glyphset reference should be deleted with [freeGlyphSet].
-  int referenceGlyphSet(int id, int existingGlyphset) {
-    var request = X11RenderReferenceGlyphSetRequest(id, existingGlyphset);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Deletes the reference to a [glyphset] created in [createGlyphSet] or [referenceGlyphSet].
-  int freeGlyphSet(int glyphset) {
-    var request = X11RenderFreeGlyphSetRequest(glyphset);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Adds [glyphs] to [glyphset]. [data] contains the image data for each glyph.
-  int addGlyphs(int glyphset, List<X11GlyphInfo> glyphs, List<int> data) {
-    var request = X11RenderAddGlyphsRequest(glyphset, glyphs, data);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Removes [glyphs] from [glyphset] that were added in [addGlyphs].
-  int freeGlyphs(int glyphset, List<int> glyphs) {
-    var request = X11RenderFreeGlyphsRequest(glyphset, glyphs);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Draws glyphs from [glyphset] from [sourcePicture] onto [destinationPicture].
-  /// [glyphcmds] contains the commands to change glyphsets and the glyphs to render.
-  int compositeGlyphs8(int sourcePicture, int destinationPicture, int glyphset,
-      List<X11GlyphItem> glyphcmds,
-      {X11PictureOperation op = X11PictureOperation.src,
-      X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
-    var request = X11RenderCompositeGlyphs8Request(
-        sourcePicture, destinationPicture, glyphset, glyphcmds,
-        op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Draws glyphs from [glyphset] from [sourcePicture] onto [destinationPicture].
-  /// [glyphcmds] contains the commands to change glyphsets and the glyphs to render.
-  int compositeGlyphs16(int sourcePicture, int destinationPicture, int glyphset,
-      List<X11GlyphItem> glyphcmds,
-      {X11PictureOperation op = X11PictureOperation.src,
-      X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
-    var request = X11RenderCompositeGlyphs16Request(
-        sourcePicture, destinationPicture, glyphset, glyphcmds,
-        op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Draws glyphs from [glyphset] from [sourcePicture] onto [destinationPicture].
-  /// [glyphcmds] contains the commands to change glyphsets and the glyphs to render.
-  int compositeGlyphs32(int sourcePicture, int destinationPicture, int glyphset,
-      List<X11GlyphItem> glyphcmds,
-      {X11PictureOperation op = X11PictureOperation.src,
-      X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
-    var request = X11RenderCompositeGlyphs32Request(
-        sourcePicture, destinationPicture, glyphset, glyphcmds,
-        op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Draws [rectangles] onto [destinationPicture].
-  int fillRectangles(int destinationPicture, List<X11Rectangle> rectangles,
-      {X11PictureOperation op = X11PictureOperation.src,
-      X11Rgba color = const X11Rgba(0, 0, 0, 0)}) {
-    var request = X11RenderFillRectanglesRequest(destinationPicture, rectangles,
-        op: op, color: color);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a cursor with [id] from [sourcePicture].
-  int createCursor(int id, int sourcePicture,
-      {X11Point hotspot = const X11Point(0, 0)}) {
-    var request =
-        X11RenderCreateCursorRequest(id, sourcePicture, hotspot: hotspot);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets the [transform] for [picture].
-  int setPictureTransform(int picture, X11Transform transform) {
-    var request = X11RenderSetPictureTransformRequest(picture, transform);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the filters supported on [drawable].
-  Future<X11RenderQueryFiltersReply> queryFilters(int drawable) async {
-    var request = X11RenderQueryFiltersRequest(drawable);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RenderQueryFiltersReply>(
-        sequenceNumber,
-        X11RenderQueryFiltersReply
-            .fromBuffer); // FIXME: can the aliases be combined with the names?
-  }
-
-  /// Sets the [filter] for [picture].
-  int setPictureFilter(int picture, String filter,
-      {List<double> values = const []}) {
-    var request =
-        X11RenderSetPictureFilterRequest(picture, filter, values: values);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new animated cursor with [id] and [frames].
-  int createAnimatedCursor(int id, List<X11AnimatedCursorFrame> frames) {
-    var request = X11RenderCreateAnimatedCursorRequest(id, frames);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Renders [trapezoids] onto [picture] using [X11PictureOperation.add].
-  /// [picture] must be an alpha only picture.
-  int addTrapezoids(int picture, List<X11Trapezoid> trapezoids,
-      {X11Point offset = const X11Point(0, 0)}) {
-    var request =
-        X11RenderAddTrapezoidsRequest(picture, trapezoids, offset: offset);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new picture with [id] that represents a solid fill with [color].
-  /// When no longer required, the picture reference should be deleted with [freePicture].
-  int createSolidFill(int id, X11Rgba color) {
-    var request = X11RenderCreateSolidFillRequest(id, color);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new picture with [id] that represents a linear gradient.
-  int createLinearGradient(int id,
-      {X11PointFixed p1 = const X11PointFixed(0, 0),
-      X11PointFixed p2 = const X11PointFixed(0, 0),
-      List<X11ColorStop> stops = const []}) {
-    var request =
-        X11RenderCreateLinearGradientRequest(id, p1: p1, p2: p2, stops: stops);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new picture with [id] that represents a radial gradient.
-  int createRadialGradient(int id,
-      {X11PointFixed inner = const X11PointFixed(0, 0),
-      X11PointFixed outer = const X11PointFixed(0, 0),
-      double innerRadius = 0,
-      double outerRadius = 0,
-      List<X11ColorStop> stops = const []}) {
-    var request = X11RenderCreateRadialGradientRequest(id,
-        inner: inner,
-        outer: outer,
-        innerRadius: innerRadius,
-        outerRadius: outerRadius,
-        stops: stops);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new picture with [id] that represents a conical gradient.
-  int createConicalGradient(int id,
-      {X11PointFixed center = const X11PointFixed(0, 0),
-      double angle = 0,
-      List<X11ColorStop> stops = const []}) {
-    var request = X11RenderCreateConicalGradientRequest(id,
-        center: center, angle: angle, stops: stops);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
-    if (code == _firstError) {
-      return X11PictFormatError.fromBuffer(sequenceNumber, buffer);
-    } else if (code == _firstError + 1) {
-      return X11PictureError.fromBuffer(sequenceNumber, buffer);
-    } else if (code == _firstError + 1) {
-      return X11PictOpError.fromBuffer(sequenceNumber, buffer);
-    } else if (code == _firstError + 1) {
-      return X11GlyphSetError.fromBuffer(sequenceNumber, buffer);
-    } else if (code == _firstError + 1) {
-      return X11GlyphError.fromBuffer(sequenceNumber, buffer);
-    } else {
-      return null;
-    }
-  }
-}
-
-class X11RandrExtension extends X11Extension {
-  var _configTimestamp = 0;
-
-  X11RandrExtension(
-      X11Client client, int majorOpcode, int firstEvent, int firstError)
-      : super(client, majorOpcode, firstEvent, firstError);
-
-  /// Gets the RANDR extension version supported by the X server.
-  /// [clientVersion] is the maximum version supported by this client, the server will not return a value greater than this.
-  Future<X11Version> queryVersion(
-      [X11Version clientVersion = const X11Version(1, 5)]) async {
-    var request = X11RandrQueryVersionRequest(clientVersion);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrQueryVersionReply>(
-        sequenceNumber, X11RandrQueryVersionReply.fromBuffer);
-    return reply.version;
-  }
-
-  /// Sets the configuration of the screen [window] is on.
-  Future<X11RandrSetScreenConfigReply> setScreenConfig(int window,
-      {int sizeId = 0,
-      Set<X11RandrRotation> rotation = const {X11RandrRotation.rotate0},
-      int rate = 0,
-      int timestamp = 0}) async {
-    var request = X11RandrSetScreenConfigRequest(window,
-        sizeId: sizeId,
-        rotation: rotation,
-        rate: rate,
-        timestamp: timestamp,
-        configTimestamp: _configTimestamp);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrSetScreenConfigReply>(
-        sequenceNumber, X11RandrSetScreenConfigReply.fromBuffer);
-    _configTimestamp = reply.configTimestamp;
-    return reply;
-  }
-
-  /// Selects the events that RANDR events to receive on [window].
-  int selectInput(int window, Set<X11RandrSelectMask> enable) {
-    var request = X11RandrSelectInputRequest(window, enable);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets information about the screen [window] is on.
-  Future<X11RandrGetScreenInfoReply> getScreenInfo(int window) async {
-    var request = X11RandrGetScreenInfoRequest(window);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrGetScreenInfoReply>(
-        sequenceNumber, X11RandrGetScreenInfoReply.fromBuffer);
-    _configTimestamp = reply.configTimestamp;
-    return reply;
-  }
-
-  /// Gets the minimum and maximum size of the screen [window] is on.
-  Future<X11RandrGetScreenSizeRangeReply> getScreenSizeRange(int window) async {
-    var request = X11RandrGetScreenSizeRangeRequest(window);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetScreenSizeRangeReply>(
-        sequenceNumber, X11RandrGetScreenSizeRangeReply.fromBuffer);
-  }
-
-  /// Sets the size of the screen [window] is on to [sizeInPixels] and [sizeInMillimeters].
-  int setScreenSize(
-      int window, X11Size sizeInPixels, X11Size sizeInMillimeters) {
-    var request =
-        X11RandrSetScreenSizeRequest(window, sizeInPixels, sizeInMillimeters);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the outputs and crtcs connected to the screen that [window] is on.
-  /// This will poll the hardware for changes, use [getScreenResourcesCurrent] if you don't want to do that.
-  Future<X11RandrGetScreenResourcesReply> getScreenResources(int window) async {
-    var request = X11RandrGetScreenResourcesRequest(window);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetScreenResourcesReply>(
-        sequenceNumber, X11RandrGetScreenResourcesReply.fromBuffer);
-  }
-
-  /// Gets information about [output].
-  Future<X11RandrGetOutputInfoReply> getOutputInfo(int output) async {
-    var request =
-        X11RandrGetOutputInfoRequest(output, configTimestamp: _configTimestamp);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetOutputInfoReply>(
-        sequenceNumber, X11RandrGetOutputInfoReply.fromBuffer);
-  }
-
-  /// Gets the properties of [output].
-  Future<List<String>> listOutputProperties(int output) async {
-    var request = X11RandrListOutputPropertiesRequest(output);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrListOutputPropertiesReply>(
-        sequenceNumber, X11RandrListOutputPropertiesReply.fromBuffer);
-    var properties = <String>[];
-    for (var atom in reply.atoms) {
-      properties.add(await _client.getAtomName(atom));
-    }
-    return properties;
-  }
-
-  /// Gets the configuration of the [property] of [output].
-  Future<X11RandrQueryOutputPropertyReply> queryOutputProperty(
-      int output, String property) async {
-    var propertyAtom = await _client.internAtom(property);
-    var request = X11RandrQueryOutputPropertyRequest(output, propertyAtom);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrQueryOutputPropertyReply>(
-        sequenceNumber, X11RandrQueryOutputPropertyReply.fromBuffer);
-  }
-
-  /// Sets the configuration of the [property] of [output].
-  /// [validValues] contains the values this property can have, or the minimum and maximum value if [range] is true.
-  /// If [pending] is true the property will only be applied the next time [setCrtcConfig] is called.
-  Future<int> configureOutputProperty(
-      int output, String property, List<int> validValues,
-      {bool range = false, bool pending = false}) async {
-    var propertyAtom = await _client.internAtom(property);
-    var request = X11RandrConfigureOutputPropertyRequest(
-        output, propertyAtom, validValues,
-        pending: pending, range: range);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  Future<int> changeOutputPropertyUint8(
-      int output, String property, List<int> data,
-      {String type = '',
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    return await _changeOutputProperty(output, property, data,
-        type: type, format: 8, mode: mode);
-  }
-
-  Future<int> changeOutputPropertyUint16(
-      int output, String property, List<int> data,
-      {String type = '',
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    return await _changeOutputProperty(output, property, data,
-        type: type, format: 16, mode: mode);
-  }
-
-  Future<int> changeOutputPropertyUint32(
-      int output, String property, List<int> data,
-      {String type = '',
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    return await _changeOutputProperty(output, property, data,
-        type: type, format: 32, mode: mode);
-  }
-
-  Future<int> changeOutputPropertyAtom(
-      int output, String property, String value,
-      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    var valueAtom = await _client.internAtom(value);
-    return await changeOutputPropertyUint32(output, property, [valueAtom],
-        type: 'ATOM', mode: mode);
-  }
-
-  Future<int> changeOutputPropertyString(
-      int output, String property, String value,
-      {String type = 'STRING',
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    return await _changeOutputProperty(output, property, utf8.encode(value),
-        type: type, format: 8, mode: mode);
-  }
-
-  Future<int> _changeOutputProperty(int output, String property, List<int> data,
-      {String type = '',
-      int format = 32,
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    var propertyAtom = await _client.internAtom(property);
-    var typeAtom = await _client.internAtom(type);
-    var request = X11RandrChangeOutputPropertyRequest(
-        output, propertyAtom, data,
-        type: typeAtom, format: format, mode: mode);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Deletes the [property] of [output].
-  Future<int> deleteOutputProperty(int output, String property) async {
-    var propertyAtom = await _client.internAtom(property);
-    var request = X11RandrDeleteOutputPropertyRequest(output, propertyAtom);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the value of the [property] of [output].
-  Future<X11RandrGetOutputPropertyReply> getOutputProperty(
-      int output, String property,
-      {String type,
-      int longOffset = 0,
-      int longLength = 4294967295,
-      bool delete = false,
-      bool pending = false}) async {
-    var propertyAtom = await _client.internAtom(property);
-    var typeAtom = type != null ? await _client.internAtom(type) : 0;
-    var request = X11RandrGetOutputPropertyRequest(output, propertyAtom,
-        type: typeAtom,
-        longOffset: longOffset,
-        longLength: longLength,
-        delete: delete,
-        pending: pending);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetOutputPropertyReply>(
-        sequenceNumber, X11RandrGetOutputPropertyReply.fromBuffer);
-  }
-
-  Future<int> createMode(int window, X11RandrModeInfo modeInfo) async {
-    var request = X11RandrCreateModeRequest(window, modeInfo);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrCreateModeReply>(
-        sequenceNumber, X11RandrCreateModeReply.fromBuffer);
-    return reply.mode;
-  }
-
-  /// Destroys a [mode] created with [createMode].
-  int destroyMode(int mode) {
-    var request = X11RandrDestroyModeRequest(mode);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Adds a [mode] to [output].
-  int addOutputMode(int output, int mode) {
-    var request = X11RandrAddOutputModeRequest(output, mode);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Deletes a [mode] from [output].
-  int deleteOutputMode(int output, int mode) {
-    var request = X11RandrDeleteOutputModeRequest(output, mode);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets information about [crtc].
-  Future<X11RandrGetCrtcInfoReply> getCrtcInfo(int crtc) async {
-    var request =
-        X11RandrGetCrtcInfoRequest(crtc, configTimestamp: _configTimestamp);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetCrtcInfoReply>(
-        sequenceNumber, X11RandrGetCrtcInfoReply.fromBuffer);
-  }
-
-  /// Sets the configuration for [crtc].
-  Future<X11RandrSetCrtcConfigReply> setCrtcConfig(int crtc,
-      {int mode = 0,
-      X11Point position = const X11Point(0, 0),
-      Set<X11RandrRotation> rotation = const {X11RandrRotation.rotate0},
-      List<int> outputs = const [],
-      int timestamp = 0}) async {
-    var request = X11RandrSetCrtcConfigRequest(
-      crtc,
-      position: position,
-      mode: mode,
-      rotation: rotation,
-      outputs: outputs,
-      timestamp: timestamp,
-      configTimestamp: _configTimestamp,
-    );
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrSetCrtcConfigReply>(
-        sequenceNumber, X11RandrSetCrtcConfigReply.fromBuffer);
-  }
-
-  /// Gets the size of the gamma ramps used by [crtc].
-  Future<int> getCrtcGammaSize(int crtc) async {
-    var request = X11RandrGetCrtcGammaSizeRequest(crtc);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrGetCrtcGammaSizeReply>(
-        sequenceNumber, X11RandrGetCrtcGammaSizeReply.fromBuffer);
-    return reply.size;
-  }
-
-  /// Gets the gamma ramps for [crtc].
-  Future<X11RandrGetCrtcGammaReply> getCrtcGamma(int crtc) async {
-    var request = X11RandrGetCrtcGammaRequest(crtc);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetCrtcGammaReply>(
-        sequenceNumber, X11RandrGetCrtcGammaReply.fromBuffer);
-  }
-
-  /// Sets the [red], [green] and [blue] gamma ramps for [crtc].
-  int setCrtcGamma(int crtc, List<int> red, List<int> green, List<int> blue) {
-    var request = X11RandrSetCrtcGammaRequest(crtc, red, green, blue);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the outputs and crtcs connected to the screen that [window] is on.
-  /// This will get the current resources without polling the hardware, use [getScreenResources] if you need more accurate information.
-  Future<X11RandrGetScreenResourcesCurrentReply> getScreenResourcesCurrent(
-      int window) async {
-    var request = X11RandrGetScreenResourcesCurrentRequest(window);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetScreenResourcesCurrentReply>(
-        sequenceNumber, X11RandrGetScreenResourcesCurrentReply.fromBuffer);
-  }
-
-  /// Sets the [transform] in use on [crtc].
-  int setCrtcTransform(int crtc, X11Transform transform,
-      {String filterName = '', List<double> filterParams = const []}) {
-    var request = X11RandrSetCrtcTransformRequest(crtc, transform,
-        filterName: filterName, filterParams: filterParams);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the transform in use on [crtc].
-  Future<X11RandrGetCrtcTransformReply> getCrtcTransform(int crtc) async {
-    var request = X11RandrGetCrtcTransformRequest(crtc);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetCrtcTransformReply>(
-        sequenceNumber, X11RandrGetCrtcTransformReply.fromBuffer);
-  }
-
-  /// Gets the panning configuration of [crtc].
-  Future<X11RandrGetPanningReply> getPanning(int crtc) async {
-    var request = X11RandrGetPanningRequest(crtc);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetPanningReply>(
-        sequenceNumber, X11RandrGetPanningReply.fromBuffer);
-  }
-
-  /// Sets the panning configuration on [crtc].
-  Future<X11RandrConfigStatus> setPanning(
-      int crtc, X11Rectangle area, X11Rectangle trackArea,
-      {int borderLeft = 0,
-      int borderTop = 0,
-      int borderRight = 0,
-      int borderBottom = 0,
-      int timestamp = 0}) async {
-    var request = X11RandrSetPanningRequest(crtc,
-        timestamp: timestamp,
-        area: area,
-        trackArea: trackArea,
-        borderLeft: borderLeft,
-        borderTop: borderTop,
-        borderRight: borderRight,
-        borderBottom: borderBottom);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrSetPanningReply>(
-        sequenceNumber, X11RandrSetPanningReply.fromBuffer);
-    // FIXME: Store reply.timestamp
-    return reply.status;
-  }
-
-  /// Sets the primary output for the screen that [window] is on.
-  int setOutputPrimary(int window, int output) {
-    var request = X11RandrSetOutputPrimaryRequest(window, output);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the primary output for the screen that [window] is on.
-  Future<int> getOutputPrimary(int window) async {
-    var request = X11RandrGetOutputPrimaryRequest(window);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrGetOutputPrimaryReply>(
-        sequenceNumber, X11RandrGetOutputPrimaryReply.fromBuffer);
-    return reply.output;
-  }
-
-  /// Gets the providers connected to the screen that [window] is on.
-  Future<X11RandrGetProvidersReply> getProviders(int window) async {
-    var request = X11RandrGetProvidersRequest(window);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetProvidersReply>(
-        sequenceNumber, X11RandrGetProvidersReply.fromBuffer);
-  }
-
-  /// Gets information on [provider].
-  Future<X11RandrGetProviderInfoReply> getProviderInfo(int provider) async {
-    var request = X11RandrGetProviderInfoRequest(provider,
-        configTimestamp: _configTimestamp);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetProviderInfoReply>(
-        sequenceNumber, X11RandrGetProviderInfoReply.fromBuffer);
-  }
-
-  /// Sets the offload sink of [provider] to [sinkProvider].
-  int setProviderOffloadSink(int provider, int sinkProvider) {
-    var request = X11RandrSetProviderOffloadSinkRequest(provider, sinkProvider,
-        configTimestamp: _configTimestamp);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Sets the output source of [provider] to [sourceProvider].
-  int setProviderOutputSource(int provider, int sourceProvider) {
-    var request = X11RandrSetProviderOutputSourceRequest(
-        provider, sourceProvider,
-        configTimestamp: _configTimestamp);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the properties of [provider].
-  Future<List<String>> listProviderProperties(int provider) async {
-    var request = X11RandrListProviderPropertiesRequest(provider);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrListProviderPropertiesReply>(
-        sequenceNumber, X11RandrListProviderPropertiesReply.fromBuffer);
-    var properties = <String>[];
-    for (var atom in reply.atoms) {
-      properties.add(await _client.getAtomName(atom));
-    }
-    return properties;
-  }
-
-  /// Gets the configuration of the [property] of [output].
-  Future<X11RandrQueryProviderPropertyReply> queryProviderProperty(
-      int provider, String property) async {
-    var propertyAtom = await _client.internAtom(property);
-    var request = X11RandrQueryProviderPropertyRequest(provider, propertyAtom);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrQueryProviderPropertyReply>(
-        sequenceNumber, X11RandrQueryProviderPropertyReply.fromBuffer);
-  }
-
-  /// Sets the configuration of the [property] of [provider].
-  /// [validValues] contains the values this property can have, or the minimum and maximum value if [range] is true.
-  /// If [pending] is true the property will only be applied the next time [setCrtcConfig] is called.
-  Future<int> configureProviderProperty(
-      int provider, String property, List<int> validValues,
-      {bool range = false, bool pending = false}) async {
-    var propertyAtom = await _client.internAtom(property);
-    var request = X11RandrConfigureProviderPropertyRequest(
-        provider, propertyAtom, validValues,
-        pending: pending, range: range);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  Future<int> changeProviderPropertyUint8(
-      int provider, String property, List<int> data,
-      {String type = '',
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    return await _changeProviderProperty(provider, property, data,
-        type: type, format: 8, mode: mode);
-  }
-
-  Future<int> changeProviderPropertyUint16(
-      int provider, String property, List<int> data,
-      {String type = '',
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    return await _changeProviderProperty(provider, property, data,
-        type: type, format: 16, mode: mode);
-  }
-
-  Future<int> changeProviderPropertyUint32(
-      int provider, String property, List<int> data,
-      {String type = '',
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    return await _changeProviderProperty(provider, property, data,
-        type: type, format: 32, mode: mode);
-  }
-
-  Future<int> changeProviderPropertyAtom(
-      int provider, String property, String value,
-      {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    var valueAtom = await _client.internAtom(value);
-    return await changeProviderPropertyUint32(provider, property, [valueAtom],
-        type: 'ATOM', mode: mode);
-  }
-
-  Future<int> changeProviderPropertyString(
-      int provider, String property, String value,
-      {String type = 'STRING',
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    return await _changeProviderProperty(provider, property, utf8.encode(value),
-        type: type, format: 8, mode: mode);
-  }
-
-  Future<int> _changeProviderProperty(
-      int provider, String property, List<int> data,
-      {String type = '',
-      int format = 32,
-      X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    var propertyAtom = await _client.internAtom(property);
-    var typeAtom = await _client.internAtom(type);
-    var request = X11RandrChangeProviderPropertyRequest(
-        provider, propertyAtom, data,
-        type: typeAtom, format: format, mode: mode);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Deletes the [property] of [provider].
-  Future<int> deleteProviderProperty(int provider, String property) async {
-    var propertyAtom = await _client.internAtom(property);
-    var request = X11RandrDeleteProviderPropertyRequest(provider, propertyAtom);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Gets the value of the [property] of [provider].
-  Future<X11RandrGetProviderPropertyReply> getProviderProperty(
-      int provider, String property,
-      {String type,
-      int longOffset = 0,
-      int longLength = 4294967295,
-      bool delete = false,
-      bool pending = false}) async {
-    var propertyAtom = await _client.internAtom(property);
-    var typeAtom = type != null ? await _client.internAtom(type) : 0;
-    var request = X11RandrGetProviderPropertyRequest(provider, propertyAtom,
-        type: typeAtom,
-        longOffset: longOffset,
-        longLength: longLength,
-        delete: delete,
-        pending: pending);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetProviderPropertyReply>(
-        sequenceNumber, X11RandrGetProviderPropertyReply.fromBuffer);
-  }
-
-  /// Gets the monitors on the screen containing [window].
-  /// If [getActive] is true then only active monitors are returned.
-  Future<X11RandrGetMonitorsReply> getMonitors(int window,
-      {bool getActive = false}) async {
-    var request = X11RandrGetMonitorsRequest(window, getActive: getActive);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    return _client._awaitReply<X11RandrGetMonitorsReply>(
-        sequenceNumber, X11RandrGetMonitorsReply.fromBuffer);
-  }
-
-  /// Creates a new monitor on the screen containing [window].
-  int setMonitor(int window, X11RandrMonitorInfo monitorInfo) {
-    var request = X11RandrSetMonitorRequest(window, monitorInfo);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Deletes the monitor with [name] on the screen containing [window].
-  Future<int> deleteMonitor(int window, String name) async {
-    var nameAtom = await _client.internAtom(name);
-    var request = X11RandrDeleteMonitorRequest(window, nameAtom);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Creates a new lease with [id] on the screen containing [window].
-  Future<int> createLease(int window, int id,
-      {List<int> crtcs = const [], List<int> outputs = const []}) async {
-    var request =
-        X11RandrCreateLeaseRequest(window, id, crtcs: crtcs, outputs: outputs);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11RandrCreateLeaseReply>(
-        sequenceNumber, X11RandrCreateLeaseReply.fromBuffer);
-    return reply.nfd;
-  }
-
-  /// Frees [lease] created in [createLease].
-  int freeLease(int lease, {bool terminate = false}) {
-    var request = X11RandrFreeLeaseRequest(lease, terminate: terminate);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
-    if (code == _firstEvent) {
-      return X11RandrScreenChangeNotifyEvent.fromBuffer(_firstEvent, buffer);
-    } else if (code == _firstEvent + 1) {
-      var subCode = buffer.readUint8();
-      if (subCode == 0) {
-        return X11RandrCrtcChangeNotifyEvent.fromBuffer(_firstEvent, buffer);
-      } else if (subCode == 1) {
-        return X11RandrOutputChangeNotifyEvent.fromBuffer(_firstEvent, buffer);
-      } else if (subCode == 2) {
-        return X11RandrOutputPropertyNotifyEvent.fromBuffer(
-            _firstEvent, buffer);
-      } else if (subCode == 3) {
-        return X11RandrProviderChangeNotifyEvent.fromBuffer(
-            _firstEvent, buffer);
-      } else if (subCode == 4) {
-        return X11RandrProviderPropertyNotifyEvent.fromBuffer(
-            _firstEvent, buffer);
-      } else if (subCode == 5) {
-        return X11RandrResourceChangeNotifyEvent.fromBuffer(
-            _firstEvent, buffer);
-      } else {
-        return X11RandrUnknownEvent.fromBuffer(_firstEvent, subCode, buffer);
-      }
-    } else {
-      return null;
-    }
-  }
-
-  @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
-    if (code == _firstError) {
-      return X11RandrOutputError.fromBuffer(sequenceNumber, buffer);
-    } else if (code == _firstError + 1) {
-      return X11RandrCrtcError.fromBuffer(sequenceNumber, buffer);
-    } else if (code == _firstError + 2) {
-      return X11RandrModeError.fromBuffer(sequenceNumber, buffer);
-    } else if (code == _firstError + 3) {
-      return X11RandrProviderError.fromBuffer(sequenceNumber, buffer);
-    } else {
-      return null;
-    }
-  }
-}
-
-class X11DamageExtension extends X11Extension {
-  X11DamageExtension(
-      X11Client client, int majorOpcode, int firstEvent, int firstError)
-      : super(client, majorOpcode, firstEvent, firstError);
-
-  /// Gets the DAMAGE extension version supported by the X server.
-  /// [clientVersion] is the maximum version supported by this client, the server will not return a value greater than this.
-  Future<X11Version> queryVersion(
-      [X11Version clientVersion = const X11Version(1, 1)]) async {
-    var request = X11DamageQueryVersionRequest(clientVersion);
-    var sequenceNumber = _client._sendRequest(_majorOpcode, request);
-    var reply = await _client._awaitReply<X11DamageQueryVersionReply>(
-        sequenceNumber, X11DamageQueryVersionReply.fromBuffer);
-    return reply.version;
-  }
-
-  /// Creates a damage object with [id] to monitor changes to [drawable].
-  /// When no longer required, the damage object reference should be deleted with [destroy].
-  int create(int id, int drawable, X11DamageReportLevel level) {
-    var request = X11DamageCreateRequest(id, drawable, level);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Deletes the reference to [damage] created in [create].
-  int destroy(int damage) {
-    var request = X11DamageDestroyRequest(damage);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Marks [repairRegion] from [damage] as repaired.
-  int subtract(int damage, int repairRegion, {int partsRegion = 0}) {
-    var request = X11DamageSubtractRequest(damage, repairRegion,
-        partsRegion: partsRegion);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  /// Reports damage in [region] of the [drawable].
-  int add(int drawable, int region) {
-    var request = X11DamageAddRequest(drawable, region);
-    return _client._sendRequest(_majorOpcode, request);
-  }
-
-  @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
-    if (code == _firstEvent) {
-      return X11DamageNotifyEvent.fromBuffer(_firstEvent, buffer);
-    } else {
-      return null;
-    }
-  }
-
-  @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
-    if (code == _firstError) {
-      return X11DamageError.fromBuffer(sequenceNumber, buffer);
-    } else {
-      return null;
-    }
   }
 }
 
@@ -1696,8 +284,7 @@ class X11Client {
       }),
       queryExtension('SYNC').then((reply) async {
         if (reply.present) {
-          _sync = X11SyncExtension(
-              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
+          _sync = X11SyncExtension(this, reply.majorOpcode);
         }
       }),
       queryExtension('SHAPE').then((reply) {
@@ -1707,7 +294,8 @@ class X11Client {
       }),
       queryExtension('XFIXES').then((reply) {
         if (reply.present) {
-          _fixes = X11FixesExtension(this, reply.majorOpcode, reply.firstError);
+          _fixes = X11FixesExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
         }
       }),
       queryExtension('RENDER').then((reply) {
@@ -1794,7 +382,7 @@ class X11Client {
         doNotPropagate: doNotPropagate,
         colormap: colormap,
         cursor: cursor);
-    return _sendRequest(1, request);
+    return sendRequest(1, request);
   }
 
   /// Changes the attributes of [window].
@@ -1832,27 +420,27 @@ class X11Client {
         doNotPropagate: doNotPropagate,
         colormap: colormap,
         cursor: cursor);
-    return _sendRequest(2, request);
+    return sendRequest(2, request);
   }
 
   /// Gets the attributes of [window].
   Future<X11GetWindowAttributesReply> getWindowAttributes(int window) async {
     var request = X11GetWindowAttributesRequest(window);
-    var sequenceNumber = _sendRequest(3, request);
-    return _awaitReply<X11GetWindowAttributesReply>(
+    var sequenceNumber = sendRequest(3, request);
+    return awaitReply<X11GetWindowAttributesReply>(
         sequenceNumber, X11GetWindowAttributesReply.fromBuffer);
   }
 
   /// Destroys [window].
   int destroyWindow(int window) {
     var request = X11DestroyWindowRequest(window);
-    return _sendRequest(4, request);
+    return sendRequest(4, request);
   }
 
   /// Destroys the children of [window] in bottom-to-top stacking order.
   int destroySubwindows(int window) {
     var request = X11DestroySubwindowsRequest(window);
-    return _sendRequest(5, request);
+    return sendRequest(5, request);
   }
 
   /// Inserts [window] into the clients save-set.
@@ -1867,38 +455,38 @@ class X11Client {
 
   int _changeSaveSet(int window, X11ChangeSetMode mode) {
     var request = X11ChangeSaveSetRequest(window, mode);
-    return _sendRequest(6, request);
+    return sendRequest(6, request);
   }
 
   /// Moves [window] to be a child of [parent]. The window is placed [position] relative to [parent].
   int reparentWindow(int window, int parent,
       {X11Point position = const X11Point(0, 0)}) {
     var request = X11ReparentWindowRequest(window, parent, position);
-    return _sendRequest(7, request);
+    return sendRequest(7, request);
   }
 
   /// Maps [window].
   int mapWindow(int window) {
     var request = X11MapWindowRequest(window);
-    return _sendRequest(8, request);
+    return sendRequest(8, request);
   }
 
   /// Maps all unmapped children of [window] in top-to-bottom stacking order.
   int mapSubwindows(int window) {
     var request = X11MapSubwindowsRequest(window);
-    return _sendRequest(9, request);
+    return sendRequest(9, request);
   }
 
   /// Unmaps [window].
   int unmapWindow(int window) {
     var request = X11UnmapWindowRequest(window);
-    return _sendRequest(10, request);
+    return sendRequest(10, request);
   }
 
   /// Unmaps all mapped children of [window] in bottom-to-top stacking order.
   int unmapSubwindows(int window) {
     var request = X11UnmapSubwindowsRequest(window);
-    return _sendRequest(11, request);
+    return sendRequest(11, request);
   }
 
   /// Changes the configuration of [window].
@@ -1920,28 +508,28 @@ class X11Client {
         borderWidth: borderWidth,
         sibling: sibling,
         stackMode: stackMode);
-    return _sendRequest(12, request);
+    return sendRequest(12, request);
   }
 
   /// Changes the stacking order of [window].
   int circulateWindow(int window, X11CirculateDirection direction) {
     var request = X11CirculateWindowRequest(window, direction);
-    return _sendRequest(13, request);
+    return sendRequest(13, request);
   }
 
   /// Gets the current geometry of [drawable].
   Future<X11GetGeometryReply> getGeometry(int drawable) async {
     var request = X11GetGeometryRequest(drawable);
-    var sequenceNumber = _sendRequest(14, request);
-    return _awaitReply<X11GetGeometryReply>(
+    var sequenceNumber = sendRequest(14, request);
+    return awaitReply<X11GetGeometryReply>(
         sequenceNumber, X11GetGeometryReply.fromBuffer);
   }
 
   /// Gets the root, parent and children of [window].
   Future<X11QueryTreeReply> queryTree(int window) async {
     var request = X11QueryTreeRequest(window);
-    var sequenceNumber = _sendRequest(15, request);
-    return _awaitReply<X11QueryTreeReply>(
+    var sequenceNumber = sendRequest(15, request);
+    return awaitReply<X11QueryTreeReply>(
         sequenceNumber, X11QueryTreeReply.fromBuffer);
   }
 
@@ -1954,8 +542,8 @@ class X11Client {
     }
 
     var request = X11InternAtomRequest(name, onlyIfExists);
-    var sequenceNumber = _sendRequest(16, request);
-    var reply = await _awaitReply<X11InternAtomReply>(
+    var sequenceNumber = sendRequest(16, request);
+    var reply = await awaitReply<X11InternAtomReply>(
         sequenceNumber, X11InternAtomReply.fromBuffer);
 
     // Cache result.
@@ -1973,8 +561,8 @@ class X11Client {
     }
 
     var request = X11GetAtomNameRequest(atom);
-    var sequenceNumber = _sendRequest(17, request);
-    var reply = await _awaitReply<X11GetAtomNameReply>(
+    var sequenceNumber = sendRequest(17, request);
+    var reply = await awaitReply<X11GetAtomNameReply>(
         sequenceNumber, X11GetAtomNameReply.fromBuffer);
 
     // Cache result.
@@ -2031,14 +619,14 @@ class X11Client {
     var typeAtom = await internAtom(type);
     var request = X11ChangePropertyRequest(window, propertyAtom, value,
         type: typeAtom, format: format, mode: mode);
-    return _sendRequest(18, request);
+    return sendRequest(18, request);
   }
 
   /// Deletes the [property] from [window].
   Future<int> deleteProperty(int window, String property) async {
     var propertyAtom = await internAtom(property);
     var request = X11DeletePropertyRequest(window, propertyAtom);
-    return _sendRequest(19, request);
+    return sendRequest(19, request);
   }
 
   /// Gets the value of the [property] on [window].
@@ -2057,8 +645,8 @@ class X11Client {
         longOffset: longOffset,
         longLength: longLength,
         delete: delete);
-    var sequenceNumber = _sendRequest(20, request);
-    return _awaitReply<X11GetPropertyReply>(
+    var sequenceNumber = sendRequest(20, request);
+    return awaitReply<X11GetPropertyReply>(
         sequenceNumber, X11GetPropertyReply.fromBuffer);
   }
 
@@ -2075,8 +663,8 @@ class X11Client {
   /// Gets the properties on [window].
   Future<List<String>> listProperties(int window) async {
     var request = X11ListPropertiesRequest(window);
-    var sequenceNumber = _sendRequest(21, request);
-    var reply = await _awaitReply<X11ListPropertiesReply>(
+    var sequenceNumber = sendRequest(21, request);
+    var reply = await awaitReply<X11ListPropertiesReply>(
         sequenceNumber, X11ListPropertiesReply.fromBuffer);
     var properties = <String>[];
     for (var atom in reply.atoms) {
@@ -2091,7 +679,7 @@ class X11Client {
     var selectionAtom = await internAtom(selection);
     var request =
         X11SetSelectionOwnerRequest(selectionAtom, ownerWindow, time: time);
-    return _sendRequest(22, request);
+    return sendRequest(22, request);
   }
 
   /// Clears the owner of [selection].
@@ -2103,8 +691,8 @@ class X11Client {
   Future<int> getSelectionOwner(String selection) async {
     var selectionAtom = await internAtom(selection);
     var request = X11GetSelectionOwnerRequest(selectionAtom);
-    var sequenceNumber = _sendRequest(23, request);
-    var reply = await _awaitReply<X11GetSelectionOwnerReply>(
+    var sequenceNumber = sendRequest(23, request);
+    var reply = await awaitReply<X11GetSelectionOwnerReply>(
         sequenceNumber, X11GetSelectionOwnerReply.fromBuffer);
     return reply.owner;
   }
@@ -2122,7 +710,7 @@ class X11Client {
     var request = X11ConvertSelectionRequest(
         selectionAtom, requestorWindow, targetAtom,
         property: propertyAtom, time: time);
-    return _sendRequest(24, request);
+    return sendRequest(24, request);
   }
 
   /// Sends [event] to [destination].
@@ -2132,7 +720,7 @@ class X11Client {
     var code = event.encode(buffer);
     var request = X11SendEventRequest(destination, code, buffer.data,
         propagate: propagate, events: events, sequenceNumber: _sequenceNumber);
-    return _sendRequest(25, request);
+    return sendRequest(25, request);
   }
 
   /// Establishes an active grab of the pointer to [grabWindow].
@@ -2144,8 +732,8 @@ class X11Client {
       int time = 0}) async {
     var request = X11GrabPointerRequest(grabWindow, ownerEvents, events,
         pointerMode, keyboardMode, confineTo, cursor, time);
-    var sequenceNumber = _sendRequest(26, request);
-    var reply = await _awaitReply<X11GrabPointerReply>(
+    var sequenceNumber = sendRequest(26, request);
+    var reply = await awaitReply<X11GrabPointerReply>(
         sequenceNumber, X11GrabPointerReply.fromBuffer);
     return reply.status;
   }
@@ -2153,7 +741,7 @@ class X11Client {
   /// Releases the pointer from [grabPointer] or [grabButton] and releases any queued events.
   int ungrabPointer({int time = 0}) {
     var request = X11UngrabPointerRequest(time);
-    return _sendRequest(27, request);
+    return sendRequest(27, request);
   }
 
   /// Establishes a passive grab of [button]/[modifers] to [grabWindow].
@@ -2167,14 +755,14 @@ class X11Client {
       int cursor = 0}) {
     var request = X11GrabButtonRequest(grabWindow, ownerEvents, events,
         pointerMode, keyboardMode, confineTo, cursor, button, modifiers);
-    return _sendRequest(28, request);
+    return sendRequest(28, request);
   }
 
   /// Releases a passive grab of [button]/[modifiers] from [grabWindow].
   /// If [button] is 0, this releases all button grabs on this window.
   int ungrabButton(int grabWindow, {int button = 0, int modifiers = 0x8000}) {
     var request = X11UngrabButtonRequest(grabWindow, button, modifiers);
-    return _sendRequest(29, request);
+    return sendRequest(29, request);
   }
 
   /// Changes properies of the pointer grab established with [grabPointer].
@@ -2182,7 +770,7 @@ class X11Client {
       {int cursor = 0, int time = 0}) {
     var request =
         X11ChangeActivePointerGrabRequest(events, cursor: cursor, time: time);
-    return _sendRequest(30, request);
+    return sendRequest(30, request);
   }
 
   /// Establishes an active grab of the keyboard to [grabWindow].
@@ -2196,8 +784,8 @@ class X11Client {
         pointerMode: pointerMode,
         keyboardMode: keyboardMode,
         time: time);
-    var sequenceNumber = _sendRequest(31, request);
-    var reply = await _awaitReply<X11GrabKeyboardReply>(
+    var sequenceNumber = sendRequest(31, request);
+    var reply = await awaitReply<X11GrabKeyboardReply>(
         sequenceNumber, X11GrabKeyboardReply.fromBuffer);
     return reply.status;
   }
@@ -2205,7 +793,7 @@ class X11Client {
   /// Releases the keyboard from [grabKeyboard] or [grabKey] and releases any queued events.
   int ungrabKeyboard({int time = 0}) {
     var request = X11UngrabKeyboardRequest(time: time);
-    return _sendRequest(32, request);
+    return sendRequest(32, request);
   }
 
   /// Establishes a passive grab of [key]/[modifers] to [grabWindow].
@@ -2219,20 +807,20 @@ class X11Client {
         ownerEvents: ownerEvents,
         pointerMode: pointerMode,
         keyboardMode: keyboardMode);
-    return _sendRequest(33, request);
+    return sendRequest(33, request);
   }
 
   /// Releases a passive grab of [key]/[modifiers] from [grabWindow].
   /// If [key] is 0, this releases all key grabs on this window.
   int ungrabKey(int grabWindow, {int key = 0, int modifiers = 0}) {
     var request = X11UngrabKeyRequest(grabWindow, key, modifiers: modifiers);
-    return _sendRequest(34, request);
+    return sendRequest(34, request);
   }
 
   /// Releases queued events.
   int allowEvents(X11AllowEventsMode mode, {int time = 0}) {
     var request = X11AllowEventsRequest(mode, time: time);
-    return _sendRequest(35, request);
+    return sendRequest(35, request);
   }
 
   /// Disables processing of requests on all other clients.
@@ -2240,20 +828,20 @@ class X11Client {
   /// Call [ungrabServer] when processing can continue.
   int grabServer() {
     var request = X11GrabServerRequest();
-    return _sendRequest(36, request);
+    return sendRequest(36, request);
   }
 
   /// Restarts processing of requests disabled by [grabServer].
   int ungrabServer() {
     var request = X11UngrabServerRequest();
-    return _sendRequest(37, request);
+    return sendRequest(37, request);
   }
 
   /// Gets the location of the pointer relative to [window].
   Future<X11QueryPointerReply> queryPointer(int window) async {
     var request = X11QueryPointerRequest(window);
-    var sequenceNumber = _sendRequest(38, request);
-    return _awaitReply<X11QueryPointerReply>(
+    var sequenceNumber = sendRequest(38, request);
+    return awaitReply<X11QueryPointerReply>(
         sequenceNumber, X11QueryPointerReply.fromBuffer);
   }
 
@@ -2261,8 +849,8 @@ class X11Client {
   Future<List<X11TimeCoord>> getMotionEvents(
       int window, int start, int stop) async {
     var request = X11GetMotionEventsRequest(window, start, stop);
-    var sequenceNumber = _sendRequest(39, request);
-    var reply = await _awaitReply<X11GetMotionEventsReply>(
+    var sequenceNumber = sendRequest(39, request);
+    var reply = await awaitReply<X11GetMotionEventsReply>(
         sequenceNumber, X11GetMotionEventsReply.fromBuffer);
     return reply.events;
   }
@@ -2272,8 +860,8 @@ class X11Client {
       int sourceWindow, X11Point source, int destinationWindow) async {
     var request =
         X11TranslateCoordinatesRequest(sourceWindow, source, destinationWindow);
-    var sequenceNumber = _sendRequest(40, request);
-    return _awaitReply<X11TranslateCoordinatesReply>(
+    var sequenceNumber = sendRequest(40, request);
+    return awaitReply<X11TranslateCoordinatesReply>(
         sequenceNumber, X11TranslateCoordinatesReply.fromBuffer);
   }
 
@@ -2286,7 +874,7 @@ class X11Client {
         destinationWindow: destinationWindow,
         sourceWindow: sourceWindow,
         source: source);
-    return _sendRequest(41, request);
+    return sendRequest(41, request);
   }
 
   /// Sets the input focus state.
@@ -2296,22 +884,22 @@ class X11Client {
       int time = 0}) {
     var request =
         X11SetInputFocusRequest(window: window, revertTo: revertTo, time: time);
-    return _sendRequest(42, request);
+    return sendRequest(42, request);
   }
 
   /// Gets the current input focus state.
   Future<X11GetInputFocusReply> getInputFocus() async {
     var request = X11GetInputFocusRequest();
-    var sequenceNumber = _sendRequest(43, request);
-    return _awaitReply<X11GetInputFocusReply>(
+    var sequenceNumber = sendRequest(43, request);
+    return awaitReply<X11GetInputFocusReply>(
         sequenceNumber, X11GetInputFocusReply.fromBuffer);
   }
 
   /// Gets the current state of the keyboard. If a key is pressed its value is true.
   Future<List<bool>> queryKeymap() async {
     var request = X11QueryKeymapRequest();
-    var sequenceNumber = _sendRequest(44, request);
-    var reply = await _awaitReply<X11QueryKeymapReply>(
+    var sequenceNumber = sendRequest(44, request);
+    var reply = await awaitReply<X11QueryKeymapReply>(
         sequenceNumber, X11QueryKeymapReply.fromBuffer);
     var state = <bool>[];
     for (var key in reply.keys) {
@@ -2331,21 +919,21 @@ class X11Client {
   /// When no longer required, the font reference should be deleted with [closeFont].
   int openFont(int id, String name) {
     var request = X11OpenFontRequest(id, name);
-    return _sendRequest(45, request);
+    return sendRequest(45, request);
   }
 
   /// Deletes the reference to a [font] opened in [openFont].
   int closeFont(int font) {
     var request = X11CloseFontRequest(font);
-    return _sendRequest(46, request);
+    return sendRequest(46, request);
   }
 
   // FIXME: Convert font atoms?
   /// Gets information on [font].
   Future<X11QueryFontReply> queryFont(int font) async {
     var request = X11QueryFontRequest(font);
-    var sequenceNumber = _sendRequest(47, request);
-    return _awaitReply<X11QueryFontReply>(
+    var sequenceNumber = sendRequest(47, request);
+    return awaitReply<X11QueryFontReply>(
         sequenceNumber, X11QueryFontReply.fromBuffer);
   }
 
@@ -2353,8 +941,8 @@ class X11Client {
   Future<X11QueryTextExtentsReply> queryTextExtents(
       int font, String string) async {
     var request = X11QueryTextExtentsRequest(font, string);
-    var sequenceNumber = _sendRequest(48, request);
-    return _awaitReply<X11QueryTextExtentsReply>(
+    var sequenceNumber = sendRequest(48, request);
+    return awaitReply<X11QueryTextExtentsReply>(
         sequenceNumber, X11QueryTextExtentsReply.fromBuffer);
   }
 
@@ -2364,8 +952,8 @@ class X11Client {
   Future<List<String>> listFonts(
       {String pattern = '*', int maxNames = 65535}) async {
     var request = X11ListFontsRequest(pattern: pattern, maxNames: maxNames);
-    var sequenceNumber = _sendRequest(49, request);
-    var reply = await _awaitReply<X11ListFontsReply>(
+    var sequenceNumber = sendRequest(49, request);
+    var reply = await awaitReply<X11ListFontsReply>(
         sequenceNumber, X11ListFontsReply.fromBuffer);
     return reply.names;
   }
@@ -2377,22 +965,22 @@ class X11Client {
       {String pattern = '*', int maxNames = 65535}) {
     var request =
         X11ListFontsWithInfoRequest(maxNames: maxNames, pattern: pattern);
-    var sequenceNumber = _sendRequest(50, request);
-    return _awaitReplyStream<X11ListFontsWithInfoReply>(sequenceNumber,
+    var sequenceNumber = sendRequest(50, request);
+    return awaitReplyStream<X11ListFontsWithInfoReply>(sequenceNumber,
         X11ListFontsWithInfoReply.fromBuffer, (reply) => reply.name.isEmpty);
   }
 
   /// Sets the search paths for fonts.
   int setFontPath(List<String> path) {
     var request = X11SetFontPathRequest(path);
-    return _sendRequest(51, request);
+    return sendRequest(51, request);
   }
 
   /// Gets the current search paths for fonts.
   Future<List<String>> getFontPath() async {
     var request = X11GetFontPathRequest();
-    var sequenceNumber = _sendRequest(52, request);
-    var reply = await _awaitReply<X11GetFontPathReply>(
+    var sequenceNumber = sendRequest(52, request);
+    var reply = await awaitReply<X11GetFontPathReply>(
         sequenceNumber, X11GetFontPathReply.fromBuffer);
     return reply.path;
   }
@@ -2401,13 +989,13 @@ class X11Client {
   /// When no longer required, the pixmap reference should be deleted with [freePixmap].
   int createPixmap(int id, int drawable, X11Size size, {int depth = 24}) {
     var request = X11CreatePixmapRequest(id, drawable, size, depth);
-    return _sendRequest(53, request);
+    return sendRequest(53, request);
   }
 
   /// Deletes the reference to a [pixmap] created in [createPixmap].
   int freePixmap(int pixmap) {
     var request = X11FreePixmapRequest(pixmap);
-    return _sendRequest(54, request);
+    return sendRequest(54, request);
   }
 
   /// Creates a graphics context with [id] for drawing on [drawable].
@@ -2460,7 +1048,7 @@ class X11Client {
         dashOffset: dashOffset,
         dashes: dashes,
         arcMode: arcMode);
-    return _sendRequest(55, request);
+    return sendRequest(55, request);
   }
 
   /// Changes properties of [gc].
@@ -2514,19 +1102,19 @@ class X11Client {
         dashOffset: dashOffset,
         dashes: dashes,
         arcMode: arcMode);
-    return _sendRequest(56, request);
+    return sendRequest(56, request);
   }
 
   /// Copies [values] from [sourceGc] to [destinationGc].
   int copyGC(int sourceGc, int destinationGc, Set<X11GCValue> values) {
     var request = X11CopyGCRequest(sourceGc, destinationGc, values);
-    return _sendRequest(57, request);
+    return sendRequest(57, request);
   }
 
   /// Sets the dash pattern used when drawing wiht [gc]. [dashes] contains the length in pixels of each part of the dash pattern.
   int setDashes(int gc, List<int> dashes, {int dashOffset = 0}) {
     var request = X11SetDashesRequest(gc, dashes, dashOffset: dashOffset);
-    return _sendRequest(58, request);
+    return sendRequest(58, request);
   }
 
   /// Sets the clipping [rectangles] used when drawing with [gc].
@@ -2535,19 +1123,19 @@ class X11Client {
       X11ClipOrdering ordering = X11ClipOrdering.unSorted}) {
     var request = X11SetClipRectanglesRequest(gc, rectangles,
         clipOrigin: clipOrigin, ordering: ordering);
-    return _sendRequest(59, request);
+    return sendRequest(59, request);
   }
 
   /// Deletes the reference to a [gc] created in [createGC].
   int freeGC(int gc) {
     var request = X11FreeGCRequest(gc);
-    return _sendRequest(60, request);
+    return sendRequest(60, request);
   }
 
   /// Clears [area] on [window] to its backing color / pixmap.
   int clearArea(int window, X11Rectangle area, {bool exposures = false}) {
     var request = X11ClearAreaRequest(window, area, exposures: exposures);
-    return _sendRequest(61, request);
+    return sendRequest(61, request);
   }
 
   /// Copies [sourceArea] from [sourceDrawable] onto [destinationDrawable] at [destinationPosition].
@@ -2555,7 +1143,7 @@ class X11Client {
       int destinationDrawable, X11Point destinationPosition) {
     var request = X11CopyAreaRequest(sourceDrawable, destinationDrawable, gc,
         sourceArea, destinationPosition);
-    return _sendRequest(62, request);
+    return sendRequest(62, request);
   }
 
   /// Copies the [sourceArea] from [sourceDrawable] onto [destinationDrawable] at [destinationPosition].
@@ -2565,7 +1153,7 @@ class X11Client {
       int destinationDrawable, X11Point destinationPosition, int bitPlane) {
     var request = X11CopyPlaneRequest(sourceDrawable, destinationDrawable, gc,
         sourceArea, destinationPosition, bitPlane);
-    return _sendRequest(63, request);
+    return sendRequest(63, request);
   }
 
   /// Draws [points] on [drawable].
@@ -2573,7 +1161,7 @@ class X11Client {
       {X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11PolyPointRequest(drawable, gc, points,
         coordinateMode: coordinateMode);
-    return _sendRequest(64, request);
+    return sendRequest(64, request);
   }
 
   /// Draws a line on [drawable] made up of [points].
@@ -2581,25 +1169,25 @@ class X11Client {
       {X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11PolyLineRequest(drawable, gc, points,
         coordinateMode: coordinateMode);
-    return _sendRequest(65, request);
+    return sendRequest(65, request);
   }
 
   /// Draws line [segments] on [drawable].
   int polySegment(int gc, int drawable, List<X11Segment> segments) {
     var request = X11PolySegmentRequest(drawable, gc, segments);
-    return _sendRequest(66, request);
+    return sendRequest(66, request);
   }
 
   /// Draws [rectangles] onto [drawable.
   int polyRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyRectangleRequest(drawable, gc, rectangles);
-    return _sendRequest(67, request);
+    return sendRequest(67, request);
   }
 
   /// Draws [arcs] onto [drawable.
   int polyArc(int gc, int drawable, List<X11Arc> arcs) {
     var request = X11PolyArcRequest(drawable, gc, arcs);
-    return _sendRequest(68, request);
+    return sendRequest(68, request);
   }
 
   /// Draws a filled polygon made from [points] onto [drawable].
@@ -2608,19 +1196,19 @@ class X11Client {
       X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11FillPolyRequest(drawable, gc, points,
         shape: shape, coordinateMode: coordinateMode);
-    return _sendRequest(69, request);
+    return sendRequest(69, request);
   }
 
   /// Draws filled [rectangles] onto [drawable].
   int polyFillRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyFillRectangleRequest(drawable, gc, rectangles);
-    return _sendRequest(70, request);
+    return sendRequest(70, request);
   }
 
   /// Draws a filled polygon made from [args] onto [drawable].
   int polyFillArc(int gc, int drawable, List<X11Arc> arcs) {
     var request = X11PolyFillArcRequest(drawable, gc, arcs);
-    return _sendRequest(71, request);
+    return sendRequest(71, request);
   }
 
   /// Sets the contents of [area] on [drawable].
@@ -2630,7 +1218,7 @@ class X11Client {
       int leftPad = 0}) {
     var request = X11PutImageRequest(drawable, gc, area, data,
         depth: depth, format: format, leftPad: leftPad);
-    return _sendRequest(72, request);
+    return sendRequest(72, request);
   }
 
   /// Gets the contents of [area] on [drawable].
@@ -2639,8 +1227,8 @@ class X11Client {
       int planeMask = 0xFFFFFFFF}) async {
     var request = X11GetImageRequest(drawable, area,
         planeMask: planeMask, format: format);
-    var sequenceNumber = _sendRequest(73, request);
-    return _awaitReply<X11GetImageReply>(
+    var sequenceNumber = sendRequest(73, request);
+    return awaitReply<X11GetImageReply>(
         sequenceNumber, X11GetImageReply.fromBuffer);
   }
 
@@ -2648,26 +1236,26 @@ class X11Client {
   int polyText8(
       int gc, int drawable, X11Point position, List<X11TextItem> items) {
     var request = X11PolyText8Request(drawable, gc, position, items);
-    return _sendRequest(74, request);
+    return sendRequest(74, request);
   }
 
   /// Draws text onto [drawable] at [position].
   int polyText16(
       int gc, int drawable, X11Point position, List<X11TextItem> items) {
     var request = X11PolyText16Request(drawable, gc, position, items);
-    return _sendRequest(75, request);
+    return sendRequest(75, request);
   }
 
   /// Draws [string] text onto [drawable] at [position]. [string] contains single byte characters.
   int imageText8(int gc, int drawable, X11Point position, String string) {
     var request = X11ImageText8Request(drawable, gc, position, string);
-    return _sendRequest(76, request);
+    return sendRequest(76, request);
   }
 
   /// Draws [string] text onto [drawable] at [position]. [string] contains two byte characters.
   int imageText16(int gc, int drawable, X11Point position, String string) {
     var request = X11ImageText16Request(drawable, gc, position, string);
-    return _sendRequest(77, request);
+    return sendRequest(77, request);
   }
 
   /// Creates a colormap with [id] with [visual] format for the screen that contains [window].
@@ -2675,13 +1263,13 @@ class X11Client {
   /// When no longer required, the colormap reference should be deleted with [freeColormap].
   int createColormap(int id, int window, int visual, {int alloc = 0}) {
     var request = X11CreateColormapRequest(id, window, visual, alloc: alloc);
-    return _sendRequest(78, request);
+    return sendRequest(78, request);
   }
 
   /// Deletes the reference to a [colormap] created in [createColormap].
   int freeColormap(int colormap) {
     var request = X11FreeColormapRequest(colormap);
-    return _sendRequest(79, request);
+    return sendRequest(79, request);
   }
 
   /// Creates a new colormap with [id] that moves the allocations from [sourceColormap].
@@ -2689,26 +1277,26 @@ class X11Client {
   /// When no longer required, the colormap reference should be deleted with [freeColormap].
   int copyColormapAndFree(int id, int sourceColormap) {
     var request = X11CopyColormapAndFreeRequest(id, sourceColormap);
-    return _sendRequest(80, request);
+    return sendRequest(80, request);
   }
 
   /// Installs [colormap].
   int installColormap(int colormap) {
     var request = X11InstallColormapRequest(colormap);
-    return _sendRequest(81, request);
+    return sendRequest(81, request);
   }
 
   /// Uninstalls [colormap].
   int uninstallColormap(int colormap) {
     var request = X11UninstallColormapRequest(colormap);
-    return _sendRequest(82, request);
+    return sendRequest(82, request);
   }
 
   /// Gets the installed colormaps on the screen containing [window].
   Future<List<int>> listInstalledColormaps(int window) async {
     var request = X11ListInstalledColormapsRequest(window);
-    var sequenceNumber = _sendRequest(83, request);
-    var reply = await _awaitReply<X11ListInstalledColormapsReply>(
+    var sequenceNumber = sendRequest(83, request);
+    var reply = await awaitReply<X11ListInstalledColormapsReply>(
         sequenceNumber, X11ListInstalledColormapsReply.fromBuffer);
     return reply.colormaps;
   }
@@ -2717,8 +1305,8 @@ class X11Client {
   // When no longer requires the allocated color can be freed with [freeColors].
   Future<X11AllocColorReply> allocColor(int colormap, X11Rgb color) async {
     var request = X11AllocColorRequest(colormap, color);
-    var sequenceNumber = _sendRequest(84, request);
-    return _awaitReply<X11AllocColorReply>(
+    var sequenceNumber = sendRequest(84, request);
+    return awaitReply<X11AllocColorReply>(
         sequenceNumber, X11AllocColorReply.fromBuffer);
   }
 
@@ -2727,8 +1315,8 @@ class X11Client {
   Future<X11AllocNamedColorReply> allocNamedColor(
       int colormap, String name) async {
     var request = X11AllocNamedColorRequest(colormap, name);
-    var sequenceNumber = _sendRequest(85, request);
-    return _awaitReply<X11AllocNamedColorReply>(
+    var sequenceNumber = sendRequest(85, request);
+    return awaitReply<X11AllocNamedColorReply>(
         sequenceNumber, X11AllocNamedColorReply.fromBuffer);
   }
 
@@ -2738,8 +1326,8 @@ class X11Client {
       {int planes = 0, bool contiguous = false}) async {
     var request = X11AllocColorCellsRequest(colormap, colorCount,
         planes: planes, contiguous: contiguous);
-    var sequenceNumber = _sendRequest(86, request);
-    return _awaitReply<X11AllocColorCellsReply>(
+    var sequenceNumber = sendRequest(86, request);
+    return awaitReply<X11AllocColorCellsReply>(
         sequenceNumber, X11AllocColorCellsReply.fromBuffer);
   }
 
@@ -2757,21 +1345,21 @@ class X11Client {
         greenDepth: greenDepth,
         blueDepth: blueDepth,
         contiguous: contiguous);
-    var sequenceNumber = _sendRequest(87, request);
-    return _awaitReply<X11AllocColorPlanesReply>(
+    var sequenceNumber = sendRequest(87, request);
+    return awaitReply<X11AllocColorPlanesReply>(
         sequenceNumber, X11AllocColorPlanesReply.fromBuffer);
   }
 
   /// Frees [pixels] in [colormap] that were previously allocated with [allocColor], [allocNamedColor], [allocColorCells] or [allocColorPlanes].
   int freeColors(int colormap, List<int> pixels, {int planeMask = 0xFFFFFFFF}) {
     var request = X11FreeColorsRequest(colormap, pixels, planeMask: planeMask);
-    return _sendRequest(88, request);
+    return sendRequest(88, request);
   }
 
   /// Sets the RGB values of pixels in [colormap].
   int storeColors(int colormap, List<X11RgbColorItem> items) {
     var request = X11StoreColorsRequest(colormap, items);
-    return _sendRequest(89, request);
+    return sendRequest(89, request);
   }
 
   /// Sets the values of a [pixel] in [colormap] to the color with [name].
@@ -2780,14 +1368,14 @@ class X11Client {
       {bool doRed = true, bool doGreen = true, bool doBlue = true}) {
     var request = X11StoreNamedColorRequest(colormap, pixel, name,
         doRed: doRed, doGreen: doGreen, doBlue: doBlue);
-    return _sendRequest(90, request);
+    return sendRequest(90, request);
   }
 
   /// Gets the RGB color values for the [pixels] in [colormap].
   Future<List<X11Rgb>> queryColors(int colormap, List<int> pixels) async {
     var request = X11QueryColorsRequest(colormap, pixels);
-    var sequenceNumber = _sendRequest(91, request);
-    var reply = await _awaitReply<X11QueryColorsReply>(
+    var sequenceNumber = sendRequest(91, request);
+    var reply = await awaitReply<X11QueryColorsReply>(
         sequenceNumber, X11QueryColorsReply.fromBuffer);
     return reply.colors;
   }
@@ -2795,8 +1383,8 @@ class X11Client {
   /// Gets the RGB values associated with the color with [name] in [colormap].
   Future<X11LookupColorReply> lookupColor(int colormap, String name) async {
     var request = X11LookupColorRequest(colormap, name);
-    var sequenceNumber = _sendRequest(92, request);
-    return _awaitReply<X11LookupColorReply>(
+    var sequenceNumber = sendRequest(92, request);
+    return awaitReply<X11LookupColorReply>(
         sequenceNumber, X11LookupColorReply.fromBuffer);
   }
 
@@ -2814,7 +1402,7 @@ class X11Client {
         background: foreground,
         hotspot: hotspot,
         maskPixmap: maskPixmap);
-    return _sendRequest(93, request);
+    return sendRequest(93, request);
   }
 
   /// Creates a cursor from [sourceChar] in [sourceFont].
@@ -2831,13 +1419,13 @@ class X11Client {
         background: background,
         maskFont: maskFont,
         maskChar: maskChar);
-    return _sendRequest(94, request);
+    return sendRequest(94, request);
   }
 
   /// Deletes the reference to a [cursor] created in [createCursor] or [createGlyphCursor].
   int freeCursor(int cursor) {
     var request = X11FreeCursorRequest(cursor);
-    return _sendRequest(95, request);
+    return sendRequest(95, request);
   }
 
   /// Changes the [foreground] and [background] colors of [cursor].
@@ -2846,7 +1434,7 @@ class X11Client {
       X11Rgb background = const X11Rgb(0, 0, 0)}) {
     var request = X11RecolorCursorRequest(cursor,
         foreground: foreground, background: background);
-    return _sendRequest(96, request);
+    return sendRequest(96, request);
   }
 
   /// Gets the largest cursor size on the screen containing [drawable].
@@ -2870,8 +1458,8 @@ class X11Client {
   Future<X11Size> _queryBestSize(
       int drawable, X11QueryClass queryClass, X11Size size) async {
     var request = X11QueryBestSizeRequest(drawable, queryClass, size);
-    var sequenceNumber = _sendRequest(97, request);
-    var reply = await _awaitReply<X11QueryBestSizeReply>(
+    var sequenceNumber = sendRequest(97, request);
+    var reply = await awaitReply<X11QueryBestSizeReply>(
         sequenceNumber, X11QueryBestSizeReply.fromBuffer);
     return reply.size;
   }
@@ -2879,16 +1467,16 @@ class X11Client {
   /// Gets information about the extension with [name].
   Future<X11QueryExtensionReply> queryExtension(String name) async {
     var request = X11QueryExtensionRequest(name);
-    var sequenceNumber = _sendRequest(98, request);
-    return _awaitReply<X11QueryExtensionReply>(
+    var sequenceNumber = sendRequest(98, request);
+    return awaitReply<X11QueryExtensionReply>(
         sequenceNumber, X11QueryExtensionReply.fromBuffer);
   }
 
   /// Gets the names of the available extensions.
   Future<List<String>> listExtensions() async {
     var request = X11ListExtensionsRequest();
-    var sequenceNumber = _sendRequest(99, request);
-    var reply = await _awaitReply<X11ListExtensionsReply>(
+    var sequenceNumber = sendRequest(99, request);
+    var reply = await awaitReply<X11ListExtensionsReply>(
         sequenceNumber, X11ListExtensionsReply.fromBuffer);
     return reply.names;
   }
@@ -2896,15 +1484,15 @@ class X11Client {
   /// Sets the keyboard [mapping].
   int changeKeyboardMapping(List<List<int>> mapping, {int firstKeycode = 0}) {
     var request = X11ChangeKeyboardMappingRequest(firstKeycode, mapping);
-    return _sendRequest(100, request);
+    return sendRequest(100, request);
   }
 
   /// Gets the keyboard mapping.
   Future<List<List<int>>> getKeyboardMapping(
       {int firstKeycode = 0, int count = 255}) async {
     var request = X11GetKeyboardMappingRequest(firstKeycode, count);
-    var sequenceNumber = _sendRequest(101, request);
-    var reply = await _awaitReply<X11GetKeyboardMappingReply>(
+    var sequenceNumber = sendRequest(101, request);
+    var reply = await awaitReply<X11GetKeyboardMappingReply>(
         sequenceNumber, X11GetKeyboardMappingReply.fromBuffer);
     return reply.map;
   }
@@ -2928,14 +1516,14 @@ class X11Client {
         ledMode: ledMode,
         key: key,
         autoRepeatMode: autoRepeatMode);
-    return _sendRequest(102, request);
+    return sendRequest(102, request);
   }
 
   /// Gets the current settings for the keyboard.
   Future<X11GetKeyboardControlReply> getKeyboardControl() async {
     var request = X11GetKeyboardControlRequest();
-    var sequenceNumber = _sendRequest(103, request);
-    return _awaitReply<X11GetKeyboardControlReply>(
+    var sequenceNumber = sendRequest(103, request);
+    return awaitReply<X11GetKeyboardControlReply>(
         sequenceNumber, X11GetKeyboardControlReply.fromBuffer);
   }
 
@@ -2946,7 +1534,7 @@ class X11Client {
   /// If [percent] is in the range [-100, 0] the volume ranges between minimum and the default.
   int bell({int percent = 0}) {
     var request = X11BellRequest(percent);
-    return _sendRequest(104, request);
+    return sendRequest(104, request);
   }
 
   /// sets the pointer control settings.
@@ -2956,14 +1544,14 @@ class X11Client {
   int changePointerControl({X11Fraction acceleration, int threshold}) {
     var request = X11ChangePointerControlRequest(
         acceleration: acceleration, threshold: threshold);
-    return _sendRequest(105, request);
+    return sendRequest(105, request);
   }
 
   /// Gets the current pointer control settings.
   Future<X11GetPointerControlReply> getPointerControl() async {
     var request = X11GetPointerControlRequest();
-    var sequenceNumber = _sendRequest(106, request);
-    return _awaitReply<X11GetPointerControlReply>(
+    var sequenceNumber = sendRequest(106, request);
+    return awaitReply<X11GetPointerControlReply>(
         sequenceNumber, X11GetPointerControlReply.fromBuffer);
   }
 
@@ -2978,14 +1566,14 @@ class X11Client {
         interval: interval,
         preferBlanking: preferBlanking,
         allowExposures: allowExposures);
-    return _sendRequest(107, request);
+    return sendRequest(107, request);
   }
 
   /// Gets the screensaver state.
   Future<X11GetScreenSaverReply> getScreenSaver() async {
     var request = X11GetScreenSaverRequest();
-    var sequenceNumber = _sendRequest(108, request);
-    return _awaitReply<X11GetScreenSaverReply>(
+    var sequenceNumber = sendRequest(108, request);
+    return awaitReply<X11GetScreenSaverReply>(
         sequenceNumber, X11GetScreenSaverReply.fromBuffer);
   }
 
@@ -3001,33 +1589,33 @@ class X11Client {
 
   int _changeHosts(X11ChangeHostsMode mode, int family, List<int> address) {
     var request = X11ChangeHostsRequest(mode, family, address);
-    return _sendRequest(109, request);
+    return sendRequest(109, request);
   }
 
   /// Gets the access control list and whether use of the list at connection setup is currently enabled or disabled.
   Future<X11ListHostsReply> listHosts() async {
     var request = X11ListHostsRequest();
-    var sequenceNumber = _sendRequest(110, request);
-    return _awaitReply<X11ListHostsReply>(
+    var sequenceNumber = sendRequest(110, request);
+    return awaitReply<X11ListHostsReply>(
         sequenceNumber, X11ListHostsReply.fromBuffer);
   }
 
   /// Enables or disables the use of the access control list at connection setups.
   int setAccessControl(bool enabled) {
     var request = X11SetAccessControlRequest(enabled);
-    return _sendRequest(111, request);
+    return sendRequest(111, request);
   }
 
   /// Sets the behaviour of this clients resources when its connection is closed.
   int setCloseDownMode(X11CloseDownMode mode) {
     var request = X11SetCloseDownModeRequest(mode);
-    return _sendRequest(112, request);
+    return sendRequest(112, request);
   }
 
   /// Closes the client that controls [resource].
   int killClient(int resource) {
     var request = X11KillClientRequest(resource);
-    return _sendRequest(113, request);
+    return sendRequest(113, request);
   }
 
   /// Rotates the [properties] of [window] by [delta] steps.
@@ -3038,7 +1626,7 @@ class X11Client {
       propertyAtoms.add(await internAtom(property));
     }
     var request = X11RotatePropertiesRequest(window, delta, propertyAtoms);
-    return _sendRequest(114, request);
+    return sendRequest(114, request);
   }
 
   /// Activates the screen-saver immediately.
@@ -3053,14 +1641,14 @@ class X11Client {
 
   int _forceScreenSaver(X11ForceScreenSaverMode mode) {
     var request = X11ForceScreenSaverRequest(mode);
-    return _sendRequest(115, request);
+    return sendRequest(115, request);
   }
 
   /// Sets the pointer button [map].
   Future<int> setPointerMapping(List<int> map) async {
     var request = X11SetPointerMappingRequest(map);
-    var sequenceNumber = _sendRequest(116, request);
-    var reply = await _awaitReply<X11SetPointerMappingReply>(
+    var sequenceNumber = sendRequest(116, request);
+    var reply = await awaitReply<X11SetPointerMappingReply>(
         sequenceNumber, X11SetPointerMappingReply.fromBuffer);
     return reply.status;
   }
@@ -3068,8 +1656,8 @@ class X11Client {
   /// Gets the current mapping of the pointer buttons.
   Future<List<int>> getPointerMapping() async {
     var request = X11GetPointerMappingRequest();
-    var sequenceNumber = _sendRequest(117, request);
-    var reply = await _awaitReply<X11GetPointerMappingReply>(
+    var sequenceNumber = sendRequest(117, request);
+    var reply = await awaitReply<X11GetPointerMappingReply>(
         sequenceNumber, X11GetPointerMappingReply.fromBuffer);
     return reply.map;
   }
@@ -3077,8 +1665,8 @@ class X11Client {
   /// Sets the keyboard modifier [map].
   Future<int> setModifierMapping(X11ModifierMap map) async {
     var request = X11SetModifierMappingRequest(map);
-    var sequenceNumber = _sendRequest(118, request);
-    var reply = await _awaitReply<X11SetModifierMappingReply>(
+    var sequenceNumber = sendRequest(118, request);
+    var reply = await awaitReply<X11SetModifierMappingReply>(
         sequenceNumber, X11SetModifierMappingReply.fromBuffer);
     return reply.status;
   }
@@ -3086,8 +1674,8 @@ class X11Client {
   /// Gets the current mapping of the keyboard modifiers.
   Future<X11ModifierMap> getModifierMapping() async {
     var request = X11GetModifierMappingRequest();
-    var sequenceNumber = _sendRequest(119, request);
-    var reply = await _awaitReply<X11GetModifierMappingReply>(
+    var sequenceNumber = sendRequest(119, request);
+    var reply = await awaitReply<X11GetModifierMappingReply>(
         sequenceNumber, X11GetModifierMappingReply.fromBuffer);
     return reply.map;
   }
@@ -3095,7 +1683,7 @@ class X11Client {
   /// Sends an empty request.
   int noOperation() {
     var request = X11NoOperationRequest();
-    return _sendRequest(127, request);
+    return sendRequest(127, request);
   }
 
   void _processData(Uint8List data) {
@@ -3327,7 +1915,7 @@ class X11Client {
     return true;
   }
 
-  int _sendRequest(int opcode, X11Request request) {
+  int sendRequest(int opcode, X11Request request) {
     var buffer = X11WriteBuffer();
     request.encode(buffer);
 
@@ -3361,14 +1949,14 @@ class X11Client {
     return _sequenceNumber;
   }
 
-  Future<T> _awaitReply<T>(
+  Future<T> awaitReply<T>(
       int sequenceNumber, T Function(X11ReadBuffer) decodeFunction) {
     var handler = _RequestSingleHandler<T>(decodeFunction);
     _requests[sequenceNumber] = handler;
     return handler.future;
   }
 
-  Stream<T> _awaitReplyStream<T>(
+  Stream<T> awaitReplyStream<T>(
       int sequenceNumber,
       T Function(X11ReadBuffer) decodeFunction,
       bool Function(T) isLastFunction) {
