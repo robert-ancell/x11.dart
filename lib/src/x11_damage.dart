@@ -1,8 +1,8 @@
 import 'x11_client.dart';
+import 'x11_damage_requests.dart';
 import 'x11_errors.dart';
 import 'x11_events.dart';
 import 'x11_read_buffer.dart';
-import 'x11_requests.dart';
 import 'x11_types.dart';
 
 class X11DamageExtension extends X11Extension {

@@ -1,5 +1,5 @@
 import 'x11_client.dart';
-import 'x11_requests.dart';
+import 'x11_sync_requests.dart';
 import 'x11_types.dart';
 
 class X11SyncExtension extends X11Extension {

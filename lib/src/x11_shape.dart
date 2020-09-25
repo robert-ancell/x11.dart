@@ -1,7 +1,7 @@
 import 'x11_client.dart';
 import 'x11_events.dart';
 import 'x11_read_buffer.dart';
-import 'x11_requests.dart';
+import 'x11_shape_requests.dart';
 import 'x11_types.dart';
 
 class X11ShapeExtension extends X11Extension {

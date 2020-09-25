@@ -1,7 +1,7 @@
 import 'x11_client.dart';
 import 'x11_errors.dart';
 import 'x11_read_buffer.dart';
-import 'x11_requests.dart';
+import 'x11_render_requests.dart';
 import 'x11_types.dart';
 
 class X11RenderExtension extends X11Extension {
