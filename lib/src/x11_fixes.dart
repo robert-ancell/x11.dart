@@ -1,6 +1,7 @@
 import 'x11_client.dart';
 import 'x11_errors.dart';
 import 'x11_events.dart';
+import 'x11_fixes_events.dart';
 import 'x11_fixes_requests.dart';
 import 'x11_read_buffer.dart';
 import 'x11_types.dart';

@@ -1,4 +1,5 @@
 import 'x11_client.dart';
+import 'x11_damage_events.dart';
 import 'x11_damage_requests.dart';
 import 'x11_errors.dart';
 import 'x11_events.dart';
