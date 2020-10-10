@@ -11,6 +11,7 @@ import 'x11_randr.dart';
 import 'x11_requests.dart';
 import 'x11_read_buffer.dart';
 import 'x11_render.dart';
+import 'x11_screensaver.dart';
 import 'x11_shape.dart';
 import 'x11_sync.dart';
 import 'x11_types.dart';
@@ -126,6 +127,9 @@ class X11Client {
   /// DAMAGE extension, or null if it doesn't exist.
   X11DamageExtension get damage => _damage;
 
+  /// MIT-SCREEN-SAVER extension, or null if it doesn't exist.
+  X11ScreensaverExtension get screensaver => _screensaver;
+
   Socket _socket;
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
@@ -147,6 +151,7 @@ class X11Client {
   X11RenderExtension _render;
   X11RandrExtension _randr;
   X11DamageExtension _damage;
+  X11ScreensaverExtension _screensaver;
 
   /// Creates a new X client.
   /// Call [connect] or [connectToHost] to connect to an X server.
@@ -314,6 +319,12 @@ class X11Client {
         if (reply.present) {
           _damage = X11DamageExtension(
               this, reply.majorOpcode, reply.firstEvent, reply.firstError);
+        }
+      }),
+      queryExtension('MIT-SCREEN-SAVER').then((reply) {
+        if (reply.present) {
+          _screensaver = X11ScreensaverExtension(
+              this, reply.majorOpcode, reply.firstEvent);
         }
       }),
     ]);

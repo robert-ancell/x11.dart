@@ -277,6 +277,12 @@ enum X11RandrSelectMask {
 
 enum X11Repeat { none, regular, pad, reflect }
 
+enum X11ScreensaverEventType { notify, cycle }
+
+enum X11ScreensaverKind { blanked, internal, external }
+
+enum X11ScreensaverState { disabled, off, on }
+
 enum X11ShapeKind { bounding, clip, input }
 
 enum X11ShapeOperation { set, union, intersect, invert }
