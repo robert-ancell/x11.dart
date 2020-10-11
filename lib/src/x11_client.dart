@@ -111,32 +111,32 @@ class X11Client {
   /// Stream of events from the X server.
   Stream<X11Event> get eventStream => _eventStreamController.stream;
 
-  /// SYNC extension, or null if it doesn't exist.
-  X11SyncExtension get sync => _sync;
-
-  /// SHAPE extension, or null if it doesn't exist.
-  X11ShapeExtension get shape => _shape;
-
-  /// XFIXES extension, or null if it doesn't exist.
-  X11FixesExtension get fixes => _fixes;
-
-  /// RENDER extension, or null if it doesn't exist.
-  X11RenderExtension get render => _render;
-
-  /// RANDR extension, or null if it doesn't exist.
-  X11RandrExtension get randr => _randr;
+  /// Composite extension, or null if it doesn't exist.
+  X11CompositeExtension get composite => _composite;
 
   /// DAMAGE extension, or null if it doesn't exist.
   X11DamageExtension get damage => _damage;
 
+  /// DPMS extension, or null if it doesn't exist.
+  X11DpmsExtension get dpms => _dpms;
+
+  /// XFIXES extension, or null if it doesn't exist.
+  X11FixesExtension get fixes => _fixes;
+
+  /// RANDR extension, or null if it doesn't exist.
+  X11RandrExtension get randr => _randr;
+
+  /// RENDER extension, or null if it doesn't exist.
+  X11RenderExtension get render => _render;
+
   /// MIT-SCREEN-SAVER extension, or null if it doesn't exist.
   X11ScreensaverExtension get screensaver => _screensaver;
 
-  /// Composite extension, or null if it doesn't exist.
-  X11CompositeExtension get composite => _composite;
+  /// SHAPE extension, or null if it doesn't exist.
+  X11ShapeExtension get shape => _shape;
 
-  /// DPMS extension, or null if it doesn't exist.
-  X11DpmsExtension get dpms => _dpms;
+  /// SYNC extension, or null if it doesn't exist.
+  X11SyncExtension get sync => _sync;
 
   Socket _socket;
   final _buffer = X11ReadBuffer();
@@ -153,15 +153,15 @@ class X11Client {
   final _atoms = <String, int>{};
   final _atomNames = <int, String>{};
 
-  X11SyncExtension _sync;
-  X11ShapeExtension _shape;
-  X11FixesExtension _fixes;
-  X11RenderExtension _render;
-  X11RandrExtension _randr;
-  X11DamageExtension _damage;
-  X11ScreensaverExtension _screensaver;
   X11CompositeExtension _composite;
+  X11DamageExtension _damage;
   X11DpmsExtension _dpms;
+  X11FixesExtension _fixes;
+  X11RandrExtension _randr;
+  X11RenderExtension _render;
+  X11ScreensaverExtension _screensaver;
+  X11ShapeExtension _shape;
+  X11SyncExtension _sync;
 
   /// Creates a new X client.
   /// Call [connect] or [connectToHost] to connect to an X server.
@@ -297,19 +297,31 @@ class X11Client {
           _maximumRequestLength = await bigRequests.bigReqEnable();
         }
       }),
-      queryExtension('SYNC').then((reply) async {
+      queryExtension('Composite').then((reply) {
         if (reply.present) {
-          _sync = X11SyncExtension(this, reply.majorOpcode);
+          _composite = X11CompositeExtension(this, reply.majorOpcode);
         }
       }),
-      queryExtension('SHAPE').then((reply) {
+      queryExtension('DAMAGE').then((reply) {
         if (reply.present) {
-          _shape = X11ShapeExtension(this, reply.majorOpcode, reply.firstEvent);
+          _damage = X11DamageExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
+        }
+      }),
+      queryExtension('DPMS').then((reply) {
+        if (reply.present) {
+          _dpms = X11DpmsExtension(this, reply.majorOpcode);
         }
       }),
       queryExtension('XFIXES').then((reply) {
         if (reply.present) {
           _fixes = X11FixesExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
+        }
+      }),
+      queryExtension('RANDR').then((reply) {
+        if (reply.present) {
+          _randr = X11RandrExtension(
               this, reply.majorOpcode, reply.firstEvent, reply.firstError);
         }
       }),
@@ -319,32 +331,20 @@ class X11Client {
               X11RenderExtension(this, reply.majorOpcode, reply.firstError);
         }
       }),
-      queryExtension('RANDR').then((reply) {
-        if (reply.present) {
-          _randr = X11RandrExtension(
-              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
-        }
-      }),
-      queryExtension('DAMAGE').then((reply) {
-        if (reply.present) {
-          _damage = X11DamageExtension(
-              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
-        }
-      }),
       queryExtension('MIT-SCREEN-SAVER').then((reply) {
         if (reply.present) {
           _screensaver = X11ScreensaverExtension(
               this, reply.majorOpcode, reply.firstEvent);
         }
       }),
-      queryExtension('Composite').then((reply) {
+      queryExtension('SHAPE').then((reply) {
         if (reply.present) {
-          _composite = X11CompositeExtension(this, reply.majorOpcode);
+          _shape = X11ShapeExtension(this, reply.majorOpcode, reply.firstEvent);
         }
       }),
-      queryExtension('DPMS').then((reply) {
+      queryExtension('SYNC').then((reply) async {
         if (reply.present) {
-          _dpms = X11DpmsExtension(this, reply.majorOpcode);
+          _sync = X11SyncExtension(this, reply.majorOpcode);
         }
       }),
     ]);
