@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'x11_big_requests.dart';
 import 'x11_composite.dart';
 import 'x11_damage.dart';
 import 'x11_dpms.dart';
@@ -83,21 +84,6 @@ class X11Extension {
 
   X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
     return null;
-  }
-}
-
-class X11BigRequestsExtension extends X11Extension {
-  final X11Client _client;
-  final int _majorOpcode;
-
-  X11BigRequestsExtension(this._client, this._majorOpcode);
-
-  Future<int> bigReqEnable() async {
-    var request = X11BigReqEnableRequest();
-    var sequenceNumber = _client.sendRequest(_majorOpcode + 0, request);
-    var reply = await _client.awaitReply<X11BigReqEnableReply>(
-        sequenceNumber, X11BigReqEnableReply.fromBuffer);
-    return reply.maximumRequestLength;
   }
 }
 
@@ -294,7 +280,7 @@ class X11Client {
       queryExtension('BIG-REQUESTS').then((reply) async {
         if (reply.present) {
           var bigRequests = X11BigRequestsExtension(this, reply.majorOpcode);
-          _maximumRequestLength = await bigRequests.bigReqEnable();
+          _maximumRequestLength = await bigRequests.enable();
         }
       }),
       queryExtension('Composite').then((reply) {

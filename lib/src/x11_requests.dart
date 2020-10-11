@@ -7044,23 +7044,6 @@ class X11NoOperationRequest extends X11Request {
   String toString() => 'X11NoOperationRequest()';
 }
 
-class X11BigReqEnableRequest extends X11Request {
-  X11BigReqEnableRequest();
-
-  factory X11BigReqEnableRequest.fromBuffer(X11ReadBuffer buffer) {
-    buffer.skip(1);
-    return X11BigReqEnableRequest();
-  }
-
-  @override
-  void encode(X11WriteBuffer buffer) {
-    buffer.skip(1);
-  }
-
-  @override
-  String toString() => 'X11BigReqEnableRequest()';
-}
-
 class X11BigReqEnableReply extends X11Reply {
   final int maximumRequestLength;
 
