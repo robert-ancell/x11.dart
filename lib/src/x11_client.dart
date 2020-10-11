@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'x11_composite.dart';
 import 'x11_damage.dart';
+import 'x11_dpms.dart';
 import 'x11_errors.dart';
 import 'x11_events.dart';
 import 'x11_fixes.dart';
@@ -134,6 +135,9 @@ class X11Client {
   /// Composite extension, or null if it doesn't exist.
   X11CompositeExtension get composite => _composite;
 
+  /// DPMS extension, or null if it doesn't exist.
+  X11DpmsExtension get dpms => _dpms;
+
   Socket _socket;
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
@@ -157,6 +161,7 @@ class X11Client {
   X11DamageExtension _damage;
   X11ScreensaverExtension _screensaver;
   X11CompositeExtension _composite;
+  X11DpmsExtension _dpms;
 
   /// Creates a new X client.
   /// Call [connect] or [connectToHost] to connect to an X server.
@@ -335,6 +340,11 @@ class X11Client {
       queryExtension('Composite').then((reply) {
         if (reply.present) {
           _composite = X11CompositeExtension(this, reply.majorOpcode);
+        }
+      }),
+      queryExtension('DPMS').then((reply) {
+        if (reply.present) {
+          _dpms = X11DpmsExtension(this, reply.majorOpcode);
         }
       }),
     ]);
