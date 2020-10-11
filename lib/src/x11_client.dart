@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'x11_composite.dart';
 import 'x11_damage.dart';
 import 'x11_errors.dart';
 import 'x11_events.dart';
@@ -130,6 +131,9 @@ class X11Client {
   /// MIT-SCREEN-SAVER extension, or null if it doesn't exist.
   X11ScreensaverExtension get screensaver => _screensaver;
 
+  /// Composite extension, or null if it doesn't exist.
+  X11CompositeExtension get composite => _composite;
+
   Socket _socket;
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
@@ -152,6 +156,7 @@ class X11Client {
   X11RandrExtension _randr;
   X11DamageExtension _damage;
   X11ScreensaverExtension _screensaver;
+  X11CompositeExtension _composite;
 
   /// Creates a new X client.
   /// Call [connect] or [connectToHost] to connect to an X server.
@@ -325,6 +330,11 @@ class X11Client {
         if (reply.present) {
           _screensaver = X11ScreensaverExtension(
               this, reply.majorOpcode, reply.firstEvent);
+        }
+      }),
+      queryExtension('Composite').then((reply) {
+        if (reply.present) {
+          _composite = X11CompositeExtension(this, reply.majorOpcode);
         }
       }),
     ]);
