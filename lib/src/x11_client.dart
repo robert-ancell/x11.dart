@@ -9,7 +9,6 @@ import 'x11_damage.dart';
 import 'x11_dpms.dart';
 import 'x11_errors.dart';
 import 'x11_events.dart';
-import 'x11_fixes.dart';
 import 'x11_mit_screen_saver.dart';
 import 'x11_mit_shm.dart';
 import 'x11_randr.dart';
@@ -20,6 +19,7 @@ import 'x11_shape.dart';
 import 'x11_sync.dart';
 import 'x11_types.dart';
 import 'x11_write_buffer.dart';
+import 'x11_xfixes.dart';
 
 abstract class _RequestHandler {
   bool get done;
@@ -113,9 +113,6 @@ class X11Client {
   /// MIT-SHM extension, or null if it doesn't exist.
   X11MitShmExtension get mitShm => _mitShm;
 
-  /// XFIXES extension, or null if it doesn't exist.
-  X11FixesExtension get fixes => _fixes;
-
   /// RANDR extension, or null if it doesn't exist.
   X11RandrExtension get randr => _randr;
 
@@ -127,6 +124,9 @@ class X11Client {
 
   /// SYNC extension, or null if it doesn't exist.
   X11SyncExtension get sync => _sync;
+
+  /// XFIXES extension, or null if it doesn't exist.
+  X11XFixesExtension get xfixes => _xfixes;
 
   Socket _socket;
   final _buffer = X11ReadBuffer();
@@ -146,13 +146,13 @@ class X11Client {
   X11CompositeExtension _composite;
   X11DamageExtension _damage;
   X11DpmsExtension _dpms;
-  X11FixesExtension _fixes;
   X11MitScreenSaverExtension _mitScreenSaver;
   X11MitShmExtension _mitShm;
   X11RandrExtension _randr;
   X11RenderExtension _render;
   X11ShapeExtension _shape;
   X11SyncExtension _sync;
+  X11XFixesExtension _xfixes;
 
   /// Creates a new X client.
   /// Call [connect] or [connectToHost] to connect to an X server.
@@ -304,12 +304,6 @@ class X11Client {
           _dpms = X11DpmsExtension(this, reply.majorOpcode);
         }
       }),
-      queryExtension('XFIXES').then((reply) {
-        if (reply.present) {
-          _fixes = X11FixesExtension(
-              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
-        }
-      }),
       queryExtension('MIT-SCREEN-SAVER').then((reply) {
         if (reply.present) {
           _mitScreenSaver = X11MitScreenSaverExtension(
@@ -342,6 +336,12 @@ class X11Client {
       queryExtension('SYNC').then((reply) async {
         if (reply.present) {
           _sync = X11SyncExtension(this, reply.majorOpcode);
+        }
+      }),
+      queryExtension('XFIXES').then((reply) {
+        if (reply.present) {
+          _xfixes = X11XFixesExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
         }
       }),
     ]);

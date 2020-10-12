@@ -3,7 +3,7 @@ import 'x11_read_buffer.dart';
 import 'x11_types.dart';
 import 'x11_write_buffer.dart';
 
-class X11FixesSelectionNotifyEvent extends X11Event {
+class X11XFixesSelectionNotifyEvent extends X11Event {
   final int firstEventCode;
   final X11EventType subtype;
   final int window;
@@ -12,11 +12,11 @@ class X11FixesSelectionNotifyEvent extends X11Event {
   final int timestamp;
   final int selectionTimestamp;
 
-  X11FixesSelectionNotifyEvent(this.firstEventCode, this.subtype, this.window,
+  X11XFixesSelectionNotifyEvent(this.firstEventCode, this.subtype, this.window,
       this.owner, this.selection,
       {this.timestamp = 0, this.selectionTimestamp = 0});
 
-  factory X11FixesSelectionNotifyEvent.fromBuffer(
+  factory X11XFixesSelectionNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
     var subtype = X11EventType.values[buffer.readUint8()];
     var window = buffer.readUint32();
@@ -25,7 +25,7 @@ class X11FixesSelectionNotifyEvent extends X11Event {
     var timestamp = buffer.readUint32();
     var selectionTimestamp = buffer.readUint32();
     buffer.skip(8);
-    return X11FixesSelectionNotifyEvent(
+    return X11XFixesSelectionNotifyEvent(
         firstEventCode, subtype, window, owner, selection,
         timestamp: timestamp, selectionTimestamp: selectionTimestamp);
   }
@@ -44,7 +44,7 @@ class X11FixesSelectionNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11FixesSelectionNotifyEvent(${subtype}, ${window}, ${owner}, ${selection}, timestamp: ${timestamp}, selectionTimestamp: ${selectionTimestamp})';
+      'X11XFixesSelectionNotifyEvent(${subtype}, ${window}, ${owner}, ${selection}, timestamp: ${timestamp}, selectionTimestamp: ${selectionTimestamp})';
 }
 
 class X11CursorNotifyEvent extends X11Event {

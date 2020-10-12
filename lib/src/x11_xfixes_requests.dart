@@ -30,15 +30,15 @@ int _encodeEventMask(Set<X11EventType> mask) {
   return flags;
 }
 
-class X11FixesQueryVersionRequest extends X11Request {
+class X11XFixesQueryVersionRequest extends X11Request {
   final X11Version clientVersion;
 
-  X11FixesQueryVersionRequest([this.clientVersion = const X11Version(5, 0)]);
+  X11XFixesQueryVersionRequest([this.clientVersion = const X11Version(5, 0)]);
 
-  factory X11FixesQueryVersionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesQueryVersionRequest.fromBuffer(X11ReadBuffer buffer) {
     var clientMajorVersion = buffer.readUint32();
     var clientMinorVersion = buffer.readUint32();
-    return X11FixesQueryVersionRequest(
+    return X11XFixesQueryVersionRequest(
         X11Version(clientMajorVersion, clientMinorVersion));
   }
 
@@ -50,20 +50,20 @@ class X11FixesQueryVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesQueryVersionRequest(${clientVersion})';
+  String toString() => 'X11XFixesQueryVersionRequest(${clientVersion})';
 }
 
-class X11FixesQueryVersionReply extends X11Reply {
+class X11XFixesQueryVersionReply extends X11Reply {
   final X11Version version;
 
-  X11FixesQueryVersionReply([this.version = const X11Version(5, 0)]);
+  X11XFixesQueryVersionReply([this.version = const X11Version(5, 0)]);
 
-  static X11FixesQueryVersionReply fromBuffer(X11ReadBuffer buffer) {
+  static X11XFixesQueryVersionReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var majorVersion = buffer.readUint32();
     var minorVersion = buffer.readUint32();
     buffer.skip(16);
-    return X11FixesQueryVersionReply(X11Version(majorVersion, minorVersion));
+    return X11XFixesQueryVersionReply(X11Version(majorVersion, minorVersion));
   }
 
   @override
@@ -75,26 +75,27 @@ class X11FixesQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11FixesQueryVersionReply(${version})';
+  String toString() => 'X11XFixesQueryVersionReply(${version})';
 }
 
-class X11FixesChangeSaveSetRequest extends X11Request {
+class X11XFixesChangeSaveSetRequest extends X11Request {
   final int window;
   final X11ChangeSetMode mode;
   final X11ChangeSetTarget target;
   final X11ChangeSetMap map;
 
-  X11FixesChangeSaveSetRequest(this.window, this.mode,
+  X11XFixesChangeSaveSetRequest(this.window, this.mode,
       {this.target = X11ChangeSetTarget.nearest,
       this.map = X11ChangeSetMap.map});
 
-  factory X11FixesChangeSaveSetRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesChangeSaveSetRequest.fromBuffer(X11ReadBuffer buffer) {
     var mode = X11ChangeSetMode.values[buffer.readUint8()];
     var target = X11ChangeSetTarget.values[buffer.readUint8()];
     var map = X11ChangeSetMap.values[buffer.readUint8()];
     buffer.skip(1);
     var window = buffer.readUint32();
-    return X11FixesChangeSaveSetRequest(window, mode, target: target, map: map);
+    return X11XFixesChangeSaveSetRequest(window, mode,
+        target: target, map: map);
   }
 
   @override
@@ -109,21 +110,23 @@ class X11FixesChangeSaveSetRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesChangeSaveSetRequest(${window}, ${mode}, target: ${target}, map: ${map})';
+      'X11XFixesChangeSaveSetRequest(${window}, ${mode}, target: ${target}, map: ${map})';
 }
 
-class X11FixesSelectSelectionInputRequest extends X11Request {
+class X11XFixesSelectSelectionInputRequest extends X11Request {
   final int window;
   final int selection;
   final Set<X11EventType> events;
 
-  X11FixesSelectSelectionInputRequest(this.window, this.selection, this.events);
+  X11XFixesSelectSelectionInputRequest(
+      this.window, this.selection, this.events);
 
-  factory X11FixesSelectSelectionInputRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesSelectSelectionInputRequest.fromBuffer(
+      X11ReadBuffer buffer) {
     var window = buffer.readUint32();
     var selection = buffer.readUint32();
     var events = _decodeEventMask(buffer.readUint32());
-    return X11FixesSelectSelectionInputRequest(window, selection, events);
+    return X11XFixesSelectSelectionInputRequest(window, selection, events);
   }
 
   @override
@@ -136,19 +139,19 @@ class X11FixesSelectSelectionInputRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesSelectSelectionInputRequest(${window}, ${selection}, ${events})';
+      'X11XFixesSelectSelectionInputRequest(${window}, ${selection}, ${events})';
 }
 
-class X11FixesSelectCursorInputRequest extends X11Request {
+class X11XFixesSelectCursorInputRequest extends X11Request {
   final int window;
   final Set<X11EventType> events;
 
-  X11FixesSelectCursorInputRequest(this.window, this.events);
+  X11XFixesSelectCursorInputRequest(this.window, this.events);
 
-  factory X11FixesSelectCursorInputRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesSelectCursorInputRequest.fromBuffer(X11ReadBuffer buffer) {
     var window = buffer.readUint32();
     var events = _decodeEventMask(buffer.readUint32());
-    return X11FixesSelectCursorInputRequest(window, events);
+    return X11XFixesSelectCursorInputRequest(window, events);
   }
 
   @override
@@ -159,14 +162,15 @@ class X11FixesSelectCursorInputRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesSelectCursorInputRequest(${window}, ${events})';
+  String toString() =>
+      'X11XFixesSelectCursorInputRequest(${window}, ${events})';
 }
 
-class X11FixesGetCursorImageRequest extends X11Request {
-  X11FixesGetCursorImageRequest();
+class X11XFixesGetCursorImageRequest extends X11Request {
+  X11XFixesGetCursorImageRequest();
 
-  factory X11FixesGetCursorImageRequest.fromBuffer(X11ReadBuffer buffer) {
-    return X11FixesGetCursorImageRequest();
+  factory X11XFixesGetCursorImageRequest.fromBuffer(X11ReadBuffer buffer) {
+    return X11XFixesGetCursorImageRequest();
   }
 
   @override
@@ -175,17 +179,17 @@ class X11FixesGetCursorImageRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesGetCursorImageRequest()';
+  String toString() => 'X11XFixesGetCursorImageRequest()';
 }
 
-class X11FixesGetCursorImageReply extends X11Reply {
+class X11XFixesGetCursorImageReply extends X11Reply {
   final X11Size size;
   final List<int> data;
   final X11Point location;
   final X11Point hotspot;
   final int cursorSerial;
 
-  X11FixesGetCursorImageReply(
+  X11XFixesGetCursorImageReply(
     this.size,
     this.data, {
     this.location = const X11Point(0, 0),
@@ -193,7 +197,7 @@ class X11FixesGetCursorImageReply extends X11Reply {
     this.cursorSerial = 0,
   });
 
-  static X11FixesGetCursorImageReply fromBuffer(X11ReadBuffer buffer) {
+  static X11XFixesGetCursorImageReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var x = buffer.readInt16();
     var y = buffer.readInt16();
@@ -204,7 +208,7 @@ class X11FixesGetCursorImageReply extends X11Reply {
     var cursorSerial = buffer.readUint32();
     buffer.skip(8);
     var data = buffer.readListOfUint32(width * height);
-    return X11FixesGetCursorImageReply(X11Size(width, height), data,
+    return X11XFixesGetCursorImageReply(X11Size(width, height), data,
         location: X11Point(x, y),
         hotspot: X11Point(hotspotX, hotspotY),
         cursorSerial: cursorSerial);
@@ -226,16 +230,16 @@ class X11FixesGetCursorImageReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11FixesGetCursorImageReply(${size}, location: ${location}, hotspot: ${hotspot}, cursorSerial: ${cursorSerial})';
+      'X11XFixesGetCursorImageReply(${size}, location: ${location}, hotspot: ${hotspot}, cursorSerial: ${cursorSerial})';
 }
 
-class X11FixesCreateRegionRequest extends X11Request {
+class X11XFixesCreateRegionRequest extends X11Request {
   final int id;
   final List<X11Rectangle> rectangles;
 
-  X11FixesCreateRegionRequest(this.id, this.rectangles);
+  X11XFixesCreateRegionRequest(this.id, this.rectangles);
 
-  factory X11FixesCreateRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesCreateRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var id = buffer.readUint32();
     var rectangles = <X11Rectangle>[];
     while (buffer.remaining > 0) {
@@ -245,7 +249,7 @@ class X11FixesCreateRegionRequest extends X11Request {
       var height = buffer.readUint16();
       rectangles.add(X11Rectangle(x, y, width, height));
     }
-    return X11FixesCreateRegionRequest(id, rectangles);
+    return X11XFixesCreateRegionRequest(id, rectangles);
   }
 
   @override
@@ -261,20 +265,20 @@ class X11FixesCreateRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesCreateRegionRequest(${id}, ${rectangles})';
+  String toString() => 'X11XFixesCreateRegionRequest(${id}, ${rectangles})';
 }
 
-class X11FixesCreateRegionFromBitmapRequest extends X11Request {
+class X11XFixesCreateRegionFromBitmapRequest extends X11Request {
   final int id;
   final int bitmap;
 
-  X11FixesCreateRegionFromBitmapRequest(this.id, this.bitmap);
+  X11XFixesCreateRegionFromBitmapRequest(this.id, this.bitmap);
 
-  factory X11FixesCreateRegionFromBitmapRequest.fromBuffer(
+  factory X11XFixesCreateRegionFromBitmapRequest.fromBuffer(
       X11ReadBuffer buffer) {
     var id = buffer.readUint32();
     var bitmap = buffer.readUint32();
-    return X11FixesCreateRegionFromBitmapRequest(id, bitmap);
+    return X11XFixesCreateRegionFromBitmapRequest(id, bitmap);
   }
 
   @override
@@ -286,23 +290,23 @@ class X11FixesCreateRegionFromBitmapRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesCreateRegionFromBitmapRequest(${id}, ${bitmap})';
+      'X11XFixesCreateRegionFromBitmapRequest(${id}, ${bitmap})';
 }
 
-class X11FixesCreateRegionFromWindowRequest extends X11Request {
+class X11XFixesCreateRegionFromWindowRequest extends X11Request {
   final int id;
   final int window;
   final X11ShapeKind kind;
 
-  X11FixesCreateRegionFromWindowRequest(this.id, this.window, {this.kind});
+  X11XFixesCreateRegionFromWindowRequest(this.id, this.window, {this.kind});
 
-  factory X11FixesCreateRegionFromWindowRequest.fromBuffer(
+  factory X11XFixesCreateRegionFromWindowRequest.fromBuffer(
       X11ReadBuffer buffer) {
     var id = buffer.readUint32();
     var window = buffer.readUint32();
     var kind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(3);
-    return X11FixesCreateRegionFromWindowRequest(id, window, kind: kind);
+    return X11XFixesCreateRegionFromWindowRequest(id, window, kind: kind);
   }
 
   @override
@@ -316,19 +320,19 @@ class X11FixesCreateRegionFromWindowRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesCreateRegionFromWindowRequest(${id}, ${window}, kind: ${kind})';
+      'X11XFixesCreateRegionFromWindowRequest(${id}, ${window}, kind: ${kind})';
 }
 
-class X11FixesCreateRegionFromGCRequest extends X11Request {
+class X11XFixesCreateRegionFromGCRequest extends X11Request {
   final int id;
   final int gc;
 
-  X11FixesCreateRegionFromGCRequest(this.id, this.gc);
+  X11XFixesCreateRegionFromGCRequest(this.id, this.gc);
 
-  factory X11FixesCreateRegionFromGCRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesCreateRegionFromGCRequest.fromBuffer(X11ReadBuffer buffer) {
     var id = buffer.readUint32();
     var gc = buffer.readUint32();
-    return X11FixesCreateRegionFromGCRequest(id, gc);
+    return X11XFixesCreateRegionFromGCRequest(id, gc);
   }
 
   @override
@@ -339,20 +343,20 @@ class X11FixesCreateRegionFromGCRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesCreateRegionFromGCRequest(${id}, ${gc})';
+  String toString() => 'X11XFixesCreateRegionFromGCRequest(${id}, ${gc})';
 }
 
-class X11FixesCreateRegionFromPictureRequest extends X11Request {
+class X11XFixesCreateRegionFromPictureRequest extends X11Request {
   final int id;
   final int picture;
 
-  X11FixesCreateRegionFromPictureRequest(this.id, this.picture);
+  X11XFixesCreateRegionFromPictureRequest(this.id, this.picture);
 
-  factory X11FixesCreateRegionFromPictureRequest.fromBuffer(
+  factory X11XFixesCreateRegionFromPictureRequest.fromBuffer(
       X11ReadBuffer buffer) {
     var id = buffer.readUint32();
     var picture = buffer.readUint32();
-    return X11FixesCreateRegionFromPictureRequest(id, picture);
+    return X11XFixesCreateRegionFromPictureRequest(id, picture);
   }
 
   @override
@@ -364,17 +368,17 @@ class X11FixesCreateRegionFromPictureRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesCreateRegionFromPictureRequest(${id}, ${picture})';
+      'X11XFixesCreateRegionFromPictureRequest(${id}, ${picture})';
 }
 
-class X11FixesDestroyRegionRequest extends X11Request {
+class X11XFixesDestroyRegionRequest extends X11Request {
   final int region;
 
-  X11FixesDestroyRegionRequest(this.region);
+  X11XFixesDestroyRegionRequest(this.region);
 
-  factory X11FixesDestroyRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesDestroyRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var region = buffer.readUint32();
-    return X11FixesDestroyRegionRequest(region);
+    return X11XFixesDestroyRegionRequest(region);
   }
 
   @override
@@ -384,16 +388,16 @@ class X11FixesDestroyRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesDestroyRegionRequest(${region})';
+  String toString() => 'X11XFixesDestroyRegionRequest(${region})';
 }
 
-class X11FixesSetRegionRequest extends X11Request {
+class X11XFixesSetRegionRequest extends X11Request {
   final int region;
   final List<X11Rectangle> rectangles;
 
-  X11FixesSetRegionRequest(this.region, this.rectangles);
+  X11XFixesSetRegionRequest(this.region, this.rectangles);
 
-  factory X11FixesSetRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesSetRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var region = buffer.readUint32();
     var rectangles = <X11Rectangle>[];
     while (buffer.remaining > 0) {
@@ -403,7 +407,7 @@ class X11FixesSetRegionRequest extends X11Request {
       var height = buffer.readUint16();
       rectangles.add(X11Rectangle(x, y, width, height));
     }
-    return X11FixesSetRegionRequest(region, rectangles);
+    return X11XFixesSetRegionRequest(region, rectangles);
   }
 
   @override
@@ -419,19 +423,19 @@ class X11FixesSetRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesSetRegionRequest(${region}, ${rectangles})';
+  String toString() => 'X11XFixesSetRegionRequest(${region}, ${rectangles})';
 }
 
-class X11FixesCopyRegionRequest extends X11Request {
+class X11XFixesCopyRegionRequest extends X11Request {
   final int region;
   final int sourceRegion;
 
-  X11FixesCopyRegionRequest(this.region, this.sourceRegion);
+  X11XFixesCopyRegionRequest(this.region, this.sourceRegion);
 
-  factory X11FixesCopyRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesCopyRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var sourceRegion = buffer.readUint32();
     var region = buffer.readUint32();
-    return X11FixesCopyRegionRequest(region, sourceRegion);
+    return X11XFixesCopyRegionRequest(region, sourceRegion);
   }
 
   @override
@@ -442,22 +446,22 @@ class X11FixesCopyRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesCopyRegionRequest(${region}, ${sourceRegion})';
+  String toString() => 'X11XFixesCopyRegionRequest(${region}, ${sourceRegion})';
 }
 
-class X11FixesUnionRegionRequest extends X11Request {
+class X11XFixesUnionRegionRequest extends X11Request {
   final int region;
   final int sourceRegion1;
   final int sourceRegion2;
 
-  X11FixesUnionRegionRequest(
+  X11XFixesUnionRegionRequest(
       this.region, this.sourceRegion1, this.sourceRegion2);
 
-  factory X11FixesUnionRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesUnionRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var sourceRegion1 = buffer.readUint32();
     var sourceRegion2 = buffer.readUint32();
     var region = buffer.readUint32();
-    return X11FixesUnionRegionRequest(region, sourceRegion1, sourceRegion2);
+    return X11XFixesUnionRegionRequest(region, sourceRegion1, sourceRegion2);
   }
 
   @override
@@ -470,22 +474,23 @@ class X11FixesUnionRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesUnionRegionRequest(${region}, ${sourceRegion1}, ${sourceRegion2})';
+      'X11XFixesUnionRegionRequest(${region}, ${sourceRegion1}, ${sourceRegion2})';
 }
 
-class X11FixesIntersectRegionRequest extends X11Request {
+class X11XFixesIntersectRegionRequest extends X11Request {
   final int region;
   final int sourceRegion1;
   final int sourceRegion2;
 
-  X11FixesIntersectRegionRequest(
+  X11XFixesIntersectRegionRequest(
       this.region, this.sourceRegion1, this.sourceRegion2);
 
-  factory X11FixesIntersectRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesIntersectRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var sourceRegion1 = buffer.readUint32();
     var sourceRegion2 = buffer.readUint32();
     var region = buffer.readUint32();
-    return X11FixesIntersectRegionRequest(region, sourceRegion1, sourceRegion2);
+    return X11XFixesIntersectRegionRequest(
+        region, sourceRegion1, sourceRegion2);
   }
 
   @override
@@ -498,22 +503,22 @@ class X11FixesIntersectRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesIntersectRegionRequest(${region}, ${sourceRegion1}, ${sourceRegion2})';
+      'X11XFixesIntersectRegionRequest(${region}, ${sourceRegion1}, ${sourceRegion2})';
 }
 
-class X11FixesSubtractRegionRequest extends X11Request {
+class X11XFixesSubtractRegionRequest extends X11Request {
   final int region;
   final int sourceRegion1;
   final int sourceRegion2;
 
-  X11FixesSubtractRegionRequest(
+  X11XFixesSubtractRegionRequest(
       this.region, this.sourceRegion1, this.sourceRegion2);
 
-  factory X11FixesSubtractRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesSubtractRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var sourceRegion1 = buffer.readUint32();
     var sourceRegion2 = buffer.readUint32();
     var region = buffer.readUint32();
-    return X11FixesSubtractRegionRequest(region, sourceRegion1, sourceRegion2);
+    return X11XFixesSubtractRegionRequest(region, sourceRegion1, sourceRegion2);
   }
 
   @override
@@ -526,24 +531,24 @@ class X11FixesSubtractRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesSubtractRegionRequest(${region}, ${sourceRegion1}, ${sourceRegion2})';
+      'X11XFixesSubtractRegionRequest(${region}, ${sourceRegion1}, ${sourceRegion2})';
 }
 
-class X11FixesInvertRegionRequest extends X11Request {
+class X11XFixesInvertRegionRequest extends X11Request {
   final int region;
   final int sourceRegion;
   final X11Rectangle bounds;
 
-  X11FixesInvertRegionRequest(this.region, this.bounds, this.sourceRegion);
+  X11XFixesInvertRegionRequest(this.region, this.bounds, this.sourceRegion);
 
-  factory X11FixesInvertRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesInvertRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var sourceRegion = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     var region = buffer.readUint32();
-    return X11FixesInvertRegionRequest(
+    return X11XFixesInvertRegionRequest(
         region, X11Rectangle(x, y, width, height), sourceRegion);
   }
 
@@ -560,20 +565,20 @@ class X11FixesInvertRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesInvertRegionRequest(${region}, ${bounds}, ${sourceRegion})';
+      'X11XFixesInvertRegionRequest(${region}, ${bounds}, ${sourceRegion})';
 }
 
-class X11FixesTranslateRegionRequest extends X11Request {
+class X11XFixesTranslateRegionRequest extends X11Request {
   final int region;
   final X11Point offset;
 
-  X11FixesTranslateRegionRequest(this.region, this.offset);
+  X11XFixesTranslateRegionRequest(this.region, this.offset);
 
-  factory X11FixesTranslateRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesTranslateRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var region = buffer.readUint32();
     var dx = buffer.readInt16();
     var dy = buffer.readInt16();
-    return X11FixesTranslateRegionRequest(region, X11Point(dx, dy));
+    return X11XFixesTranslateRegionRequest(region, X11Point(dx, dy));
   }
 
   @override
@@ -585,19 +590,19 @@ class X11FixesTranslateRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesTranslateRegionRequest(${region}, ${offset})';
+  String toString() => 'X11XFixesTranslateRegionRequest(${region}, ${offset})';
 }
 
-class X11FixesRegionExtentsRequest extends X11Request {
+class X11XFixesRegionExtentsRequest extends X11Request {
   final int region;
   final int sourceRegion;
 
-  X11FixesRegionExtentsRequest(this.region, this.sourceRegion);
+  X11XFixesRegionExtentsRequest(this.region, this.sourceRegion);
 
-  factory X11FixesRegionExtentsRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesRegionExtentsRequest.fromBuffer(X11ReadBuffer buffer) {
     var sourceRegion = buffer.readUint32();
     var region = buffer.readUint32();
-    return X11FixesRegionExtentsRequest(region, sourceRegion);
+    return X11XFixesRegionExtentsRequest(region, sourceRegion);
   }
 
   @override
@@ -609,17 +614,17 @@ class X11FixesRegionExtentsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesRegionExtentsRequest(${region}, ${sourceRegion})';
+      'X11XFixesRegionExtentsRequest(${region}, ${sourceRegion})';
 }
 
-class X11FixesFetchRegionRequest extends X11Request {
+class X11XFixesFetchRegionRequest extends X11Request {
   final int region;
 
-  X11FixesFetchRegionRequest(this.region);
+  X11XFixesFetchRegionRequest(this.region);
 
-  factory X11FixesFetchRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesFetchRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var region = buffer.readUint32();
-    return X11FixesFetchRegionRequest(region);
+    return X11XFixesFetchRegionRequest(region);
   }
 
   @override
@@ -629,16 +634,16 @@ class X11FixesFetchRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesFetchRegionRequest(region: ${region})';
+  String toString() => 'X11XFixesFetchRegionRequest(region: ${region})';
 }
 
-class X11FixesFetchRegionReply extends X11Reply {
+class X11XFixesFetchRegionReply extends X11Reply {
   final X11Rectangle extents;
   final List<X11Rectangle> rectangles;
 
-  X11FixesFetchRegionReply({this.extents, this.rectangles});
+  X11XFixesFetchRegionReply({this.extents, this.rectangles});
 
-  static X11FixesFetchRegionReply fromBuffer(X11ReadBuffer buffer) {
+  static X11XFixesFetchRegionReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var x = buffer.readInt16();
     var y = buffer.readInt16();
@@ -654,7 +659,7 @@ class X11FixesFetchRegionReply extends X11Reply {
       var height = buffer.readUint16();
       rectangles.add(X11Rectangle(x, y, width, height));
     }
-    return X11FixesFetchRegionReply(extents: extents, rectangles: rectangles);
+    return X11XFixesFetchRegionReply(extents: extents, rectangles: rectangles);
   }
 
   @override
@@ -675,23 +680,23 @@ class X11FixesFetchRegionReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11FixesFetchRegionReply(extents: ${extents}, rectangles: ${rectangles})';
+      'X11XFixesFetchRegionReply(extents: ${extents}, rectangles: ${rectangles})';
 }
 
-class X11FixesSetGCClipRegionRequest extends X11Request {
+class X11XFixesSetGCClipRegionRequest extends X11Request {
   final int gc;
   final int region;
   final X11Point origin;
 
-  X11FixesSetGCClipRegionRequest(this.gc, this.region,
+  X11XFixesSetGCClipRegionRequest(this.gc, this.region,
       {this.origin = const X11Point(0, 0)});
 
-  factory X11FixesSetGCClipRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesSetGCClipRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var gc = buffer.readUint32();
     var region = buffer.readUint32();
     var originX = buffer.readInt16();
     var originY = buffer.readInt16();
-    return X11FixesSetGCClipRegionRequest(gc, region,
+    return X11XFixesSetGCClipRegionRequest(gc, region,
         origin: X11Point(originX, originY));
   }
 
@@ -706,26 +711,27 @@ class X11FixesSetGCClipRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesSetGCClipRegionRequest(${gc}, ${region}, ${origin})';
+      'X11XFixesSetGCClipRegionRequest(${gc}, ${region}, ${origin})';
 }
 
-class X11FixesSetWindowShapeRegionRequest extends X11Request {
+class X11XFixesSetWindowShapeRegionRequest extends X11Request {
   final int window;
   final int region;
   final X11ShapeKind kind;
   final X11Point offset;
 
-  X11FixesSetWindowShapeRegionRequest(this.window, this.region,
+  X11XFixesSetWindowShapeRegionRequest(this.window, this.region,
       {this.kind = X11ShapeKind.bounding, this.offset = const X11Point(0, 0)});
 
-  factory X11FixesSetWindowShapeRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesSetWindowShapeRegionRequest.fromBuffer(
+      X11ReadBuffer buffer) {
     var window = buffer.readUint32();
     var kind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(3);
     var offsetX = buffer.readInt16();
     var offsetY = buffer.readInt16();
     var region = buffer.readUint32();
-    return X11FixesSetWindowShapeRegionRequest(window, region,
+    return X11XFixesSetWindowShapeRegionRequest(window, region,
         kind: kind, offset: X11Point(offsetX, offsetY));
   }
 
@@ -742,23 +748,24 @@ class X11FixesSetWindowShapeRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesSetWindowShapeRegionRequest(${window}, ${region}, kind: ${kind}, offset: ${offset})';
+      'X11XFixesSetWindowShapeRegionRequest(${window}, ${region}, kind: ${kind}, offset: ${offset})';
 }
 
-class X11FixesSetPictureClipRegionRequest extends X11Request {
+class X11XFixesSetPictureClipRegionRequest extends X11Request {
   final int picture;
   final int region;
   final X11Point origin;
 
-  X11FixesSetPictureClipRegionRequest(this.picture, this.region,
+  X11XFixesSetPictureClipRegionRequest(this.picture, this.region,
       {this.origin = const X11Point(0, 0)});
 
-  factory X11FixesSetPictureClipRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesSetPictureClipRegionRequest.fromBuffer(
+      X11ReadBuffer buffer) {
     var picture = buffer.readUint32();
     var region = buffer.readUint32();
     var originX = buffer.readInt16();
     var originY = buffer.readInt16();
-    return X11FixesSetPictureClipRegionRequest(picture, region,
+    return X11XFixesSetPictureClipRegionRequest(picture, region,
         origin: X11Point(originX, originY));
   }
 
@@ -773,22 +780,22 @@ class X11FixesSetPictureClipRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesSetPictureClipRegionRequest(${picture}, ${region}, origin: ${origin})';
+      'X11XFixesSetPictureClipRegionRequest(${picture}, ${region}, origin: ${origin})';
 }
 
-class X11FixesSetCursorNameRequest extends X11Request {
+class X11XFixesSetCursorNameRequest extends X11Request {
   final int cursor;
   final String name;
 
-  X11FixesSetCursorNameRequest(this.cursor, this.name);
+  X11XFixesSetCursorNameRequest(this.cursor, this.name);
 
-  factory X11FixesSetCursorNameRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesSetCursorNameRequest.fromBuffer(X11ReadBuffer buffer) {
     var cursor = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
-    return X11FixesSetCursorNameRequest(cursor, name);
+    return X11XFixesSetCursorNameRequest(cursor, name);
   }
 
   @override
@@ -803,17 +810,17 @@ class X11FixesSetCursorNameRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesSetCursorNameRequest(${cursor}, ${name})';
+  String toString() => 'X11XFixesSetCursorNameRequest(${cursor}, ${name})';
 }
 
-class X11FixesGetCursorNameRequest extends X11Request {
+class X11XFixesGetCursorNameRequest extends X11Request {
   final int cursor;
 
-  X11FixesGetCursorNameRequest(this.cursor);
+  X11XFixesGetCursorNameRequest(this.cursor);
 
-  factory X11FixesGetCursorNameRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesGetCursorNameRequest.fromBuffer(X11ReadBuffer buffer) {
     var cursor = buffer.readUint32();
-    return X11FixesGetCursorNameRequest(cursor);
+    return X11XFixesGetCursorNameRequest(cursor);
   }
 
   @override
@@ -823,23 +830,23 @@ class X11FixesGetCursorNameRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesGetCursorNameRequest(${cursor})';
+  String toString() => 'X11XFixesGetCursorNameRequest(${cursor})';
 }
 
-class X11FixesGetCursorNameReply extends X11Reply {
+class X11XFixesGetCursorNameReply extends X11Reply {
   final int atom;
   final String name;
 
-  X11FixesGetCursorNameReply(this.atom, this.name);
+  X11XFixesGetCursorNameReply(this.atom, this.name);
 
-  static X11FixesGetCursorNameReply fromBuffer(X11ReadBuffer buffer) {
+  static X11XFixesGetCursorNameReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var atom = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(18);
     var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
-    return X11FixesGetCursorNameReply(atom, name);
+    return X11XFixesGetCursorNameReply(atom, name);
   }
 
   @override
@@ -854,15 +861,15 @@ class X11FixesGetCursorNameReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11FixesGetCursorNameReply(${atom}, ${name})';
+  String toString() => 'X11XFixesGetCursorNameReply(${atom}, ${name})';
 }
 
-class X11FixesGetCursorImageAndNameRequest extends X11Request {
-  X11FixesGetCursorImageAndNameRequest();
+class X11XFixesGetCursorImageAndNameRequest extends X11Request {
+  X11XFixesGetCursorImageAndNameRequest();
 
-  factory X11FixesGetCursorImageAndNameRequest.fromBuffer(
+  factory X11XFixesGetCursorImageAndNameRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    return X11FixesGetCursorImageAndNameRequest();
+    return X11XFixesGetCursorImageAndNameRequest();
   }
 
   @override
@@ -871,10 +878,10 @@ class X11FixesGetCursorImageAndNameRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesGetCursorImageAndNameRequest()';
+  String toString() => 'X11XFixesGetCursorImageAndNameRequest()';
 }
 
-class X11FixesGetCursorImageAndNameReply extends X11Reply {
+class X11XFixesGetCursorImageAndNameReply extends X11Reply {
   final X11Size size;
   final List<int> data;
   final X11Point location;
@@ -883,14 +890,14 @@ class X11FixesGetCursorImageAndNameReply extends X11Reply {
   final int cursorAtom;
   final String name;
 
-  X11FixesGetCursorImageAndNameReply(this.size, this.data,
+  X11XFixesGetCursorImageAndNameReply(this.size, this.data,
       {this.location,
       this.hotspot,
       this.cursorSerial,
       this.cursorAtom,
       this.name});
 
-  static X11FixesGetCursorImageAndNameReply fromBuffer(X11ReadBuffer buffer) {
+  static X11XFixesGetCursorImageAndNameReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var x = buffer.readInt16();
     var y = buffer.readInt16();
@@ -905,7 +912,7 @@ class X11FixesGetCursorImageAndNameReply extends X11Reply {
     var data = buffer.readListOfUint32(width * height);
     var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
-    return X11FixesGetCursorImageAndNameReply(X11Size(width, height), data,
+    return X11XFixesGetCursorImageAndNameReply(X11Size(width, height), data,
         location: X11Point(x, y),
         hotspot: X11Point(hotspotX, hotspotY),
         cursorSerial: cursorSerial,
@@ -934,19 +941,19 @@ class X11FixesGetCursorImageAndNameReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11FixesGetCursorImageAndNameReply(${size}, location: ${location}, hotspot: ${hotspot}, cursorSerial: ${cursorSerial}, cursorAtom: ${cursorAtom}, name: ${name})';
+      'X11XFixesGetCursorImageAndNameReply(${size}, location: ${location}, hotspot: ${hotspot}, cursorSerial: ${cursorSerial}, cursorAtom: ${cursorAtom}, name: ${name})';
 }
 
-class X11FixesChangeCursorRequest extends X11Request {
+class X11XFixesChangeCursorRequest extends X11Request {
   final int cursor;
   final int newCursor;
 
-  X11FixesChangeCursorRequest(this.cursor, this.newCursor);
+  X11XFixesChangeCursorRequest(this.cursor, this.newCursor);
 
-  factory X11FixesChangeCursorRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesChangeCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     var newCursor = buffer.readUint32();
     var cursor = buffer.readUint32();
-    return X11FixesChangeCursorRequest(cursor, newCursor);
+    return X11XFixesChangeCursorRequest(cursor, newCursor);
   }
 
   @override
@@ -957,22 +964,22 @@ class X11FixesChangeCursorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesChangeCursorRequest(${cursor}, ${newCursor})';
+  String toString() => 'X11XFixesChangeCursorRequest(${cursor}, ${newCursor})';
 }
 
-class X11FixesChangeCursorByNameRequest extends X11Request {
+class X11XFixesChangeCursorByNameRequest extends X11Request {
   final String name;
   final int cursor;
 
-  X11FixesChangeCursorByNameRequest(this.name, this.cursor);
+  X11XFixesChangeCursorByNameRequest(this.name, this.cursor);
 
-  factory X11FixesChangeCursorByNameRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesChangeCursorByNameRequest.fromBuffer(X11ReadBuffer buffer) {
     var cursor = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
-    return X11FixesChangeCursorByNameRequest(name, cursor);
+    return X11XFixesChangeCursorByNameRequest(name, cursor);
   }
 
   @override
@@ -987,10 +994,10 @@ class X11FixesChangeCursorByNameRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesChangeCursorByNameRequest(${name}, ${cursor})';
+  String toString() => 'X11XFixesChangeCursorByNameRequest(${name}, ${cursor})';
 }
 
-class X11FixesExpandRegionRequest extends X11Request {
+class X11XFixesExpandRegionRequest extends X11Request {
   final int region;
   final int sourceRegion;
   final int left;
@@ -998,17 +1005,17 @@ class X11FixesExpandRegionRequest extends X11Request {
   final int top;
   final int bottom;
 
-  X11FixesExpandRegionRequest(this.region, this.sourceRegion,
+  X11XFixesExpandRegionRequest(this.region, this.sourceRegion,
       {this.left = 0, this.right = 0, this.top = 0, this.bottom = 0});
 
-  factory X11FixesExpandRegionRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesExpandRegionRequest.fromBuffer(X11ReadBuffer buffer) {
     var sourceRegion = buffer.readUint32();
     var region = buffer.readUint32();
     var left = buffer.readUint16();
     var right = buffer.readUint16();
     var top = buffer.readUint16();
     var bottom = buffer.readUint16();
-    return X11FixesExpandRegionRequest(region, sourceRegion,
+    return X11XFixesExpandRegionRequest(region, sourceRegion,
         left: left, right: right, top: top, bottom: bottom);
   }
 
@@ -1025,17 +1032,17 @@ class X11FixesExpandRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesExpandRegionRequest(${region}, ${sourceRegion}, left: ${left}, right: ${right}, top: ${top}, bottom: ${bottom})';
+      'X11XFixesExpandRegionRequest(${region}, ${sourceRegion}, left: ${left}, right: ${right}, top: ${top}, bottom: ${bottom})';
 }
 
-class X11FixesHideCursorRequest extends X11Request {
+class X11XFixesHideCursorRequest extends X11Request {
   final int window;
 
-  X11FixesHideCursorRequest(this.window);
+  X11XFixesHideCursorRequest(this.window);
 
-  factory X11FixesHideCursorRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesHideCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     var window = buffer.readUint32();
-    return X11FixesHideCursorRequest(window);
+    return X11XFixesHideCursorRequest(window);
   }
 
   @override
@@ -1045,17 +1052,17 @@ class X11FixesHideCursorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesHideCursorRequest(${window})';
+  String toString() => 'X11XFixesHideCursorRequest(${window})';
 }
 
-class X11FixesShowCursorRequest extends X11Request {
+class X11XFixesShowCursorRequest extends X11Request {
   final int window;
 
-  X11FixesShowCursorRequest(this.window);
+  X11XFixesShowCursorRequest(this.window);
 
-  factory X11FixesShowCursorRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesShowCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     var window = buffer.readUint32();
-    return X11FixesShowCursorRequest(window);
+    return X11XFixesShowCursorRequest(window);
   }
 
   @override
@@ -1065,20 +1072,21 @@ class X11FixesShowCursorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesShowCursorRequest(${window})';
+  String toString() => 'X11XFixesShowCursorRequest(${window})';
 }
 
-class X11FixesCreatePointerBarrierRequest extends X11Request {
+class X11XFixesCreatePointerBarrierRequest extends X11Request {
   final int id;
   final int drawable;
   final X11Segment line;
   final Set<X11BarrierDirection> directions;
   final List<int> devices;
 
-  X11FixesCreatePointerBarrierRequest(this.id, this.drawable, this.line,
+  X11XFixesCreatePointerBarrierRequest(this.id, this.drawable, this.line,
       {this.directions = const {}, this.devices = const []});
 
-  factory X11FixesCreatePointerBarrierRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesCreatePointerBarrierRequest.fromBuffer(
+      X11ReadBuffer buffer) {
     var id = buffer.readUint32();
     var drawable = buffer.readUint32();
     var x1 = buffer.readUint16();
@@ -1095,7 +1103,7 @@ class X11FixesCreatePointerBarrierRequest extends X11Request {
     buffer.skip(2);
     var devicesLength = buffer.readUint16();
     var devices = buffer.readListOfUint16(devicesLength);
-    return X11FixesCreatePointerBarrierRequest(
+    return X11XFixesCreatePointerBarrierRequest(
         id, drawable, X11Segment(X11Point(x1, y1), X11Point(x2, y2)),
         directions: directions, devices: devices);
   }
@@ -1121,17 +1129,18 @@ class X11FixesCreatePointerBarrierRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FixesCreatePointerBarrierRequest(${id}, ${drawable}, ${line}, directions: ${directions}, devices: ${devices})';
+      'X11XFixesCreatePointerBarrierRequest(${id}, ${drawable}, ${line}, directions: ${directions}, devices: ${devices})';
 }
 
-class X11FixesDeletePointerBarrierRequest extends X11Request {
+class X11XFixesDeletePointerBarrierRequest extends X11Request {
   final int barrier;
 
-  X11FixesDeletePointerBarrierRequest(this.barrier);
+  X11XFixesDeletePointerBarrierRequest(this.barrier);
 
-  factory X11FixesDeletePointerBarrierRequest.fromBuffer(X11ReadBuffer buffer) {
+  factory X11XFixesDeletePointerBarrierRequest.fromBuffer(
+      X11ReadBuffer buffer) {
     var barrier = buffer.readUint32();
-    return X11FixesDeletePointerBarrierRequest(barrier);
+    return X11XFixesDeletePointerBarrierRequest(barrier);
   }
 
   @override
@@ -1141,5 +1150,5 @@ class X11FixesDeletePointerBarrierRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FixesDeletePointerBarrierRequest(${barrier})';
+  String toString() => 'X11XFixesDeletePointerBarrierRequest(${barrier})';
 }
