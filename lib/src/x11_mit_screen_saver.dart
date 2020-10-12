@@ -1,16 +1,16 @@
 import 'x11_client.dart';
 import 'x11_events.dart';
+import 'x11_mit_screen_saver_events.dart';
+import 'x11_mit_screen_saver_requests.dart';
 import 'x11_read_buffer.dart';
-import 'x11_screensaver_events.dart';
-import 'x11_screensaver_requests.dart';
 import 'x11_types.dart';
 
-class X11ScreensaverExtension extends X11Extension {
+class X11MitScreenSaverExtension extends X11Extension {
   final X11Client _client;
   final int _majorOpcode;
   final int _firstEvent;
 
-  X11ScreensaverExtension(this._client, this._majorOpcode, this._firstEvent);
+  X11MitScreenSaverExtension(this._client, this._majorOpcode, this._firstEvent);
 
   /// Gets the MIT-SCREEN-SAVER extension version supported by the X server.
   /// [clientVersion] is the maximum version supported by this client, the server will not return a value greater than this.

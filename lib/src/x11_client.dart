@@ -10,11 +10,11 @@ import 'x11_dpms.dart';
 import 'x11_errors.dart';
 import 'x11_events.dart';
 import 'x11_fixes.dart';
+import 'x11_mit_screen_saver.dart';
 import 'x11_randr.dart';
 import 'x11_requests.dart';
 import 'x11_read_buffer.dart';
 import 'x11_render.dart';
-import 'x11_screensaver.dart';
 import 'x11_shape.dart';
 import 'x11_sync.dart';
 import 'x11_types.dart';
@@ -106,6 +106,9 @@ class X11Client {
   /// DPMS extension, or null if it doesn't exist.
   X11DpmsExtension get dpms => _dpms;
 
+  /// MIT-SCREEN-SAVER extension, or null if it doesn't exist.
+  X11MitScreenSaverExtension get mitScreenSaver => _mitScreenSaver;
+
   /// XFIXES extension, or null if it doesn't exist.
   X11FixesExtension get fixes => _fixes;
 
@@ -114,9 +117,6 @@ class X11Client {
 
   /// RENDER extension, or null if it doesn't exist.
   X11RenderExtension get render => _render;
-
-  /// MIT-SCREEN-SAVER extension, or null if it doesn't exist.
-  X11ScreensaverExtension get screensaver => _screensaver;
 
   /// SHAPE extension, or null if it doesn't exist.
   X11ShapeExtension get shape => _shape;
@@ -143,9 +143,9 @@ class X11Client {
   X11DamageExtension _damage;
   X11DpmsExtension _dpms;
   X11FixesExtension _fixes;
+  X11MitScreenSaverExtension _mitScreenSaver;
   X11RandrExtension _randr;
   X11RenderExtension _render;
-  X11ScreensaverExtension _screensaver;
   X11ShapeExtension _shape;
   X11SyncExtension _sync;
 
@@ -305,6 +305,12 @@ class X11Client {
               this, reply.majorOpcode, reply.firstEvent, reply.firstError);
         }
       }),
+      queryExtension('MIT-SCREEN-SAVER').then((reply) {
+        if (reply.present) {
+          _mitScreenSaver = X11MitScreenSaverExtension(
+              this, reply.majorOpcode, reply.firstEvent);
+        }
+      }),
       queryExtension('RANDR').then((reply) {
         if (reply.present) {
           _randr = X11RandrExtension(
@@ -315,12 +321,6 @@ class X11Client {
         if (reply.present) {
           _render =
               X11RenderExtension(this, reply.majorOpcode, reply.firstError);
-        }
-      }),
-      queryExtension('MIT-SCREEN-SAVER').then((reply) {
-        if (reply.present) {
-          _screensaver = X11ScreensaverExtension(
-              this, reply.majorOpcode, reply.firstEvent);
         }
       }),
       queryExtension('SHAPE').then((reply) {
