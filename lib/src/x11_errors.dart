@@ -507,3 +507,23 @@ class X11DamageError extends X11Error {
     buffer.skip(21);
   }
 }
+
+class X11BadSegmentError extends X11Error {
+  final int shmseg;
+
+  const X11BadSegmentError(int sequenceNumber, this.shmseg)
+      : super(sequenceNumber);
+
+  factory X11BadSegmentError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    var shmseg = buffer.readUint32();
+    buffer.skip(21);
+    return X11BadSegmentError(sequenceNumber, shmseg);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint32(shmseg);
+    buffer.skip(21);
+  }
+}

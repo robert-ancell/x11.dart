@@ -11,6 +11,7 @@ import 'x11_errors.dart';
 import 'x11_events.dart';
 import 'x11_fixes.dart';
 import 'x11_mit_screen_saver.dart';
+import 'x11_mit_shm.dart';
 import 'x11_randr.dart';
 import 'x11_requests.dart';
 import 'x11_read_buffer.dart';
@@ -109,6 +110,9 @@ class X11Client {
   /// MIT-SCREEN-SAVER extension, or null if it doesn't exist.
   X11MitScreenSaverExtension get mitScreenSaver => _mitScreenSaver;
 
+  /// MIT-SHM extension, or null if it doesn't exist.
+  X11MitShmExtension get mitShm => _mitShm;
+
   /// XFIXES extension, or null if it doesn't exist.
   X11FixesExtension get fixes => _fixes;
 
@@ -144,6 +148,7 @@ class X11Client {
   X11DpmsExtension _dpms;
   X11FixesExtension _fixes;
   X11MitScreenSaverExtension _mitScreenSaver;
+  X11MitShmExtension _mitShm;
   X11RandrExtension _randr;
   X11RenderExtension _render;
   X11ShapeExtension _shape;
@@ -309,6 +314,12 @@ class X11Client {
         if (reply.present) {
           _mitScreenSaver = X11MitScreenSaverExtension(
               this, reply.majorOpcode, reply.firstEvent);
+        }
+      }),
+      queryExtension('MIT-SHM').then((reply) {
+        if (reply.present) {
+          _mitShm = X11MitShmExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
         }
       }),
       queryExtension('RANDR').then((reply) {
