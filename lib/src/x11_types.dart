@@ -74,6 +74,14 @@ enum X11DamageReportLevel {
   nonEmpty
 }
 
+enum X11DeviceUse {
+  pointer,
+  keyboard,
+  extensionDevice,
+  extensionKeyboard,
+  extensionPointer
+}
+
 enum X11EventType {
   keyPress,
   keyRelease,
@@ -369,6 +377,54 @@ class X11ColorStop {
   String toString() => 'X11ColorStop(${point}, ${color})';
 }
 
+class X11DeviceInfo {
+  final int id;
+  final String name;
+  final int type;
+  final List<X11InputInfo> inputClasses;
+  final X11DeviceUse deviceUse;
+
+  const X11DeviceInfo(
+      {this.id = 0,
+      this.name = '',
+      this.type = 0,
+      this.inputClasses = const [],
+      this.deviceUse = X11DeviceUse.pointer});
+
+  @override
+  String toString() =>
+      "X11DeviceInfo(id: ${id}, name: '${name}', type: ${type}, inputClasses: ${inputClasses}, deviceUse: ${deviceUse})";
+}
+
+abstract class X11InputInfo {
+  const X11InputInfo();
+}
+
+class X11KeyInfo extends X11InputInfo {
+  final int minimumKeycode;
+  final int maximumKeycode;
+  final int keysLength;
+
+  const X11KeyInfo(this.minimumKeycode, this.maximumKeycode, this.keysLength);
+
+  @override
+  String toString() =>
+      "X11KeyInfo(minimumKeycode: ${minimumKeycode}, maximumKeycode: ${maximumKeycode}, keysLength: ${keysLength})";
+}
+
+class X11ButtonInfo extends X11InputInfo {
+  final int buttonsLength;
+
+  const X11ButtonInfo(this.buttonsLength);
+
+  @override
+  String toString() => "X11ButtonInfo(${buttonsLength})";
+}
+
+class X11ValuatorInfo extends X11InputInfo {
+  // FIXME
+}
+
 class X11RgbColorItem {
   final int pixel;
   final int red;
@@ -440,6 +496,11 @@ class X11GlyphItemGlyphs extends X11GlyphItem {
 
   @override
   String toString() => 'X11GlyphItemGlyphs(${glyphs}, offset: ${offset})';
+}
+
+class X11InputClassInfo {
+  int id; // FIXME: enum
+  int eventTypeCode;
 }
 
 class X11ModifierMap {

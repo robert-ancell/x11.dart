@@ -20,6 +20,7 @@ import 'x11_sync.dart';
 import 'x11_types.dart';
 import 'x11_write_buffer.dart';
 import 'x11_xfixes.dart';
+import 'x11_xinput.dart';
 
 abstract class _RequestHandler {
   bool get done;
@@ -128,6 +129,9 @@ class X11Client {
   /// XFIXES extension, or null if it doesn't exist.
   X11XFixesExtension get xfixes => _xfixes;
 
+  /// XInput extension, or null if it doesn't exist.
+  X11XInputExtension get xinput => _xinput;
+
   Socket _socket;
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
@@ -153,6 +157,7 @@ class X11Client {
   X11ShapeExtension _shape;
   X11SyncExtension _sync;
   X11XFixesExtension _xfixes;
+  X11XInputExtension _xinput;
 
   /// Creates a new X client.
   /// Call [connect] or [connectToHost] to connect to an X server.
@@ -341,6 +346,12 @@ class X11Client {
       queryExtension('XFIXES').then((reply) {
         if (reply.present) {
           _xfixes = X11XFixesExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
+        }
+      }),
+      queryExtension('XInputExtension').then((reply) {
+        if (reply.present) {
+          _xinput = X11XInputExtension(
               this, reply.majorOpcode, reply.firstEvent, reply.firstError);
         }
       }),
