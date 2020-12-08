@@ -97,6 +97,12 @@ class X11WriteBuffer {
     }
   }
 
+  void writeListOfAtom(List<X11Atom> value) {
+    for (var atom in value) {
+      writeAtom(atom);
+    }
+  }
+
   void writeListOfFixed(List<double> value) {
     for (var v in value) {
       writeFixed(v);

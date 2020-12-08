@@ -412,6 +412,16 @@ class X11DeviceInfo {
       "X11DeviceInfo(id: ${id}, name: '${name}', type: ${type}, inputClasses: ${inputClasses}, deviceUse: ${deviceUse})";
 }
 
+class X11DeviceTimeCoord {
+  final List<int> axes;
+  final int time;
+
+  const X11DeviceTimeCoord(this.axes, this.time);
+
+  @override
+  String toString() => 'X11DeviceTimeCoord(${axes}, time: ${time})';
+}
+
 abstract class X11InputInfo {
   const X11InputInfo();
 }

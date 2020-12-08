@@ -351,7 +351,8 @@ class X11Client {
       }),
       queryExtension('XInputExtension').then((reply) {
         if (reply.present) {
-          _xinput = X11XInputExtension(this, reply.majorOpcode);
+          _xinput = X11XInputExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
         }
       }),
     ]);
