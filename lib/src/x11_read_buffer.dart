@@ -119,6 +119,14 @@ class X11ReadBuffer {
     return values;
   }
 
+  List<X11Atom> readListOfAtom(int length) {
+    var values = <X11Atom>[];
+    for (var i = 0; i < length; i++) {
+      values.add(readAtom());
+    }
+    return values;
+  }
+
   List<double> readListOfFixed(int length) {
     var values = <double>[];
     for (var i = 0; i < length; i++) {

@@ -528,3 +528,74 @@ class X11BadSegmentError extends X11Error {
     buffer.skip(21);
   }
 }
+
+class X11DeviceError extends X11Error {
+  const X11DeviceError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11DeviceError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11DeviceError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11EventError extends X11Error {
+  const X11EventError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11EventError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11EventError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11ModeError extends X11Error {
+  const X11ModeError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11ModeError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11ModeError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11DeviceBusyError extends X11Error {
+  const X11DeviceBusyError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11DeviceBusyError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11DeviceBusyError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11ClassError extends X11Error {
+  const X11ClassError(int sequenceNumber) : super(sequenceNumber);
+
+  factory X11ClassError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11ClassError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
