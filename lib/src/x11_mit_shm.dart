@@ -39,8 +39,8 @@ class X11MitShmExtension extends X11Extension {
   /// Writes an image to [drawable] taken from [shmseg].
   /// The image in [shmseg] is of [size] pixels.
   /// The image written is taken from [sourceArea] and placed in [destinationPosition].
-  int putImage(int gc, int drawable, int shmseg, X11Size size,
-      X11Rectangle sourceArea, X11Point destinationPosition,
+  int putImage(X11ResourceId gc, X11ResourceId drawable, int shmseg,
+      X11Size size, X11Rectangle sourceArea, X11Point destinationPosition,
       {int depth = 24,
       X11ImageFormat format = X11ImageFormat.zPixmap,
       int offset = 0,
@@ -53,7 +53,7 @@ class X11MitShmExtension extends X11Extension {
 
   /// Get the image under [area] in [drawable] and writes it to [shmseg].
   Future<X11MitShmGetImageReply> getImage(
-      int drawable, X11Rectangle area, int shmseg,
+      X11ResourceId drawable, X11Rectangle area, int shmseg,
       {X11ImageFormat format = X11ImageFormat.zPixmap,
       int planeMask = 0xFFFFFFFF,
       int offset = 0}) async {
@@ -66,7 +66,8 @@ class X11MitShmExtension extends X11Extension {
 
   /// Creates a new pixmap with [id] from [shmseg] containing image with [size].
   /// When no longer required, the pixmap reference should be deleted with [X11Client.freePixmap].
-  int createPixmap(int id, int drawable, int shmseg, X11Size size,
+  int createPixmap(
+      X11ResourceId id, X11ResourceId drawable, int shmseg, X11Size size,
       {int offset = 0, int depth = 24}) {
     var request = X11MitShmCreatePixmapRequest(id, drawable, shmseg, size,
         offset: offset, depth: depth);

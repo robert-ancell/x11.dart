@@ -358,10 +358,10 @@ class X11Client {
   }
 
   /// Generates a new resource ID for use in [createWindow], [createGC], [createPixmap] etc.
-  int generateId() {
+  X11ResourceId generateId() {
     var id = _resourceIdBase + _resourceCount;
     _resourceCount++;
-    return id;
+    return X11ResourceId(id);
   }
 
   /// Creates a new window with [id] and [geometry] as a child of [parent].
@@ -381,18 +381,19 @@ class X11Client {
   /// * The server behaviour of maintaining the window contents when obscured is controlled using [backingStore].
   ///   [backingPlanes] controls which information is stored in this case.
   ///   [backingPixel] what default pixel value to use.
-  int createWindow(int id, int parent, X11Rectangle geometry,
+  int createWindow(
+      X11ResourceId id, X11ResourceId parent, X11Rectangle geometry,
       {X11WindowClass windowClass = X11WindowClass.copyFromParent,
       int visual = 0,
       int depth = 24,
-      int colormap,
-      int cursor,
+      X11ResourceId colormap,
+      X11ResourceId cursor,
       Set<X11EventType> events,
       Set<X11EventType> doNotPropagate,
       int borderWidth = 0,
-      int backgroundPixmap,
+      X11ResourceId backgroundPixmap,
       int backgroundPixel,
-      int borderPixmap,
+      X11ResourceId borderPixmap,
       int borderPixel,
       X11BitGravity bitGravity,
       X11WinGravity winGravity,
@@ -425,11 +426,11 @@ class X11Client {
 
   /// Changes the attributes of [window].
   /// The attributes are the same as [createWindow].
-  int changeWindowAttributes(int window,
+  int changeWindowAttributes(X11ResourceId window,
       {int borderWidth,
-      int backgroundPixmap,
+      X11ResourceId backgroundPixmap,
       int backgroundPixel,
-      int borderPixmap,
+      X11ResourceId borderPixmap,
       int borderPixel,
       X11BitGravity bitGravity,
       X11WinGravity winGravity,
@@ -440,8 +441,8 @@ class X11Client {
       bool saveUnder,
       Set<X11EventType> events,
       Set<X11EventType> doNotPropagate,
-      int colormap,
-      int cursor}) {
+      X11ResourceId colormap,
+      X11ResourceId cursor}) {
     var request = X11ChangeWindowAttributesRequest(window,
         backgroundPixmap: backgroundPixmap,
         backgroundPixel: backgroundPixel,
@@ -462,7 +463,8 @@ class X11Client {
   }
 
   /// Gets the attributes of [window].
-  Future<X11GetWindowAttributesReply> getWindowAttributes(int window) async {
+  Future<X11GetWindowAttributesReply> getWindowAttributes(
+      X11ResourceId window) async {
     var request = X11GetWindowAttributesRequest(window);
     var sequenceNumber = sendRequest(3, request);
     return awaitReply<X11GetWindowAttributesReply>(
@@ -470,59 +472,59 @@ class X11Client {
   }
 
   /// Destroys [window].
-  int destroyWindow(int window) {
+  int destroyWindow(X11ResourceId window) {
     var request = X11DestroyWindowRequest(window);
     return sendRequest(4, request);
   }
 
   /// Destroys the children of [window] in bottom-to-top stacking order.
-  int destroySubwindows(int window) {
+  int destroySubwindows(X11ResourceId window) {
     var request = X11DestroySubwindowsRequest(window);
     return sendRequest(5, request);
   }
 
   /// Inserts [window] into the clients save-set.
-  int insertSaveSet(int window) {
+  int insertSaveSet(X11ResourceId window) {
     return _changeSaveSet(window, X11ChangeSetMode.insert);
   }
 
   /// Deletes [window] from the clients save-set.
-  int deleteSaveSet(int window) {
+  int deleteSaveSet(X11ResourceId window) {
     return _changeSaveSet(window, X11ChangeSetMode.delete);
   }
 
-  int _changeSaveSet(int window, X11ChangeSetMode mode) {
+  int _changeSaveSet(X11ResourceId window, X11ChangeSetMode mode) {
     var request = X11ChangeSaveSetRequest(window, mode);
     return sendRequest(6, request);
   }
 
   /// Moves [window] to be a child of [parent]. The window is placed [position] relative to [parent].
-  int reparentWindow(int window, int parent,
+  int reparentWindow(X11ResourceId window, X11ResourceId parent,
       {X11Point position = const X11Point(0, 0)}) {
     var request = X11ReparentWindowRequest(window, parent, position);
     return sendRequest(7, request);
   }
 
   /// Maps [window].
-  int mapWindow(int window) {
+  int mapWindow(X11ResourceId window) {
     var request = X11MapWindowRequest(window);
     return sendRequest(8, request);
   }
 
   /// Maps all unmapped children of [window] in top-to-bottom stacking order.
-  int mapSubwindows(int window) {
+  int mapSubwindows(X11ResourceId window) {
     var request = X11MapSubwindowsRequest(window);
     return sendRequest(9, request);
   }
 
   /// Unmaps [window].
-  int unmapWindow(int window) {
+  int unmapWindow(X11ResourceId window) {
     var request = X11UnmapWindowRequest(window);
     return sendRequest(10, request);
   }
 
   /// Unmaps all mapped children of [window] in bottom-to-top stacking order.
-  int unmapSubwindows(int window) {
+  int unmapSubwindows(X11ResourceId window) {
     var request = X11UnmapSubwindowsRequest(window);
     return sendRequest(11, request);
   }
@@ -530,13 +532,13 @@ class X11Client {
   /// Changes the configuration of [window].
   ///
   /// The dimensions of the window are changed if one or more of [x], [y], [width] and [height] are set.
-  int configureWindow(int window,
+  int configureWindow(X11ResourceId window,
       {int x,
       int y,
       int width,
       int height,
       int borderWidth,
-      int sibling,
+      X11ResourceId sibling,
       X11StackMode stackMode}) {
     var request = X11ConfigureWindowRequest(window,
         x: x,
@@ -550,13 +552,13 @@ class X11Client {
   }
 
   /// Changes the stacking order of [window].
-  int circulateWindow(int window, X11CirculateDirection direction) {
+  int circulateWindow(X11ResourceId window, X11CirculateDirection direction) {
     var request = X11CirculateWindowRequest(window, direction);
     return sendRequest(13, request);
   }
 
   /// Gets the current geometry of [drawable].
-  Future<X11GetGeometryReply> getGeometry(int drawable) async {
+  Future<X11GetGeometryReply> getGeometry(X11ResourceId drawable) async {
     var request = X11GetGeometryRequest(drawable);
     var sequenceNumber = sendRequest(14, request);
     return awaitReply<X11GetGeometryReply>(
@@ -564,7 +566,7 @@ class X11Client {
   }
 
   /// Gets the root, parent and children of [window].
-  Future<X11QueryTreeReply> queryTree(int window) async {
+  Future<X11QueryTreeReply> queryTree(X11ResourceId window) async {
     var request = X11QueryTreeRequest(window);
     var sequenceNumber = sendRequest(15, request);
     return awaitReply<X11QueryTreeReply>(
@@ -572,11 +574,11 @@ class X11Client {
   }
 
   /// Gets the atom with [name]. If [onlyIfExists] is false this will always return a value (new atoms will be created).
-  Future<int> internAtom(String name, {bool onlyIfExists = false}) async {
+  Future<X11Atom> internAtom(String name, {bool onlyIfExists = false}) async {
     // Check if already in cache.
     var id = _atoms[name];
     if (id != null) {
-      return id;
+      return X11Atom(id);
     }
 
     var request = X11InternAtomRequest(name, onlyIfExists);
@@ -585,15 +587,15 @@ class X11Client {
         sequenceNumber, X11InternAtomReply.fromBuffer);
 
     // Cache result.
-    _atoms[name] = reply.atom;
+    _atoms[name] = reply.atom.value;
 
     return reply.atom;
   }
 
   /// Gets the name of [atom].
-  Future<String> getAtomName(int atom) async {
+  Future<String> getAtomName(X11Atom atom) async {
     // Check if already in cache.
-    var name = _atomNames[atom];
+    var name = _atomNames[atom.value];
     if (name != null) {
       return name;
     }
@@ -604,13 +606,14 @@ class X11Client {
         sequenceNumber, X11GetAtomNameReply.fromBuffer);
 
     // Cache result.
-    _atomNames[atom] = reply.name;
+    _atomNames[atom.value] = reply.name;
 
     return reply.name;
   }
 
   /// Changes a [property] of [window] to [value].
-  Future<int> changePropertyUint8(int window, String property, List<int> value,
+  Future<int> changePropertyUint8(
+      X11ResourceId window, String property, List<int> value,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return _changeProperty(window, property, value,
@@ -618,7 +621,8 @@ class X11Client {
   }
 
   /// Changes a [property] of [window] to [value].
-  Future<int> changePropertyUint16(int window, String property, List<int> value,
+  Future<int> changePropertyUint16(
+      X11ResourceId window, String property, List<int> value,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeProperty(window, property, value,
@@ -626,7 +630,8 @@ class X11Client {
   }
 
   /// Changes a [property] of [window] to [value].
-  Future<int> changePropertyUint32(int window, String property, List<int> value,
+  Future<int> changePropertyUint32(
+      X11ResourceId window, String property, List<int> value,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeProperty(window, property, value,
@@ -634,22 +639,25 @@ class X11Client {
   }
 
   /// Changes a [property] of [window] to [value].
-  Future<int> changePropertyAtom(int window, String property, String value,
+  Future<int> changePropertyAtom(
+      X11ResourceId window, String property, String value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     var valueAtom = await internAtom(value);
-    return await changePropertyUint32(window, property, [valueAtom],
+    return await changePropertyUint32(window, property, [valueAtom.value],
         type: 'ATOM', mode: mode);
   }
 
   /// Changes a [property] of [window] to [value].
-  Future<int> changePropertyString(int window, String property, String value,
+  Future<int> changePropertyString(
+      X11ResourceId window, String property, String value,
       {String type = 'STRING',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return _changeProperty(window, property, utf8.encode(value),
         type: type, format: 8, mode: mode);
   }
 
-  Future<int> _changeProperty(int window, String property, List<int> value,
+  Future<int> _changeProperty(
+      X11ResourceId window, String property, List<int> value,
       {String type = '',
       int format = 32,
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
@@ -661,7 +669,7 @@ class X11Client {
   }
 
   /// Deletes the [property] from [window].
-  Future<int> deleteProperty(int window, String property) async {
+  Future<int> deleteProperty(X11ResourceId window, String property) async {
     var propertyAtom = await internAtom(property);
     var request = X11DeletePropertyRequest(window, propertyAtom);
     return sendRequest(19, request);
@@ -671,7 +679,7 @@ class X11Client {
   ///
   /// If [type] is not null, the property must match the requested type.
   /// If [delete] is true the property is removed.
-  Future<X11GetPropertyReply> getProperty(int window, String property,
+  Future<X11GetPropertyReply> getProperty(X11ResourceId window, String property,
       {String type,
       int longOffset = 0,
       int longLength = 4294967295,
@@ -689,7 +697,8 @@ class X11Client {
   }
 
   /// Gets a string [property] on [window].
-  Future<String> getPropertyString(int window, String property) async {
+  Future<String> getPropertyString(
+      X11ResourceId window, String property) async {
     var reply = await getProperty(window, property, type: 'STRING');
     if (reply.format == 8) {
       return utf8.decode(reply.value);
@@ -699,7 +708,7 @@ class X11Client {
   }
 
   /// Gets the properties on [window].
-  Future<List<String>> listProperties(int window) async {
+  Future<List<String>> listProperties(X11ResourceId window) async {
     var request = X11ListPropertiesRequest(window);
     var sequenceNumber = sendRequest(21, request);
     var reply = await awaitReply<X11ListPropertiesReply>(
@@ -712,7 +721,7 @@ class X11Client {
   }
 
   /// Sets the owner of [selection] to [ownerWindow].
-  Future<int> setSelectionOwner(String selection, int ownerWindow,
+  Future<int> setSelectionOwner(String selection, X11ResourceId ownerWindow,
       {int time = 0}) async {
     var selectionAtom = await internAtom(selection);
     var request =
@@ -722,11 +731,11 @@ class X11Client {
 
   /// Clears the owner of [selection].
   Future<int> clearSelectionOwner(String selection, {int time = 0}) async {
-    return setSelectionOwner(selection, 0, time: time);
+    return setSelectionOwner(selection, X11ResourceId.None, time: time);
   }
 
   /// Gets the current owner of [selection].
-  Future<int> getSelectionOwner(String selection) async {
+  Future<X11ResourceId> getSelectionOwner(String selection) async {
     var selectionAtom = await internAtom(selection);
     var request = X11GetSelectionOwnerRequest(selectionAtom);
     var sequenceNumber = sendRequest(23, request);
@@ -737,11 +746,11 @@ class X11Client {
 
   /// Requests that [selection] is conveted to [target] and a [SelectionNotify] event generated to [requestorWindow] with the result.
   Future<int> convertSelection(
-      String selection, String target, int requestorWindow,
+      String selection, String target, X11ResourceId requestorWindow,
       {String property, int time = 0}) async {
     var selectionAtom = await internAtom(selection);
     var targetAtom = await internAtom(target);
-    var propertyAtom = 0;
+    var propertyAtom = X11Atom.None;
     if (property != null) {
       propertyAtom = await internAtom(property);
     }
@@ -752,7 +761,7 @@ class X11Client {
   }
 
   /// Sends [event] to [destination].
-  int sendEvent(int destination, X11Event event,
+  int sendEvent(X11ResourceId destination, X11Event event,
       {bool propagate = false, Set<X11EventType> events = const {}}) {
     var buffer = X11WriteBuffer();
     var code = event.encode(buffer);
@@ -762,11 +771,12 @@ class X11Client {
   }
 
   /// Establishes an active grab of the pointer to [grabWindow].
-  Future<int> grabPointer(int grabWindow, int pointerMode, int keyboardMode,
+  Future<int> grabPointer(
+      X11ResourceId grabWindow, int pointerMode, int keyboardMode,
       {Set<X11EventType> events = const {},
       bool ownerEvents = true,
-      int confineTo = 0,
-      int cursor = 0,
+      X11ResourceId confineTo = X11ResourceId.None,
+      X11ResourceId cursor = X11ResourceId.None,
       int time = 0}) async {
     var request = X11GrabPointerRequest(grabWindow, ownerEvents, events,
         pointerMode, keyboardMode, confineTo, cursor, time);
@@ -784,13 +794,13 @@ class X11Client {
 
   /// Establishes a passive grab of [button]/[modifers] to [grabWindow].
   /// If [button] is 0, all buttons are grabbed.
-  int grabButton(int grabWindow, int pointerMode, int keyboardMode,
+  int grabButton(X11ResourceId grabWindow, int pointerMode, int keyboardMode,
       {int button = 0,
       int modifiers = 0x8000,
       Set<X11EventType> events = const {},
       bool ownerEvents = true,
-      int confineTo = 0,
-      int cursor = 0}) {
+      X11ResourceId confineTo = X11ResourceId.None,
+      X11ResourceId cursor = X11ResourceId.None}) {
     var request = X11GrabButtonRequest(grabWindow, ownerEvents, events,
         pointerMode, keyboardMode, confineTo, cursor, button, modifiers);
     return sendRequest(28, request);
@@ -798,21 +808,22 @@ class X11Client {
 
   /// Releases a passive grab of [button]/[modifiers] from [grabWindow].
   /// If [button] is 0, this releases all button grabs on this window.
-  int ungrabButton(int grabWindow, {int button = 0, int modifiers = 0x8000}) {
+  int ungrabButton(X11ResourceId grabWindow,
+      {int button = 0, int modifiers = 0x8000}) {
     var request = X11UngrabButtonRequest(grabWindow, button, modifiers);
     return sendRequest(29, request);
   }
 
   /// Changes properies of the pointer grab established with [grabPointer].
   int changeActivePointerGrab(Set<X11EventType> events,
-      {int cursor = 0, int time = 0}) {
+      {X11ResourceId cursor = X11ResourceId.None, int time = 0}) {
     var request =
         X11ChangeActivePointerGrabRequest(events, cursor: cursor, time: time);
     return sendRequest(30, request);
   }
 
   /// Establishes an active grab of the keyboard to [grabWindow].
-  Future<int> grabKeyboard(int grabWindow,
+  Future<int> grabKeyboard(X11ResourceId grabWindow,
       {bool ownerEvents = true,
       int pointerMode = 0,
       int keyboardMode = 0,
@@ -835,7 +846,7 @@ class X11Client {
   }
 
   /// Establishes a passive grab of [key]/[modifers] to [grabWindow].
-  int grabKey(int grabWindow, int key,
+  int grabKey(X11ResourceId grabWindow, int key,
       {int modifiers = 0,
       bool ownerEvents = true,
       int pointerMode = 0,
@@ -850,7 +861,7 @@ class X11Client {
 
   /// Releases a passive grab of [key]/[modifiers] from [grabWindow].
   /// If [key] is 0, this releases all key grabs on this window.
-  int ungrabKey(int grabWindow, {int key = 0, int modifiers = 0}) {
+  int ungrabKey(X11ResourceId grabWindow, {int key = 0, int modifiers = 0}) {
     var request = X11UngrabKeyRequest(grabWindow, key, modifiers: modifiers);
     return sendRequest(34, request);
   }
@@ -876,7 +887,7 @@ class X11Client {
   }
 
   /// Gets the location of the pointer relative to [window].
-  Future<X11QueryPointerReply> queryPointer(int window) async {
+  Future<X11QueryPointerReply> queryPointer(X11ResourceId window) async {
     var request = X11QueryPointerRequest(window);
     var sequenceNumber = sendRequest(38, request);
     return awaitReply<X11QueryPointerReply>(
@@ -885,7 +896,7 @@ class X11Client {
 
   /// Gets pointer motion events that occured within [window] between [start] and [stop] time.
   Future<List<X11TimeCoord>> getMotionEvents(
-      int window, int start, int stop) async {
+      X11ResourceId window, int start, int stop) async {
     var request = X11GetMotionEventsRequest(window, start, stop);
     var sequenceNumber = sendRequest(39, request);
     var reply = await awaitReply<X11GetMotionEventsReply>(
@@ -895,7 +906,9 @@ class X11Client {
 
   /// Gets the position [source] on [sourceWindow] relative to [destinationWindow].
   Future<X11TranslateCoordinatesReply> translateCoordinates(
-      int sourceWindow, X11Point source, int destinationWindow) async {
+      X11ResourceId sourceWindow,
+      X11Point source,
+      X11ResourceId destinationWindow) async {
     var request =
         X11TranslateCoordinatesRequest(sourceWindow, source, destinationWindow);
     var sequenceNumber = sendRequest(40, request);
@@ -905,8 +918,8 @@ class X11Client {
 
   /// Moves the pointer to [destination].
   int warpPointer(X11Point destination,
-      {int destinationWindow = 0,
-      int sourceWindow = 0,
+      {X11ResourceId destinationWindow = X11ResourceId.None,
+      X11ResourceId sourceWindow = X11ResourceId.None,
       X11Rectangle source = const X11Rectangle(0, 0, 0, 0)}) {
     var request = X11WarpPointerRequest(destination,
         destinationWindow: destinationWindow,
@@ -917,7 +930,7 @@ class X11Client {
 
   /// Sets the input focus state.
   int setInputFocus(
-      {int window = 0,
+      {X11ResourceId window = X11ResourceId.None,
       X11FocusRevertTo revertTo = X11FocusRevertTo.none,
       int time = 0}) {
     var request =
@@ -955,20 +968,20 @@ class X11Client {
 
   /// Opens the font with the given [name] and assigns it [id].
   /// When no longer required, the font reference should be deleted with [closeFont].
-  int openFont(int id, String name) {
+  int openFont(X11ResourceId id, String name) {
     var request = X11OpenFontRequest(id, name);
     return sendRequest(45, request);
   }
 
   /// Deletes the reference to a [font] opened in [openFont].
-  int closeFont(int font) {
+  int closeFont(X11ResourceId font) {
     var request = X11CloseFontRequest(font);
     return sendRequest(46, request);
   }
 
   // FIXME: Convert font atoms?
   /// Gets information on [font].
-  Future<X11QueryFontReply> queryFont(int font) async {
+  Future<X11QueryFontReply> queryFont(X11ResourceId font) async {
     var request = X11QueryFontRequest(font);
     var sequenceNumber = sendRequest(47, request);
     return awaitReply<X11QueryFontReply>(
@@ -977,7 +990,7 @@ class X11Client {
 
   /// Gets the dimensions rendering [string] with [font] will use.
   Future<X11QueryTextExtentsReply> queryTextExtents(
-      int font, String string) async {
+      X11ResourceId font, String string) async {
     var request = X11QueryTextExtentsRequest(font, string);
     var sequenceNumber = sendRequest(48, request);
     return awaitReply<X11QueryTextExtentsReply>(
@@ -1025,20 +1038,21 @@ class X11Client {
 
   /// Creates a new pixmap with [id].
   /// When no longer required, the pixmap reference should be deleted with [freePixmap].
-  int createPixmap(int id, int drawable, X11Size size, {int depth = 24}) {
+  int createPixmap(X11ResourceId id, X11ResourceId drawable, X11Size size,
+      {int depth = 24}) {
     var request = X11CreatePixmapRequest(id, drawable, size, depth);
     return sendRequest(53, request);
   }
 
   /// Deletes the reference to a [pixmap] created in [createPixmap].
-  int freePixmap(int pixmap) {
+  int freePixmap(X11ResourceId pixmap) {
     var request = X11FreePixmapRequest(pixmap);
     return sendRequest(54, request);
   }
 
   /// Creates a graphics context with [id] for drawing on [drawable].
   /// When no longer required, the graphics context should be deleted with [freeGC].
-  int createGC(int id, int drawable,
+  int createGC(X11ResourceId id, X11ResourceId drawable,
       {X11GraphicsFunction function,
       int planeMask,
       int foreground,
@@ -1052,7 +1066,7 @@ class X11Client {
       int tile,
       int stipple,
       X11Point tileStippleOrigin,
-      int font,
+      X11ResourceId font,
       X11SubwindowMode subwindowMode,
       bool graphicsExposures,
       X11Point clipOrigin,
@@ -1092,7 +1106,7 @@ class X11Client {
   /// Changes properties of [gc].
   ///
   /// The properties are the same as in [createGC].
-  int changeGC(int gc,
+  int changeGC(X11ResourceId gc,
       {X11GraphicsFunction function,
       int planeMask,
       int foreground,
@@ -1106,7 +1120,7 @@ class X11Client {
       int tile,
       int stipple,
       X11Point tileStippleOrigin,
-      int font,
+      X11ResourceId font,
       X11SubwindowMode subwindowMode,
       bool graphicsExposures,
       X11Point clipOrigin,
@@ -1144,19 +1158,20 @@ class X11Client {
   }
 
   /// Copies [values] from [sourceGc] to [destinationGc].
-  int copyGC(int sourceGc, int destinationGc, Set<X11GCValue> values) {
+  int copyGC(X11ResourceId sourceGc, X11ResourceId destinationGc,
+      Set<X11GCValue> values) {
     var request = X11CopyGCRequest(sourceGc, destinationGc, values);
     return sendRequest(57, request);
   }
 
   /// Sets the dash pattern used when drawing wiht [gc]. [dashes] contains the length in pixels of each part of the dash pattern.
-  int setDashes(int gc, List<int> dashes, {int dashOffset = 0}) {
+  int setDashes(X11ResourceId gc, List<int> dashes, {int dashOffset = 0}) {
     var request = X11SetDashesRequest(gc, dashes, dashOffset: dashOffset);
     return sendRequest(58, request);
   }
 
   /// Sets the clipping [rectangles] used when drawing with [gc].
-  int setClipRectangles(int gc, List<X11Rectangle> rectangles,
+  int setClipRectangles(X11ResourceId gc, List<X11Rectangle> rectangles,
       {X11Point clipOrigin = const X11Point(0, 0),
       X11ClipOrdering ordering = X11ClipOrdering.unSorted}) {
     var request = X11SetClipRectanglesRequest(gc, rectangles,
@@ -1165,20 +1180,25 @@ class X11Client {
   }
 
   /// Deletes the reference to a [gc] created in [createGC].
-  int freeGC(int gc) {
+  int freeGC(X11ResourceId gc) {
     var request = X11FreeGCRequest(gc);
     return sendRequest(60, request);
   }
 
   /// Clears [area] on [window] to its backing color / pixmap.
-  int clearArea(int window, X11Rectangle area, {bool exposures = false}) {
+  int clearArea(X11ResourceId window, X11Rectangle area,
+      {bool exposures = false}) {
     var request = X11ClearAreaRequest(window, area, exposures: exposures);
     return sendRequest(61, request);
   }
 
   /// Copies [sourceArea] from [sourceDrawable] onto [destinationDrawable] at [destinationPosition].
-  int copyArea(int gc, int sourceDrawable, X11Rectangle sourceArea,
-      int destinationDrawable, X11Point destinationPosition) {
+  int copyArea(
+      X11ResourceId gc,
+      X11ResourceId sourceDrawable,
+      X11Rectangle sourceArea,
+      X11ResourceId destinationDrawable,
+      X11Point destinationPosition) {
     var request = X11CopyAreaRequest(sourceDrawable, destinationDrawable, gc,
         sourceArea, destinationPosition);
     return sendRequest(62, request);
@@ -1187,15 +1207,20 @@ class X11Client {
   /// Copies the [sourceArea] from [sourceDrawable] onto [destinationDrawable] at [destinationPosition].
   /// Only the bits in [bitPlane] from each pixel are copied.
   /// [bitPlane] must have a single bit set within the depth of the data being copied.
-  int copyPlane(int gc, int sourceDrawable, X11Rectangle sourceArea,
-      int destinationDrawable, X11Point destinationPosition, int bitPlane) {
+  int copyPlane(
+      X11ResourceId gc,
+      X11ResourceId sourceDrawable,
+      X11Rectangle sourceArea,
+      X11ResourceId destinationDrawable,
+      X11Point destinationPosition,
+      int bitPlane) {
     var request = X11CopyPlaneRequest(sourceDrawable, destinationDrawable, gc,
         sourceArea, destinationPosition, bitPlane);
     return sendRequest(63, request);
   }
 
   /// Draws [points] on [drawable].
-  int polyPoint(int gc, int drawable, List<X11Point> points,
+  int polyPoint(X11ResourceId gc, X11ResourceId drawable, List<X11Point> points,
       {X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11PolyPointRequest(drawable, gc, points,
         coordinateMode: coordinateMode);
@@ -1203,7 +1228,7 @@ class X11Client {
   }
 
   /// Draws a line on [drawable] made up of [points].
-  int polyLine(int gc, int drawable, List<X11Point> points,
+  int polyLine(X11ResourceId gc, X11ResourceId drawable, List<X11Point> points,
       {X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11PolyLineRequest(drawable, gc, points,
         coordinateMode: coordinateMode);
@@ -1211,25 +1236,27 @@ class X11Client {
   }
 
   /// Draws line [segments] on [drawable].
-  int polySegment(int gc, int drawable, List<X11Segment> segments) {
+  int polySegment(
+      X11ResourceId gc, X11ResourceId drawable, List<X11Segment> segments) {
     var request = X11PolySegmentRequest(drawable, gc, segments);
     return sendRequest(66, request);
   }
 
   /// Draws [rectangles] onto [drawable.
-  int polyRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
+  int polyRectangle(
+      X11ResourceId gc, X11ResourceId drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyRectangleRequest(drawable, gc, rectangles);
     return sendRequest(67, request);
   }
 
   /// Draws [arcs] onto [drawable.
-  int polyArc(int gc, int drawable, List<X11Arc> arcs) {
+  int polyArc(X11ResourceId gc, X11ResourceId drawable, List<X11Arc> arcs) {
     var request = X11PolyArcRequest(drawable, gc, arcs);
     return sendRequest(68, request);
   }
 
   /// Draws a filled polygon made from [points] onto [drawable].
-  int fillPoly(int gc, int drawable, List<X11Point> points,
+  int fillPoly(X11ResourceId gc, X11ResourceId drawable, List<X11Point> points,
       {X11PolygonShape shape = X11PolygonShape.complex,
       X11CoordinateMode coordinateMode = X11CoordinateMode.origin}) {
     var request = X11FillPolyRequest(drawable, gc, points,
@@ -1238,19 +1265,21 @@ class X11Client {
   }
 
   /// Draws filled [rectangles] onto [drawable].
-  int polyFillRectangle(int gc, int drawable, List<X11Rectangle> rectangles) {
+  int polyFillRectangle(
+      X11ResourceId gc, X11ResourceId drawable, List<X11Rectangle> rectangles) {
     var request = X11PolyFillRectangleRequest(drawable, gc, rectangles);
     return sendRequest(70, request);
   }
 
   /// Draws a filled polygon made from [args] onto [drawable].
-  int polyFillArc(int gc, int drawable, List<X11Arc> arcs) {
+  int polyFillArc(X11ResourceId gc, X11ResourceId drawable, List<X11Arc> arcs) {
     var request = X11PolyFillArcRequest(drawable, gc, arcs);
     return sendRequest(71, request);
   }
 
   /// Sets the contents of [area] on [drawable].
-  int putImage(int gc, int drawable, X11Rectangle area, List<int> data,
+  int putImage(X11ResourceId gc, X11ResourceId drawable, X11Rectangle area,
+      List<int> data,
       {X11ImageFormat format = X11ImageFormat.zPixmap,
       int depth = 24,
       int leftPad = 0}) {
@@ -1260,7 +1289,7 @@ class X11Client {
   }
 
   /// Gets the contents of [area] on [drawable].
-  Future<X11GetImageReply> getImage(int drawable, X11Rectangle area,
+  Future<X11GetImageReply> getImage(X11ResourceId drawable, X11Rectangle area,
       {X11ImageFormat format = X11ImageFormat.zPixmap,
       int planeMask = 0xFFFFFFFF}) async {
     var request = X11GetImageRequest(drawable, area,
@@ -1271,27 +1300,29 @@ class X11Client {
   }
 
   /// Draws text onto [drawable] at [position].
-  int polyText8(
-      int gc, int drawable, X11Point position, List<X11TextItem> items) {
+  int polyText8(X11ResourceId gc, X11ResourceId drawable, X11Point position,
+      List<X11TextItem> items) {
     var request = X11PolyText8Request(drawable, gc, position, items);
     return sendRequest(74, request);
   }
 
   /// Draws text onto [drawable] at [position].
-  int polyText16(
-      int gc, int drawable, X11Point position, List<X11TextItem> items) {
+  int polyText16(X11ResourceId gc, X11ResourceId drawable, X11Point position,
+      List<X11TextItem> items) {
     var request = X11PolyText16Request(drawable, gc, position, items);
     return sendRequest(75, request);
   }
 
   /// Draws [string] text onto [drawable] at [position]. [string] contains single byte characters.
-  int imageText8(int gc, int drawable, X11Point position, String string) {
+  int imageText8(X11ResourceId gc, X11ResourceId drawable, X11Point position,
+      String string) {
     var request = X11ImageText8Request(drawable, gc, position, string);
     return sendRequest(76, request);
   }
 
   /// Draws [string] text onto [drawable] at [position]. [string] contains two byte characters.
-  int imageText16(int gc, int drawable, X11Point position, String string) {
+  int imageText16(X11ResourceId gc, X11ResourceId drawable, X11Point position,
+      String string) {
     var request = X11ImageText16Request(drawable, gc, position, string);
     return sendRequest(77, request);
   }
@@ -1299,13 +1330,14 @@ class X11Client {
   /// Creates a colormap with [id] with [visual] format for the screen that contains [window].
   ///
   /// When no longer required, the colormap reference should be deleted with [freeColormap].
-  int createColormap(int id, int window, int visual, {int alloc = 0}) {
+  int createColormap(X11ResourceId id, X11ResourceId window, int visual,
+      {int alloc = 0}) {
     var request = X11CreateColormapRequest(id, window, visual, alloc: alloc);
     return sendRequest(78, request);
   }
 
   /// Deletes the reference to a [colormap] created in [createColormap].
-  int freeColormap(int colormap) {
+  int freeColormap(X11ResourceId colormap) {
     var request = X11FreeColormapRequest(colormap);
     return sendRequest(79, request);
   }
@@ -1313,25 +1345,26 @@ class X11Client {
   /// Creates a new colormap with [id] that moves the allocations from [sourceColormap].
   ///
   /// When no longer required, the colormap reference should be deleted with [freeColormap].
-  int copyColormapAndFree(int id, int sourceColormap) {
+  int copyColormapAndFree(X11ResourceId id, X11ResourceId sourceColormap) {
     var request = X11CopyColormapAndFreeRequest(id, sourceColormap);
     return sendRequest(80, request);
   }
 
   /// Installs [colormap].
-  int installColormap(int colormap) {
+  int installColormap(X11ResourceId colormap) {
     var request = X11InstallColormapRequest(colormap);
     return sendRequest(81, request);
   }
 
   /// Uninstalls [colormap].
-  int uninstallColormap(int colormap) {
+  int uninstallColormap(X11ResourceId colormap) {
     var request = X11UninstallColormapRequest(colormap);
     return sendRequest(82, request);
   }
 
   /// Gets the installed colormaps on the screen containing [window].
-  Future<List<int>> listInstalledColormaps(int window) async {
+  Future<List<X11ResourceId>> listInstalledColormaps(
+      X11ResourceId window) async {
     var request = X11ListInstalledColormapsRequest(window);
     var sequenceNumber = sendRequest(83, request);
     var reply = await awaitReply<X11ListInstalledColormapsReply>(
@@ -1341,7 +1374,8 @@ class X11Client {
 
   /// Allocates a read-only colormap entry in [colormap] for the closest RGB value to [color].
   // When no longer requires the allocated color can be freed with [freeColors].
-  Future<X11AllocColorReply> allocColor(int colormap, X11Rgb color) async {
+  Future<X11AllocColorReply> allocColor(
+      X11ResourceId colormap, X11Rgb color) async {
     var request = X11AllocColorRequest(colormap, color);
     var sequenceNumber = sendRequest(84, request);
     return awaitReply<X11AllocColorReply>(
@@ -1351,7 +1385,7 @@ class X11Client {
   /// Allocates a read-only colormap entry in [colormap] for the color with [name].
   // When no longer requires the allocated color can be freed with [freeColors].
   Future<X11AllocNamedColorReply> allocNamedColor(
-      int colormap, String name) async {
+      X11ResourceId colormap, String name) async {
     var request = X11AllocNamedColorRequest(colormap, name);
     var sequenceNumber = sendRequest(85, request);
     return awaitReply<X11AllocNamedColorReply>(
@@ -1360,7 +1394,8 @@ class X11Client {
 
   /// Allocates [colorCount] colors in [colormap].
   // When no longer requires the allocated colors can be freed with [freeColors].
-  Future<X11AllocColorCellsReply> allocColorCells(int colormap, int colorCount,
+  Future<X11AllocColorCellsReply> allocColorCells(
+      X11ResourceId colormap, int colorCount,
       {int planes = 0, bool contiguous = false}) async {
     var request = X11AllocColorCellsRequest(colormap, colorCount,
         planes: planes, contiguous: contiguous);
@@ -1373,7 +1408,7 @@ class X11Client {
   // If [contiguous] is true then each returned color channel mask will have contiguous bits set.
   // When no longer requires the allocated colors can be freed with [freeColors].
   Future<X11AllocColorPlanesReply> allocColorPlanes(
-      int colormap, int colorCount,
+      X11ResourceId colormap, int colorCount,
       {int redDepth = 0,
       int greenDepth = 0,
       int blueDepth = 0,
@@ -1389,20 +1424,21 @@ class X11Client {
   }
 
   /// Frees [pixels] in [colormap] that were previously allocated with [allocColor], [allocNamedColor], [allocColorCells] or [allocColorPlanes].
-  int freeColors(int colormap, List<int> pixels, {int planeMask = 0xFFFFFFFF}) {
+  int freeColors(X11ResourceId colormap, List<int> pixels,
+      {int planeMask = 0xFFFFFFFF}) {
     var request = X11FreeColorsRequest(colormap, pixels, planeMask: planeMask);
     return sendRequest(88, request);
   }
 
   /// Sets the RGB values of pixels in [colormap].
-  int storeColors(int colormap, List<X11RgbColorItem> items) {
+  int storeColors(X11ResourceId colormap, List<X11RgbColorItem> items) {
     var request = X11StoreColorsRequest(colormap, items);
     return sendRequest(89, request);
   }
 
   /// Sets the values of a [pixel] in [colormap] to the color with [name].
   /// Color channels can be filtered out by setting [doRed], [doGreen] and [doBlue] to false.
-  int storeNamedColor(int colormap, int pixel, String name,
+  int storeNamedColor(X11ResourceId colormap, int pixel, String name,
       {bool doRed = true, bool doGreen = true, bool doBlue = true}) {
     var request = X11StoreNamedColorRequest(colormap, pixel, name,
         doRed: doRed, doGreen: doGreen, doBlue: doBlue);
@@ -1410,7 +1446,8 @@ class X11Client {
   }
 
   /// Gets the RGB color values for the [pixels] in [colormap].
-  Future<List<X11Rgb>> queryColors(int colormap, List<int> pixels) async {
+  Future<List<X11Rgb>> queryColors(
+      X11ResourceId colormap, List<int> pixels) async {
     var request = X11QueryColorsRequest(colormap, pixels);
     var sequenceNumber = sendRequest(91, request);
     var reply = await awaitReply<X11QueryColorsReply>(
@@ -1419,7 +1456,8 @@ class X11Client {
   }
 
   /// Gets the RGB values associated with the color with [name] in [colormap].
-  Future<X11LookupColorReply> lookupColor(int colormap, String name) async {
+  Future<X11LookupColorReply> lookupColor(
+      X11ResourceId colormap, String name) async {
     var request = X11LookupColorRequest(colormap, name);
     var sequenceNumber = sendRequest(92, request);
     return awaitReply<X11LookupColorReply>(
@@ -1430,11 +1468,11 @@ class X11Client {
   ///
   /// If set, [maskPixmap] defines the shape of the cursor.
   /// When no longer required, the cursor reference should be deleted with [freeCursor].
-  int createCursor(int id, int sourcePixmap,
+  int createCursor(X11ResourceId id, X11ResourceId sourcePixmap,
       {X11Rgb foreground = const X11Rgb(65535, 65535, 65535),
       X11Rgb background = const X11Rgb(0, 0, 0),
       X11Point hotspot = const X11Point(0, 0),
-      int maskPixmap = 0}) {
+      X11ResourceId maskPixmap = X11ResourceId.None}) {
     var request = X11CreateCursorRequest(id, sourcePixmap,
         foreground: foreground,
         background: foreground,
@@ -1447,10 +1485,11 @@ class X11Client {
   ///
   /// If set, [maskChar] and [maskFont] define the shape of the cursor.
   /// When no longer required, the cursor reference should be deleted with [freeCursor].
-  int createGlyphCursor(int id, int sourceFont, int sourceChar,
+  int createGlyphCursor(
+      X11ResourceId id, X11ResourceId sourceFont, int sourceChar,
       {X11Rgb foreground = const X11Rgb(65535, 65535, 65535),
       X11Rgb background = const X11Rgb(0, 0, 0),
-      int maskFont = 0,
+      X11ResourceId maskFont = X11ResourceId.None,
       int maskChar = 0}) {
     var request = X11CreateGlyphCursorRequest(id, sourceFont, sourceChar,
         foreground: foreground,
@@ -1461,13 +1500,13 @@ class X11Client {
   }
 
   /// Deletes the reference to a [cursor] created in [createCursor] or [createGlyphCursor].
-  int freeCursor(int cursor) {
+  int freeCursor(X11ResourceId cursor) {
     var request = X11FreeCursorRequest(cursor);
     return sendRequest(95, request);
   }
 
   /// Changes the [foreground] and [background] colors of [cursor].
-  int recolorCursor(int cursor,
+  int recolorCursor(X11ResourceId cursor,
       {X11Rgb foreground = const X11Rgb(65535, 65535, 65535),
       X11Rgb background = const X11Rgb(0, 0, 0)}) {
     var request = X11RecolorCursorRequest(cursor,
@@ -1477,24 +1516,27 @@ class X11Client {
 
   /// Gets the largest cursor size on the screen containing [drawable].
   /// The size will be no larger than maximumSize].
-  Future<X11Size> queryBestSizeCursor(int drawable, X11Size maximumSize) async {
+  Future<X11Size> queryBestSizeCursor(
+      X11ResourceId drawable, X11Size maximumSize) async {
     return _queryBestSize(drawable, X11QueryClass.cursor, maximumSize);
   }
 
   /// Gets the size that tiles fastest on the screen containing [drawable].
   /// The size will be no larger than [maximumSize].
-  Future<X11Size> queryBestSizeTile(int drawable, X11Size maximumSize) async {
+  Future<X11Size> queryBestSizeTile(
+      X11ResourceId drawable, X11Size maximumSize) async {
     return _queryBestSize(drawable, X11QueryClass.tile, maximumSize);
   }
 
   /// Gets the size that stipples fastest on the screen containing [drawable].
   /// The size will be no larger than [maximumSize].
-  Future<X11Size> queryBestSizeStipple(int drawable, X11Size size) async {
+  Future<X11Size> queryBestSizeStipple(
+      X11ResourceId drawable, X11Size size) async {
     return _queryBestSize(drawable, X11QueryClass.stipple, size);
   }
 
   Future<X11Size> _queryBestSize(
-      int drawable, X11QueryClass queryClass, X11Size size) async {
+      X11ResourceId drawable, X11QueryClass queryClass, X11Size size) async {
     var request = X11QueryBestSizeRequest(drawable, queryClass, size);
     var sequenceNumber = sendRequest(97, request);
     var reply = await awaitReply<X11QueryBestSizeReply>(
@@ -1651,15 +1693,15 @@ class X11Client {
   }
 
   /// Closes the client that controls [resource].
-  int killClient(int resource) {
+  int killClient(X11ResourceId resource) {
     var request = X11KillClientRequest(resource);
     return sendRequest(113, request);
   }
 
   /// Rotates the [properties] of [window] by [delta] steps.
   Future<int> rotateProperties(
-      int window, int delta, List<String> properties) async {
-    var propertyAtoms = <int>[];
+      X11ResourceId window, int delta, List<String> properties) async {
+    var propertyAtoms = <X11Atom>[];
     for (var property in properties) {
       propertyAtoms.add(await internAtom(property));
     }

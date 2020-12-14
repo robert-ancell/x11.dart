@@ -1,4 +1,5 @@
 import 'x11_read_buffer.dart';
+import 'x11_types.dart';
 import 'x11_write_buffer.dart';
 
 class X11Error {
@@ -43,96 +44,96 @@ class X11ValueError extends X11Error {
 }
 
 class X11WindowError extends X11Error {
-  final int badResourceId;
+  final X11ResourceId badResourceId;
 
   const X11WindowError(int sequenceNumber, this.badResourceId)
       : super(sequenceNumber);
 
   factory X11WindowError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
-    var badResourceId = buffer.readUint32();
+    var badResourceId = buffer.readResourceId();
     buffer.skip(21);
     return X11WindowError(sequenceNumber, badResourceId);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(badResourceId);
+    buffer.writeResourceId(badResourceId);
     buffer.skip(21);
   }
 }
 
 class X11PixmapError extends X11Error {
-  final int badResourceId;
+  final X11ResourceId badResourceId;
 
   const X11PixmapError(int sequenceNumber, this.badResourceId)
       : super(sequenceNumber);
 
   factory X11PixmapError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
-    var badResourceId = buffer.readUint32();
+    var badResourceId = buffer.readResourceId();
     buffer.skip(21);
     return X11PixmapError(sequenceNumber, badResourceId);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(badResourceId);
+    buffer.writeResourceId(badResourceId);
     buffer.skip(21);
   }
 }
 
 class X11AtomError extends X11Error {
-  final int badAtomId;
+  final X11Atom badAtomId;
 
   const X11AtomError(int sequenceNumber, this.badAtomId)
       : super(sequenceNumber);
 
   factory X11AtomError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
-    var badAtomId = buffer.readUint32();
+    var badAtomId = buffer.readAtom();
     buffer.skip(21);
     return X11AtomError(sequenceNumber, badAtomId);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(badAtomId);
+    buffer.writeAtom(badAtomId);
     buffer.skip(21);
   }
 }
 
 class X11CursorError extends X11Error {
-  final int badResourceId;
+  final X11ResourceId badResourceId;
 
   const X11CursorError(int sequenceNumber, this.badResourceId)
       : super(sequenceNumber);
 
   factory X11CursorError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
-    var badResourceId = buffer.readUint32();
+    var badResourceId = buffer.readResourceId();
     buffer.skip(21);
     return X11CursorError(sequenceNumber, badResourceId);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(badResourceId);
+    buffer.writeResourceId(badResourceId);
     buffer.skip(21);
   }
 }
 
 class X11FontError extends X11Error {
-  final int badResourceId;
+  final X11ResourceId badResourceId;
 
   const X11FontError(int sequenceNumber, this.badResourceId)
       : super(sequenceNumber);
 
   factory X11FontError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
-    var badResourceId = buffer.readUint32();
+    var badResourceId = buffer.readResourceId();
     buffer.skip(21);
     return X11FontError(sequenceNumber, badResourceId);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(badResourceId);
+    buffer.writeResourceId(badResourceId);
     buffer.skip(21);
   }
 }
@@ -152,21 +153,21 @@ class X11MatchError extends X11Error {
 }
 
 class X11DrawableError extends X11Error {
-  final int badResourceId;
+  final X11ResourceId badResourceId;
 
   const X11DrawableError(int sequenceNumber, this.badResourceId)
       : super(sequenceNumber);
 
   factory X11DrawableError.fromBuffer(
       int sequenceNumber, X11ReadBuffer buffer) {
-    var badResourceId = buffer.readUint32();
+    var badResourceId = buffer.readResourceId();
     buffer.skip(21);
     return X11DrawableError(sequenceNumber, badResourceId);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(badResourceId);
+    buffer.writeResourceId(badResourceId);
     buffer.skip(21);
   }
 }
@@ -200,61 +201,61 @@ class X11AllocError extends X11Error {
 }
 
 class X11ColormapError extends X11Error {
-  final int badResourceId;
+  final X11ResourceId badResourceId;
 
   const X11ColormapError(int sequenceNumber, this.badResourceId)
       : super(sequenceNumber);
 
   factory X11ColormapError.fromBuffer(
       int sequenceNumber, X11ReadBuffer buffer) {
-    var badResourceId = buffer.readUint32();
+    var badResourceId = buffer.readResourceId();
     buffer.skip(21);
     return X11ColormapError(sequenceNumber, badResourceId);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(badResourceId);
+    buffer.writeResourceId(badResourceId);
     buffer.skip(21);
   }
 }
 
 class X11GContextError extends X11Error {
-  final int badResourceId;
+  final X11ResourceId badResourceId;
 
   const X11GContextError(int sequenceNumber, this.badResourceId)
       : super(sequenceNumber);
 
   factory X11GContextError.fromBuffer(
       int sequenceNumber, X11ReadBuffer buffer) {
-    var badResourceId = buffer.readUint32();
+    var badResourceId = buffer.readResourceId();
     buffer.skip(21);
     return X11GContextError(sequenceNumber, badResourceId);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(badResourceId);
+    buffer.writeResourceId(badResourceId);
     buffer.skip(21);
   }
 }
 
 class X11IdChoiceError extends X11Error {
-  final int badResourceId;
+  final X11ResourceId badResourceId;
 
   const X11IdChoiceError(int sequenceNumber, this.badResourceId)
       : super(sequenceNumber);
 
   factory X11IdChoiceError.fromBuffer(
       int sequenceNumber, X11ReadBuffer buffer) {
-    var badResourceId = buffer.readUint32();
+    var badResourceId = buffer.readResourceId();
     buffer.skip(21);
     return X11IdChoiceError(sequenceNumber, badResourceId);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(badResourceId);
+    buffer.writeResourceId(badResourceId);
     buffer.skip(21);
   }
 }
@@ -322,19 +323,19 @@ class X11UnknownError extends X11Error {
 }
 
 class X11RegionError extends X11Error {
-  final int region;
+  final X11ResourceId region;
 
   const X11RegionError(int sequenceNumber, this.region) : super(sequenceNumber);
 
   factory X11RegionError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
-    var region = buffer.readUint32();
+    var region = buffer.readResourceId();
     buffer.skip(21);
     return X11RegionError(sequenceNumber, region);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(region);
+    buffer.writeResourceId(region);
     buffer.skip(21);
   }
 }
@@ -491,19 +492,19 @@ class X11RandrProviderError extends X11Error {
 }
 
 class X11DamageError extends X11Error {
-  final int damage;
+  final X11ResourceId damage;
 
   const X11DamageError(int sequenceNumber, this.damage) : super(sequenceNumber);
 
   factory X11DamageError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
-    var damage = buffer.readUint32();
+    var damage = buffer.readResourceId();
     buffer.skip(21);
     return X11DamageError(sequenceNumber, damage);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(damage);
+    buffer.writeResourceId(damage);
     buffer.skip(21);
   }
 }

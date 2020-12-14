@@ -5,8 +5,8 @@ import 'x11_write_buffer.dart';
 
 class X11DamageNotifyEvent extends X11Event {
   final int firstEventCode;
-  final int drawable;
-  final int damage;
+  final X11ResourceId drawable;
+  final X11ResourceId damage;
   final X11DamageReportLevel level;
   final X11Rectangle area;
   final X11Rectangle geometry;
@@ -18,8 +18,8 @@ class X11DamageNotifyEvent extends X11Event {
   factory X11DamageNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
     var level = X11DamageReportLevel.values[buffer.readUint8()];
-    var drawable = buffer.readUint32();
-    var damage = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var damage = buffer.readResourceId();
     var timestamp = buffer.readUint32();
     var areaX = buffer.readUint16();
     var areaY = buffer.readUint16();
@@ -40,8 +40,8 @@ class X11DamageNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(level.index);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(damage);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(damage);
     buffer.writeUint32(timestamp);
     buffer.writeUint16(area.x);
     buffer.writeUint16(area.y);

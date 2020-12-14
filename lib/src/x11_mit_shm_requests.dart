@@ -115,8 +115,8 @@ class X11MitShmDetachRequest extends X11Request {
 }
 
 class X11MitShmPutImageRequest extends X11Request {
-  final int gc;
-  final int drawable;
+  final X11ResourceId gc;
+  final X11ResourceId drawable;
   final X11Size size;
   final X11Rectangle sourceArea;
   final X11Point destinationPosition;
@@ -134,8 +134,8 @@ class X11MitShmPutImageRequest extends X11Request {
       this.sendEvent = false});
 
   factory X11MitShmPutImageRequest.fromBuffer(X11ReadBuffer buffer) {
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var totalWidth = buffer.readUint16();
     var totalHeight = buffer.readUint16();
     var srcX = buffer.readUint16();
@@ -166,8 +166,8 @@ class X11MitShmPutImageRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(3);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
     buffer.writeUint16(sourceArea.x);
@@ -190,7 +190,7 @@ class X11MitShmPutImageRequest extends X11Request {
 }
 
 class X11MitShmGetImageRequest extends X11Request {
-  final int drawable;
+  final X11ResourceId drawable;
   final X11Rectangle area;
   final X11ImageFormat format;
   final int planeMask;
@@ -201,7 +201,7 @@ class X11MitShmGetImageRequest extends X11Request {
       {this.format, this.planeMask = 0xFFFFFFFF, this.offset});
 
   factory X11MitShmGetImageRequest.fromBuffer(X11ReadBuffer buffer) {
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
@@ -219,7 +219,7 @@ class X11MitShmGetImageRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(4);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
     buffer.writeInt16(area.x);
     buffer.writeInt16(area.y);
     buffer.writeUint16(area.width);
@@ -263,8 +263,8 @@ class X11MitShmGetImageReply extends X11Reply {
 }
 
 class X11MitShmCreatePixmapRequest extends X11Request {
-  final int id;
-  final int drawable;
+  final X11ResourceId id;
+  final X11ResourceId drawable;
   final X11Size size;
   final int depth;
   final int shmseg;
@@ -274,8 +274,8 @@ class X11MitShmCreatePixmapRequest extends X11Request {
       {this.depth = 24, this.offset = 0});
 
   factory X11MitShmCreatePixmapRequest.fromBuffer(X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
-    var drawable = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var drawable = buffer.readResourceId();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     var depth = buffer.readUint8();
@@ -290,8 +290,8 @@ class X11MitShmCreatePixmapRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(5);
-    buffer.writeUint32(id);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(drawable);
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
     buffer.writeUint8(depth);

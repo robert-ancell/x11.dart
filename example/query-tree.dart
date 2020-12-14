@@ -4,17 +4,13 @@ void main() async {
   var client = X11Client();
   await client.connect();
 
-  String formatId(int id) {
-    return '0x' + id.toRadixString(16).padLeft(8, '0');
-  }
-
-  void printChildren(List<int> children, [String indent = '']) async {
+  void printChildren(List<X11ResourceId> children, [String indent = '']) async {
     for (var window in children) {
       var reply = await client.getGeometry(window);
       var attributes = await client.getWindowAttributes(window);
       var properties = await client.listProperties(window);
       print(
-          '${indent}0x${formatId(window)} ${reply.geometry.x},${reply.geometry.y} ${reply.geometry.width}x${reply.geometry.height} ${attributes.windowClass} ${properties.join(', ')}');
+          '${indent}${window} ${reply.geometry.x},${reply.geometry.y} ${reply.geometry.width}x${reply.geometry.height} ${attributes.windowClass} ${properties.join(', ')}');
       var wmName = await client.getPropertyString(window, 'WM_NAME');
       if (wmName != null) {
         print('  ${indent} "${wmName}"');

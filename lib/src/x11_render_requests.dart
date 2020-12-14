@@ -12,14 +12,6 @@ int pad(int length) {
   return n;
 }
 
-String _formatHex32(int id) {
-  return '0x' + id.toRadixString(16).padLeft(8, '0');
-}
-
-String _formatId(int id) {
-  return _formatHex32(id);
-}
-
 X11Transform _readX11Transform(X11ReadBuffer buffer) {
   var p11 = buffer.readFixed();
   var p12 = buffer.readFixed();
@@ -127,7 +119,7 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
     buffer.skip(4);
     var formats = <X11PictFormatInfo>[];
     for (var i = 0; i < formatsLength; i++) {
-      var id = buffer.readUint32();
+      var id = buffer.readResourceId();
       var type = X11PictureType.values[buffer.readUint8()];
       var depth = buffer.readUint8();
       buffer.skip(2);
@@ -139,7 +131,7 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
       var blueMask = buffer.readUint16();
       var alphaShift = buffer.readUint16();
       var alphaMask = buffer.readUint16();
-      var colormap = buffer.readUint32();
+      var colormap = buffer.readResourceId();
       formats.add(X11PictFormatInfo(id,
           type: type,
           depth: depth,
@@ -157,16 +149,16 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
     for (var i = 0; i < screensLength; i++) {
       var depthsLength = buffer.readUint32();
       var fallback = buffer.readUint32();
-      var visuals = <int, Map<int, int>>{};
+      var visuals = <int, Map<int, X11ResourceId>>{};
       for (var j = 0; j < depthsLength; j++) {
         var depth = buffer.readUint8();
         buffer.skip(1);
         var visualsLength = buffer.readUint16();
         buffer.skip(4);
-        var visualMap = <int, int>{};
+        var visualMap = <int, X11ResourceId>{};
         for (var k = 0; k < visualsLength; k++) {
           var visual = buffer.readUint32();
-          var format = buffer.readUint32();
+          var format = buffer.readResourceId();
           visualMap[visual] = format;
         }
         visuals[depth] = visualMap;
@@ -215,7 +207,7 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
         buffer.skip(4);
         visualMap.forEach((visual, format) {
           buffer.writeUint32(visual);
-          buffer.writeUint32(format);
+          buffer.writeResourceId(format);
         });
       });
     }
@@ -230,19 +222,19 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
 }
 
 class X11RenderQueryPictIndexValuesRequest extends X11Request {
-  final int format;
+  final X11ResourceId format;
 
   X11RenderQueryPictIndexValuesRequest(this.format);
 
   factory X11RenderQueryPictIndexValuesRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var format = buffer.readUint32();
+    var format = buffer.readResourceId();
     return X11RenderQueryPictIndexValuesRequest(format);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
-    buffer.writeUint32(format);
+    buffer.writeResourceId(format);
   }
 
   @override
@@ -290,11 +282,11 @@ class X11RenderQueryPictIndexValuesReply extends X11Reply {
 }
 
 class X11RenderCreatePictureRequest extends X11Request {
-  final int id;
-  final int drawable;
-  final int format;
+  final X11ResourceId id;
+  final X11ResourceId drawable;
+  final X11ResourceId format;
   final X11Repeat repeat;
-  final int alphaMap;
+  final X11ResourceId alphaMap;
   final int alphaXOrigin;
   final int alphaYOrigin;
   final int clipXOrigin;
@@ -304,7 +296,7 @@ class X11RenderCreatePictureRequest extends X11Request {
   final X11SubwindowMode subwindowMode;
   final X11PolyEdge polyEdge;
   final X11PolyMode polyMode;
-  final int dither;
+  final X11Atom dither;
   final bool componentAlpha;
 
   X11RenderCreatePictureRequest(this.id, this.drawable, this.format,
@@ -323,17 +315,17 @@ class X11RenderCreatePictureRequest extends X11Request {
       this.componentAlpha});
 
   factory X11RenderCreatePictureRequest.fromBuffer(X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
-    var drawable = buffer.readUint32();
-    var format = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var drawable = buffer.readResourceId();
+    var format = buffer.readResourceId();
     var valueMask = buffer.readUint32();
     X11Repeat repeat;
     if ((valueMask & 0x0001) != 0) {
       repeat = X11Repeat.values[buffer.readValueUint8()];
     }
-    int alphaMap;
+    X11ResourceId alphaMap;
     if ((valueMask & 0x0002) != 0) {
-      alphaMap = buffer.readUint32();
+      alphaMap = buffer.readResourceId();
     }
     int alphaXOrigin;
     if ((valueMask & 0x0004) != 0) {
@@ -371,9 +363,9 @@ class X11RenderCreatePictureRequest extends X11Request {
     if ((valueMask & 0x0400) != 0) {
       polyMode = X11PolyMode.values[buffer.readValueUint8()];
     }
-    int dither;
+    X11Atom dither;
     if ((valueMask & 0x0800) != 0) {
-      dither = buffer.readUint32();
+      dither = buffer.readAtom();
     }
     bool componentAlpha;
     if ((valueMask & 0x1000) != 0) {
@@ -398,9 +390,9 @@ class X11RenderCreatePictureRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(4);
-    buffer.writeUint32(id);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(format);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(format);
     var valueMask = 0;
     if (repeat != null) {
       valueMask |= 0x0001;
@@ -446,7 +438,7 @@ class X11RenderCreatePictureRequest extends X11Request {
       buffer.writeValueUint8(repeat.index);
     }
     if (alphaMap != null) {
-      buffer.writeUint32(alphaMap);
+      buffer.writeResourceId(alphaMap);
     }
     if (alphaXOrigin != null) {
       buffer.writeValueInt16(alphaXOrigin);
@@ -476,7 +468,7 @@ class X11RenderCreatePictureRequest extends X11Request {
       buffer.writeValueUint8(polyMode.index);
     }
     if (dither != null) {
-      buffer.writeUint32(dither);
+      buffer.writeAtom(dither);
     }
     if (componentAlpha != null) {
       buffer.writeValueBool(componentAlpha);
@@ -486,7 +478,7 @@ class X11RenderCreatePictureRequest extends X11Request {
   @override
   String toString() {
     var string =
-        'X11CreatePictureRequest(${_formatId(id)}, drawable: ${_formatId(drawable)} format: ${format}';
+        'X11CreatePictureRequest(${id}, drawable: ${drawable} format: ${format}';
     if (repeat != null) {
       string += ', repeat: ${repeat}';
     }
@@ -532,9 +524,9 @@ class X11RenderCreatePictureRequest extends X11Request {
 }
 
 class X11RenderChangePictureRequest extends X11Request {
-  final int picture;
+  final X11ResourceId picture;
   final X11Repeat repeat;
-  final int alphaMap;
+  final X11ResourceId alphaMap;
   final int alphaXOrigin;
   final int alphaYOrigin;
   final int clipXOrigin;
@@ -544,7 +536,7 @@ class X11RenderChangePictureRequest extends X11Request {
   final X11SubwindowMode subwindowMode;
   final X11PolyEdge polyEdge;
   final X11PolyMode polyMode;
-  final int dither;
+  final X11Atom dither;
   final bool componentAlpha;
 
   X11RenderChangePictureRequest(this.picture,
@@ -563,15 +555,15 @@ class X11RenderChangePictureRequest extends X11Request {
       this.componentAlpha});
 
   factory X11RenderChangePictureRequest.fromBuffer(X11ReadBuffer buffer) {
-    var picture = buffer.readUint32();
+    var picture = buffer.readResourceId();
     var valueMask = buffer.readUint32();
     X11Repeat repeat;
     if ((valueMask & 0x0001) != 0) {
       repeat = X11Repeat.values[buffer.readValueUint8()];
     }
-    int alphaMap;
+    X11ResourceId alphaMap;
     if ((valueMask & 0x0002) != 0) {
-      alphaMap = buffer.readUint32();
+      alphaMap = buffer.readResourceId();
     }
     int alphaXOrigin;
     if ((valueMask & 0x0004) != 0) {
@@ -609,9 +601,9 @@ class X11RenderChangePictureRequest extends X11Request {
     if ((valueMask & 0x0400) != 0) {
       polyMode = X11PolyMode.values[buffer.readValueUint8()];
     }
-    int dither;
+    X11Atom dither;
     if ((valueMask & 0x0800) != 0) {
-      dither = buffer.readUint32();
+      dither = buffer.readAtom();
     }
     bool componentAlpha;
     if ((valueMask & 0x1000) != 0) {
@@ -636,7 +628,7 @@ class X11RenderChangePictureRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(5);
-    buffer.writeUint32(picture);
+    buffer.writeResourceId(picture);
     var valueMask = 0;
     if (repeat != null) {
       valueMask |= 0x0001;
@@ -682,7 +674,7 @@ class X11RenderChangePictureRequest extends X11Request {
       buffer.writeValueUint8(repeat.index);
     }
     if (alphaMap != null) {
-      buffer.writeUint32(alphaMap);
+      buffer.writeResourceId(alphaMap);
     }
     if (alphaXOrigin != null) {
       buffer.writeValueInt16(alphaXOrigin);
@@ -712,7 +704,7 @@ class X11RenderChangePictureRequest extends X11Request {
       buffer.writeValueUint8(polyMode.index);
     }
     if (dither != null) {
-      buffer.writeUint32(dither);
+      buffer.writeAtom(dither);
     }
     if (componentAlpha != null) {
       buffer.writeValueBool(componentAlpha);
@@ -721,7 +713,7 @@ class X11RenderChangePictureRequest extends X11Request {
 
   @override
   String toString() {
-    var string = 'X11ChangePictureRequest(${_formatId(picture)}';
+    var string = 'X11ChangePictureRequest(${picture}';
     if (repeat != null) {
       string += ', repeat: ${repeat}';
     }
@@ -767,7 +759,7 @@ class X11RenderChangePictureRequest extends X11Request {
 }
 
 class X11RenderSetPictureClipRectanglesRequest extends X11Request {
-  final int picture;
+  final X11ResourceId picture;
   final X11Point clipOrigin;
   final List<X11Rectangle> rectangles;
 
@@ -776,7 +768,7 @@ class X11RenderSetPictureClipRectanglesRequest extends X11Request {
 
   factory X11RenderSetPictureClipRectanglesRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var picture = buffer.readUint32();
+    var picture = buffer.readResourceId();
     var clipXOrigin = buffer.readInt16();
     var clipYOrigin = buffer.readInt16();
     var rectangles = <X11Rectangle>[];
@@ -794,7 +786,7 @@ class X11RenderSetPictureClipRectanglesRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(6);
-    buffer.writeUint32(picture);
+    buffer.writeResourceId(picture);
     buffer.writeInt16(clipOrigin.x);
     buffer.writeInt16(clipOrigin.y);
     for (var rectangle in rectangles) {
@@ -807,38 +799,38 @@ class X11RenderSetPictureClipRectanglesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderSetPictureClipRectanglesRequest(${_formatId(picture)}, ${rectangles}, clipOrigin: ${clipOrigin})';
+      'X11RenderSetPictureClipRectanglesRequest(${picture}, ${rectangles}, clipOrigin: ${clipOrigin})';
 }
 
 class X11RenderFreePictureRequest extends X11Request {
-  final int picture;
+  final X11ResourceId picture;
 
   X11RenderFreePictureRequest(this.picture);
 
   factory X11RenderFreePictureRequest.fromBuffer(X11ReadBuffer buffer) {
-    var picture = buffer.readUint32();
+    var picture = buffer.readResourceId();
     return X11RenderFreePictureRequest(picture);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(7);
-    buffer.writeUint32(picture);
+    buffer.writeResourceId(picture);
   }
 
   @override
-  String toString() => 'X11RenderFreePictureRequest(${_formatId(picture)})';
+  String toString() => 'X11RenderFreePictureRequest(${picture})';
 }
 
 class X11RenderCompositeRequest extends X11Request {
-  final int sourcePicture;
-  final int
+  final X11ResourceId sourcePicture;
+  final X11ResourceId
       destinationPicture; // FIXME: Change to picture and make first argument
   final X11Size area;
   final X11PictureOperation op;
   final X11Point sourceOrigin;
   final X11Point destinationOrigin;
-  final int maskPicture;
+  final X11ResourceId maskPicture;
   final X11Point maskOrigin;
 
   X11RenderCompositeRequest(
@@ -846,15 +838,15 @@ class X11RenderCompositeRequest extends X11Request {
       {this.op = X11PictureOperation.src,
       this.sourceOrigin = const X11Point(0, 0),
       this.destinationOrigin = const X11Point(0, 0),
-      this.maskPicture = 0,
+      this.maskPicture = X11ResourceId.None,
       this.maskOrigin = const X11Point(0, 0)});
 
   factory X11RenderCompositeRequest.fromBuffer(X11ReadBuffer buffer) {
     var op = X11PictureOperation.values[buffer.readUint8()];
     buffer.skip(3);
-    var sourcePicture = buffer.readUint32();
-    var maskPicture = buffer.readUint32();
-    var destinationPicture = buffer.readUint32();
+    var sourcePicture = buffer.readResourceId();
+    var maskPicture = buffer.readResourceId();
+    var destinationPicture = buffer.readResourceId();
     var sourceOriginX = buffer.readInt16();
     var sourceOriginY = buffer.readInt16();
     var maskOriginX = buffer.readInt16();
@@ -877,9 +869,9 @@ class X11RenderCompositeRequest extends X11Request {
     buffer.writeUint8(8);
     buffer.writeUint8(op.index);
     buffer.skip(3);
-    buffer.writeUint32(sourcePicture);
-    buffer.writeUint32(maskPicture);
-    buffer.writeUint32(destinationPicture);
+    buffer.writeResourceId(sourcePicture);
+    buffer.writeResourceId(maskPicture);
+    buffer.writeResourceId(destinationPicture);
     buffer.writeInt16(sourceOrigin.x);
     buffer.writeInt16(sourceOrigin.y);
     buffer.writeInt16(maskOrigin.x);
@@ -892,29 +884,29 @@ class X11RenderCompositeRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCompositeRequest(${_formatId(sourcePicture)}, ${_formatId(destinationPicture)}, ${area}, op: ${op}, sourceOrigin: ${sourceOrigin}, destinationOrigin: ${destinationOrigin}, maskPicture: ${_formatId(maskPicture)}, maskOrigin: ${maskOrigin})';
+      'X11RenderCompositeRequest(${sourcePicture}, ${destinationPicture}, ${area}, op: ${op}, sourceOrigin: ${sourceOrigin}, destinationOrigin: ${destinationOrigin}, maskPicture: ${maskPicture}, maskOrigin: ${maskOrigin})';
 }
 
 class X11RenderTrapezoidsRequest extends X11Request {
-  final int sourcePicture;
-  final int destinationPicture;
+  final X11ResourceId sourcePicture;
+  final X11ResourceId destinationPicture;
   final List<X11Trap> trapezoids;
   final X11PictureOperation op;
   final X11Point sourceOrigin;
-  final int maskFormat;
+  final X11ResourceId maskFormat;
 
   X11RenderTrapezoidsRequest(
       this.sourcePicture, this.destinationPicture, this.trapezoids,
       {this.op = X11PictureOperation.src,
       this.sourceOrigin = const X11Point(0, 0),
-      this.maskFormat = 0});
+      this.maskFormat = X11ResourceId.None});
 
   factory X11RenderTrapezoidsRequest.fromBuffer(X11ReadBuffer buffer) {
     var op = X11PictureOperation.values[buffer.readUint8()];
     buffer.skip(3);
-    var sourcePicture = buffer.readUint32();
-    var destinationPicture = buffer.readUint32();
-    var maskFormat = buffer.readUint32();
+    var sourcePicture = buffer.readResourceId();
+    var destinationPicture = buffer.readResourceId();
+    var maskFormat = buffer.readResourceId();
     var sourceOriginX = buffer.readInt16();
     var sourceOriginY = buffer.readInt16();
     var trapezoids = <X11Trap>[];
@@ -947,9 +939,9 @@ class X11RenderTrapezoidsRequest extends X11Request {
     buffer.writeUint8(10);
     buffer.writeUint8(op.index);
     buffer.skip(3);
-    buffer.writeUint32(sourcePicture);
-    buffer.writeUint32(destinationPicture);
-    buffer.writeUint32(maskFormat);
+    buffer.writeResourceId(sourcePicture);
+    buffer.writeResourceId(destinationPicture);
+    buffer.writeResourceId(maskFormat);
     buffer.writeInt16(sourceOrigin.x);
     buffer.writeInt16(sourceOrigin.y);
     for (var trapezoid in trapezoids) {
@@ -968,29 +960,29 @@ class X11RenderTrapezoidsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderTrapezoidsRequest(${_formatId(sourcePicture)}, ${_formatId(destinationPicture)}, ${trapezoids}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${_formatId(maskFormat)})';
+      'X11RenderTrapezoidsRequest(${sourcePicture}, ${destinationPicture}, ${trapezoids}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
 }
 
 class X11RenderTrianglesRequest extends X11Request {
-  final int sourcePicture;
-  final int destinationPicture;
+  final X11ResourceId sourcePicture;
+  final X11ResourceId destinationPicture;
   final List<X11Triangle> triangles;
   final X11PictureOperation op;
   final X11Point sourceOrigin;
-  final int maskFormat;
+  final X11ResourceId maskFormat;
 
   X11RenderTrianglesRequest(
       this.sourcePicture, this.destinationPicture, this.triangles,
       {this.op = X11PictureOperation.src,
       this.sourceOrigin = const X11Point(0, 0),
-      this.maskFormat = 0});
+      this.maskFormat = X11ResourceId.None});
 
   factory X11RenderTrianglesRequest.fromBuffer(X11ReadBuffer buffer) {
     var op = X11PictureOperation.values[buffer.readUint8()];
     buffer.skip(3);
-    var sourcePicture = buffer.readUint32();
-    var destinationPicture = buffer.readUint32();
-    var maskFormat = buffer.readUint32();
+    var sourcePicture = buffer.readResourceId();
+    var destinationPicture = buffer.readResourceId();
+    var maskFormat = buffer.readResourceId();
     var sourceOriginX = buffer.readInt16();
     var sourceOriginY = buffer.readInt16();
     var triangles = <X11Triangle>[];
@@ -1016,9 +1008,9 @@ class X11RenderTrianglesRequest extends X11Request {
     buffer.writeUint8(11);
     buffer.writeUint8(op.index);
     buffer.skip(3);
-    buffer.writeUint32(sourcePicture);
-    buffer.writeUint32(destinationPicture);
-    buffer.writeUint32(maskFormat);
+    buffer.writeResourceId(sourcePicture);
+    buffer.writeResourceId(destinationPicture);
+    buffer.writeResourceId(maskFormat);
     buffer.writeInt16(sourceOrigin.x);
     buffer.writeInt16(sourceOrigin.y);
     for (var triangle in triangles) {
@@ -1033,29 +1025,29 @@ class X11RenderTrianglesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderTrianglesRequest(${_formatId(sourcePicture)}, ${_formatId(destinationPicture)}, ${triangles}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${_formatId(maskFormat)})';
+      'X11RenderTrianglesRequest(${sourcePicture}, ${destinationPicture}, ${triangles}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
 }
 
 class X11RenderTriStripRequest extends X11Request {
-  final int sourcePicture;
-  final int destinationPicture;
+  final X11ResourceId sourcePicture;
+  final X11ResourceId destinationPicture;
   final List<X11PointFixed> points;
   final X11PictureOperation op;
   final X11Point sourceOrigin;
-  final int maskFormat;
+  final X11ResourceId maskFormat;
 
   X11RenderTriStripRequest(
       this.sourcePicture, this.destinationPicture, this.points,
       {this.op = X11PictureOperation.src,
-      this.maskFormat = 0,
+      this.maskFormat = X11ResourceId.None,
       this.sourceOrigin = const X11Point(0, 0)});
 
   factory X11RenderTriStripRequest.fromBuffer(X11ReadBuffer buffer) {
     var op = X11PictureOperation.values[buffer.readUint8()];
     buffer.skip(3);
-    var sourcePicture = buffer.readUint32();
-    var destinationPicture = buffer.readUint32();
-    var maskFormat = buffer.readUint32();
+    var sourcePicture = buffer.readResourceId();
+    var destinationPicture = buffer.readResourceId();
+    var maskFormat = buffer.readResourceId();
     var sourceOriginX = buffer.readInt16();
     var sourceOriginY = buffer.readInt16();
     var points = <X11PointFixed>[];
@@ -1075,9 +1067,9 @@ class X11RenderTriStripRequest extends X11Request {
     buffer.writeUint8(12);
     buffer.writeUint8(op.index);
     buffer.skip(3);
-    buffer.writeUint32(sourcePicture);
-    buffer.writeUint32(destinationPicture);
-    buffer.writeUint32(maskFormat);
+    buffer.writeResourceId(sourcePicture);
+    buffer.writeResourceId(destinationPicture);
+    buffer.writeResourceId(maskFormat);
     buffer.writeInt16(sourceOrigin.x);
     buffer.writeInt16(sourceOrigin.y);
     for (var point in points) {
@@ -1088,29 +1080,29 @@ class X11RenderTriStripRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderTriStripRequest(${_formatId(sourcePicture)}, ${_formatId(destinationPicture)}, ${points}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderTriStripRequest(${sourcePicture}, ${destinationPicture}, ${points}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
 }
 
 class X11RenderTriFanRequest extends X11Request {
-  final int sourcePicture;
-  final int destinationPicture;
+  final X11ResourceId sourcePicture;
+  final X11ResourceId destinationPicture;
   final List<X11PointFixed> points;
   final X11PictureOperation op;
   final X11Point sourceOrigin;
-  final int maskFormat;
+  final X11ResourceId maskFormat;
 
   X11RenderTriFanRequest(
       this.sourcePicture, this.destinationPicture, this.points,
       {this.op = X11PictureOperation.src,
-      this.maskFormat = 0,
+      this.maskFormat = X11ResourceId.None,
       this.sourceOrigin = const X11Point(0, 0)});
 
   factory X11RenderTriFanRequest.fromBuffer(X11ReadBuffer buffer) {
     var op = X11PictureOperation.values[buffer.readUint8()];
     buffer.skip(3);
-    var sourcePicture = buffer.readUint32();
-    var destinationPicture = buffer.readUint32();
-    var maskFormat = buffer.readUint32();
+    var sourcePicture = buffer.readResourceId();
+    var destinationPicture = buffer.readResourceId();
+    var maskFormat = buffer.readResourceId();
     var sourceOriginX = buffer.readInt16();
     var sourceOriginY = buffer.readInt16();
     var points = <X11PointFixed>[];
@@ -1130,9 +1122,9 @@ class X11RenderTriFanRequest extends X11Request {
     buffer.writeUint8(13);
     buffer.writeUint8(op.index);
     buffer.skip(3);
-    buffer.writeUint32(sourcePicture);
-    buffer.writeUint32(destinationPicture);
-    buffer.writeUint32(maskFormat);
+    buffer.writeResourceId(sourcePicture);
+    buffer.writeResourceId(destinationPicture);
+    buffer.writeResourceId(maskFormat);
     buffer.writeInt16(sourceOrigin.x);
     buffer.writeInt16(sourceOrigin.y);
     for (var point in points) {
@@ -1143,86 +1135,85 @@ class X11RenderTriFanRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderTriFanRequest(${_formatId(sourcePicture)}, ${_formatId(destinationPicture)}, ${points}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderTriFanRequest(${sourcePicture}, ${destinationPicture}, ${points}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
 }
 
 class X11RenderCreateGlyphSetRequest extends X11Request {
-  final int id;
-  final int format;
+  final X11ResourceId id;
+  final X11ResourceId format;
 
   X11RenderCreateGlyphSetRequest(this.id, this.format);
 
   factory X11RenderCreateGlyphSetRequest.fromBuffer(X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
-    var format = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var format = buffer.readResourceId();
     return X11RenderCreateGlyphSetRequest(id, format);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(17);
-    buffer.writeUint32(id);
-    buffer.writeUint32(format);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(format);
   }
 
   @override
-  String toString() =>
-      'X11RenderCreateGlyphSetRequest(${_formatId(id)}, ${format})';
+  String toString() => 'X11RenderCreateGlyphSetRequest(${id}, ${format})';
 }
 
 class X11RenderReferenceGlyphSetRequest extends X11Request {
-  final int id;
-  final int existingGlyphset;
+  final X11ResourceId id;
+  final X11ResourceId existingGlyphset;
 
   X11RenderReferenceGlyphSetRequest(this.id, this.existingGlyphset);
 
   factory X11RenderReferenceGlyphSetRequest.fromBuffer(X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
-    var existingGlyphset = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var existingGlyphset = buffer.readResourceId();
     return X11RenderReferenceGlyphSetRequest(id, existingGlyphset);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(18);
-    buffer.writeUint32(id);
-    buffer.writeUint32(existingGlyphset);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(existingGlyphset);
   }
 
   @override
   String toString() =>
-      'X11RenderReferenceGlyphSetRequest(${_formatId(id)}, ${_formatId(existingGlyphset)})';
+      'X11RenderReferenceGlyphSetRequest(${id}, ${existingGlyphset})';
 }
 
 class X11RenderFreeGlyphSetRequest extends X11Request {
-  final int glyphset;
+  final X11ResourceId glyphset;
 
   X11RenderFreeGlyphSetRequest(this.glyphset);
 
   factory X11RenderFreeGlyphSetRequest.fromBuffer(X11ReadBuffer buffer) {
-    var glyphset = buffer.readUint32();
+    var glyphset = buffer.readResourceId();
     return X11RenderFreeGlyphSetRequest(glyphset);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(19);
-    buffer.writeUint32(glyphset);
+    buffer.writeResourceId(glyphset);
   }
 
   @override
-  String toString() => 'X11RenderFreeGlyphSetRequest(${_formatId(glyphset)})';
+  String toString() => 'X11RenderFreeGlyphSetRequest(${glyphset})';
 }
 
 class X11RenderAddGlyphsRequest extends X11Request {
-  final int glyphset;
+  final X11ResourceId glyphset;
   final List<X11GlyphInfo> glyphs;
   final List<int> data;
 
   X11RenderAddGlyphsRequest(this.glyphset, this.glyphs, this.data);
 
   factory X11RenderAddGlyphsRequest.fromBuffer(X11ReadBuffer buffer) {
-    var glyphset = buffer.readUint32();
+    var glyphset = buffer.readResourceId();
     var glyphsLength = buffer.readUint32();
     var ids = <int>[];
     for (var i = 0; i < glyphsLength; i++) {
@@ -1246,7 +1237,7 @@ class X11RenderAddGlyphsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(20);
-    buffer.writeUint32(glyphset);
+    buffer.writeResourceId(glyphset);
     buffer.writeUint32(glyphs.length);
     for (var glyph in glyphs) {
       buffer.writeUint32(glyph.id);
@@ -1265,17 +1256,17 @@ class X11RenderAddGlyphsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderAddGlyphsRequest(glyphset: ${_formatId(glyphset)}, ${glyphs}, ${data})';
+      'X11RenderAddGlyphsRequest(glyphset: ${glyphset}, ${glyphs}, ${data})';
 }
 
 class X11RenderFreeGlyphsRequest extends X11Request {
-  final int glyphset;
+  final X11ResourceId glyphset;
   final List<int> glyphs;
 
   X11RenderFreeGlyphsRequest(this.glyphset, this.glyphs);
 
   factory X11RenderFreeGlyphsRequest.fromBuffer(X11ReadBuffer buffer) {
-    var glyphset = buffer.readUint32();
+    var glyphset = buffer.readResourceId();
     var glyphs = <int>[];
     while (buffer.remaining > 0) {
       glyphs.add(buffer.readUint32());
@@ -1286,37 +1277,36 @@ class X11RenderFreeGlyphsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(22);
-    buffer.writeUint32(glyphset);
+    buffer.writeResourceId(glyphset);
     buffer.writeListOfUint32(glyphs);
   }
 
   @override
-  String toString() =>
-      'X11RenderFreeGlyphsRequest(${_formatId(glyphset)}, ${glyphs})';
+  String toString() => 'X11RenderFreeGlyphsRequest(${glyphset}, ${glyphs})';
 }
 
 class X11RenderCompositeGlyphs8Request extends X11Request {
-  final int sourcePicture;
-  final int destinationPicture;
-  final int glyphset;
+  final X11ResourceId sourcePicture;
+  final X11ResourceId destinationPicture;
+  final X11ResourceId glyphset;
   final List<X11GlyphItem> glyphcmds;
   final X11PictureOperation op;
   final X11Point sourceOrigin;
-  final int maskFormat;
+  final X11ResourceId maskFormat;
 
   X11RenderCompositeGlyphs8Request(this.sourcePicture, this.destinationPicture,
       this.glyphset, this.glyphcmds,
       {this.op = X11PictureOperation.src,
       this.sourceOrigin = const X11Point(0, 0),
-      this.maskFormat = 0});
+      this.maskFormat = X11ResourceId.None});
 
   factory X11RenderCompositeGlyphs8Request.fromBuffer(X11ReadBuffer buffer) {
     var op = X11PictureOperation.values[buffer.readUint8()];
     buffer.skip(3);
-    var sourcePicture = buffer.readUint32();
-    var destinationPicture = buffer.readUint32();
-    var maskFormat = buffer.readUint32();
-    var glyphset = buffer.readUint32();
+    var sourcePicture = buffer.readResourceId();
+    var destinationPicture = buffer.readResourceId();
+    var maskFormat = buffer.readResourceId();
+    var glyphset = buffer.readResourceId();
     var sourceOriginX = buffer.readInt16();
     var sourceOriginY = buffer.readInt16();
     var glyphcmds = <X11GlyphItem>[];
@@ -1324,7 +1314,7 @@ class X11RenderCompositeGlyphs8Request extends X11Request {
       var glyphsLength = buffer.readUint8();
       buffer.skip(3);
       if (glyphsLength == 255) {
-        var glyphable = buffer.readUint32();
+        var glyphable = buffer.readResourceId();
         glyphcmds.add(X11GlyphItemGlyphable(glyphable));
       } else {
         var dx = buffer.readInt16();
@@ -1346,17 +1336,17 @@ class X11RenderCompositeGlyphs8Request extends X11Request {
     buffer.writeUint8(23);
     buffer.writeUint8(op.index);
     buffer.skip(3);
-    buffer.writeUint32(sourcePicture);
-    buffer.writeUint32(destinationPicture);
-    buffer.writeUint32(maskFormat);
-    buffer.writeUint32(glyphset);
+    buffer.writeResourceId(sourcePicture);
+    buffer.writeResourceId(destinationPicture);
+    buffer.writeResourceId(maskFormat);
+    buffer.writeResourceId(glyphset);
     buffer.writeInt16(sourceOrigin.x);
     buffer.writeInt16(sourceOrigin.y);
     for (var item in glyphcmds) {
       if (item is X11GlyphItemGlyphable) {
         buffer.writeUint8(255);
         buffer.skip(3);
-        buffer.writeUint32(item.glyphable);
+        buffer.writeResourceId(item.glyphable);
       } else if (item is X11GlyphItemGlyphs) {
         buffer.writeUint8(item.glyphs.length);
         buffer.skip(3);
@@ -1370,31 +1360,31 @@ class X11RenderCompositeGlyphs8Request extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCompositeGlyphs8Request(${_formatId(sourcePicture)}, ${_formatId(destinationPicture)}, ${_formatId(glyphset)}, ${glyphcmds}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderCompositeGlyphs8Request(${sourcePicture}, ${destinationPicture}, ${glyphset}, ${glyphcmds}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
 }
 
 class X11RenderCompositeGlyphs16Request extends X11Request {
-  final int sourcePicture;
-  final int destinationPicture;
-  final int glyphset;
+  final X11ResourceId sourcePicture;
+  final X11ResourceId destinationPicture;
+  final X11ResourceId glyphset;
   final List<X11GlyphItem> glyphcmds;
   final X11PictureOperation op;
   final X11Point sourceOrigin;
-  final int maskFormat;
+  final X11ResourceId maskFormat;
 
   X11RenderCompositeGlyphs16Request(this.sourcePicture, this.destinationPicture,
       this.glyphset, this.glyphcmds,
       {this.op = X11PictureOperation.src,
       this.sourceOrigin = const X11Point(0, 0),
-      this.maskFormat = 0});
+      this.maskFormat = X11ResourceId.None});
 
   factory X11RenderCompositeGlyphs16Request.fromBuffer(X11ReadBuffer buffer) {
     var op = X11PictureOperation.values[buffer.readUint8()];
     buffer.skip(3);
-    var sourcePicture = buffer.readUint32();
-    var destinationPicture = buffer.readUint32();
-    var maskFormat = buffer.readUint32();
-    var glyphset = buffer.readUint32();
+    var sourcePicture = buffer.readResourceId();
+    var destinationPicture = buffer.readResourceId();
+    var maskFormat = buffer.readResourceId();
+    var glyphset = buffer.readResourceId();
     var sourceOriginX = buffer.readInt16();
     var sourceOriginY = buffer.readInt16();
     var glyphcmds = <X11GlyphItem>[];
@@ -1402,7 +1392,7 @@ class X11RenderCompositeGlyphs16Request extends X11Request {
       var glyphsLength = buffer.readUint8();
       buffer.skip(3);
       if (glyphsLength == 255) {
-        var glyphable = buffer.readUint32();
+        var glyphable = buffer.readResourceId();
         glyphcmds.add(X11GlyphItemGlyphable(glyphable));
       } else {
         var dx = buffer.readInt16();
@@ -1424,17 +1414,17 @@ class X11RenderCompositeGlyphs16Request extends X11Request {
     buffer.writeUint8(24);
     buffer.writeUint8(op.index);
     buffer.skip(3);
-    buffer.writeUint32(sourcePicture);
-    buffer.writeUint32(destinationPicture);
-    buffer.writeUint32(maskFormat);
-    buffer.writeUint32(glyphset);
+    buffer.writeResourceId(sourcePicture);
+    buffer.writeResourceId(destinationPicture);
+    buffer.writeResourceId(maskFormat);
+    buffer.writeResourceId(glyphset);
     buffer.writeInt16(sourceOrigin.x);
     buffer.writeInt16(sourceOrigin.y);
     for (var item in glyphcmds) {
       if (item is X11GlyphItemGlyphable) {
         buffer.writeUint8(255);
         buffer.skip(3);
-        buffer.writeUint32(item.glyphable);
+        buffer.writeResourceId(item.glyphable);
       } else if (item is X11GlyphItemGlyphs) {
         buffer.writeUint8(item.glyphs.length);
         buffer.skip(3);
@@ -1448,31 +1438,31 @@ class X11RenderCompositeGlyphs16Request extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCompositeGlyphs16Request(${_formatId(sourcePicture)}, ${_formatId(destinationPicture)}, ${_formatId(glyphset)}, ${glyphcmds}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderCompositeGlyphs16Request(${sourcePicture}, ${destinationPicture}, ${glyphset}, ${glyphcmds}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
 }
 
 class X11RenderCompositeGlyphs32Request extends X11Request {
-  final int sourcePicture;
-  final int destinationPicture;
-  final int glyphset;
+  final X11ResourceId sourcePicture;
+  final X11ResourceId destinationPicture;
+  final X11ResourceId glyphset;
   final List<X11GlyphItem> glyphcmds;
   final X11PictureOperation op;
   final X11Point sourceOrigin;
-  final int maskFormat;
+  final X11ResourceId maskFormat;
 
   X11RenderCompositeGlyphs32Request(this.sourcePicture, this.destinationPicture,
       this.glyphset, this.glyphcmds,
       {this.op = X11PictureOperation.src,
       this.sourceOrigin = const X11Point(0, 0),
-      this.maskFormat = 0});
+      this.maskFormat = X11ResourceId.None});
 
   factory X11RenderCompositeGlyphs32Request.fromBuffer(X11ReadBuffer buffer) {
     var op = X11PictureOperation.values[buffer.readUint8()];
     buffer.skip(3);
-    var sourcePicture = buffer.readUint32();
-    var destinationPicture = buffer.readUint32();
-    var maskFormat = buffer.readUint32();
-    var glyphset = buffer.readUint32();
+    var sourcePicture = buffer.readResourceId();
+    var destinationPicture = buffer.readResourceId();
+    var maskFormat = buffer.readResourceId();
+    var glyphset = buffer.readResourceId();
     var sourceOriginX = buffer.readInt16();
     var sourceOriginY = buffer.readInt16();
     var glyphcmds = <X11GlyphItem>[];
@@ -1480,7 +1470,7 @@ class X11RenderCompositeGlyphs32Request extends X11Request {
       var glyphsLength = buffer.readUint8();
       buffer.skip(3);
       if (glyphsLength == 255) {
-        var glyphable = buffer.readUint32();
+        var glyphable = buffer.readResourceId();
         glyphcmds.add(X11GlyphItemGlyphable(glyphable));
       } else {
         var dx = buffer.readInt16();
@@ -1501,17 +1491,17 @@ class X11RenderCompositeGlyphs32Request extends X11Request {
     buffer.writeUint8(25);
     buffer.writeUint8(op.index);
     buffer.skip(3);
-    buffer.writeUint32(sourcePicture);
-    buffer.writeUint32(destinationPicture);
-    buffer.writeUint32(maskFormat);
-    buffer.writeUint32(glyphset);
+    buffer.writeResourceId(sourcePicture);
+    buffer.writeResourceId(destinationPicture);
+    buffer.writeResourceId(maskFormat);
+    buffer.writeResourceId(glyphset);
     buffer.writeInt16(sourceOrigin.x);
     buffer.writeInt16(sourceOrigin.y);
     for (var item in glyphcmds) {
       if (item is X11GlyphItemGlyphable) {
         buffer.writeUint8(255);
         buffer.skip(3);
-        buffer.writeUint32(item.glyphable);
+        buffer.writeResourceId(item.glyphable);
       } else if (item is X11GlyphItemGlyphs) {
         buffer.writeUint8(item.glyphs.length);
         buffer.skip(3);
@@ -1523,7 +1513,7 @@ class X11RenderCompositeGlyphs32Request extends X11Request {
       if (item is X11GlyphItemGlyphable) {
         buffer.writeUint8(255);
         buffer.skip(3);
-        buffer.writeUint32(item.glyphable);
+        buffer.writeResourceId(item.glyphable);
       } else if (item is X11GlyphItemGlyphs) {
         buffer.writeUint8(item.glyphs.length);
         buffer.skip(3);
@@ -1535,7 +1525,7 @@ class X11RenderCompositeGlyphs32Request extends X11Request {
       if (item is X11GlyphItemGlyphable) {
         buffer.writeUint8(255);
         buffer.skip(3);
-        buffer.writeUint32(item.glyphable);
+        buffer.writeResourceId(item.glyphable);
       } else if (item is X11GlyphItemGlyphs) {
         buffer.writeUint8(item.glyphs.length);
         buffer.skip(3);
@@ -1547,7 +1537,7 @@ class X11RenderCompositeGlyphs32Request extends X11Request {
       if (item is X11GlyphItemGlyphable) {
         buffer.writeUint8(255);
         buffer.skip(3);
-        buffer.writeUint32(item.glyphable);
+        buffer.writeResourceId(item.glyphable);
       } else if (item is X11GlyphItemGlyphs) {
         buffer.writeUint8(item.glyphs.length);
         buffer.skip(3);
@@ -1560,11 +1550,11 @@ class X11RenderCompositeGlyphs32Request extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCompositeGlyphs32Request(${_formatId(sourcePicture)}, ${_formatId(destinationPicture)}, ${_formatId(glyphset)}, ${glyphcmds}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderCompositeGlyphs32Request(${sourcePicture}, ${destinationPicture}, ${glyphset}, ${glyphcmds}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
 }
 
 class X11RenderFillRectanglesRequest extends X11Request {
-  final int destinationPicture;
+  final X11ResourceId destinationPicture;
   final List<X11Rectangle> rectangles;
   final X11PictureOperation op;
   final X11Rgba color;
@@ -1576,7 +1566,7 @@ class X11RenderFillRectanglesRequest extends X11Request {
   factory X11RenderFillRectanglesRequest.fromBuffer(X11ReadBuffer buffer) {
     var op = X11PictureOperation.values[buffer.readUint8()];
     buffer.skip(3);
-    var destinationPicture = buffer.readUint32();
+    var destinationPicture = buffer.readResourceId();
     var red = buffer.readUint16();
     var green = buffer.readUint16();
     var blue = buffer.readUint16();
@@ -1598,7 +1588,7 @@ class X11RenderFillRectanglesRequest extends X11Request {
     buffer.writeUint8(26);
     buffer.writeUint8(op.index);
     buffer.skip(3);
-    buffer.writeUint32(destinationPicture);
+    buffer.writeResourceId(destinationPicture);
     buffer.writeUint16(color.red);
     buffer.writeUint16(color.green);
     buffer.writeUint16(color.blue);
@@ -1617,15 +1607,15 @@ class X11RenderFillRectanglesRequest extends X11Request {
 }
 
 class X11RenderCreateCursorRequest extends X11Request {
-  final int id;
-  final int sourcePicture;
+  final X11ResourceId id;
+  final X11ResourceId sourcePicture;
   final X11Point hotspot;
 
   X11RenderCreateCursorRequest(this.id, this.sourcePicture, {this.hotspot});
 
   factory X11RenderCreateCursorRequest.fromBuffer(X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
-    var sourcePicture = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var sourcePicture = buffer.readResourceId();
     var x = buffer.readUint16();
     var y = buffer.readUint16();
     return X11RenderCreateCursorRequest(id, sourcePicture,
@@ -1635,25 +1625,25 @@ class X11RenderCreateCursorRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(27);
-    buffer.writeUint32(id);
-    buffer.writeUint32(sourcePicture);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(sourcePicture);
     buffer.writeUint16(hotspot.x);
     buffer.writeUint16(hotspot.y);
   }
 
   @override
   String toString() =>
-      'X11RenderCreateCursorRequest(${_formatId(id)}, ${_formatId(sourcePicture)}, hotspot: ${hotspot})';
+      'X11RenderCreateCursorRequest(${id}, ${sourcePicture}, hotspot: ${hotspot})';
 }
 
 class X11RenderSetPictureTransformRequest extends X11Request {
-  final int picture;
+  final X11ResourceId picture;
   final X11Transform transform;
 
   X11RenderSetPictureTransformRequest(this.picture, this.transform);
 
   factory X11RenderSetPictureTransformRequest.fromBuffer(X11ReadBuffer buffer) {
-    var picture = buffer.readUint32();
+    var picture = buffer.readResourceId();
     var transform = _readX11Transform(buffer);
     return X11RenderSetPictureTransformRequest(picture, transform);
   }
@@ -1661,33 +1651,33 @@ class X11RenderSetPictureTransformRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(28);
-    buffer.writeUint32(picture);
+    buffer.writeResourceId(picture);
     _writeX11Transform(buffer, transform);
   }
 
   @override
   String toString() =>
-      'X11RenderSetPictureTransformRequest({_formatId(picture)}, ${transform})';
+      'X11RenderSetPictureTransformRequest({picture}, ${transform})';
 }
 
 class X11RenderQueryFiltersRequest extends X11Request {
-  final int drawable;
+  final X11ResourceId drawable;
 
   X11RenderQueryFiltersRequest(this.drawable);
 
   factory X11RenderQueryFiltersRequest.fromBuffer(X11ReadBuffer buffer) {
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     return X11RenderQueryFiltersRequest(drawable);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(29);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
   }
 
   @override
-  String toString() => 'X11RenderQueryFiltersRequest(${_formatId(drawable)})';
+  String toString() => 'X11RenderQueryFiltersRequest(${drawable})';
 }
 
 class X11RenderQueryFiltersReply extends X11Reply {
@@ -1721,7 +1711,7 @@ class X11RenderQueryFiltersReply extends X11Reply {
 }
 
 class X11RenderSetPictureFilterRequest extends X11Request {
-  final int picture;
+  final X11ResourceId picture;
   final String filter;
   final List<double> values;
 
@@ -1729,7 +1719,7 @@ class X11RenderSetPictureFilterRequest extends X11Request {
       {this.values = const []});
 
   factory X11RenderSetPictureFilterRequest.fromBuffer(X11ReadBuffer buffer) {
-    var picture = buffer.readUint32();
+    var picture = buffer.readResourceId();
     var filterLength = buffer.readUint16();
     buffer.skip(2);
     var filter = buffer.readString8(filterLength);
@@ -1744,7 +1734,7 @@ class X11RenderSetPictureFilterRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(30);
-    buffer.writeUint32(picture);
+    buffer.writeResourceId(picture);
     var filterLength = buffer.getString8Length(filter);
     buffer.writeUint16(filterLength);
     buffer.skip(2);
@@ -1755,21 +1745,21 @@ class X11RenderSetPictureFilterRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderSetPictureFilterRequest(picture: ${_formatId(picture)}, filter: ${filter}, values: ${values})';
+      'X11RenderSetPictureFilterRequest(picture: ${picture}, filter: ${filter}, values: ${values})';
 }
 
 class X11RenderCreateAnimatedCursorRequest extends X11Request {
-  final int id;
+  final X11ResourceId id;
   final List<X11AnimatedCursorFrame> frames;
 
   X11RenderCreateAnimatedCursorRequest(this.id, this.frames);
 
   factory X11RenderCreateAnimatedCursorRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
+    var id = buffer.readResourceId();
     var frames = <X11AnimatedCursorFrame>[];
     while (buffer.remaining > 0) {
-      var cursor = buffer.readUint32();
+      var cursor = buffer.readResourceId();
       var delay = buffer.readUint32();
       frames.add(X11AnimatedCursorFrame(cursor, delay));
     }
@@ -1779,9 +1769,9 @@ class X11RenderCreateAnimatedCursorRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(31);
-    buffer.writeUint32(id);
+    buffer.writeResourceId(id);
     for (var frame in frames) {
-      buffer.writeUint32(frame.cursor);
+      buffer.writeResourceId(frame.cursor);
       buffer.writeUint32(frame.delay);
     }
   }
@@ -1791,7 +1781,7 @@ class X11RenderCreateAnimatedCursorRequest extends X11Request {
 }
 
 class X11RenderAddTrapezoidsRequest extends X11Request {
-  final int picture;
+  final X11ResourceId picture;
   final List<X11Trapezoid> trapezoids;
   final X11Point offset;
 
@@ -1799,7 +1789,7 @@ class X11RenderAddTrapezoidsRequest extends X11Request {
       {this.offset = const X11Point(0, 0)});
 
   factory X11RenderAddTrapezoidsRequest.fromBuffer(X11ReadBuffer buffer) {
-    var picture = buffer.readUint32();
+    var picture = buffer.readResourceId();
     var dx = buffer.readInt16();
     var dy = buffer.readInt16();
     var trapezoids = <X11Trapezoid>[];
@@ -1820,7 +1810,7 @@ class X11RenderAddTrapezoidsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(32);
-    buffer.writeUint32(picture);
+    buffer.writeResourceId(picture);
     buffer.writeInt16(offset.x);
     buffer.writeInt16(offset.y);
     for (var trapezoid in trapezoids) {
@@ -1835,17 +1825,17 @@ class X11RenderAddTrapezoidsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderAddTrapezoidsRequest(picture: ${_formatId(picture)}, ${trapezoids}, offset: ${offset})';
+      'X11RenderAddTrapezoidsRequest(picture: ${picture}, ${trapezoids}, offset: ${offset})';
 }
 
 class X11RenderCreateSolidFillRequest extends X11Request {
-  final int id;
+  final X11ResourceId id;
   final X11Rgba color;
 
   X11RenderCreateSolidFillRequest(this.id, this.color);
 
   factory X11RenderCreateSolidFillRequest.fromBuffer(X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
+    var id = buffer.readResourceId();
     var red = buffer.readUint16();
     var green = buffer.readUint16();
     var blue = buffer.readUint16();
@@ -1857,7 +1847,7 @@ class X11RenderCreateSolidFillRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(33);
-    buffer.writeUint32(id);
+    buffer.writeResourceId(id);
     buffer.writeUint16(color.red);
     buffer.writeUint16(color.green);
     buffer.writeUint16(color.blue);
@@ -1865,12 +1855,11 @@ class X11RenderCreateSolidFillRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11RenderCreateSolidFillRequest(${_formatId(id)}, ${color})';
+  String toString() => 'X11RenderCreateSolidFillRequest(${id}, ${color})';
 }
 
 class X11RenderCreateLinearGradientRequest extends X11Request {
-  final int id;
+  final X11ResourceId id;
   final X11PointFixed p1;
   final X11PointFixed p2;
   final List<X11ColorStop> stops;
@@ -1882,7 +1871,7 @@ class X11RenderCreateLinearGradientRequest extends X11Request {
 
   factory X11RenderCreateLinearGradientRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
+    var id = buffer.readResourceId();
     var p1X = buffer.readFixed();
     var p1Y = buffer.readFixed();
     var p2X = buffer.readFixed();
@@ -1907,7 +1896,7 @@ class X11RenderCreateLinearGradientRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(34);
-    buffer.writeUint32(id);
+    buffer.writeResourceId(id);
     buffer.writeFixed(p1.x);
     buffer.writeFixed(p1.y);
     buffer.writeFixed(p2.x);
@@ -1926,11 +1915,11 @@ class X11RenderCreateLinearGradientRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCreateLinearGradientRequest(${_formatId(id)}, p1: ${p1}, p2: ${p2}, stops: ${stops})';
+      'X11RenderCreateLinearGradientRequest(${id}, p1: ${p1}, p2: ${p2}, stops: ${stops})';
 }
 
 class X11RenderCreateRadialGradientRequest extends X11Request {
-  final int id;
+  final X11ResourceId id;
   final X11PointFixed inner;
   final X11PointFixed outer;
   final double innerRadius;
@@ -1946,7 +1935,7 @@ class X11RenderCreateRadialGradientRequest extends X11Request {
 
   factory X11RenderCreateRadialGradientRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
+    var id = buffer.readResourceId();
     var innerX = buffer.readFixed();
     var innerY = buffer.readFixed();
     var outerX = buffer.readFixed();
@@ -1977,7 +1966,7 @@ class X11RenderCreateRadialGradientRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(35);
-    buffer.writeUint32(id);
+    buffer.writeResourceId(id);
     buffer.writeFixed(inner.x);
     buffer.writeFixed(inner.y);
     buffer.writeFixed(outer.x);
@@ -1998,11 +1987,11 @@ class X11RenderCreateRadialGradientRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCreateRadialGradientRequest(${_formatId(id)}, inner: ${inner}, outer: ${outer}, innerRadius: ${innerRadius}, outerRadius: ${outerRadius}, stops: ${stops})';
+      'X11RenderCreateRadialGradientRequest(${id}, inner: ${inner}, outer: ${outer}, innerRadius: ${innerRadius}, outerRadius: ${outerRadius}, stops: ${stops})';
 }
 
 class X11RenderCreateConicalGradientRequest extends X11Request {
-  final int id;
+  final X11ResourceId id;
   final X11PointFixed center;
   final double angle;
   final List<X11ColorStop> stops;
@@ -2014,7 +2003,7 @@ class X11RenderCreateConicalGradientRequest extends X11Request {
 
   factory X11RenderCreateConicalGradientRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var id = buffer.readUint32();
+    var id = buffer.readResourceId();
     var centerX = buffer.readFixed();
     var centerY = buffer.readFixed();
     var angle = buffer.readFixed();
@@ -2038,7 +2027,7 @@ class X11RenderCreateConicalGradientRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(36);
-    buffer.writeUint32(id);
+    buffer.writeResourceId(id);
     buffer.writeFixed(center.x);
     buffer.writeFixed(center.y);
     buffer.writeFixed(angle);
@@ -2056,5 +2045,5 @@ class X11RenderCreateConicalGradientRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCreateConicalGradientRequest(${_formatId(id)}, center: ${center}, angle: ${angle}, stops: ${stops})';
+      'X11RenderCreateConicalGradientRequest(${id}, center: ${center}, angle: ${angle}, stops: ${stops})';
 }

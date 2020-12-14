@@ -30,7 +30,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Sets the configuration of the screen [window] is on.
-  Future<X11RandrSetScreenConfigReply> setScreenConfig(int window,
+  Future<X11RandrSetScreenConfigReply> setScreenConfig(X11ResourceId window,
       {int sizeId = 0,
       Set<X11RandrRotation> rotation = const {X11RandrRotation.rotate0},
       int rate = 0,
@@ -49,13 +49,13 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Selects the events that RANDR events to receive on [window].
-  int selectInput(int window, Set<X11RandrSelectMask> enable) {
+  int selectInput(X11ResourceId window, Set<X11RandrSelectMask> enable) {
     var request = X11RandrSelectInputRequest(window, enable);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Gets information about the screen [window] is on.
-  Future<X11RandrGetScreenInfoReply> getScreenInfo(int window) async {
+  Future<X11RandrGetScreenInfoReply> getScreenInfo(X11ResourceId window) async {
     var request = X11RandrGetScreenInfoRequest(window);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     var reply = await _client.awaitReply<X11RandrGetScreenInfoReply>(
@@ -65,7 +65,8 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets the minimum and maximum size of the screen [window] is on.
-  Future<X11RandrGetScreenSizeRangeReply> getScreenSizeRange(int window) async {
+  Future<X11RandrGetScreenSizeRangeReply> getScreenSizeRange(
+      X11ResourceId window) async {
     var request = X11RandrGetScreenSizeRangeRequest(window);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11RandrGetScreenSizeRangeReply>(
@@ -74,7 +75,7 @@ class X11RandrExtension extends X11Extension {
 
   /// Sets the size of the screen [window] is on to [sizeInPixels] and [sizeInMillimeters].
   int setScreenSize(
-      int window, X11Size sizeInPixels, X11Size sizeInMillimeters) {
+      X11ResourceId window, X11Size sizeInPixels, X11Size sizeInMillimeters) {
     var request =
         X11RandrSetScreenSizeRequest(window, sizeInPixels, sizeInMillimeters);
     return _client.sendRequest(_majorOpcode, request);
@@ -82,7 +83,8 @@ class X11RandrExtension extends X11Extension {
 
   /// Gets the outputs and crtcs connected to the screen that [window] is on.
   /// This will poll the hardware for changes, use [getScreenResourcesCurrent] if you don't want to do that.
-  Future<X11RandrGetScreenResourcesReply> getScreenResources(int window) async {
+  Future<X11RandrGetScreenResourcesReply> getScreenResources(
+      X11ResourceId window) async {
     var request = X11RandrGetScreenResourcesRequest(window);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11RandrGetScreenResourcesReply>(
@@ -90,7 +92,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets information about [output].
-  Future<X11RandrGetOutputInfoReply> getOutputInfo(int output) async {
+  Future<X11RandrGetOutputInfoReply> getOutputInfo(X11ResourceId output) async {
     var request =
         X11RandrGetOutputInfoRequest(output, configTimestamp: _configTimestamp);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
@@ -99,7 +101,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets the properties of [output].
-  Future<List<String>> listOutputProperties(int output) async {
+  Future<List<String>> listOutputProperties(X11ResourceId output) async {
     var request = X11RandrListOutputPropertiesRequest(output);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     var reply = await _client.awaitReply<X11RandrListOutputPropertiesReply>(
@@ -113,7 +115,7 @@ class X11RandrExtension extends X11Extension {
 
   /// Gets the configuration of the [property] of [output].
   Future<X11RandrQueryOutputPropertyReply> queryOutputProperty(
-      int output, String property) async {
+      X11ResourceId output, String property) async {
     var propertyAtom = await _client.internAtom(property);
     var request = X11RandrQueryOutputPropertyRequest(output, propertyAtom);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
@@ -125,7 +127,7 @@ class X11RandrExtension extends X11Extension {
   /// [validValues] contains the values this property can have, or the minimum and maximum value if [range] is true.
   /// If [pending] is true the property will only be applied the next time [setCrtcConfig] is called.
   Future<int> configureOutputProperty(
-      int output, String property, List<int> validValues,
+      X11ResourceId output, String property, List<int> validValues,
       {bool range = false, bool pending = false}) async {
     var propertyAtom = await _client.internAtom(property);
     var request = X11RandrConfigureOutputPropertyRequest(
@@ -135,7 +137,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   Future<int> changeOutputPropertyUint8(
-      int output, String property, List<int> data,
+      X11ResourceId output, String property, List<int> data,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeOutputProperty(output, property, data,
@@ -143,7 +145,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   Future<int> changeOutputPropertyUint16(
-      int output, String property, List<int> data,
+      X11ResourceId output, String property, List<int> data,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeOutputProperty(output, property, data,
@@ -151,7 +153,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   Future<int> changeOutputPropertyUint32(
-      int output, String property, List<int> data,
+      X11ResourceId output, String property, List<int> data,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeOutputProperty(output, property, data,
@@ -159,22 +161,23 @@ class X11RandrExtension extends X11Extension {
   }
 
   Future<int> changeOutputPropertyAtom(
-      int output, String property, String value,
+      X11ResourceId output, String property, String value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     var valueAtom = await _client.internAtom(value);
-    return await changeOutputPropertyUint32(output, property, [valueAtom],
+    return await changeOutputPropertyUint32(output, property, [valueAtom.value],
         type: 'ATOM', mode: mode);
   }
 
   Future<int> changeOutputPropertyString(
-      int output, String property, String value,
+      X11ResourceId output, String property, String value,
       {String type = 'STRING',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeOutputProperty(output, property, utf8.encode(value),
         type: type, format: 8, mode: mode);
   }
 
-  Future<int> _changeOutputProperty(int output, String property, List<int> data,
+  Future<int> _changeOutputProperty(
+      X11ResourceId output, String property, List<int> data,
       {String type = '',
       int format = 32,
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
@@ -187,7 +190,8 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Deletes the [property] of [output].
-  Future<int> deleteOutputProperty(int output, String property) async {
+  Future<int> deleteOutputProperty(
+      X11ResourceId output, String property) async {
     var propertyAtom = await _client.internAtom(property);
     var request = X11RandrDeleteOutputPropertyRequest(output, propertyAtom);
     return _client.sendRequest(_majorOpcode, request);
@@ -195,14 +199,14 @@ class X11RandrExtension extends X11Extension {
 
   /// Gets the value of the [property] of [output].
   Future<X11RandrGetOutputPropertyReply> getOutputProperty(
-      int output, String property,
+      X11ResourceId output, String property,
       {String type,
       int longOffset = 0,
       int longLength = 4294967295,
       bool delete = false,
       bool pending = false}) async {
     var propertyAtom = await _client.internAtom(property);
-    var typeAtom = type != null ? await _client.internAtom(type) : 0;
+    var typeAtom = type != null ? await _client.internAtom(type) : X11Atom.None;
     var request = X11RandrGetOutputPropertyRequest(output, propertyAtom,
         type: typeAtom,
         longOffset: longOffset,
@@ -214,7 +218,8 @@ class X11RandrExtension extends X11Extension {
         sequenceNumber, X11RandrGetOutputPropertyReply.fromBuffer);
   }
 
-  Future<int> createMode(int window, X11RandrModeInfo modeInfo) async {
+  Future<X11ResourceId> createMode(
+      X11ResourceId window, X11RandrModeInfo modeInfo) async {
     var request = X11RandrCreateModeRequest(window, modeInfo);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     var reply = await _client.awaitReply<X11RandrCreateModeReply>(
@@ -223,25 +228,25 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Destroys a [mode] created with [createMode].
-  int destroyMode(int mode) {
+  int destroyMode(X11ResourceId mode) {
     var request = X11RandrDestroyModeRequest(mode);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Adds a [mode] to [output].
-  int addOutputMode(int output, int mode) {
+  int addOutputMode(X11ResourceId output, X11ResourceId mode) {
     var request = X11RandrAddOutputModeRequest(output, mode);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Deletes a [mode] from [output].
-  int deleteOutputMode(int output, int mode) {
+  int deleteOutputMode(X11ResourceId output, X11ResourceId mode) {
     var request = X11RandrDeleteOutputModeRequest(output, mode);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Gets information about [crtc].
-  Future<X11RandrGetCrtcInfoReply> getCrtcInfo(int crtc) async {
+  Future<X11RandrGetCrtcInfoReply> getCrtcInfo(X11ResourceId crtc) async {
     var request =
         X11RandrGetCrtcInfoRequest(crtc, configTimestamp: _configTimestamp);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
@@ -250,11 +255,11 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Sets the configuration for [crtc].
-  Future<X11RandrSetCrtcConfigReply> setCrtcConfig(int crtc,
-      {int mode = 0,
+  Future<X11RandrSetCrtcConfigReply> setCrtcConfig(X11ResourceId crtc,
+      {X11ResourceId mode = X11ResourceId.None,
       X11Point position = const X11Point(0, 0),
       Set<X11RandrRotation> rotation = const {X11RandrRotation.rotate0},
-      List<int> outputs = const [],
+      List<X11ResourceId> outputs = const [],
       int timestamp = 0}) async {
     var request = X11RandrSetCrtcConfigRequest(
       crtc,
@@ -271,7 +276,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets the size of the gamma ramps used by [crtc].
-  Future<int> getCrtcGammaSize(int crtc) async {
+  Future<int> getCrtcGammaSize(X11ResourceId crtc) async {
     var request = X11RandrGetCrtcGammaSizeRequest(crtc);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     var reply = await _client.awaitReply<X11RandrGetCrtcGammaSizeReply>(
@@ -280,7 +285,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets the gamma ramps for [crtc].
-  Future<X11RandrGetCrtcGammaReply> getCrtcGamma(int crtc) async {
+  Future<X11RandrGetCrtcGammaReply> getCrtcGamma(X11ResourceId crtc) async {
     var request = X11RandrGetCrtcGammaRequest(crtc);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11RandrGetCrtcGammaReply>(
@@ -288,7 +293,8 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Sets the [red], [green] and [blue] gamma ramps for [crtc].
-  int setCrtcGamma(int crtc, List<int> red, List<int> green, List<int> blue) {
+  int setCrtcGamma(
+      X11ResourceId crtc, List<int> red, List<int> green, List<int> blue) {
     var request = X11RandrSetCrtcGammaRequest(crtc, red, green, blue);
     return _client.sendRequest(_majorOpcode, request);
   }
@@ -296,7 +302,7 @@ class X11RandrExtension extends X11Extension {
   /// Gets the outputs and crtcs connected to the screen that [window] is on.
   /// This will get the current resources without polling the hardware, use [getScreenResources] if you need more accurate information.
   Future<X11RandrGetScreenResourcesCurrentReply> getScreenResourcesCurrent(
-      int window) async {
+      X11ResourceId window) async {
     var request = X11RandrGetScreenResourcesCurrentRequest(window);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11RandrGetScreenResourcesCurrentReply>(
@@ -304,7 +310,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Sets the [transform] in use on [crtc].
-  int setCrtcTransform(int crtc, X11Transform transform,
+  int setCrtcTransform(X11ResourceId crtc, X11Transform transform,
       {String filterName = '', List<double> filterParams = const []}) {
     var request = X11RandrSetCrtcTransformRequest(crtc, transform,
         filterName: filterName, filterParams: filterParams);
@@ -312,7 +318,8 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets the transform in use on [crtc].
-  Future<X11RandrGetCrtcTransformReply> getCrtcTransform(int crtc) async {
+  Future<X11RandrGetCrtcTransformReply> getCrtcTransform(
+      X11ResourceId crtc) async {
     var request = X11RandrGetCrtcTransformRequest(crtc);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11RandrGetCrtcTransformReply>(
@@ -320,7 +327,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets the panning configuration of [crtc].
-  Future<X11RandrGetPanningReply> getPanning(int crtc) async {
+  Future<X11RandrGetPanningReply> getPanning(X11ResourceId crtc) async {
     var request = X11RandrGetPanningRequest(crtc);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11RandrGetPanningReply>(
@@ -329,7 +336,7 @@ class X11RandrExtension extends X11Extension {
 
   /// Sets the panning configuration on [crtc].
   Future<X11RandrConfigStatus> setPanning(
-      int crtc, X11Rectangle area, X11Rectangle trackArea,
+      X11ResourceId crtc, X11Rectangle area, X11Rectangle trackArea,
       {int borderLeft = 0,
       int borderTop = 0,
       int borderRight = 0,
@@ -351,13 +358,13 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Sets the primary output for the screen that [window] is on.
-  int setOutputPrimary(int window, int output) {
+  int setOutputPrimary(X11ResourceId window, X11ResourceId output) {
     var request = X11RandrSetOutputPrimaryRequest(window, output);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Gets the primary output for the screen that [window] is on.
-  Future<int> getOutputPrimary(int window) async {
+  Future<X11ResourceId> getOutputPrimary(X11ResourceId window) async {
     var request = X11RandrGetOutputPrimaryRequest(window);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     var reply = await _client.awaitReply<X11RandrGetOutputPrimaryReply>(
@@ -366,7 +373,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets the providers connected to the screen that [window] is on.
-  Future<X11RandrGetProvidersReply> getProviders(int window) async {
+  Future<X11RandrGetProvidersReply> getProviders(X11ResourceId window) async {
     var request = X11RandrGetProvidersRequest(window);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11RandrGetProvidersReply>(
@@ -374,7 +381,8 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets information on [provider].
-  Future<X11RandrGetProviderInfoReply> getProviderInfo(int provider) async {
+  Future<X11RandrGetProviderInfoReply> getProviderInfo(
+      X11ResourceId provider) async {
     var request = X11RandrGetProviderInfoRequest(provider,
         configTimestamp: _configTimestamp);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
@@ -383,14 +391,16 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Sets the offload sink of [provider] to [sinkProvider].
-  int setProviderOffloadSink(int provider, int sinkProvider) {
+  int setProviderOffloadSink(
+      X11ResourceId provider, X11ResourceId sinkProvider) {
     var request = X11RandrSetProviderOffloadSinkRequest(provider, sinkProvider,
         configTimestamp: _configTimestamp);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Sets the output source of [provider] to [sourceProvider].
-  int setProviderOutputSource(int provider, int sourceProvider) {
+  int setProviderOutputSource(
+      X11ResourceId provider, X11ResourceId sourceProvider) {
     var request = X11RandrSetProviderOutputSourceRequest(
         provider, sourceProvider,
         configTimestamp: _configTimestamp);
@@ -398,7 +408,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Gets the properties of [provider].
-  Future<List<String>> listProviderProperties(int provider) async {
+  Future<List<String>> listProviderProperties(X11ResourceId provider) async {
     var request = X11RandrListProviderPropertiesRequest(provider);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     var reply = await _client.awaitReply<X11RandrListProviderPropertiesReply>(
@@ -412,7 +422,7 @@ class X11RandrExtension extends X11Extension {
 
   /// Gets the configuration of the [property] of [output].
   Future<X11RandrQueryProviderPropertyReply> queryProviderProperty(
-      int provider, String property) async {
+      X11ResourceId provider, String property) async {
     var propertyAtom = await _client.internAtom(property);
     var request = X11RandrQueryProviderPropertyRequest(provider, propertyAtom);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
@@ -424,7 +434,7 @@ class X11RandrExtension extends X11Extension {
   /// [validValues] contains the values this property can have, or the minimum and maximum value if [range] is true.
   /// If [pending] is true the property will only be applied the next time [setCrtcConfig] is called.
   Future<int> configureProviderProperty(
-      int provider, String property, List<int> validValues,
+      X11ResourceId provider, String property, List<int> validValues,
       {bool range = false, bool pending = false}) async {
     var propertyAtom = await _client.internAtom(property);
     var request = X11RandrConfigureProviderPropertyRequest(
@@ -434,7 +444,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   Future<int> changeProviderPropertyUint8(
-      int provider, String property, List<int> data,
+      X11ResourceId provider, String property, List<int> data,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeProviderProperty(provider, property, data,
@@ -442,7 +452,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   Future<int> changeProviderPropertyUint16(
-      int provider, String property, List<int> data,
+      X11ResourceId provider, String property, List<int> data,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeProviderProperty(provider, property, data,
@@ -450,7 +460,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   Future<int> changeProviderPropertyUint32(
-      int provider, String property, List<int> data,
+      X11ResourceId provider, String property, List<int> data,
       {String type = '',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeProviderProperty(provider, property, data,
@@ -458,15 +468,16 @@ class X11RandrExtension extends X11Extension {
   }
 
   Future<int> changeProviderPropertyAtom(
-      int provider, String property, String value,
+      X11ResourceId provider, String property, String value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     var valueAtom = await _client.internAtom(value);
-    return await changeProviderPropertyUint32(provider, property, [valueAtom],
+    return await changeProviderPropertyUint32(
+        provider, property, [valueAtom.value],
         type: 'ATOM', mode: mode);
   }
 
   Future<int> changeProviderPropertyString(
-      int provider, String property, String value,
+      X11ResourceId provider, String property, String value,
       {String type = 'STRING',
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
     return await _changeProviderProperty(provider, property, utf8.encode(value),
@@ -474,7 +485,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   Future<int> _changeProviderProperty(
-      int provider, String property, List<int> data,
+      X11ResourceId provider, String property, List<int> data,
       {String type = '',
       int format = 32,
       X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
@@ -487,7 +498,8 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Deletes the [property] of [provider].
-  Future<int> deleteProviderProperty(int provider, String property) async {
+  Future<int> deleteProviderProperty(
+      X11ResourceId provider, String property) async {
     var propertyAtom = await _client.internAtom(property);
     var request = X11RandrDeleteProviderPropertyRequest(provider, propertyAtom);
     return _client.sendRequest(_majorOpcode, request);
@@ -495,7 +507,7 @@ class X11RandrExtension extends X11Extension {
 
   /// Gets the value of the [property] of [provider].
   Future<X11RandrGetProviderPropertyReply> getProviderProperty(
-      int provider, String property,
+      X11ResourceId provider, String property,
       {String type,
       int longOffset = 0,
       int longLength = 4294967295,
@@ -516,7 +528,7 @@ class X11RandrExtension extends X11Extension {
 
   /// Gets the monitors on the screen containing [window].
   /// If [getActive] is true then only active monitors are returned.
-  Future<X11RandrGetMonitorsReply> getMonitors(int window,
+  Future<X11RandrGetMonitorsReply> getMonitors(X11ResourceId window,
       {bool getActive = false}) async {
     var request = X11RandrGetMonitorsRequest(window, getActive: getActive);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
@@ -525,21 +537,22 @@ class X11RandrExtension extends X11Extension {
   }
 
   /// Creates a new monitor on the screen containing [window].
-  int setMonitor(int window, X11RandrMonitorInfo monitorInfo) {
+  int setMonitor(X11ResourceId window, X11RandrMonitorInfo monitorInfo) {
     var request = X11RandrSetMonitorRequest(window, monitorInfo);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Deletes the monitor with [name] on the screen containing [window].
-  Future<int> deleteMonitor(int window, String name) async {
+  Future<int> deleteMonitor(X11ResourceId window, String name) async {
     var nameAtom = await _client.internAtom(name);
     var request = X11RandrDeleteMonitorRequest(window, nameAtom);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Creates a new lease with [id] on the screen containing [window].
-  Future<int> createLease(int window, int id,
-      {List<int> crtcs = const [], List<int> outputs = const []}) async {
+  Future<int> createLease(X11ResourceId window, X11ResourceId id,
+      {List<X11ResourceId> crtcs = const [],
+      List<X11ResourceId> outputs = const []}) async {
     var request =
         X11RandrCreateLeaseRequest(window, id, crtcs: crtcs, outputs: outputs);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);

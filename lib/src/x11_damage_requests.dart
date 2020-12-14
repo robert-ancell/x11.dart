@@ -61,15 +61,15 @@ class X11DamageQueryVersionReply extends X11Reply {
 }
 
 class X11DamageCreateRequest extends X11Request {
-  final int damage;
-  final int drawable;
+  final X11ResourceId damage;
+  final X11ResourceId drawable;
   final X11DamageReportLevel level;
 
   X11DamageCreateRequest(this.damage, this.drawable, this.level);
 
   factory X11DamageCreateRequest.fromBuffer(X11ReadBuffer buffer) {
-    var damage = buffer.readUint32();
-    var drawable = buffer.readUint32();
+    var damage = buffer.readResourceId();
+    var drawable = buffer.readResourceId();
     var level = X11DamageReportLevel.values[buffer.readUint8()];
     buffer.skip(3);
     return X11DamageCreateRequest(damage, drawable, level);
@@ -78,8 +78,8 @@ class X11DamageCreateRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(1);
-    buffer.writeUint32(damage);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(damage);
+    buffer.writeResourceId(drawable);
     buffer.writeUint8(level.index);
     buffer.skip(3);
   }
@@ -90,19 +90,19 @@ class X11DamageCreateRequest extends X11Request {
 }
 
 class X11DamageDestroyRequest extends X11Request {
-  final int damage;
+  final X11ResourceId damage;
 
   X11DamageDestroyRequest(this.damage);
 
   factory X11DamageDestroyRequest.fromBuffer(X11ReadBuffer buffer) {
-    var damage = buffer.readUint32();
+    var damage = buffer.readResourceId();
     return X11DamageDestroyRequest(damage);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(2);
-    buffer.writeUint32(damage);
+    buffer.writeResourceId(damage);
   }
 
   @override
@@ -110,17 +110,17 @@ class X11DamageDestroyRequest extends X11Request {
 }
 
 class X11DamageSubtractRequest extends X11Request {
-  final int damage;
-  final int repairRegion;
-  final int partsRegion;
+  final X11ResourceId damage;
+  final X11ResourceId repairRegion;
+  final X11ResourceId partsRegion;
 
   X11DamageSubtractRequest(this.damage, this.repairRegion,
-      {this.partsRegion = 0});
+      {this.partsRegion = X11ResourceId.None});
 
   factory X11DamageSubtractRequest.fromBuffer(X11ReadBuffer buffer) {
-    var damage = buffer.readUint32();
-    var repairRegion = buffer.readUint32();
-    var partsRegion = buffer.readUint32();
+    var damage = buffer.readResourceId();
+    var repairRegion = buffer.readResourceId();
+    var partsRegion = buffer.readResourceId();
     return X11DamageSubtractRequest(damage, repairRegion,
         partsRegion: partsRegion);
   }
@@ -128,9 +128,9 @@ class X11DamageSubtractRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(3);
-    buffer.writeUint32(damage);
-    buffer.writeUint32(repairRegion);
-    buffer.writeUint32(partsRegion);
+    buffer.writeResourceId(damage);
+    buffer.writeResourceId(repairRegion);
+    buffer.writeResourceId(partsRegion);
   }
 
   @override
@@ -139,22 +139,22 @@ class X11DamageSubtractRequest extends X11Request {
 }
 
 class X11DamageAddRequest extends X11Request {
-  final int drawable;
-  final int region;
+  final X11ResourceId drawable;
+  final X11ResourceId region;
 
   X11DamageAddRequest(this.drawable, this.region);
 
   factory X11DamageAddRequest.fromBuffer(X11ReadBuffer buffer) {
-    var drawable = buffer.readUint32();
-    var region = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var region = buffer.readResourceId();
     return X11DamageAddRequest(drawable, region);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(4);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(region);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(region);
   }
 
   @override

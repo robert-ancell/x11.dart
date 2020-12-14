@@ -24,7 +24,7 @@ class X11MitScreenSaverExtension extends X11Extension {
   }
 
   /// Queries the state of the screen saver on the screen containing [drawable].
-  Future<X11ScreensaverQueryInfoReply> queryInfo(int drawable) async {
+  Future<X11ScreensaverQueryInfoReply> queryInfo(X11ResourceId drawable) async {
     var request = X11ScreensaverQueryInfoRequest(drawable);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11ScreensaverQueryInfoReply>(
@@ -32,20 +32,20 @@ class X11MitScreenSaverExtension extends X11Extension {
   }
 
   /// Sets the screen saver [events] to deliver to [drawable].
-  int selectInput(int drawable, Set<X11ScreensaverEventType> events) {
+  int selectInput(X11ResourceId drawable, Set<X11ScreensaverEventType> events) {
     var request = X11ScreensaverSelectInputRequest(drawable, events);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Sets the attributes that the screen saver on the screen containing [drawable].
-  int setAttributes(int drawable, X11Rectangle geometry,
+  int setAttributes(X11ResourceId drawable, X11Rectangle geometry,
       {int borderWidth = 0,
       X11WindowClass windowClass = X11WindowClass.copyFromParent,
       int depth = 24,
       int visual = 0,
-      int backgroundPixmap,
+      X11ResourceId backgroundPixmap,
       int backgroundPixel,
-      int borderPixmap,
+      X11ResourceId borderPixmap,
       int borderPixel,
       X11BitGravity bitGravity,
       X11WinGravity winGravity,
@@ -56,8 +56,8 @@ class X11MitScreenSaverExtension extends X11Extension {
       bool saveUnder,
       Set<X11EventType> events,
       Set<X11EventType> doNotPropagate,
-      int colormap,
-      int cursor}) {
+      X11ResourceId colormap,
+      X11ResourceId cursor}) {
     var request = X11ScreensaverSetAttributesRequest(drawable, geometry,
         windowClass: windowClass,
         depth: depth,
@@ -81,7 +81,7 @@ class X11MitScreenSaverExtension extends X11Extension {
   }
 
   /// Removes any attributes set on the screen containing [drawable] as set in [setAttributes].
-  int unsetAttributes(int drawable) {
+  int unsetAttributes(X11ResourceId drawable) {
     var request = X11ScreensaverUnsetAttributesRequest(drawable);
     return _client.sendRequest(_majorOpcode, request);
   }

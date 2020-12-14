@@ -10,9 +10,9 @@ abstract class X11Event {
 
 class X11KeyPressEvent extends X11Event {
   final int key;
-  final int root;
+  final X11ResourceId root;
   final int event;
-  final int child;
+  final X11ResourceId child;
   final X11Point positionRoot;
   final X11Point position;
   final int state;
@@ -25,9 +25,9 @@ class X11KeyPressEvent extends X11Event {
   factory X11KeyPressEvent.fromBuffer(X11ReadBuffer buffer) {
     var key = buffer.readUint8();
     var time = buffer.readUint32();
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var event = buffer.readUint32();
-    var child = buffer.readUint32();
+    var child = buffer.readResourceId();
     var rootX = buffer.readInt16();
     var rootY = buffer.readInt16();
     var eventX = buffer.readInt16();
@@ -43,9 +43,9 @@ class X11KeyPressEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(key);
     buffer.writeUint32(time);
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeUint32(event);
-    buffer.writeUint32(child);
+    buffer.writeResourceId(child);
     buffer.writeInt16(positionRoot.x);
     buffer.writeInt16(positionRoot.y);
     buffer.writeInt16(position.x);
@@ -59,9 +59,9 @@ class X11KeyPressEvent extends X11Event {
 
 class X11KeyReleaseEvent extends X11Event {
   final int key;
-  final int root;
+  final X11ResourceId root;
   final int event;
-  final int child;
+  final X11ResourceId child;
   final X11Point positionRoot;
   final X11Point position;
   final int state;
@@ -74,9 +74,9 @@ class X11KeyReleaseEvent extends X11Event {
   factory X11KeyReleaseEvent.fromBuffer(X11ReadBuffer buffer) {
     var key = buffer.readUint8();
     var time = buffer.readUint32();
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var event = buffer.readUint32();
-    var child = buffer.readUint32();
+    var child = buffer.readResourceId();
     var rootX = buffer.readInt16();
     var rootY = buffer.readInt16();
     var eventX = buffer.readInt16();
@@ -92,9 +92,9 @@ class X11KeyReleaseEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(key);
     buffer.writeUint32(time);
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeUint32(event);
-    buffer.writeUint32(child);
+    buffer.writeResourceId(child);
     buffer.writeInt16(positionRoot.x);
     buffer.writeInt16(positionRoot.y);
     buffer.writeInt16(position.x);
@@ -108,9 +108,9 @@ class X11KeyReleaseEvent extends X11Event {
 
 class X11ButtonPressEvent extends X11Event {
   final int button;
-  final int root;
+  final X11ResourceId root;
   final int event;
-  final int child;
+  final X11ResourceId child;
   final X11Point positionRoot;
   final X11Point position;
   final int state;
@@ -123,9 +123,9 @@ class X11ButtonPressEvent extends X11Event {
   factory X11ButtonPressEvent.fromBuffer(X11ReadBuffer buffer) {
     var button = buffer.readUint8();
     var time = buffer.readUint32();
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var event = buffer.readUint32();
-    var child = buffer.readUint32();
+    var child = buffer.readResourceId();
     var rootX = buffer.readInt16();
     var rootY = buffer.readInt16();
     var eventX = buffer.readInt16();
@@ -149,9 +149,9 @@ class X11ButtonPressEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(button);
     buffer.writeUint32(time);
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeUint32(event);
-    buffer.writeUint32(child);
+    buffer.writeResourceId(child);
     buffer.writeInt16(positionRoot.x);
     buffer.writeInt16(positionRoot.y);
     buffer.writeInt16(position.x);
@@ -165,9 +165,9 @@ class X11ButtonPressEvent extends X11Event {
 
 class X11ButtonReleaseEvent extends X11Event {
   final int button;
-  final int root;
+  final X11ResourceId root;
   final int event;
-  final int child;
+  final X11ResourceId child;
   final X11Point positionRoot;
   final X11Point position;
   final int state;
@@ -180,9 +180,9 @@ class X11ButtonReleaseEvent extends X11Event {
   factory X11ButtonReleaseEvent.fromBuffer(X11ReadBuffer buffer) {
     var button = buffer.readUint8();
     var time = buffer.readUint32();
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var event = buffer.readUint32();
-    var child = buffer.readUint32();
+    var child = buffer.readResourceId();
     var rootX = buffer.readInt16();
     var rootY = buffer.readInt16();
     var eventX = buffer.readInt16();
@@ -206,9 +206,9 @@ class X11ButtonReleaseEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(button);
     buffer.writeUint32(time);
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeUint32(event);
-    buffer.writeUint32(child);
+    buffer.writeResourceId(child);
     buffer.writeInt16(positionRoot.x);
     buffer.writeInt16(positionRoot.y);
     buffer.writeInt16(position.x);
@@ -222,9 +222,9 @@ class X11ButtonReleaseEvent extends X11Event {
 
 class X11MotionNotifyEvent extends X11Event {
   final int detail;
-  final int root;
+  final X11ResourceId root;
   final int event;
-  final int child;
+  final X11ResourceId child;
   final X11Point positionRoot;
   final X11Point position;
   final int state;
@@ -237,9 +237,9 @@ class X11MotionNotifyEvent extends X11Event {
   factory X11MotionNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     var detail = buffer.readUint8();
     var time = buffer.readUint32();
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var event = buffer.readUint32();
-    var child = buffer.readUint32();
+    var child = buffer.readResourceId();
     var rootX = buffer.readInt16();
     var rootY = buffer.readInt16();
     var eventX = buffer.readInt16();
@@ -263,9 +263,9 @@ class X11MotionNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(detail);
     buffer.writeUint32(time);
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeUint32(event);
-    buffer.writeUint32(child);
+    buffer.writeResourceId(child);
     buffer.writeInt16(positionRoot.x);
     buffer.writeInt16(positionRoot.y);
     buffer.writeInt16(position.x);
@@ -280,9 +280,9 @@ class X11MotionNotifyEvent extends X11Event {
 class X11EnterNotifyEvent extends X11Event {
   final int detail;
   final int time;
-  final int root;
+  final X11ResourceId root;
   final int event;
-  final int child;
+  final X11ResourceId child;
   final X11Point positionRoot;
   final X11Point position;
   final int state;
@@ -304,9 +304,9 @@ class X11EnterNotifyEvent extends X11Event {
   factory X11EnterNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     var detail = buffer.readUint8();
     var time = buffer.readUint32();
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var event = buffer.readUint32();
-    var child = buffer.readUint32();
+    var child = buffer.readResourceId();
     var rootX = buffer.readInt16();
     var rootY = buffer.readInt16();
     var eventX = buffer.readInt16();
@@ -331,9 +331,9 @@ class X11EnterNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(detail);
     buffer.writeUint32(time);
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeUint32(event);
-    buffer.writeUint32(child);
+    buffer.writeResourceId(child);
     buffer.writeInt16(positionRoot.x);
     buffer.writeInt16(positionRoot.y);
     buffer.writeInt16(position.x);
@@ -348,9 +348,9 @@ class X11EnterNotifyEvent extends X11Event {
 class X11LeaveNotifyEvent extends X11Event {
   final int detail;
   final int time;
-  final int root;
+  final X11ResourceId root;
   final int event;
-  final int child;
+  final X11ResourceId child;
   final X11Point positionRoot;
   final X11Point position;
   final int state;
@@ -372,9 +372,9 @@ class X11LeaveNotifyEvent extends X11Event {
   factory X11LeaveNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     var detail = buffer.readUint8();
     var time = buffer.readUint32();
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var event = buffer.readUint32();
-    var child = buffer.readUint32();
+    var child = buffer.readResourceId();
     var rootX = buffer.readInt16();
     var rootY = buffer.readInt16();
     var eventX = buffer.readInt16();
@@ -399,9 +399,9 @@ class X11LeaveNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(detail);
     buffer.writeUint32(time);
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeUint32(event);
-    buffer.writeUint32(child);
+    buffer.writeResourceId(child);
     buffer.writeInt16(positionRoot.x);
     buffer.writeInt16(positionRoot.y);
     buffer.writeInt16(position.x);
@@ -486,7 +486,7 @@ class X11KeymapNotifyEvent extends X11Event {
 }
 
 class X11ExposeEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final X11Rectangle area;
   final int count;
 
@@ -494,7 +494,7 @@ class X11ExposeEvent extends X11Event {
 
   factory X11ExposeEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var x = buffer.readUint16();
     var y = buffer.readUint16();
     var width = buffer.readUint16();
@@ -508,7 +508,7 @@ class X11ExposeEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint16(area.x);
     buffer.writeUint16(area.y);
     buffer.writeUint16(area.width);
@@ -520,7 +520,7 @@ class X11ExposeEvent extends X11Event {
 }
 
 class X11GraphicsExposureEvent extends X11Event {
-  final int drawable;
+  final X11ResourceId drawable;
   final X11Rectangle area;
   final int majorOpcode;
   final int minorOpcode;
@@ -532,7 +532,7 @@ class X11GraphicsExposureEvent extends X11Event {
 
   factory X11GraphicsExposureEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     var x = buffer.readUint16();
     var y = buffer.readUint16();
     var width = buffer.readUint16();
@@ -549,7 +549,7 @@ class X11GraphicsExposureEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
     buffer.writeUint16(area.x);
     buffer.writeUint16(area.y);
     buffer.writeUint16(area.width);
@@ -563,7 +563,7 @@ class X11GraphicsExposureEvent extends X11Event {
 }
 
 class X11NoExposureEvent extends X11Event {
-  final int drawable;
+  final X11ResourceId drawable;
   final int majorOpcode;
   final int minorOpcode;
 
@@ -571,7 +571,7 @@ class X11NoExposureEvent extends X11Event {
 
   factory X11NoExposureEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     var minorOpcode = buffer.readUint16();
     var majorOpcode = buffer.readUint8();
     buffer.skip(1);
@@ -581,7 +581,7 @@ class X11NoExposureEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
     buffer.writeUint16(minorOpcode);
     buffer.writeUint8(majorOpcode);
     buffer.skip(1);
@@ -590,14 +590,14 @@ class X11NoExposureEvent extends X11Event {
 }
 
 class X11VisibilityNotifyEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final int state;
 
   X11VisibilityNotifyEvent(this.window, this.state);
 
   factory X11VisibilityNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var state = buffer.readUint8();
     buffer.skip(3);
     return X11VisibilityNotifyEvent(window, state);
@@ -606,7 +606,7 @@ class X11VisibilityNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint8(state);
     buffer.skip(3);
     return 15;
@@ -614,8 +614,8 @@ class X11VisibilityNotifyEvent extends X11Event {
 }
 
 class X11CreateNotifyEvent extends X11Event {
-  final int window;
-  final int parent;
+  final X11ResourceId window;
+  final X11ResourceId parent;
   final X11Rectangle area;
   final int borderWidth;
   final bool overrideRedirect;
@@ -625,8 +625,8 @@ class X11CreateNotifyEvent extends X11Event {
 
   factory X11CreateNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var parent = buffer.readUint32();
-    var window = buffer.readUint32();
+    var parent = buffer.readResourceId();
+    var window = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
@@ -642,8 +642,8 @@ class X11CreateNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(parent);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(parent);
+    buffer.writeResourceId(window);
     buffer.writeInt16(area.x);
     buffer.writeInt16(area.y);
     buffer.writeUint16(area.width);
@@ -656,7 +656,7 @@ class X11CreateNotifyEvent extends X11Event {
 }
 
 class X11DestroyNotifyEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final int event;
 
   X11DestroyNotifyEvent(this.window, this.event);
@@ -664,7 +664,7 @@ class X11DestroyNotifyEvent extends X11Event {
   factory X11DestroyNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var event = buffer.readUint32();
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11DestroyNotifyEvent(window, event);
   }
 
@@ -672,13 +672,13 @@ class X11DestroyNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     return 17;
   }
 }
 
 class X11UnmapNotifyEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final int event;
   final bool fromConfigure;
 
@@ -687,7 +687,7 @@ class X11UnmapNotifyEvent extends X11Event {
   factory X11UnmapNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var event = buffer.readUint32();
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var fromConfigure = buffer.readBool();
     buffer.skip(3);
     return X11UnmapNotifyEvent(window, event, fromConfigure: fromConfigure);
@@ -697,7 +697,7 @@ class X11UnmapNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeBool(fromConfigure);
     buffer.skip(3);
     return 18;
@@ -705,7 +705,7 @@ class X11UnmapNotifyEvent extends X11Event {
 }
 
 class X11MapNotifyEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final int event;
   final bool overrideRedirect;
 
@@ -714,7 +714,7 @@ class X11MapNotifyEvent extends X11Event {
   factory X11MapNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var event = buffer.readUint32();
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var overrideRedirect = buffer.readBool();
     buffer.skip(3);
     return X11MapNotifyEvent(window, event, overrideRedirect: overrideRedirect);
@@ -724,7 +724,7 @@ class X11MapNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeBool(overrideRedirect);
     buffer.skip(3);
     return 19;
@@ -732,31 +732,31 @@ class X11MapNotifyEvent extends X11Event {
 }
 
 class X11MapRequestEvent extends X11Event {
-  final int window;
-  final int parent;
+  final X11ResourceId window;
+  final X11ResourceId parent;
 
   X11MapRequestEvent(this.window, this.parent);
 
   factory X11MapRequestEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var parent = buffer.readUint32();
-    var window = buffer.readUint32();
+    var parent = buffer.readResourceId();
+    var window = buffer.readResourceId();
     return X11MapRequestEvent(window, parent);
   }
 
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(parent);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(parent);
+    buffer.writeResourceId(window);
     return 20;
   }
 }
 
 class X11ReparentNotifyEvent extends X11Event {
   final int event;
-  final int window;
-  final int parent;
+  final X11ResourceId window;
+  final X11ResourceId parent;
   final int x;
   final int y;
   final bool overrideRedirect;
@@ -772,8 +772,8 @@ class X11ReparentNotifyEvent extends X11Event {
   factory X11ReparentNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var event = buffer.readUint32();
-    var window = buffer.readUint32();
-    var parent = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var parent = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var overrideRedirect = buffer.readBool();
@@ -791,8 +791,8 @@ class X11ReparentNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
-    buffer.writeUint32(window);
-    buffer.writeUint32(parent);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(parent);
     buffer.writeInt16(x);
     buffer.writeInt16(y);
     buffer.writeBool(overrideRedirect);
@@ -802,10 +802,10 @@ class X11ReparentNotifyEvent extends X11Event {
 }
 
 class X11ConfigureNotifyEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final X11Rectangle geometry;
   final int event;
-  final int aboveSibling;
+  final X11ResourceId aboveSibling;
   final int borderWidth;
   final bool overrideRedirect;
 
@@ -815,8 +815,8 @@ class X11ConfigureNotifyEvent extends X11Event {
   factory X11ConfigureNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var event = buffer.readUint32();
-    var window = buffer.readUint32();
-    var aboveSibling = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var aboveSibling = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
@@ -835,8 +835,8 @@ class X11ConfigureNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
-    buffer.writeUint32(window);
-    buffer.writeUint32(aboveSibling);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(aboveSibling);
     buffer.writeInt16(geometry.x);
     buffer.writeInt16(geometry.y);
     buffer.writeUint16(geometry.width);
@@ -849,11 +849,11 @@ class X11ConfigureNotifyEvent extends X11Event {
 }
 
 class X11ConfigureRequestEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final X11Rectangle geometry;
   final int stackMode;
-  final int parent;
-  final int sibling;
+  final X11ResourceId parent;
+  final X11ResourceId sibling;
   final int borderWidth;
   final int valueMask; // FIXME
 
@@ -866,9 +866,9 @@ class X11ConfigureRequestEvent extends X11Event {
 
   factory X11ConfigureRequestEvent.fromBuffer(X11ReadBuffer buffer) {
     var stackMode = buffer.readUint8();
-    var parent = buffer.readUint32();
-    var window = buffer.readUint32();
-    var sibling = buffer.readUint32();
+    var parent = buffer.readResourceId();
+    var window = buffer.readResourceId();
+    var sibling = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
@@ -886,9 +886,9 @@ class X11ConfigureRequestEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(stackMode);
-    buffer.writeUint32(parent);
-    buffer.writeUint32(window);
-    buffer.writeUint32(sibling);
+    buffer.writeResourceId(parent);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(sibling);
     buffer.writeInt16(geometry.x);
     buffer.writeInt16(geometry.y);
     buffer.writeUint16(geometry.width);
@@ -900,7 +900,7 @@ class X11ConfigureRequestEvent extends X11Event {
 }
 
 class X11GravityNotifyEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final int event;
   final X11Point position;
 
@@ -909,7 +909,7 @@ class X11GravityNotifyEvent extends X11Event {
   factory X11GravityNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var event = buffer.readUint32();
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     return X11GravityNotifyEvent(window, event, X11Point(x, y));
@@ -919,7 +919,7 @@ class X11GravityNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
     return 24;
@@ -927,14 +927,14 @@ class X11GravityNotifyEvent extends X11Event {
 }
 
 class X11ResizeRequestEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final X11Size size;
 
   X11ResizeRequestEvent(this.window, this.size);
 
   factory X11ResizeRequestEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     return X11ResizeRequestEvent(window, X11Size(width, height));
@@ -943,7 +943,7 @@ class X11ResizeRequestEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
     return 25;
@@ -951,7 +951,7 @@ class X11ResizeRequestEvent extends X11Event {
 }
 
 class X11CirculateNotifyEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final int event;
   final int place;
 
@@ -960,7 +960,7 @@ class X11CirculateNotifyEvent extends X11Event {
   factory X11CirculateNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var event = buffer.readUint32();
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     buffer.skip(4);
     var place = buffer.readUint8();
     buffer.skip(3);
@@ -971,7 +971,7 @@ class X11CirculateNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.skip(4);
     buffer.writeUint8(place);
     buffer.skip(3);
@@ -980,7 +980,7 @@ class X11CirculateNotifyEvent extends X11Event {
 }
 
 class X11CirculateRequestEvent extends X11Event {
-  final int window;
+  final X11ResourceId window;
   final int event;
   final int place;
 
@@ -989,7 +989,7 @@ class X11CirculateRequestEvent extends X11Event {
   factory X11CirculateRequestEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var event = buffer.readUint32();
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     buffer.skip(4);
     var place = buffer.readUint8();
     buffer.skip(3);
@@ -1000,7 +1000,7 @@ class X11CirculateRequestEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(event);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.skip(4);
     buffer.writeUint8(place);
     buffer.skip(3);
@@ -1009,8 +1009,8 @@ class X11CirculateRequestEvent extends X11Event {
 }
 
 class X11PropertyNotifyEvent extends X11Event {
-  final int window;
-  final int atom;
+  final X11ResourceId window;
+  final X11Atom atom;
   final int state;
   final int time;
 
@@ -1018,8 +1018,8 @@ class X11PropertyNotifyEvent extends X11Event {
 
   factory X11PropertyNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
-    var atom = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var atom = buffer.readAtom();
     var time = buffer.readUint32();
     var state = buffer.readUint8();
     buffer.skip(3);
@@ -1029,8 +1029,8 @@ class X11PropertyNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
-    buffer.writeUint32(atom);
+    buffer.writeResourceId(window);
+    buffer.writeAtom(atom);
     buffer.writeUint32(time);
     buffer.writeUint8(state);
     buffer.skip(3);
@@ -1039,8 +1039,8 @@ class X11PropertyNotifyEvent extends X11Event {
 }
 
 class X11SelectionClearEvent extends X11Event {
-  final int selection;
-  final int owner;
+  final X11Atom selection;
+  final X11ResourceId owner;
   final int time;
 
   X11SelectionClearEvent(this.selection, this.owner, this.time);
@@ -1048,8 +1048,8 @@ class X11SelectionClearEvent extends X11Event {
   factory X11SelectionClearEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var time = buffer.readUint32();
-    var owner = buffer.readUint32();
-    var selection = buffer.readUint32();
+    var owner = buffer.readResourceId();
+    var selection = buffer.readAtom();
     return X11SelectionClearEvent(selection, owner, time);
   }
 
@@ -1057,18 +1057,18 @@ class X11SelectionClearEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(time);
-    buffer.writeUint32(owner);
-    buffer.writeUint32(selection);
+    buffer.writeResourceId(owner);
+    buffer.writeAtom(selection);
     return 29;
   }
 }
 
 class X11SelectionRequestEvent extends X11Event {
-  final int selection;
-  final int owner;
-  final int requestor;
-  final int target;
-  final int property;
+  final X11Atom selection;
+  final X11ResourceId owner;
+  final X11ResourceId requestor;
+  final X11Atom target;
+  final X11Atom property;
   final int time;
 
   X11SelectionRequestEvent(this.selection, this.owner, this.requestor,
@@ -1077,11 +1077,11 @@ class X11SelectionRequestEvent extends X11Event {
   factory X11SelectionRequestEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var time = buffer.readUint32();
-    var owner = buffer.readUint32();
-    var requestor = buffer.readUint32();
-    var selection = buffer.readUint32();
-    var target = buffer.readUint32();
-    var property = buffer.readUint32();
+    var owner = buffer.readResourceId();
+    var requestor = buffer.readResourceId();
+    var selection = buffer.readAtom();
+    var target = buffer.readAtom();
+    var property = buffer.readAtom();
     return X11SelectionRequestEvent(
         selection, owner, requestor, target, property, time);
   }
@@ -1090,20 +1090,20 @@ class X11SelectionRequestEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(time);
-    buffer.writeUint32(owner);
-    buffer.writeUint32(requestor);
-    buffer.writeUint32(selection);
-    buffer.writeUint32(target);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(owner);
+    buffer.writeResourceId(requestor);
+    buffer.writeAtom(selection);
+    buffer.writeAtom(target);
+    buffer.writeAtom(property);
     return 30;
   }
 }
 
 class X11SelectionNotifyEvent extends X11Event {
-  final int selection;
-  final int requestor;
-  final int target;
-  final int property;
+  final X11Atom selection;
+  final X11ResourceId requestor;
+  final X11Atom target;
+  final X11Atom property;
   final int time;
 
   X11SelectionNotifyEvent(
@@ -1112,10 +1112,10 @@ class X11SelectionNotifyEvent extends X11Event {
   factory X11SelectionNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var time = buffer.readUint32();
-    var requestor = buffer.readUint32();
-    var selection = buffer.readUint32();
-    var target = buffer.readUint32();
-    var property = buffer.readUint32();
+    var requestor = buffer.readResourceId();
+    var selection = buffer.readAtom();
+    var target = buffer.readAtom();
+    var property = buffer.readAtom();
     return X11SelectionNotifyEvent(
         selection, requestor, target, property, time);
   }
@@ -1124,17 +1124,17 @@ class X11SelectionNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint32(time);
-    buffer.writeUint32(requestor);
-    buffer.writeUint32(selection);
-    buffer.writeUint32(target);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(requestor);
+    buffer.writeAtom(selection);
+    buffer.writeAtom(target);
+    buffer.writeAtom(property);
     return 31;
   }
 }
 
 class X11ColormapNotifyEvent extends X11Event {
-  final int window;
-  final int colormap;
+  final X11ResourceId window;
+  final X11ResourceId colormap;
   final bool new_;
   final int state;
 
@@ -1142,8 +1142,8 @@ class X11ColormapNotifyEvent extends X11Event {
 
   factory X11ColormapNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
-    var colormap = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var colormap = buffer.readResourceId();
     var new_ = buffer.readBool();
     var state = buffer.readUint8();
     buffer.skip(2);
@@ -1153,8 +1153,8 @@ class X11ColormapNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(colormap);
     buffer.writeBool(new_);
     buffer.writeUint8(state);
     buffer.skip(2);
@@ -1164,16 +1164,16 @@ class X11ColormapNotifyEvent extends X11Event {
 
 /*class X11ClientMessageEvent extends X11Event {
   final int format;
-  final int window;
-  final int type;
+  final X11ResourceId window;
+  final X11Atom type;
   final ?ClientMessageData? data;
 
   X11ClientMessageEvent(this.format, this.window, this.type, this.data);
 
   factory X11ClientMessageEvent.fromBuffer(X11ReadBuffer buffer) {
     var format = buffer.readUint8();
-    var window = buffer.readUint32();
-    var type = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var type = buffer.readAtom();
     var data = buffer.read?ClientMessageData?();
     return X11ClientMessageEvent(format, window, type, data);
   }
@@ -1181,8 +1181,8 @@ class X11ColormapNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(format);
-    buffer.writeUint32(window);
-    buffer.writeUint32(type);
+    buffer.writeResourceId(window);
+    buffer.writeAtom(type);
     buffer.write?ClientMessageData?(data);
     return 33;
   }
@@ -1241,14 +1241,14 @@ class X11UnknownEvent extends X11Event {
 class X11ShapeNotifyEvent extends X11Event {
   final int firstEventCode;
   final X11ShapeKind shapeKind;
-  final int affectedWindow;
+  final X11ResourceId affectedWindow;
   final X11Rectangle extents;
   final int serverTime;
   final bool shaped;
 
   X11ShapeNotifyEvent(this.firstEventCode,
       {this.shapeKind = X11ShapeKind.bounding,
-      this.affectedWindow = 0,
+      this.affectedWindow = X11ResourceId.None,
       this.extents = const X11Rectangle(0, 0, 0, 0),
       this.serverTime = 0,
       this.shaped = false});
@@ -1256,7 +1256,7 @@ class X11ShapeNotifyEvent extends X11Event {
   factory X11ShapeNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
     var shapeKind = X11ShapeKind.values[buffer.readUint8()];
-    var affectedWindow = buffer.readUint32();
+    var affectedWindow = buffer.readResourceId();
     var extentsX = buffer.readInt16();
     var extentsY = buffer.readInt16();
     var extentsWidth = buffer.readUint16();
@@ -1275,7 +1275,7 @@ class X11ShapeNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(shapeKind.index);
-    buffer.writeUint32(affectedWindow);
+    buffer.writeResourceId(affectedWindow);
     buffer.writeInt16(extents.x);
     buffer.writeInt16(extents.y);
     buffer.writeUint16(extents.width);

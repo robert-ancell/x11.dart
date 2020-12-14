@@ -71,7 +71,7 @@ class _X11Client {
       var allowedDepths = {24: visuals};
       var screens = [
         X11Screen(
-            window: 0x000007a5,
+            window: X11ResourceId(0x000007a5),
             whitePixel: 0xffffff,
             blackPixel: 0x000000,
             sizeInPixels: X11Size(1920, 1080),
@@ -193,11 +193,11 @@ class _X11Client {
     } else if (opcode == 38) {
       var r = X11QueryPointerRequest.fromBuffer(requestBuffer);
       request = r;
-      reply = X11QueryPointerReply(0x000007a5, X11Point(0, 0));
+      reply = X11QueryPointerReply(X11ResourceId(0x000007a5), X11Point(0, 0));
     } else if (opcode == 43) {
       var r = X11GetInputFocusRequest.fromBuffer(requestBuffer);
       request = r;
-      reply = X11GetInputFocusReply(0);
+      reply = X11GetInputFocusReply(X11ResourceId.None);
     } else if (opcode == 44) {
       var r = X11QueryKeymapRequest.fromBuffer(requestBuffer);
       request = r;
@@ -573,15 +573,15 @@ class X11Server {
     _socket.listen(_onConnect);
   }
 
-  int internAtom(String name, {bool onlyIfExists = false}) {
+  X11Atom internAtom(String name, {bool onlyIfExists = false}) {
     var atom = atoms[name];
     if (atom == null && onlyIfExists) {
-      return 0;
+      return X11Atom.None;
     }
     atom = atoms.length;
     atoms[name] = atom;
 
-    return atom;
+    return X11Atom(atom);
   }
 
   void _onConnect(Socket socket) {

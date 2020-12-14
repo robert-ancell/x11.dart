@@ -54,13 +54,13 @@ class X11CompositeQueryVersionReply extends X11Reply {
 }
 
 class X11CompositeRedirectWindowRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final int update;
 
   X11CompositeRedirectWindowRequest(this.window, this.update);
 
   factory X11CompositeRedirectWindowRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var update = buffer.readUint8();
     buffer.skip(3);
     return X11CompositeRedirectWindowRequest(window, update);
@@ -69,7 +69,7 @@ class X11CompositeRedirectWindowRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint8(update);
     buffer.skip(3);
   }
@@ -80,14 +80,14 @@ class X11CompositeRedirectWindowRequest extends X11Request {
 }
 
 class X11CompositeRedirectSubwindowsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final int update;
 
   X11CompositeRedirectSubwindowsRequest(this.window, this.update);
 
   factory X11CompositeRedirectSubwindowsRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var update = buffer.readUint8();
     buffer.skip(3);
     return X11CompositeRedirectSubwindowsRequest(window, update);
@@ -96,7 +96,7 @@ class X11CompositeRedirectSubwindowsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(2);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint8(update);
     buffer.skip(3);
   }
@@ -107,13 +107,13 @@ class X11CompositeRedirectSubwindowsRequest extends X11Request {
 }
 
 class X11CompositeUnredirectWindowRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final int update;
 
   X11CompositeUnredirectWindowRequest(this.window, this.update);
 
   factory X11CompositeUnredirectWindowRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var update = buffer.readUint8();
     buffer.skip(3);
     return X11CompositeUnredirectWindowRequest(window, update);
@@ -122,7 +122,7 @@ class X11CompositeUnredirectWindowRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(3);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint8(update);
     buffer.skip(3);
   }
@@ -133,14 +133,14 @@ class X11CompositeUnredirectWindowRequest extends X11Request {
 }
 
 class X11CompositeUnredirectSubwindowsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final int update;
 
   X11CompositeUnredirectSubwindowsRequest(this.window, this.update);
 
   factory X11CompositeUnredirectSubwindowsRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var update = buffer.readUint8();
     buffer.skip(3);
     return X11CompositeUnredirectSubwindowsRequest(window, update);
@@ -149,7 +149,7 @@ class X11CompositeUnredirectSubwindowsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(4);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint8(update);
     buffer.skip(3);
   }
@@ -160,23 +160,23 @@ class X11CompositeUnredirectSubwindowsRequest extends X11Request {
 }
 
 class X11CompositeCreateRegionFromBorderClipRequest extends X11Request {
-  final int region;
-  final int window;
+  final X11ResourceId region;
+  final X11ResourceId window;
 
   X11CompositeCreateRegionFromBorderClipRequest(this.region, this.window);
 
   factory X11CompositeCreateRegionFromBorderClipRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var region = buffer.readUint32();
-    var window = buffer.readUint32();
+    var region = buffer.readResourceId();
+    var window = buffer.readResourceId();
     return X11CompositeCreateRegionFromBorderClipRequest(region, window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(5);
-    buffer.writeUint32(region);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(region);
+    buffer.writeResourceId(window);
   }
 
   @override
@@ -185,13 +185,13 @@ class X11CompositeCreateRegionFromBorderClipRequest extends X11Request {
 }
 
 class X11CompositeNameWindowPixmapRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final int pixmap;
 
   X11CompositeNameWindowPixmapRequest(this.window, this.pixmap);
 
   factory X11CompositeNameWindowPixmapRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var pixmap = buffer.readUint32();
     return X11CompositeNameWindowPixmapRequest(window, pixmap);
   }
@@ -199,7 +199,7 @@ class X11CompositeNameWindowPixmapRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(6);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint32(pixmap);
   }
 
@@ -209,19 +209,19 @@ class X11CompositeNameWindowPixmapRequest extends X11Request {
 }
 
 class X11CompositeGetOverlayWindowRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11CompositeGetOverlayWindowRequest(this.window);
 
   factory X11CompositeGetOverlayWindowRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11CompositeGetOverlayWindowRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(7);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
@@ -229,13 +229,13 @@ class X11CompositeGetOverlayWindowRequest extends X11Request {
 }
 
 class X11CompositeGetOverlayWindowReply extends X11Reply {
-  final int window;
+  final X11ResourceId window;
 
   X11CompositeGetOverlayWindowReply(this.window);
 
   static X11CompositeGetOverlayWindowReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     buffer.skip(20);
     return X11CompositeGetOverlayWindowReply(window);
   }
@@ -243,7 +243,7 @@ class X11CompositeGetOverlayWindowReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.skip(20);
   }
 
@@ -252,20 +252,20 @@ class X11CompositeGetOverlayWindowReply extends X11Reply {
 }
 
 class X11CompositeReleaseOverlayWindowRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11CompositeReleaseOverlayWindowRequest(this.window);
 
   factory X11CompositeReleaseOverlayWindowRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11CompositeReleaseOverlayWindowRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(8);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override

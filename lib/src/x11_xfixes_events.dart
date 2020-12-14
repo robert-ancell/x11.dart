@@ -6,7 +6,7 @@ import 'x11_write_buffer.dart';
 class X11XFixesSelectionNotifyEvent extends X11Event {
   final int firstEventCode;
   final X11EventType subtype;
-  final int window;
+  final X11ResourceId window;
   final int owner;
   final int selection;
   final int timestamp;
@@ -19,7 +19,7 @@ class X11XFixesSelectionNotifyEvent extends X11Event {
   factory X11XFixesSelectionNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
     var subtype = X11EventType.values[buffer.readUint8()];
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var owner = buffer.readUint32();
     var selection = buffer.readUint32();
     var timestamp = buffer.readUint32();
@@ -33,7 +33,7 @@ class X11XFixesSelectionNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(subtype.index);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint32(owner);
     buffer.writeUint32(selection);
     buffer.writeUint32(timestamp);
@@ -50,21 +50,23 @@ class X11XFixesSelectionNotifyEvent extends X11Event {
 class X11CursorNotifyEvent extends X11Event {
   final int firstEventCode;
   final X11EventType subtype;
-  final int window;
+  final X11ResourceId window;
   final int cursorSerial;
   final int timestamp;
-  final int nameAtom;
+  final X11Atom nameAtom;
 
   X11CursorNotifyEvent(this.firstEventCode, this.subtype, this.window,
-      {this.cursorSerial = 0, this.timestamp = 0, this.nameAtom = 0});
+      {this.cursorSerial = 0,
+      this.timestamp = 0,
+      this.nameAtom = X11Atom.None});
 
   factory X11CursorNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
     var subtype = X11EventType.values[buffer.readUint8()];
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var cursorSerial = buffer.readUint32();
     var timestamp = buffer.readUint32();
-    var nameAtom = buffer.readUint32();
+    var nameAtom = buffer.readAtom();
     buffer.skip(12);
     return X11CursorNotifyEvent(firstEventCode, subtype, window,
         cursorSerial: cursorSerial, timestamp: timestamp, nameAtom: nameAtom);
@@ -73,10 +75,10 @@ class X11CursorNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(subtype.index);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint32(cursorSerial);
     buffer.writeUint32(timestamp);
-    buffer.writeUint32(nameAtom);
+    buffer.writeAtom(nameAtom);
     buffer.skip(12);
     return firstEventCode + 1;
   }

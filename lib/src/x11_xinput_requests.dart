@@ -89,7 +89,7 @@ class X11XInputListInputDevicesReply extends X11Reply {
     var devicesWithoutNames = <X11DeviceInfo>[];
     var classInfoLengths = <int>[];
     for (var i = 0; i < devicesLength; i++) {
-      var type = buffer.readUint32(); // FIXME: Atom
+      var type = buffer.readAtom();
       var id = buffer.readUint8();
       classInfoLengths.add(buffer.readUint8());
       var use = X11DeviceUse.values[buffer.readUint8()];
@@ -151,7 +151,7 @@ class X11XInputListInputDevicesReply extends X11Reply {
     buffer.writeUint8(devices.length);
     buffer.skip(23);
     for (var device in devices) {
-      buffer.writeUint32(device.type);
+      buffer.writeAtom(device.type);
       buffer.writeUint8(device.id);
       buffer.writeUint8(device.inputClasses.length);
       buffer.writeUint8(device.deviceUse.index);
