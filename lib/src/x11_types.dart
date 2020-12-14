@@ -409,7 +409,7 @@ class X11KeyInfo extends X11InputInfo {
 
   @override
   String toString() =>
-      "X11KeyInfo(minimumKeycode: ${minimumKeycode}, maximumKeycode: ${maximumKeycode}, keysLength: ${keysLength})";
+      'X11KeyInfo(minimumKeycode: ${minimumKeycode}, maximumKeycode: ${maximumKeycode}, keysLength: ${keysLength})';
 }
 
 class X11ButtonInfo extends X11InputInfo {
@@ -418,7 +418,7 @@ class X11ButtonInfo extends X11InputInfo {
   const X11ButtonInfo(this.buttonsLength);
 
   @override
-  String toString() => "X11ButtonInfo(${buttonsLength})";
+  String toString() => 'X11ButtonInfo(${buttonsLength})';
 }
 
 class X11ValuatorInfo extends X11InputInfo {

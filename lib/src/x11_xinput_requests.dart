@@ -115,12 +115,12 @@ class X11XInputListInputDevicesReply extends X11Reply {
           inputClasses.add(X11ButtonInfo(buttonsLength));
         } else if (classId == 2) {
           var axesLength = buffer.readUint8();
-          var mode = buffer.readUint8(); // FIXME
-          var motionBufferSize = buffer.readUint32();
+          buffer.readUint8(); // FIXME: mode
+          buffer.readUint32(); // FIXME: motionBufferSize
           for (var i = 0; i < axesLength; i++) {
-            var resolution = buffer.readUint32();
-            var minimumValue = buffer.readUint32();
-            var maximumValue = buffer.readUint32();
+            buffer.readUint32(); // FIXME: resolution
+            buffer.readUint32(); // FIXME: minimumValue
+            buffer.readUint32(); // FIXME: maximumValue
           }
           inputClasses.add(X11ValuatorInfo());
         } else {
@@ -156,9 +156,9 @@ class X11XInputListInputDevicesReply extends X11Reply {
       buffer.writeUint8(device.inputClasses.length);
       buffer.writeUint8(device.deviceUse.index);
       buffer.skip(1);
-      for (var inputClass in device.inputClasses) {
-        // FIXME
-      }
+      //for (var inputClass in device.inputClasses) {
+      // FIXME
+      //}
     }
   }
 
@@ -194,8 +194,8 @@ class X11XInputOpenDeviceReply extends X11Reply {
   X11XInputOpenDeviceReply(this.classInfo);
 
   static X11XInputOpenDeviceReply fromBuffer(X11ReadBuffer buffer) {
-    var xiReplyType = buffer.readUint8();
-    var classInfoLength = buffer.readUint8();
+    buffer.readUint8(); // FIXME: xiReplyType
+    buffer.readUint8(); // FIXME: classInfoLength
     buffer.skip(23);
     var classInfo = <X11InputClassInfo>[];
     return X11XInputOpenDeviceReply(classInfo);

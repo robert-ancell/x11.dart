@@ -1,19 +1,12 @@
 import 'x11_client.dart';
-import 'x11_errors.dart';
-import 'x11_events.dart';
-import 'x11_xinput_events.dart';
 import 'x11_xinput_requests.dart';
-import 'x11_read_buffer.dart';
 import 'x11_types.dart';
 
 class X11XInputExtension extends X11Extension {
   final X11Client _client;
   final int _majorOpcode;
-  final int _firstEvent;
-  final int _firstError;
 
-  X11XInputExtension(
-      this._client, this._majorOpcode, this._firstEvent, this._firstError);
+  X11XInputExtension(this._client, this._majorOpcode);
 
   Future<X11XInputGetExtensionVersionReply> getExtensionVersion(
       String name) async {
