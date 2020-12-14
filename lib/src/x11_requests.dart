@@ -13,14 +13,6 @@ int pad(int length) {
   return n;
 }
 
-String _formatHex32(int id) {
-  return '0x' + id.toRadixString(16).padLeft(8, '0');
-}
-
-String _formatId(int id) {
-  return _formatHex32(id);
-}
-
 class X11SetupRequest {
   final X11Version protocolVersion;
   final String authorizationProtocolName;
@@ -162,8 +154,8 @@ class X11SetupSuccessReply {
     }
     var screens = <X11Screen>[];
     for (var i = 0; i < screensCount; i++) {
-      var window = buffer.readUint32();
-      var defaultColormap = buffer.readUint32();
+      var window = buffer.readResourceId();
+      var defaultColormap = buffer.readResourceId();
       var whitePixel = buffer.readUint32();
       var blackPixel = buffer.readUint32();
       var currentInputMasks = buffer.readUint32();
@@ -262,8 +254,8 @@ class X11SetupSuccessReply {
       buffer.skip(5);
     }
     for (var screen in screens) {
-      buffer.writeUint32(screen.window);
-      buffer.writeUint32(screen.defaultColormap);
+      buffer.writeResourceId(screen.window);
+      buffer.writeResourceId(screen.defaultColormap);
       buffer.writeUint32(screen.whitePixel);
       buffer.writeUint32(screen.blackPixel);
       buffer.writeUint32(screen.currentInputMasks);
@@ -299,7 +291,7 @@ class X11SetupSuccessReply {
 
   @override
   String toString() =>
-      "X11SetupSuccessReply(releaseNumber: ${releaseNumber}, resourceIdBase: ${_formatId(resourceIdBase)}, resourceIdMask: ${_formatId(resourceIdMask)}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, screens: ${screens})";
+      "X11SetupSuccessReply(releaseNumber: ${releaseNumber}, resourceIdBase: ${resourceIdBase}, resourceIdMask: ${resourceIdMask}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, screens: ${screens})";
 }
 
 class X11SetupAuthenticateReply {
@@ -351,16 +343,16 @@ int _encodeEventMask(Set<X11EventType> mask) {
 }
 
 class X11CreateWindowRequest extends X11Request {
-  final int id;
-  final int parent;
+  final X11ResourceId id;
+  final X11ResourceId parent;
   final X11Rectangle geometry;
   final int depth;
   final int borderWidth;
   final X11WindowClass windowClass;
   final int visual;
-  final int backgroundPixmap;
+  final X11ResourceId backgroundPixmap;
   final int backgroundPixel;
-  final int borderPixmap;
+  final X11ResourceId borderPixmap;
   final int borderPixel;
   final X11BitGravity bitGravity;
   final X11WinGravity winGravity;
@@ -371,8 +363,8 @@ class X11CreateWindowRequest extends X11Request {
   final bool saveUnder;
   final Set<X11EventType> events;
   final Set<X11EventType> doNotPropagate;
-  final int colormap;
-  final int cursor;
+  final X11ResourceId colormap;
+  final X11ResourceId cursor;
 
   X11CreateWindowRequest(this.id, this.parent, this.geometry, this.depth,
       {this.windowClass = X11WindowClass.inputOutput,
@@ -396,8 +388,8 @@ class X11CreateWindowRequest extends X11Request {
 
   factory X11CreateWindowRequest.fromBuffer(X11ReadBuffer buffer) {
     var depth = buffer.readUint8();
-    var id = buffer.readUint32();
-    var parent = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var parent = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
@@ -406,17 +398,17 @@ class X11CreateWindowRequest extends X11Request {
     var windowClass = X11WindowClass.values[buffer.readUint16()];
     var visual = buffer.readUint32();
     var valueMask = buffer.readUint32();
-    int backgroundPixmap;
+    X11ResourceId backgroundPixmap;
     if ((valueMask & 0x0001) != 0) {
-      backgroundPixmap = buffer.readUint32();
+      backgroundPixmap = buffer.readResourceId();
     }
     int backgroundPixel;
     if ((valueMask & 0x0002) != 0) {
       backgroundPixel = buffer.readUint32();
     }
-    int borderPixmap;
+    X11ResourceId borderPixmap;
     if ((valueMask & 0x0004) != 0) {
-      borderPixmap = buffer.readUint32();
+      borderPixmap = buffer.readResourceId();
     }
     int borderPixel;
     if ((valueMask & 0x0008) != 0) {
@@ -458,13 +450,13 @@ class X11CreateWindowRequest extends X11Request {
     if ((valueMask & 0x1000) != 0) {
       doNotPropagate = _decodeEventMask(buffer.readValueUint16());
     }
-    int colormap;
+    X11ResourceId colormap;
     if ((valueMask & 0x2000) != 0) {
-      colormap = buffer.readUint32();
+      colormap = buffer.readResourceId();
     }
-    int cursor;
+    X11ResourceId cursor;
     if ((valueMask & 0x4000) != 0) {
-      cursor = buffer.readUint32();
+      cursor = buffer.readResourceId();
     }
     return X11CreateWindowRequest(
         id, parent, X11Rectangle(x, y, width, height), depth,
@@ -491,8 +483,8 @@ class X11CreateWindowRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(depth);
-    buffer.writeUint32(id);
-    buffer.writeUint32(parent);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(parent);
     buffer.writeInt16(geometry.x);
     buffer.writeInt16(geometry.y);
     buffer.writeUint16(geometry.width);
@@ -548,13 +540,13 @@ class X11CreateWindowRequest extends X11Request {
     }
     buffer.writeUint32(valueMask);
     if (backgroundPixmap != null) {
-      buffer.writeUint32(backgroundPixmap);
+      buffer.writeResourceId(backgroundPixmap);
     }
     if (backgroundPixel != null) {
       buffer.writeUint32(backgroundPixel);
     }
     if (borderPixmap != null) {
-      buffer.writeUint32(borderPixmap);
+      buffer.writeResourceId(borderPixmap);
     }
     if (borderPixel != null) {
       buffer.writeUint32(borderPixel);
@@ -587,25 +579,25 @@ class X11CreateWindowRequest extends X11Request {
       buffer.writeUint32(_encodeEventMask(doNotPropagate));
     }
     if (colormap != null) {
-      buffer.writeUint32(colormap);
+      buffer.writeResourceId(colormap);
     }
     if (cursor != null) {
-      buffer.writeUint32(cursor);
+      buffer.writeResourceId(cursor);
     }
   }
 
   @override
   String toString() {
     var string =
-        'X11CreateWindowRequest(id: ${_formatId(id)}, parent: ${_formatId(parent)}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth}, windowClass: ${windowClass}, visual: ${visual}';
+        'X11CreateWindowRequest(id: ${id}, parent: ${parent}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth}, windowClass: ${windowClass}, visual: ${visual}';
     if (backgroundPixmap != null) {
-      string += ', backgroundPixmap: ${_formatId(backgroundPixmap)}';
+      string += ', backgroundPixmap: ${backgroundPixmap}';
     }
     if (backgroundPixel != null) {
       string += ', backgroundPixel: ${backgroundPixel}';
     }
     if (borderPixmap != null) {
-      string += ', borderPixmap: ${_formatId(borderPixmap)}';
+      string += ', borderPixmap: ${borderPixmap}';
     }
     if (borderPixel != null) {
       string += ', borderPixel: ${borderPixel}';
@@ -649,10 +641,10 @@ class X11CreateWindowRequest extends X11Request {
 }
 
 class X11ChangeWindowAttributesRequest extends X11Request {
-  final int window;
-  final int backgroundPixmap;
+  final X11ResourceId window;
+  final X11ResourceId backgroundPixmap;
   final int backgroundPixel;
-  final int borderPixmap;
+  final X11ResourceId borderPixmap;
   final int borderPixel;
   final X11BitGravity bitGravity;
   final X11WinGravity winGravity;
@@ -663,8 +655,8 @@ class X11ChangeWindowAttributesRequest extends X11Request {
   final bool saveUnder;
   final Set<X11EventType> events;
   final Set<X11EventType> doNotPropagate;
-  final int colormap;
-  final int cursor;
+  final X11ResourceId colormap;
+  final X11ResourceId cursor;
 
   X11ChangeWindowAttributesRequest(this.window,
       {this.backgroundPixmap,
@@ -685,19 +677,19 @@ class X11ChangeWindowAttributesRequest extends X11Request {
 
   factory X11ChangeWindowAttributesRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var valueMask = buffer.readUint32();
-    int backgroundPixmap;
+    X11ResourceId backgroundPixmap;
     if ((valueMask & 0x0001) != 0) {
-      backgroundPixmap = buffer.readUint32();
+      backgroundPixmap = buffer.readResourceId();
     }
     int backgroundPixel;
     if ((valueMask & 0x0002) != 0) {
       backgroundPixel = buffer.readUint32();
     }
-    int borderPixmap;
+    X11ResourceId borderPixmap;
     if ((valueMask & 0x0004) != 0) {
-      borderPixmap = buffer.readUint32();
+      borderPixmap = buffer.readResourceId();
     }
     int borderPixel;
     if ((valueMask & 0x0008) != 0) {
@@ -739,13 +731,13 @@ class X11ChangeWindowAttributesRequest extends X11Request {
     if ((valueMask & 0x1000) != 0) {
       doNotPropagate = _decodeEventMask(buffer.readValueUint16());
     }
-    int colormap;
+    X11ResourceId colormap;
     if ((valueMask & 0x2000) != 0) {
-      colormap = buffer.readUint32();
+      colormap = buffer.readResourceId();
     }
-    int cursor;
+    X11ResourceId cursor;
     if ((valueMask & 0x4000) != 0) {
-      cursor = buffer.readUint32();
+      cursor = buffer.readResourceId();
     }
     return X11ChangeWindowAttributesRequest(window,
         backgroundPixmap: backgroundPixmap,
@@ -768,7 +760,7 @@ class X11ChangeWindowAttributesRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     var valueMask = 0;
     if (backgroundPixmap != null) {
       valueMask |= 0x0001;
@@ -817,13 +809,13 @@ class X11ChangeWindowAttributesRequest extends X11Request {
     }
     buffer.writeUint32(valueMask);
     if (backgroundPixmap != null) {
-      buffer.writeUint32(backgroundPixmap);
+      buffer.writeResourceId(backgroundPixmap);
     }
     if (backgroundPixel != null) {
       buffer.writeUint32(backgroundPixel);
     }
     if (borderPixmap != null) {
-      buffer.writeUint32(borderPixmap);
+      buffer.writeResourceId(borderPixmap);
     }
     if (borderPixel != null) {
       buffer.writeUint32(borderPixel);
@@ -856,38 +848,37 @@ class X11ChangeWindowAttributesRequest extends X11Request {
       buffer.writeUint32(_encodeEventMask(doNotPropagate));
     }
     if (colormap != null) {
-      buffer.writeUint32(colormap);
+      buffer.writeResourceId(colormap);
     }
     if (cursor != null) {
-      buffer.writeUint32(cursor);
+      buffer.writeResourceId(cursor);
     }
   }
 
   @override
   String toString() =>
-      'X11ChangeWindowAttributesRequest(window: ${_formatId(window)}, backgroundPixmap: ${backgroundPixmap}, backgroundPixel: ${backgroundPixel}, borderPixmap: ${borderPixmap}, borderPixel: ${borderPixel}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingStore: ${backingStore}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, overrideRedirect: ${overrideRedirect}, saveUnder: ${saveUnder}, events: ${events}, doNotPropagate: ${doNotPropagate}, colormap: ${colormap}, cursor: ${cursor})';
+      'X11ChangeWindowAttributesRequest(window: ${window}, backgroundPixmap: ${backgroundPixmap}, backgroundPixel: ${backgroundPixel}, borderPixmap: ${borderPixmap}, borderPixel: ${borderPixel}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingStore: ${backingStore}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, overrideRedirect: ${overrideRedirect}, saveUnder: ${saveUnder}, events: ${events}, doNotPropagate: ${doNotPropagate}, colormap: ${colormap}, cursor: ${cursor})';
 }
 
 class X11GetWindowAttributesRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11GetWindowAttributesRequest(this.window);
 
   factory X11GetWindowAttributesRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11GetWindowAttributesRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() =>
-      'X11GetWindowAttributesRequest(window: ${_formatId(window)})';
+  String toString() => 'X11GetWindowAttributesRequest(window: ${window})';
 }
 
 class X11GetWindowAttributesReply extends X11Reply {
@@ -902,7 +893,7 @@ class X11GetWindowAttributesReply extends X11Reply {
   final bool mapIsInstalled;
   final int mapState;
   final bool overrideRedirect;
-  final int colormap;
+  final X11ResourceId colormap;
   final Set<X11EventType> allEvents;
   final Set<X11EventType> yourEvents;
   final Set<X11EventType> doNotPropagate;
@@ -936,7 +927,7 @@ class X11GetWindowAttributesReply extends X11Reply {
     var mapIsInstalled = buffer.readBool();
     var mapState = buffer.readUint8();
     var overrideRedirect = buffer.readBool();
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var allEvents = _decodeEventMask(buffer.readUint32());
     var yourEvents = _decodeEventMask(buffer.readUint32());
     var doNotPropagate = _decodeEventMask(buffer.readUint16());
@@ -972,7 +963,7 @@ class X11GetWindowAttributesReply extends X11Reply {
     buffer.writeBool(mapIsInstalled);
     buffer.writeUint8(mapState);
     buffer.writeBool(overrideRedirect);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     buffer.writeUint32(_encodeEventMask(allEvents));
     buffer.writeUint32(_encodeEventMask(yourEvents));
     buffer.writeUint16(_encodeEventMask(doNotPropagate));
@@ -985,82 +976,81 @@ class X11GetWindowAttributesReply extends X11Reply {
 }
 
 class X11DestroyWindowRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11DestroyWindowRequest(this.window);
 
   factory X11DestroyWindowRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11DestroyWindowRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11DestroyWindowRequest(window: ${_formatId(window)})';
+  String toString() => 'X11DestroyWindowRequest(window: ${window})';
 }
 
 class X11DestroySubwindowsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11DestroySubwindowsRequest(this.window);
 
   factory X11DestroySubwindowsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11DestroySubwindowsRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() =>
-      'X11DestroySubwindowsRequest(window: ${_formatId(window)})';
+  String toString() => 'X11DestroySubwindowsRequest(window: ${window})';
 }
 
 class X11ChangeSaveSetRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11ChangeSetMode mode;
 
   X11ChangeSaveSetRequest(this.window, this.mode);
 
   factory X11ChangeSaveSetRequest.fromBuffer(X11ReadBuffer buffer) {
     var mode = X11ChangeSetMode.values[buffer.readUint8()];
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11ChangeSaveSetRequest(window, mode);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(mode.index);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
   String toString() =>
-      'X11ChangeSaveSetRequest(window: ${_formatId(window)}, mode: ${mode})';
+      'X11ChangeSaveSetRequest(window: ${window}, mode: ${mode})';
 }
 
 class X11ReparentWindowRequest extends X11Request {
-  final int window;
-  final int parent;
+  final X11ResourceId window;
+  final X11ResourceId parent;
   final X11Point position;
 
   X11ReparentWindowRequest(this.window, this.parent, this.position);
 
   factory X11ReparentWindowRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
-    var parent = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var parent = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     return X11ReparentWindowRequest(window, parent, X11Point(x, y));
@@ -1069,109 +1059,109 @@ class X11ReparentWindowRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
-    buffer.writeUint32(parent);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(parent);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
   }
 
   @override
   String toString() =>
-      'X11ReparentWindowRequest(window: ${_formatId(window)}, parent: ${parent}, position: ${position})';
+      'X11ReparentWindowRequest(window: ${window}, parent: ${parent}, position: ${position})';
 }
 
 class X11MapWindowRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11MapWindowRequest(this.window);
 
   factory X11MapWindowRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11MapWindowRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11MapWindowRequest(${_formatId(window)})';
+  String toString() => 'X11MapWindowRequest(${window})';
 }
 
 class X11MapSubwindowsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11MapSubwindowsRequest(this.window);
 
   factory X11MapSubwindowsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11MapSubwindowsRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11MapSubwindowsRequest(${_formatId(window)})';
+  String toString() => 'X11MapSubwindowsRequest(${window})';
 }
 
 class X11UnmapWindowRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11UnmapWindowRequest(this.window);
 
   factory X11UnmapWindowRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11UnmapWindowRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11UnmapWindowRequest(${_formatId(window)})';
+  String toString() => 'X11UnmapWindowRequest(${window})';
 }
 
 class X11UnmapSubwindowsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11UnmapSubwindowsRequest(this.window);
 
   factory X11UnmapSubwindowsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11UnmapSubwindowsRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11UnmapSubwindowsRequest(${_formatId(window)})';
+  String toString() => 'X11UnmapSubwindowsRequest(${window})';
 }
 
 class X11ConfigureWindowRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final int x;
   final int y;
   final int width;
   final int height;
   final int borderWidth;
-  final int sibling;
+  final X11ResourceId sibling;
   final X11StackMode stackMode;
 
   X11ConfigureWindowRequest(this.window,
@@ -1185,7 +1175,7 @@ class X11ConfigureWindowRequest extends X11Request {
 
   factory X11ConfigureWindowRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var valueMask = buffer.readUint16();
     buffer.skip(2);
     int x;
@@ -1208,9 +1198,9 @@ class X11ConfigureWindowRequest extends X11Request {
     if ((valueMask & 0x10) != 0) {
       borderWidth = buffer.readUint32();
     }
-    int sibling;
+    X11ResourceId sibling;
     if ((valueMask & 0x20) != 0) {
-      sibling = buffer.readUint32();
+      sibling = buffer.readResourceId();
     }
     X11StackMode stackMode;
     if ((valueMask & 0x40) != 0) {
@@ -1229,7 +1219,7 @@ class X11ConfigureWindowRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     var valueMask = 0;
     if (x != null) {
       valueMask |= 0x01;
@@ -1270,7 +1260,7 @@ class X11ConfigureWindowRequest extends X11Request {
       buffer.writeUint32(borderWidth);
     }
     if (sibling != null) {
-      buffer.writeUint32(sibling);
+      buffer.writeResourceId(sibling);
     }
     if (stackMode != null) {
       buffer.writeUint32(stackMode.index);
@@ -1279,55 +1269,55 @@ class X11ConfigureWindowRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ConfigureWindowRequest(window: ${_formatId(window)}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, borderWidth: ${borderWidth}, sibling: ${_formatId(sibling)}, stackMode: ${stackMode})';
+      'X11ConfigureWindowRequest(window: ${window}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, borderWidth: ${borderWidth}, sibling: ${sibling}, stackMode: ${stackMode})';
 }
 
 class X11CirculateWindowRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11CirculateDirection direction;
 
   X11CirculateWindowRequest(this.window, this.direction);
 
   factory X11CirculateWindowRequest.fromBuffer(X11ReadBuffer buffer) {
     var direction = X11CirculateDirection.values[buffer.readUint8()];
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11CirculateWindowRequest(window, direction);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(direction.index);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
   String toString() =>
-      'X11CirculateWindowRequest(window: ${_formatId(window)}, direction: ${direction})';
+      'X11CirculateWindowRequest(window: ${window}, direction: ${direction})';
 }
 
 class X11GetGeometryRequest extends X11Request {
-  final int drawable;
+  final X11ResourceId drawable;
 
   X11GetGeometryRequest(this.drawable);
 
   factory X11GetGeometryRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     return X11GetGeometryRequest(drawable);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
   }
 
   @override
-  String toString() => 'X11GetGeometryRequest(${_formatId(drawable)})';
+  String toString() => 'X11GetGeometryRequest(${drawable})';
 }
 
 class X11GetGeometryReply extends X11Reply {
-  final int root;
+  final X11ResourceId root;
   final X11Rectangle geometry;
   final int depth;
   final int borderWidth;
@@ -1336,7 +1326,7 @@ class X11GetGeometryReply extends X11Reply {
 
   static X11GetGeometryReply fromBuffer(X11ReadBuffer buffer) {
     var depth = buffer.readUint8();
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
@@ -1350,7 +1340,7 @@ class X11GetGeometryReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(depth);
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeInt16(geometry.x);
     buffer.writeInt16(geometry.y);
     buffer.writeUint16(geometry.width);
@@ -1361,60 +1351,60 @@ class X11GetGeometryReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetGeometryReply(root: ${_formatId(root)}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth})';
+      'X11GetGeometryReply(root: ${root}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth})';
 }
 
 class X11QueryTreeRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11QueryTreeRequest(this.window);
 
   factory X11QueryTreeRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11QueryTreeRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11QueryTreeRequest(window: ${_formatId(window)})';
+  String toString() => 'X11QueryTreeRequest(window: ${window})';
 }
 
 class X11QueryTreeReply extends X11Reply {
-  final int root;
-  final int parent;
-  final List<int> children;
+  final X11ResourceId root;
+  final X11ResourceId parent;
+  final List<X11ResourceId> children;
 
   X11QueryTreeReply(this.root, this.parent, this.children);
 
   static X11QueryTreeReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var root = buffer.readUint32();
-    var parent = buffer.readUint32();
+    var root = buffer.readResourceId();
+    var parent = buffer.readResourceId();
     var childrenLength = buffer.readUint16();
     buffer.skip(14);
-    var children = buffer.readListOfUint32(childrenLength);
+    var children = buffer.readListOfResourceId(childrenLength);
     return X11QueryTreeReply(root, parent, children);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(root);
-    buffer.writeUint32(parent);
+    buffer.writeResourceId(root);
+    buffer.writeResourceId(parent);
     buffer.writeUint16(children.length);
     buffer.skip(14);
-    buffer.writeListOfUint32(children);
+    buffer.writeListOfResourceId(children);
   }
 
   @override
   String toString() =>
-      'X11QueryTreeReply(root: ${_formatId(root)}, parent: ${_formatId(parent)}, children: ${children.map((window) => _formatId(window)).toList()})';
+      'X11QueryTreeReply(root: ${root}, parent: ${parent}, children: ${children.map((window) => window).toList()})';
 }
 
 class X11InternAtomRequest extends X11Request {
@@ -1448,20 +1438,20 @@ class X11InternAtomRequest extends X11Request {
 }
 
 class X11InternAtomReply extends X11Reply {
-  final int atom;
+  final X11Atom atom;
 
   X11InternAtomReply(this.atom);
 
   static X11InternAtomReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var atom = buffer.readUint32();
+    var atom = buffer.readAtom();
     return X11InternAtomReply(atom);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(atom);
+    buffer.writeAtom(atom);
     buffer.skip(20);
   }
 
@@ -1470,20 +1460,20 @@ class X11InternAtomReply extends X11Reply {
 }
 
 class X11GetAtomNameRequest extends X11Request {
-  final int atom;
+  final X11Atom atom;
 
   X11GetAtomNameRequest(this.atom);
 
   factory X11GetAtomNameRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var atom = buffer.readUint32();
+    var atom = buffer.readAtom();
     return X11GetAtomNameRequest(atom);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(atom);
+    buffer.writeAtom(atom);
   }
 
   @override
@@ -1519,23 +1509,23 @@ class X11GetAtomNameReply extends X11Reply {
 }
 
 class X11ChangePropertyRequest extends X11Request {
-  final int window;
-  final int property;
+  final X11ResourceId window;
+  final X11Atom property;
   final List<int> data;
   final X11ChangePropertyMode mode;
-  final int type;
+  final X11Atom type;
   final int format;
 
   X11ChangePropertyRequest(this.window, this.property, this.data,
-      {this.type = 0,
+      {this.type = X11Atom.None,
       this.format = 32,
       this.mode = X11ChangePropertyMode.replace});
 
   factory X11ChangePropertyRequest.fromBuffer(X11ReadBuffer buffer) {
     var mode = X11ChangePropertyMode.values[buffer.readUint8()];
-    var window = buffer.readUint32();
-    var property = buffer.readUint32();
-    var type = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var property = buffer.readAtom();
+    var type = buffer.readAtom();
     var format = buffer.readUint8();
     buffer.skip(3);
     var dataLength = buffer.readUint32();
@@ -1562,9 +1552,9 @@ class X11ChangePropertyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(mode.index);
-    buffer.writeUint32(window);
-    buffer.writeUint32(property);
-    buffer.writeUint32(type);
+    buffer.writeResourceId(window);
+    buffer.writeAtom(property);
+    buffer.writeAtom(type);
     buffer.writeUint8(format);
     buffer.skip(3);
     buffer.writeUint32(data.length);
@@ -1587,53 +1577,53 @@ class X11ChangePropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangePropertyRequest(${_formatId(window)}, ${property}, <${data.length} bytes>, type: ${type}, format: ${format}, mode: ${mode})';
+      'X11ChangePropertyRequest(${window}, ${property}, <${data.length} bytes>, type: ${type}, format: ${format}, mode: ${mode})';
 }
 
 class X11DeletePropertyRequest extends X11Request {
-  final int window;
-  final int property;
+  final X11ResourceId window;
+  final X11Atom property;
 
   X11DeletePropertyRequest(this.window, this.property);
 
   factory X11DeletePropertyRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
-    var property = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var property = buffer.readAtom();
     return X11DeletePropertyRequest(window, property);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(window);
+    buffer.writeAtom(property);
   }
 
   @override
   String toString() =>
-      'X11DeletePropertyRequest(window: ${_formatId(window)}, property: ${property})';
+      'X11DeletePropertyRequest(window: ${window}, property: ${property})';
 }
 
 class X11GetPropertyRequest extends X11Request {
-  final int window;
-  final int property;
-  final int type;
+  final X11ResourceId window;
+  final X11Atom property;
+  final X11Atom type;
   final int longOffset;
   final int longLength;
   final bool delete;
 
   X11GetPropertyRequest(this.window, this.property,
-      {this.type = 0,
+      {this.type = X11Atom.None,
       this.longOffset = 0,
       this.longLength = 4294967295,
       this.delete = false});
 
   factory X11GetPropertyRequest.fromBuffer(X11ReadBuffer buffer) {
     var delete = buffer.readBool();
-    var window = buffer.readUint32();
-    var property = buffer.readUint32();
-    var type = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var property = buffer.readAtom();
+    var type = buffer.readAtom();
     var longOffset = buffer.readUint32();
     var longLength = buffer.readUint32();
     return X11GetPropertyRequest(window, property,
@@ -1646,33 +1636,33 @@ class X11GetPropertyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(delete);
-    buffer.writeUint32(window);
-    buffer.writeUint32(property);
-    buffer.writeUint32(type);
+    buffer.writeResourceId(window);
+    buffer.writeAtom(property);
+    buffer.writeAtom(type);
     buffer.writeUint32(longOffset);
     buffer.writeUint32(longLength);
   }
 
   @override
   String toString() =>
-      'X11GetPropertyRequest(window: ${_formatId(window)}, property: ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}})';
+      'X11GetPropertyRequest(window: ${window}, property: ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}})';
 }
 
 class X11GetPropertyReply extends X11Reply {
-  final int type;
+  final X11Atom type;
   final int format;
   final List<int> value;
   final int bytesAfter;
 
   X11GetPropertyReply(
-      {this.type = 0,
+      {this.type = X11Atom.None,
       this.format = 0,
       this.value = const [],
       this.bytesAfter = 0});
 
   static X11GetPropertyReply fromBuffer(X11ReadBuffer buffer) {
     var format = buffer.readUint8();
-    var type = buffer.readUint32();
+    var type = buffer.readAtom();
     var bytesAfter = buffer.readUint32();
     var valueLength = buffer.readUint32();
     buffer.skip(12);
@@ -1699,7 +1689,7 @@ class X11GetPropertyReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(format);
-    buffer.writeUint32(type);
+    buffer.writeAtom(type);
     buffer.writeUint32(bytesAfter);
     buffer.writeUint32(value.length * format ~/ 8);
     buffer.skip(12);
@@ -1726,28 +1716,28 @@ class X11GetPropertyReply extends X11Reply {
 }
 
 class X11ListPropertiesRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11ListPropertiesRequest(this.window);
 
   factory X11ListPropertiesRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11ListPropertiesRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11ListPropertiesRequest(${_formatId(window)})';
+  String toString() => 'X11ListPropertiesRequest(${window})';
 }
 
 class X11ListPropertiesReply extends X11Reply {
-  final List<int> atoms;
+  final List<X11Atom> atoms;
 
   X11ListPropertiesReply(this.atoms);
 
@@ -1755,7 +1745,10 @@ class X11ListPropertiesReply extends X11Reply {
     buffer.skip(1);
     var atomsLength = buffer.readUint16();
     buffer.skip(22);
-    var atoms = buffer.readListOfUint32(atomsLength);
+    var atoms = <X11Atom>[];
+    for (var i = 0; i < atomsLength; i++) {
+      atoms.add(buffer.readAtom());
+    }
     return X11ListPropertiesReply(atoms);
   }
 
@@ -1764,7 +1757,9 @@ class X11ListPropertiesReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(atoms.length);
     buffer.skip(22);
-    buffer.writeListOfUint32(atoms);
+    for (var atom in atoms) {
+      buffer.writeAtom(atom);
+    }
   }
 
   @override
@@ -1772,16 +1767,16 @@ class X11ListPropertiesReply extends X11Reply {
 }
 
 class X11SetSelectionOwnerRequest extends X11Request {
-  final int selection;
-  final int owner;
+  final X11Atom selection;
+  final X11ResourceId owner;
   final int time;
 
   X11SetSelectionOwnerRequest(this.selection, this.owner, {this.time = 0});
 
   factory X11SetSelectionOwnerRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var owner = buffer.readUint32();
-    var selection = buffer.readUint32();
+    var owner = buffer.readResourceId();
+    var selection = buffer.readAtom();
     var time = buffer.readUint32();
     return X11SetSelectionOwnerRequest(selection, owner, time: time);
   }
@@ -1789,8 +1784,8 @@ class X11SetSelectionOwnerRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(owner);
-    buffer.writeUint32(selection);
+    buffer.writeResourceId(owner);
+    buffer.writeAtom(selection);
     buffer.writeUint32(time);
   }
 
@@ -1800,20 +1795,20 @@ class X11SetSelectionOwnerRequest extends X11Request {
 }
 
 class X11GetSelectionOwnerRequest extends X11Request {
-  final int selection;
+  final X11Atom selection;
 
   X11GetSelectionOwnerRequest(this.selection);
 
   factory X11GetSelectionOwnerRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var selection = buffer.readUint32();
+    var selection = buffer.readAtom();
     return X11GetSelectionOwnerRequest(selection);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(selection);
+    buffer.writeAtom(selection);
   }
 
   @override
@@ -1821,20 +1816,20 @@ class X11GetSelectionOwnerRequest extends X11Request {
 }
 
 class X11GetSelectionOwnerReply extends X11Reply {
-  final int owner;
+  final X11ResourceId owner;
 
   X11GetSelectionOwnerReply(this.owner);
 
   static X11GetSelectionOwnerReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var owner = buffer.readUint32();
+    var owner = buffer.readResourceId();
     return X11GetSelectionOwnerReply(owner);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(owner);
+    buffer.writeResourceId(owner);
   }
 
   @override
@@ -1842,21 +1837,21 @@ class X11GetSelectionOwnerReply extends X11Reply {
 }
 
 class X11ConvertSelectionRequest extends X11Request {
-  final int selection;
-  final int requestor;
-  final int target;
-  final int property;
+  final X11Atom selection;
+  final X11ResourceId requestor;
+  final X11Atom target;
+  final X11Atom property;
   final int time;
 
   X11ConvertSelectionRequest(this.selection, this.requestor, this.target,
-      {this.property = 0, this.time = 0});
+      {this.property = X11Atom.None, this.time = 0});
 
   factory X11ConvertSelectionRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var requestor = buffer.readUint32();
-    var selection = buffer.readUint32();
-    var target = buffer.readUint32();
-    var property = buffer.readUint32();
+    var requestor = buffer.readResourceId();
+    var selection = buffer.readAtom();
+    var target = buffer.readAtom();
+    var property = buffer.readAtom();
     var time = buffer.readUint32();
     return X11ConvertSelectionRequest(selection, requestor, target,
         property: property, time: time);
@@ -1865,10 +1860,10 @@ class X11ConvertSelectionRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(requestor);
-    buffer.writeUint32(selection);
-    buffer.writeUint32(target);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(requestor);
+    buffer.writeAtom(selection);
+    buffer.writeAtom(target);
+    buffer.writeAtom(property);
     buffer.writeUint32(time);
   }
 
@@ -1878,7 +1873,7 @@ class X11ConvertSelectionRequest extends X11Request {
 }
 
 class X11SendEventRequest extends X11Request {
-  final int destination;
+  final X11ResourceId destination;
   final int code;
   final List<int> event;
   final bool propagate;
@@ -1892,7 +1887,7 @@ class X11SendEventRequest extends X11Request {
 
   factory X11SendEventRequest.fromBuffer(X11ReadBuffer buffer) {
     var propagate = buffer.readBool();
-    var destination = buffer.readUint32();
+    var destination = buffer.readResourceId();
     var events = _decodeEventMask(buffer.readUint32());
     var code = buffer.readUint8();
     var event = [buffer.readUint8()];
@@ -1905,7 +1900,7 @@ class X11SendEventRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(propagate);
-    buffer.writeUint32(destination);
+    buffer.writeResourceId(destination);
     buffer.writeUint32(_encodeEventMask(events));
     buffer.writeUint8(code);
     buffer.writeUint8(event[0]);
@@ -1919,13 +1914,13 @@ class X11SendEventRequest extends X11Request {
 }
 
 class X11GrabPointerRequest extends X11Request {
-  final int grabWindow;
+  final X11ResourceId grabWindow;
   final bool ownerEvents;
   final Set<X11EventType> events;
   final int pointerMode;
   final int keyboardMode;
-  final int confineTo;
-  final int cursor;
+  final X11ResourceId confineTo;
+  final X11ResourceId cursor;
   final int time;
 
   X11GrabPointerRequest(
@@ -1940,12 +1935,12 @@ class X11GrabPointerRequest extends X11Request {
 
   factory X11GrabPointerRequest.fromBuffer(X11ReadBuffer buffer) {
     var ownerEvents = buffer.readBool();
-    var grabWindow = buffer.readUint32();
+    var grabWindow = buffer.readResourceId();
     var events = _decodeEventMask(buffer.readUint16());
     var pointerMode = buffer.readUint8();
     var keyboardMode = buffer.readUint8();
-    var confineTo = buffer.readUint32();
-    var cursor = buffer.readUint32();
+    var confineTo = buffer.readResourceId();
+    var cursor = buffer.readResourceId();
     var time = buffer.readUint32();
     return X11GrabPointerRequest(grabWindow, ownerEvents, events, pointerMode,
         keyboardMode, confineTo, cursor, time);
@@ -1954,12 +1949,12 @@ class X11GrabPointerRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(ownerEvents);
-    buffer.writeUint32(grabWindow);
+    buffer.writeResourceId(grabWindow);
     buffer.writeUint16(_encodeEventMask(events));
     buffer.writeUint8(pointerMode);
     buffer.writeUint8(keyboardMode);
-    buffer.writeUint32(confineTo);
-    buffer.writeUint32(cursor);
+    buffer.writeResourceId(confineTo);
+    buffer.writeResourceId(cursor);
     buffer.writeUint32(time);
   }
 
@@ -2009,13 +2004,13 @@ class X11UngrabPointerRequest extends X11Request {
 }
 
 class X11GrabButtonRequest extends X11Request {
-  final int grabWindow;
+  final X11ResourceId grabWindow;
   final bool ownerEvents;
   final Set<X11EventType> events;
   final int pointerMode;
   final int keyboardMode;
-  final int confineTo;
-  final int cursor;
+  final X11ResourceId confineTo;
+  final X11ResourceId cursor;
   final int button;
   final int modifiers;
 
@@ -2032,12 +2027,12 @@ class X11GrabButtonRequest extends X11Request {
 
   factory X11GrabButtonRequest.fromBuffer(X11ReadBuffer buffer) {
     var ownerEvents = buffer.readBool();
-    var grabWindow = buffer.readUint32();
+    var grabWindow = buffer.readResourceId();
     var events = _decodeEventMask(buffer.readUint16());
     var pointerMode = buffer.readUint8();
     var keyboardMode = buffer.readUint8();
-    var confineTo = buffer.readUint32();
-    var cursor = buffer.readUint32();
+    var confineTo = buffer.readResourceId();
+    var cursor = buffer.readResourceId();
     var button = buffer.readUint8();
     buffer.skip(1);
     var modifiers = buffer.readUint16();
@@ -2048,12 +2043,12 @@ class X11GrabButtonRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(ownerEvents);
-    buffer.writeUint32(grabWindow);
+    buffer.writeResourceId(grabWindow);
     buffer.writeUint16(_encodeEventMask(events));
     buffer.writeUint8(pointerMode);
     buffer.writeUint8(keyboardMode);
-    buffer.writeUint32(confineTo);
-    buffer.writeUint32(cursor);
+    buffer.writeResourceId(confineTo);
+    buffer.writeResourceId(cursor);
     buffer.writeUint8(button);
     buffer.skip(1);
     buffer.writeUint16(modifiers);
@@ -2065,7 +2060,7 @@ class X11GrabButtonRequest extends X11Request {
 }
 
 class X11UngrabButtonRequest extends X11Request {
-  final int grabWindow;
+  final X11ResourceId grabWindow;
   final int button;
   final int modifiers;
 
@@ -2073,7 +2068,7 @@ class X11UngrabButtonRequest extends X11Request {
 
   factory X11UngrabButtonRequest.fromBuffer(X11ReadBuffer buffer) {
     var button = buffer.readUint8();
-    var grabWindow = buffer.readUint32();
+    var grabWindow = buffer.readResourceId();
     var modifiers = buffer.readUint16();
     buffer.skip(2);
     return X11UngrabButtonRequest(grabWindow, button, modifiers);
@@ -2082,7 +2077,7 @@ class X11UngrabButtonRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(button);
-    buffer.writeUint32(grabWindow);
+    buffer.writeResourceId(grabWindow);
     buffer.writeUint16(modifiers);
     buffer.skip(2);
   }
@@ -2094,15 +2089,15 @@ class X11UngrabButtonRequest extends X11Request {
 
 class X11ChangeActivePointerGrabRequest extends X11Request {
   final Set<X11EventType> events;
-  final int cursor;
+  final X11ResourceId cursor;
   final int time;
 
   X11ChangeActivePointerGrabRequest(this.events,
-      {this.cursor = 0, this.time = 0});
+      {this.cursor = X11ResourceId.None, this.time = 0});
 
   factory X11ChangeActivePointerGrabRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cursor = buffer.readUint32();
+    var cursor = buffer.readResourceId();
     var time = buffer.readUint32();
     var events = _decodeEventMask(buffer.readUint16());
     buffer.skip(2);
@@ -2113,7 +2108,7 @@ class X11ChangeActivePointerGrabRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cursor);
+    buffer.writeResourceId(cursor);
     buffer.writeUint32(time);
     buffer.writeUint16(_encodeEventMask(events));
     buffer.skip(2);
@@ -2125,7 +2120,7 @@ class X11ChangeActivePointerGrabRequest extends X11Request {
 }
 
 class X11GrabKeyboardRequest extends X11Request {
-  final int grabWindow;
+  final X11ResourceId grabWindow;
   final bool ownerEvents;
   final int pointerMode;
   final int keyboardMode;
@@ -2139,7 +2134,7 @@ class X11GrabKeyboardRequest extends X11Request {
 
   factory X11GrabKeyboardRequest.fromBuffer(X11ReadBuffer buffer) {
     var ownerEvents = buffer.readBool();
-    var grabWindow = buffer.readUint32();
+    var grabWindow = buffer.readResourceId();
     var time = buffer.readUint32();
     var pointerMode = buffer.readUint8();
     var keyboardMode = buffer.readUint8();
@@ -2154,7 +2149,7 @@ class X11GrabKeyboardRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(ownerEvents);
-    buffer.writeUint32(grabWindow);
+    buffer.writeResourceId(grabWindow);
     buffer.writeUint32(time);
     buffer.writeUint8(pointerMode);
     buffer.writeUint8(keyboardMode);
@@ -2207,7 +2202,7 @@ class X11UngrabKeyboardRequest extends X11Request {
 }
 
 class X11GrabKeyRequest extends X11Request {
-  final int grabWindow;
+  final X11ResourceId grabWindow;
   final int key;
   final int modifiers;
   final bool ownerEvents;
@@ -2222,7 +2217,7 @@ class X11GrabKeyRequest extends X11Request {
 
   factory X11GrabKeyRequest.fromBuffer(X11ReadBuffer buffer) {
     var ownerEvents = buffer.readBool();
-    var grabWindow = buffer.readUint32();
+    var grabWindow = buffer.readResourceId();
     var modifiers = buffer.readUint16();
     var key = buffer.readUint32();
     var pointerMode = buffer.readUint8();
@@ -2238,7 +2233,7 @@ class X11GrabKeyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(ownerEvents);
-    buffer.writeUint32(grabWindow);
+    buffer.writeResourceId(grabWindow);
     buffer.writeUint16(modifiers);
     buffer.writeUint32(key);
     buffer.writeUint8(pointerMode);
@@ -2252,7 +2247,7 @@ class X11GrabKeyRequest extends X11Request {
 }
 
 class X11UngrabKeyRequest extends X11Request {
-  final int grabWindow;
+  final X11ResourceId grabWindow;
   final int key;
   final int modifiers;
 
@@ -2260,7 +2255,7 @@ class X11UngrabKeyRequest extends X11Request {
 
   factory X11UngrabKeyRequest.fromBuffer(X11ReadBuffer buffer) {
     var key = buffer.readUint32();
-    var grabWindow = buffer.readUint32();
+    var grabWindow = buffer.readResourceId();
     var modifiers = buffer.readUint16();
     buffer.skip(2);
     return X11UngrabKeyRequest(grabWindow, key, modifiers: modifiers);
@@ -2269,7 +2264,7 @@ class X11UngrabKeyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint32(key);
-    buffer.writeUint32(grabWindow);
+    buffer.writeResourceId(grabWindow);
     buffer.writeUint16(modifiers);
     buffer.skip(2);
   }
@@ -2336,29 +2331,29 @@ class X11UngrabServerRequest extends X11Request {
 }
 
 class X11QueryPointerRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11QueryPointerRequest(this.window);
 
   factory X11QueryPointerRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11QueryPointerRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11QueryPointerRequest(window: ${_formatId(window)})';
+  String toString() => 'X11QueryPointerRequest(window: ${window})';
 }
 
 class X11QueryPointerReply extends X11Reply {
-  final int root;
-  final int child;
+  final X11ResourceId root;
+  final X11ResourceId child;
   final X11Point positionRoot;
   final X11Point positionWindow;
   final int mask;
@@ -2366,14 +2361,14 @@ class X11QueryPointerReply extends X11Reply {
 
   X11QueryPointerReply(this.root, this.positionRoot,
       {this.positionWindow = const X11Point(0, 0),
-      this.child = 0,
+      this.child = X11ResourceId.None,
       this.mask = 0,
       this.sameScreen = true});
 
   static X11QueryPointerReply fromBuffer(X11ReadBuffer buffer) {
     var sameScreen = buffer.readBool();
-    var root = buffer.readUint32();
-    var child = buffer.readUint32();
+    var root = buffer.readResourceId();
+    var child = buffer.readResourceId();
     var rootX = buffer.readInt16();
     var rootY = buffer.readInt16();
     var winX = buffer.readInt16();
@@ -2390,8 +2385,8 @@ class X11QueryPointerReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(sameScreen);
-    buffer.writeUint32(root);
-    buffer.writeUint32(child);
+    buffer.writeResourceId(root);
+    buffer.writeResourceId(child);
     buffer.writeInt16(positionRoot.x);
     buffer.writeInt16(positionRoot.y);
     buffer.writeInt16(positionWindow.x);
@@ -2402,11 +2397,11 @@ class X11QueryPointerReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11QueryPointerReply(root: ${_formatId(root)}, child: ${child}, positionRoot: ${positionRoot}, posiitionWindow: ${positionWindow}, mask: ${mask}, sameScreen: ${sameScreen})';
+      'X11QueryPointerReply(root: ${root}, child: ${child}, positionRoot: ${positionRoot}, posiitionWindow: ${positionWindow}, mask: ${mask}, sameScreen: ${sameScreen})';
 }
 
 class X11GetMotionEventsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final int start;
   final int stop;
 
@@ -2414,7 +2409,7 @@ class X11GetMotionEventsRequest extends X11Request {
 
   factory X11GetMotionEventsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var start = buffer.readUint32();
     var stop = buffer.readUint32();
     return X11GetMotionEventsRequest(window, start, stop);
@@ -2423,14 +2418,14 @@ class X11GetMotionEventsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint32(start);
     buffer.writeUint32(stop);
   }
 
   @override
   String toString() =>
-      'X11GetMotionEventsRequest(window: ${_formatId(window)}, start: ${start}, stop: ${stop})';
+      'X11GetMotionEventsRequest(window: ${window}, start: ${start}, stop: ${stop})';
 }
 
 class X11GetMotionEventsReply extends X11Reply {
@@ -2469,17 +2464,17 @@ class X11GetMotionEventsReply extends X11Reply {
 }
 
 class X11TranslateCoordinatesRequest extends X11Request {
-  final int sourceWindow;
+  final X11ResourceId sourceWindow;
   final X11Point source;
-  final int destinationWindow;
+  final X11ResourceId destinationWindow;
 
   X11TranslateCoordinatesRequest(
       this.sourceWindow, this.source, this.destinationWindow);
 
   factory X11TranslateCoordinatesRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var sourceWindow = buffer.readUint32();
-    var destinationWindow = buffer.readUint32();
+    var sourceWindow = buffer.readResourceId();
+    var destinationWindow = buffer.readResourceId();
     var sourceX = buffer.readInt16();
     var sourceY = buffer.readInt16();
     return X11TranslateCoordinatesRequest(
@@ -2489,8 +2484,8 @@ class X11TranslateCoordinatesRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(sourceWindow);
-    buffer.writeUint32(destinationWindow);
+    buffer.writeResourceId(sourceWindow);
+    buffer.writeResourceId(destinationWindow);
     buffer.writeInt16(source.x);
     buffer.writeInt16(source.y);
   }
@@ -2501,7 +2496,7 @@ class X11TranslateCoordinatesRequest extends X11Request {
 }
 
 class X11TranslateCoordinatesReply extends X11Reply {
-  final int child;
+  final X11ResourceId child;
   final X11Point destination;
   final bool sameScreen;
 
@@ -2510,7 +2505,7 @@ class X11TranslateCoordinatesReply extends X11Reply {
 
   static X11TranslateCoordinatesReply fromBuffer(X11ReadBuffer buffer) {
     var sameScreen = buffer.readBool();
-    var child = buffer.readUint32();
+    var child = buffer.readResourceId();
     var destinationX = buffer.readInt16();
     var destinationY = buffer.readInt16();
     return X11TranslateCoordinatesReply(
@@ -2521,7 +2516,7 @@ class X11TranslateCoordinatesReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(sameScreen);
-    buffer.writeUint32(child);
+    buffer.writeResourceId(child);
     buffer.writeInt16(destination.x);
     buffer.writeInt16(destination.y);
   }
@@ -2533,19 +2528,19 @@ class X11TranslateCoordinatesReply extends X11Reply {
 
 class X11WarpPointerRequest extends X11Request {
   final X11Point destination;
-  final int sourceWindow;
-  final int destinationWindow;
+  final X11ResourceId sourceWindow;
+  final X11ResourceId destinationWindow;
   final X11Rectangle source;
 
   X11WarpPointerRequest(this.destination,
-      {this.destinationWindow = 0,
-      this.sourceWindow = 0,
+      {this.destinationWindow = X11ResourceId.None,
+      this.sourceWindow = X11ResourceId.None,
       this.source = const X11Rectangle(0, 0, 0, 0)});
 
   factory X11WarpPointerRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var sourceWindow = buffer.readUint32();
-    var destinationWindow = buffer.readUint32();
+    var sourceWindow = buffer.readResourceId();
+    var destinationWindow = buffer.readResourceId();
     var sourceX = buffer.readInt16();
     var sourceY = buffer.readInt16();
     var sourceWidth = buffer.readUint16();
@@ -2561,8 +2556,8 @@ class X11WarpPointerRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(sourceWindow);
-    buffer.writeUint32(destinationWindow);
+    buffer.writeResourceId(sourceWindow);
+    buffer.writeResourceId(destinationWindow);
     buffer.writeInt16(source.x);
     buffer.writeInt16(source.y);
     buffer.writeUint16(source.width);
@@ -2577,16 +2572,18 @@ class X11WarpPointerRequest extends X11Request {
 }
 
 class X11SetInputFocusRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11FocusRevertTo revertTo;
   final int time;
 
   X11SetInputFocusRequest(
-      {this.window = 0, this.revertTo = X11FocusRevertTo.none, this.time = 0});
+      {this.window = X11ResourceId.None,
+      this.revertTo = X11FocusRevertTo.none,
+      this.time = 0});
 
   factory X11SetInputFocusRequest.fromBuffer(X11ReadBuffer buffer) {
     var revertTo = X11FocusRevertTo.values[buffer.readUint8()];
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var time = buffer.readUint32();
     return X11SetInputFocusRequest(
         window: window, revertTo: revertTo, time: time);
@@ -2595,13 +2592,13 @@ class X11SetInputFocusRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(revertTo.index);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint32(time);
   }
 
   @override
   String toString() =>
-      'X11SetInputFocusRequest(window: ${_formatId(window)}, revertTo: ${revertTo}, time: ${time})';
+      'X11SetInputFocusRequest(window: ${window}, revertTo: ${revertTo}, time: ${time})';
 }
 
 class X11GetInputFocusRequest extends X11Request {
@@ -2622,14 +2619,14 @@ class X11GetInputFocusRequest extends X11Request {
 }
 
 class X11GetInputFocusReply extends X11Reply {
-  final int window;
+  final X11ResourceId window;
   final X11FocusRevertTo revertTo;
 
   X11GetInputFocusReply(this.window, {this.revertTo = X11FocusRevertTo.none});
 
   static X11GetInputFocusReply fromBuffer(X11ReadBuffer buffer) {
     var revertTo = X11FocusRevertTo.values[buffer.readUint8()];
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     buffer.skip(20);
     return X11GetInputFocusReply(window, revertTo: revertTo);
   }
@@ -2637,13 +2634,13 @@ class X11GetInputFocusReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(revertTo.index);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.skip(20);
   }
 
   @override
   String toString() =>
-      'X11GetInputFocusReply(window: ${_formatId(window)}, revertTo: ${revertTo})';
+      'X11GetInputFocusReply(window: ${window}, revertTo: ${revertTo})';
 }
 
 class X11QueryKeymapRequest extends X11Request {
@@ -2690,25 +2687,25 @@ class X11QueryKeymapReply extends X11Reply {
 }
 
 class X11OpenFontRequest extends X11Request {
-  final int fid;
+  final X11ResourceId id;
   final String name;
 
-  X11OpenFontRequest(this.fid, this.name);
+  X11OpenFontRequest(this.id, this.name);
 
   factory X11OpenFontRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var fid = buffer.readUint32();
+    var id = buffer.readResourceId();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
-    return X11OpenFontRequest(fid, name);
+    return X11OpenFontRequest(id, name);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(fid);
+    buffer.writeResourceId(id);
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint16(nameLength);
     buffer.skip(2);
@@ -2717,24 +2714,24 @@ class X11OpenFontRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11OpenFontRequest(fid: ${fid}, name: ${name})';
+  String toString() => 'X11OpenFontRequest(id: ${id}, name: ${name})';
 }
 
 class X11CloseFontRequest extends X11Request {
-  final int font;
+  final X11ResourceId font;
 
   X11CloseFontRequest(this.font);
 
   factory X11CloseFontRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var font = buffer.readUint32();
+    var font = buffer.readResourceId();
     return X11CloseFontRequest(font);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(font);
+    buffer.writeResourceId(font);
   }
 
   @override
@@ -2742,20 +2739,20 @@ class X11CloseFontRequest extends X11Request {
 }
 
 class X11QueryFontRequest extends X11Request {
-  final int font;
+  final X11ResourceId font;
 
   X11QueryFontRequest(this.font);
 
   factory X11QueryFontRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var font = buffer.readUint32();
+    var font = buffer.readResourceId();
     return X11QueryFontRequest(font);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(font);
+    buffer.writeResourceId(font);
   }
 
   @override
@@ -2836,7 +2833,7 @@ class X11QueryFontReply extends X11Reply {
     var charInfosLength = buffer.readUint32();
     var properties = <X11FontProperty>[];
     for (var i = 0; i < propertiesLength; i++) {
-      var name = buffer.readUint32();
+      var name = buffer.readAtom();
       var value = buffer.readUint32();
       properties.add(X11FontProperty(name, value));
     }
@@ -2879,7 +2876,7 @@ class X11QueryFontReply extends X11Reply {
     buffer.writeInt16(fontDescent);
     buffer.writeUint32(charInfos.length);
     for (var property in properties) {
-      buffer.writeUint32(property.name);
+      buffer.writeAtom(property.name);
       buffer.writeUint32(property.value);
     }
     for (var info in charInfos) {
@@ -2893,14 +2890,14 @@ class X11QueryFontReply extends X11Reply {
 }
 
 class X11QueryTextExtentsRequest extends X11Request {
-  final int font;
+  final X11ResourceId font;
   final String string;
 
   X11QueryTextExtentsRequest(this.font, this.string);
 
   factory X11QueryTextExtentsRequest.fromBuffer(X11ReadBuffer buffer) {
     var oddLength = buffer.readBool();
-    var font = buffer.readUint32();
+    var font = buffer.readResourceId();
     var stringLength = buffer.remaining ~/ 2;
     if (oddLength) {
       stringLength -= 2;
@@ -2913,7 +2910,7 @@ class X11QueryTextExtentsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(string.length % 2 == 1);
-    buffer.writeUint32(font);
+    buffer.writeResourceId(font);
     buffer.writeString16(string);
     buffer.skip(pad(string.length * 2));
   }
@@ -3119,7 +3116,7 @@ class X11ListFontsWithInfoReply extends X11Reply {
     var repliesHint = buffer.readUint32();
     var properties = <X11FontProperty>[];
     for (var i = 0; i < propertiesLength; i++) {
-      var name = buffer.readUint32();
+      var name = buffer.readAtom();
       var value = buffer.readUint32();
       properties.add(X11FontProperty(name, value));
     }
@@ -3161,7 +3158,7 @@ class X11ListFontsWithInfoReply extends X11Reply {
     buffer.writeInt16(fontDescent);
     buffer.writeUint32(repliesHint);
     for (var property in properties) {
-      buffer.writeUint32(property.name);
+      buffer.writeAtom(property.name);
       buffer.writeUint32(property.value);
     }
     buffer.writeString8(name);
@@ -3249,60 +3246,60 @@ class X11GetFontPathReply extends X11Reply {
 }
 
 class X11CreatePixmapRequest extends X11Request {
-  final int pid;
-  final int drawable;
+  final X11ResourceId id;
+  final X11ResourceId drawable;
   final X11Size size;
   final int depth;
 
-  X11CreatePixmapRequest(this.pid, this.drawable, this.size, this.depth);
+  X11CreatePixmapRequest(this.id, this.drawable, this.size, this.depth);
 
   factory X11CreatePixmapRequest.fromBuffer(X11ReadBuffer buffer) {
     var depth = buffer.readUint8();
-    var pid = buffer.readUint32();
-    var drawable = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var drawable = buffer.readResourceId();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11CreatePixmapRequest(pid, drawable, X11Size(width, height), depth);
+    return X11CreatePixmapRequest(id, drawable, X11Size(width, height), depth);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(depth);
-    buffer.writeUint32(pid);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(drawable);
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
   }
 
   @override
   String toString() =>
-      'X11CreatePixmapRequest(pid: ${_formatId(pid)}, drawable: ${_formatId(drawable)}, size: ${size}, depth: ${depth})';
+      'X11CreatePixmapRequest(id: ${id}, drawable: ${drawable}, size: ${size}, depth: ${depth})';
 }
 
 class X11FreePixmapRequest extends X11Request {
-  final int pixmap;
+  final X11ResourceId pixmap;
 
   X11FreePixmapRequest(this.pixmap);
 
   factory X11FreePixmapRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var pixmap = buffer.readUint32();
+    var pixmap = buffer.readResourceId();
     return X11FreePixmapRequest(pixmap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(pixmap);
+    buffer.writeResourceId(pixmap);
   }
 
   @override
-  String toString() => 'X11FreePixmapRequest(${_formatId(pixmap)})';
+  String toString() => 'X11FreePixmapRequest(${pixmap})';
 }
 
 class X11CreateGCRequest extends X11Request {
-  final int id;
-  final int drawable;
+  final X11ResourceId id;
+  final X11ResourceId drawable;
   final X11GraphicsFunction function;
   final int planeMask;
   final int foreground;
@@ -3317,7 +3314,7 @@ class X11CreateGCRequest extends X11Request {
   final int stipple;
   final int tileStippleXOrigin;
   final int tileStippleYOrigin;
-  final int font;
+  final X11ResourceId font;
   final X11SubwindowMode subwindowMode;
   final bool graphicsExposures;
   final int clipXOrigin;
@@ -3354,8 +3351,8 @@ class X11CreateGCRequest extends X11Request {
 
   factory X11CreateGCRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var id = buffer.readUint32();
-    var drawable = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var drawable = buffer.readResourceId();
     var valueMask = buffer.readUint32();
     X11GraphicsFunction function;
     if ((valueMask & 0x000001) != 0) {
@@ -3413,9 +3410,9 @@ class X11CreateGCRequest extends X11Request {
     if ((valueMask & 0x002000) != 0) {
       tileStippleYOrigin = buffer.readValueInt16();
     }
-    int font;
+    X11ResourceId font;
     if ((valueMask & 0x004000) != 0) {
-      font = buffer.readUint32();
+      font = buffer.readResourceId();
     }
     X11SubwindowMode subwindowMode;
     if ((valueMask & 0x008000) != 0) {
@@ -3478,8 +3475,8 @@ class X11CreateGCRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(id);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(drawable);
     var valueMask = 0;
     if (function != null) {
       valueMask |= 0x000001;
@@ -3594,7 +3591,7 @@ class X11CreateGCRequest extends X11Request {
       buffer.writeValueInt16(tileStippleYOrigin);
     }
     if (font != null) {
-      buffer.writeUint32(font);
+      buffer.writeResourceId(font);
     }
     if (subwindowMode != null) {
       buffer.writeValueUint8(subwindowMode.index);
@@ -3624,8 +3621,7 @@ class X11CreateGCRequest extends X11Request {
 
   @override
   String toString() {
-    var string =
-        'X11CreateGCRequest(id: ${_formatId(id)}, drawable: ${_formatId(drawable)}';
+    var string = 'X11CreateGCRequest(id: ${id}, drawable: ${drawable}';
     if (function != null) {
       string += ', function: ${function}';
     }
@@ -3701,7 +3697,7 @@ class X11CreateGCRequest extends X11Request {
 }
 
 class X11ChangeGCRequest extends X11Request {
-  final int gc;
+  final X11ResourceId gc;
   final X11GraphicsFunction function;
   final int planeMask;
   final int foreground;
@@ -3716,7 +3712,7 @@ class X11ChangeGCRequest extends X11Request {
   final int stipple;
   final int tileStippleXOrigin;
   final int tileStippleYOrigin;
-  final int font;
+  final X11ResourceId font;
   final X11SubwindowMode subwindowMode;
   final bool graphicsExposures;
   final int clipXOrigin;
@@ -3753,7 +3749,7 @@ class X11ChangeGCRequest extends X11Request {
 
   factory X11ChangeGCRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var gc = buffer.readUint32();
+    var gc = buffer.readResourceId();
     var valueMask = buffer.readUint32();
     X11GraphicsFunction function;
     if ((valueMask & 0x000001) != 0) {
@@ -3811,9 +3807,9 @@ class X11ChangeGCRequest extends X11Request {
     if ((valueMask & 0x002000) != 0) {
       tileStippleYOrigin = buffer.readValueInt16();
     }
-    int font;
+    X11ResourceId font;
     if ((valueMask & 0x004000) != 0) {
-      font = buffer.readUint32();
+      font = buffer.readResourceId();
     }
     X11SubwindowMode subwindowMode;
     if ((valueMask & 0x008000) != 0) {
@@ -3876,7 +3872,7 @@ class X11ChangeGCRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(gc);
     var valueMask = 0;
     if (function != null) {
       valueMask |= 0x000001;
@@ -3991,7 +3987,7 @@ class X11ChangeGCRequest extends X11Request {
       buffer.writeValueUint16(tileStippleYOrigin);
     }
     if (font != null) {
-      buffer.writeUint32(font);
+      buffer.writeResourceId(font);
     }
     if (subwindowMode != null) {
       buffer.writeValueUint8(subwindowMode.index);
@@ -4021,20 +4017,20 @@ class X11ChangeGCRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangeGCRequest(gc: ${_formatId(gc)}, function: ${function}, planeMask: ${planeMask}, foreground: ${foreground}, background: ${background}, lineWidth: ${lineWidth}, lineStyle: ${lineStyle}, capStyle: ${capStyle}, joinStyle: ${joinStyle}, fillStyle: ${fillStyle}, fillRule: ${fillRule}, tile: ${tile}, stipple: ${stipple}, tileStippleXOrigin: ${tileStippleXOrigin}, tileStippleYOrigin: ${tileStippleYOrigin}, font: ${font}, subwindowMode: ${subwindowMode}, graphicsExposures: ${graphicsExposures}, clipXOrigin: ${clipXOrigin}, clipYOrigin: ${clipYOrigin}, clipMask: ${clipMask}, dashOffset: ${dashOffset}, dashes: ${dashes}, arcMode: ${arcMode})';
+      'X11ChangeGCRequest(gc: ${gc}, function: ${function}, planeMask: ${planeMask}, foreground: ${foreground}, background: ${background}, lineWidth: ${lineWidth}, lineStyle: ${lineStyle}, capStyle: ${capStyle}, joinStyle: ${joinStyle}, fillStyle: ${fillStyle}, fillRule: ${fillRule}, tile: ${tile}, stipple: ${stipple}, tileStippleXOrigin: ${tileStippleXOrigin}, tileStippleYOrigin: ${tileStippleYOrigin}, font: ${font}, subwindowMode: ${subwindowMode}, graphicsExposures: ${graphicsExposures}, clipXOrigin: ${clipXOrigin}, clipYOrigin: ${clipYOrigin}, clipMask: ${clipMask}, dashOffset: ${dashOffset}, dashes: ${dashes}, arcMode: ${arcMode})';
 }
 
 class X11CopyGCRequest extends X11Request {
-  final int sourceGc;
-  final int destinationGc;
+  final X11ResourceId sourceGc;
+  final X11ResourceId destinationGc;
   final Set<X11GCValue> values;
 
   X11CopyGCRequest(this.sourceGc, this.destinationGc, this.values);
 
   factory X11CopyGCRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var sourceGc = buffer.readUint32();
-    var destinationGc = buffer.readUint32();
+    var sourceGc = buffer.readResourceId();
+    var destinationGc = buffer.readResourceId();
     var valueMask = buffer.readUint32();
     var values = <X11GCValue>{};
     for (var value in X11GCValue.values) {
@@ -4048,8 +4044,8 @@ class X11CopyGCRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(sourceGc);
-    buffer.writeUint32(destinationGc);
+    buffer.writeResourceId(sourceGc);
+    buffer.writeResourceId(destinationGc);
     var valueMask = 0;
     for (var value in values) {
       valueMask |= 1 << value.index;
@@ -4063,7 +4059,7 @@ class X11CopyGCRequest extends X11Request {
 }
 
 class X11SetDashesRequest extends X11Request {
-  final int gc;
+  final X11ResourceId gc;
   final int dashOffset;
   final List<int> dashes;
 
@@ -4071,7 +4067,7 @@ class X11SetDashesRequest extends X11Request {
 
   factory X11SetDashesRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var gc = buffer.readUint32();
+    var gc = buffer.readResourceId();
     var dashOffset = buffer.readUint16();
     var dashesLength = buffer.readUint16();
     var dashes = <int>[];
@@ -4085,7 +4081,7 @@ class X11SetDashesRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(gc);
     buffer.writeUint16(dashOffset);
     buffer.writeUint16(dashes.length);
     for (var dash in dashes) {
@@ -4096,11 +4092,11 @@ class X11SetDashesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SetDashesRequest(gc: ${_formatId(gc)}, dashOffset: ${dashOffset}, dashes: ${dashes})';
+      'X11SetDashesRequest(gc: ${gc}, dashOffset: ${dashOffset}, dashes: ${dashes})';
 }
 
 class X11SetClipRectanglesRequest extends X11Request {
-  final int gc;
+  final X11ResourceId gc;
   final X11Point clipOrigin;
   final List<X11Rectangle> rectangles;
   final X11ClipOrdering ordering;
@@ -4111,7 +4107,7 @@ class X11SetClipRectanglesRequest extends X11Request {
 
   factory X11SetClipRectanglesRequest.fromBuffer(X11ReadBuffer buffer) {
     var ordering = X11ClipOrdering.values[buffer.readUint8()];
-    var gc = buffer.readUint32();
+    var gc = buffer.readResourceId();
     var clipXOrigin = buffer.readInt16();
     var clipYOrigin = buffer.readInt16();
     var rectangles = <X11Rectangle>[];
@@ -4129,7 +4125,7 @@ class X11SetClipRectanglesRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(ordering.index);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(gc);
     buffer.writeInt16(clipOrigin.x);
     buffer.writeInt16(clipOrigin.y);
     for (var rectangle in rectangles) {
@@ -4142,32 +4138,32 @@ class X11SetClipRectanglesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SetClipRectanglesRequest(ordering: ${ordering}, gc: ${_formatId(gc)}, clipOrigin: ${clipOrigin}, rectangles: ${rectangles})';
+      'X11SetClipRectanglesRequest(ordering: ${ordering}, gc: ${gc}, clipOrigin: ${clipOrigin}, rectangles: ${rectangles})';
 }
 
 class X11FreeGCRequest extends X11Request {
-  final int gc;
+  final X11ResourceId gc;
 
   X11FreeGCRequest(this.gc);
 
   factory X11FreeGCRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var gc = buffer.readUint32();
+    var gc = buffer.readResourceId();
     return X11FreeGCRequest(gc);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(gc);
   }
 
   @override
-  String toString() => 'X11FreeGCRequest(gc: ${_formatId(gc)})';
+  String toString() => 'X11FreeGCRequest(gc: ${gc})';
 }
 
 class X11ClearAreaRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11Rectangle area;
   final bool exposures;
 
@@ -4175,7 +4171,7 @@ class X11ClearAreaRequest extends X11Request {
 
   factory X11ClearAreaRequest.fromBuffer(X11ReadBuffer buffer) {
     var exposures = buffer.readBool();
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
@@ -4187,7 +4183,7 @@ class X11ClearAreaRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(exposures);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(area.x);
     buffer.writeInt16(area.y);
     buffer.writeUint16(area.width);
@@ -4196,13 +4192,13 @@ class X11ClearAreaRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ClearAreaRequest(exposures: ${exposures}, window: ${_formatId(window)}, area: ${area})';
+      'X11ClearAreaRequest(exposures: ${exposures}, window: ${window}, area: ${area})';
 }
 
 class X11CopyAreaRequest extends X11Request {
-  final int sourceDrawable;
-  final int destinationDrawable;
-  final int gc;
+  final X11ResourceId sourceDrawable;
+  final X11ResourceId destinationDrawable;
+  final X11ResourceId gc;
   final X11Rectangle sourceArea;
   final X11Point destinationPosition;
 
@@ -4211,9 +4207,9 @@ class X11CopyAreaRequest extends X11Request {
 
   factory X11CopyAreaRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var sourceDrawable = buffer.readUint32();
-    var destinationDrawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var sourceDrawable = buffer.readResourceId();
+    var destinationDrawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var sourceX = buffer.readInt16();
     var sourceY = buffer.readInt16();
     var destinationX = buffer.readInt16();
@@ -4231,9 +4227,9 @@ class X11CopyAreaRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(sourceDrawable);
-    buffer.writeUint32(destinationDrawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(sourceDrawable);
+    buffer.writeResourceId(destinationDrawable);
+    buffer.writeResourceId(gc);
     buffer.writeInt16(sourceArea.x);
     buffer.writeInt16(sourceArea.y);
     buffer.writeInt16(destinationPosition.x);
@@ -4244,13 +4240,13 @@ class X11CopyAreaRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CopyAreaRequest(sourceDrawable: ${sourceDrawable}, destinationDrawable: ${destinationDrawable}, gc: ${_formatId(gc)}, sourceArea: ${sourceArea}, destinationPosition: ${destinationPosition})';
+      'X11CopyAreaRequest(sourceDrawable: ${sourceDrawable}, destinationDrawable: ${destinationDrawable}, gc: ${gc}, sourceArea: ${sourceArea}, destinationPosition: ${destinationPosition})';
 }
 
 class X11CopyPlaneRequest extends X11Request {
-  final int sourceDrawable;
-  final int destinationDrawable;
-  final int gc;
+  final X11ResourceId sourceDrawable;
+  final X11ResourceId destinationDrawable;
+  final X11ResourceId gc;
   final X11Rectangle sourceArea;
   final X11Point destinationPosition;
   final int bitPlane;
@@ -4260,9 +4256,9 @@ class X11CopyPlaneRequest extends X11Request {
 
   factory X11CopyPlaneRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var sourceDrawable = buffer.readUint32();
-    var destinationDrawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var sourceDrawable = buffer.readResourceId();
+    var destinationDrawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var sourceX = buffer.readInt16();
     var sourceY = buffer.readInt16();
     var destinationX = buffer.readInt16();
@@ -4282,9 +4278,9 @@ class X11CopyPlaneRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(sourceDrawable);
-    buffer.writeUint32(destinationDrawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(sourceDrawable);
+    buffer.writeResourceId(destinationDrawable);
+    buffer.writeResourceId(gc);
     buffer.writeInt16(sourceArea.x);
     buffer.writeInt16(sourceArea.y);
     buffer.writeInt16(destinationPosition.x);
@@ -4296,12 +4292,12 @@ class X11CopyPlaneRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CopyPlaneRequest(sourceDrawable: ${sourceDrawable}, destinationDrawable: ${destinationDrawable}, gc: ${_formatId(gc)}, sourceArea: ${sourceArea}, destinationPosition: ${destinationPosition}, bitPlane: ${bitPlane})';
+      'X11CopyPlaneRequest(sourceDrawable: ${sourceDrawable}, destinationDrawable: ${destinationDrawable}, gc: ${gc}, sourceArea: ${sourceArea}, destinationPosition: ${destinationPosition}, bitPlane: ${bitPlane})';
 }
 
 class X11PolyPointRequest extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final List<X11Point> points;
   final X11CoordinateMode coordinateMode;
 
@@ -4310,8 +4306,8 @@ class X11PolyPointRequest extends X11Request {
 
   factory X11PolyPointRequest.fromBuffer(X11ReadBuffer buffer) {
     var coordinateMode = X11CoordinateMode.values[buffer.readUint8()];
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var points = <X11Point>[];
     while (buffer.remaining > 0) {
       var x = buffer.readInt16();
@@ -4325,8 +4321,8 @@ class X11PolyPointRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(coordinateMode.index);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     for (var point in points) {
       buffer.writeInt16(point.x);
       buffer.writeInt16(point.y);
@@ -4335,12 +4331,12 @@ class X11PolyPointRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyPointRequest(coordinateMode: ${coordinateMode}, drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, points: ${points})';
+      'X11PolyPointRequest(coordinateMode: ${coordinateMode}, drawable: ${drawable}, gc: ${gc}, points: ${points})';
 }
 
 class X11PolyLineRequest extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final List<X11Point> points;
   final X11CoordinateMode coordinateMode;
 
@@ -4349,8 +4345,8 @@ class X11PolyLineRequest extends X11Request {
 
   factory X11PolyLineRequest.fromBuffer(X11ReadBuffer buffer) {
     var coordinateMode = X11CoordinateMode.values[buffer.readUint8()];
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var points = <X11Point>[];
     while (buffer.remaining > 0) {
       var x = buffer.readInt16();
@@ -4364,8 +4360,8 @@ class X11PolyLineRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(coordinateMode.index);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     for (var point in points) {
       buffer.writeInt16(point.x);
       buffer.writeInt16(point.y);
@@ -4374,20 +4370,20 @@ class X11PolyLineRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyLineRequest(coordinateMode: ${coordinateMode}, drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, points: ${points})';
+      'X11PolyLineRequest(coordinateMode: ${coordinateMode}, drawable: ${drawable}, gc: ${gc}, points: ${points})';
 }
 
 class X11PolySegmentRequest extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final List<X11Segment> segments;
 
   X11PolySegmentRequest(this.drawable, this.gc, this.segments);
 
   factory X11PolySegmentRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var segments = <X11Segment>[];
     while (buffer.remaining > 0) {
       var x1 = buffer.readInt16();
@@ -4402,8 +4398,8 @@ class X11PolySegmentRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     for (var segment in segments) {
       buffer.writeInt16(segment.p1.x);
       buffer.writeInt16(segment.p1.y);
@@ -4414,20 +4410,20 @@ class X11PolySegmentRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolySegmentRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, segments: ${segments})';
+      'X11PolySegmentRequest(drawable: ${drawable}, gc: ${gc}, segments: ${segments})';
 }
 
 class X11PolyRectangleRequest extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final List<X11Rectangle> rectangles;
 
   X11PolyRectangleRequest(this.drawable, this.gc, this.rectangles);
 
   factory X11PolyRectangleRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var rectangles = <X11Rectangle>[];
     while (buffer.remaining > 0) {
       var x = buffer.readInt16();
@@ -4442,8 +4438,8 @@ class X11PolyRectangleRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     for (var rectangle in rectangles) {
       buffer.writeInt16(rectangle.x);
       buffer.writeInt16(rectangle.y);
@@ -4454,20 +4450,20 @@ class X11PolyRectangleRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyRectangleRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, rectangles: ${rectangles})';
+      'X11PolyRectangleRequest(drawable: ${drawable}, gc: ${gc}, rectangles: ${rectangles})';
 }
 
 class X11PolyArcRequest extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final List<X11Arc> arcs;
 
   X11PolyArcRequest(this.drawable, this.gc, this.arcs);
 
   factory X11PolyArcRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var arcs = <X11Arc>[];
     while (buffer.remaining > 0) {
       var x = buffer.readInt16();
@@ -4484,8 +4480,8 @@ class X11PolyArcRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     for (var arc in arcs) {
       buffer.writeInt16(arc.x);
       buffer.writeInt16(arc.y);
@@ -4498,12 +4494,12 @@ class X11PolyArcRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyArcRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, arcs: ${arcs})';
+      'X11PolyArcRequest(drawable: ${drawable}, gc: ${gc}, arcs: ${arcs})';
 }
 
 class X11FillPolyRequest extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final List<X11Point> points;
   final X11PolygonShape shape;
   final X11CoordinateMode coordinateMode;
@@ -4514,8 +4510,8 @@ class X11FillPolyRequest extends X11Request {
 
   factory X11FillPolyRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var shape = X11PolygonShape.values[buffer.readUint8()];
     var coordinateMode = X11CoordinateMode.values[buffer.readUint8()];
     buffer.skip(2);
@@ -4532,8 +4528,8 @@ class X11FillPolyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(coordinateMode.index);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     buffer.writeUint8(shape.index);
     buffer.writeUint8(coordinateMode.index);
     buffer.skip(2);
@@ -4545,20 +4541,20 @@ class X11FillPolyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FillPolyRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, shape: ${shape}, coordinateMode: ${coordinateMode}, points: ${points})';
+      'X11FillPolyRequest(drawable: ${drawable}, gc: ${gc}, shape: ${shape}, coordinateMode: ${coordinateMode}, points: ${points})';
 }
 
 class X11PolyFillRectangleRequest extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final List<X11Rectangle> rectangles;
 
   X11PolyFillRectangleRequest(this.drawable, this.gc, this.rectangles);
 
   factory X11PolyFillRectangleRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var rectangles = <X11Rectangle>[];
     while (buffer.remaining > 0) {
       var x = buffer.readInt16();
@@ -4573,8 +4569,8 @@ class X11PolyFillRectangleRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     for (var rectangle in rectangles) {
       buffer.writeInt16(rectangle.x);
       buffer.writeInt16(rectangle.y);
@@ -4585,20 +4581,20 @@ class X11PolyFillRectangleRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyFillRectangleRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, rectangles: ${rectangles})';
+      'X11PolyFillRectangleRequest(drawable: ${drawable}, gc: ${gc}, rectangles: ${rectangles})';
 }
 
 class X11PolyFillArcRequest extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final List<X11Arc> arcs;
 
   X11PolyFillArcRequest(this.drawable, this.gc, this.arcs);
 
   factory X11PolyFillArcRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var arcs = <X11Arc>[];
     while (buffer.remaining > 0) {
       var x = buffer.readInt16();
@@ -4615,8 +4611,8 @@ class X11PolyFillArcRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     for (var arc in arcs) {
       buffer.writeInt16(arc.x);
       buffer.writeInt16(arc.y);
@@ -4629,12 +4625,12 @@ class X11PolyFillArcRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyFillArcRequest(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, arcs: ${arcs})';
+      'X11PolyFillArcRequest(drawable: ${drawable}, gc: ${gc}, arcs: ${arcs})';
 }
 
 class X11PutImageRequest extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final X11Rectangle area;
   final int depth;
   final X11ImageFormat format;
@@ -4648,8 +4644,8 @@ class X11PutImageRequest extends X11Request {
 
   factory X11PutImageRequest.fromBuffer(X11ReadBuffer buffer) {
     var format = X11ImageFormat.values[buffer.readUint8()];
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     var destinationX = buffer.readInt16();
@@ -4670,8 +4666,8 @@ class X11PutImageRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(format.index);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     buffer.writeUint16(area.width);
     buffer.writeUint16(area.height);
     buffer.writeInt16(area.x);
@@ -4687,11 +4683,11 @@ class X11PutImageRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PutImageRequest(format: ${format}, drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, area: ${area}, leftPad: ${leftPad}, depth: ${depth}, data: <${data.length} bytes>)';
+      'X11PutImageRequest(format: ${format}, drawable: ${drawable}, gc: ${gc}, area: ${area}, leftPad: ${leftPad}, depth: ${depth}, data: <${data.length} bytes>)';
 }
 
 class X11GetImageRequest extends X11Request {
-  final int drawable;
+  final X11ResourceId drawable;
   final X11Rectangle area;
   final X11ImageFormat format;
   final int planeMask;
@@ -4701,7 +4697,7 @@ class X11GetImageRequest extends X11Request {
 
   factory X11GetImageRequest.fromBuffer(X11ReadBuffer buffer) {
     var format = X11ImageFormat.values[buffer.readUint8()];
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
@@ -4714,7 +4710,7 @@ class X11GetImageRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(format.index);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
     buffer.writeInt16(area.x);
     buffer.writeInt16(area.y);
     buffer.writeUint16(area.width);
@@ -4724,7 +4720,7 @@ class X11GetImageRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GetImageRequest(format: ${format}, drawable: ${_formatId(drawable)}, area: ${area}, planeMask: ${planeMask})';
+      'X11GetImageRequest(format: ${format}, drawable: ${drawable}, area: ${area}, planeMask: ${planeMask})';
 }
 
 class X11GetImageReply extends X11Reply {
@@ -4763,8 +4759,8 @@ class X11GetImageReply extends X11Reply {
 }
 
 class X11PolyText8Request extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final X11Point position;
   final List<X11TextItem> items;
 
@@ -4772,8 +4768,8 @@ class X11PolyText8Request extends X11Request {
 
   factory X11PolyText8Request.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var items = <X11TextItem>[];
@@ -4799,8 +4795,8 @@ class X11PolyText8Request extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
     for (var item in items) {
@@ -4821,12 +4817,12 @@ class X11PolyText8Request extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyText8Request(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, position: ${position}, items: ${items})';
+      'X11PolyText8Request(drawable: ${drawable}, gc: ${gc}, position: ${position}, items: ${items})';
 }
 
 class X11PolyText16Request extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final X11Point position;
   final List<X11TextItem> items;
 
@@ -4834,8 +4830,8 @@ class X11PolyText16Request extends X11Request {
 
   factory X11PolyText16Request.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var items = <X11TextItem>[];
@@ -4861,8 +4857,8 @@ class X11PolyText16Request extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
     for (var item in items) {
@@ -4882,12 +4878,12 @@ class X11PolyText16Request extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyText16Request(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, position: ${position}, items: ${items})';
+      'X11PolyText16Request(drawable: ${drawable}, gc: ${gc}, position: ${position}, items: ${items})';
 }
 
 class X11ImageText8Request extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final X11Point position;
   final String string;
 
@@ -4895,8 +4891,8 @@ class X11ImageText8Request extends X11Request {
 
   factory X11ImageText8Request.fromBuffer(X11ReadBuffer buffer) {
     var stringLength = buffer.readUint8();
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var string = buffer.readString8(stringLength);
@@ -4908,8 +4904,8 @@ class X11ImageText8Request extends X11Request {
   void encode(X11WriteBuffer buffer) {
     var stringLength = buffer.getString8Length(string);
     buffer.writeUint8(stringLength);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
     buffer.writeString8(string);
@@ -4918,12 +4914,12 @@ class X11ImageText8Request extends X11Request {
 
   @override
   String toString() =>
-      'X11ImageText8Request(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, position: ${position}, string: ${string})';
+      'X11ImageText8Request(drawable: ${drawable}, gc: ${gc}, position: ${position}, string: ${string})';
 }
 
 class X11ImageText16Request extends X11Request {
-  final int drawable;
-  final int gc;
+  final X11ResourceId drawable;
+  final X11ResourceId gc;
   final X11Point position;
   final String string;
 
@@ -4931,8 +4927,8 @@ class X11ImageText16Request extends X11Request {
 
   factory X11ImageText16Request.fromBuffer(X11ReadBuffer buffer) {
     var stringLength = buffer.readUint8();
-    var drawable = buffer.readUint32();
-    var gc = buffer.readUint32();
+    var drawable = buffer.readResourceId();
+    var gc = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var string = buffer.readString16(stringLength);
@@ -4944,8 +4940,8 @@ class X11ImageText16Request extends X11Request {
   void encode(X11WriteBuffer buffer) {
     var stringLength = buffer.getString16Length(string);
     buffer.writeUint8(stringLength);
-    buffer.writeUint32(drawable);
-    buffer.writeUint32(gc);
+    buffer.writeResourceId(drawable);
+    buffer.writeResourceId(gc);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
     buffer.writeString16(string);
@@ -4954,54 +4950,53 @@ class X11ImageText16Request extends X11Request {
 
   @override
   String toString() =>
-      'X11ImageText16Request(drawable: ${_formatId(drawable)}, gc: ${_formatId(gc)}, position: ${position}, string: ${string})';
+      'X11ImageText16Request(drawable: ${drawable}, gc: ${gc}, position: ${position}, string: ${string})';
 }
 
 class X11CreateColormapRequest extends X11Request {
-  final int mid;
-  final int window;
+  final X11ResourceId id;
+  final X11ResourceId window;
   final int visual;
   final int alloc;
 
-  X11CreateColormapRequest(this.mid, this.window, this.visual,
-      {this.alloc = 0});
+  X11CreateColormapRequest(this.id, this.window, this.visual, {this.alloc = 0});
 
   factory X11CreateColormapRequest.fromBuffer(X11ReadBuffer buffer) {
     var alloc = buffer.readUint8();
-    var mid = buffer.readUint32();
-    var window = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var window = buffer.readResourceId();
     var visual = buffer.readUint32();
-    return X11CreateColormapRequest(mid, window, visual, alloc: alloc);
+    return X11CreateColormapRequest(id, window, visual, alloc: alloc);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(alloc);
-    buffer.writeUint32(mid);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(window);
     buffer.writeUint32(visual);
   }
 
   @override
   String toString() =>
-      'X11CreateColormapRequest(alloc: ${alloc}, mid: ${mid}, window: ${_formatId(window)}, visual: ${visual})';
+      'X11CreateColormapRequest(alloc: ${alloc}, id: ${id}, window: ${window}, visual: ${visual})';
 }
 
 class X11FreeColormapRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
 
   X11FreeColormapRequest(this.colormap);
 
   factory X11FreeColormapRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     return X11FreeColormapRequest(colormap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
   }
 
   @override
@@ -5009,45 +5004,45 @@ class X11FreeColormapRequest extends X11Request {
 }
 
 class X11CopyColormapAndFreeRequest extends X11Request {
-  final int mid;
-  final int sourceColormap;
+  final X11ResourceId id;
+  final X11ResourceId sourceColormap;
 
-  X11CopyColormapAndFreeRequest(this.mid, this.sourceColormap);
+  X11CopyColormapAndFreeRequest(this.id, this.sourceColormap);
 
   factory X11CopyColormapAndFreeRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var mid = buffer.readUint32();
-    var sourceColormap = buffer.readUint32();
-    return X11CopyColormapAndFreeRequest(mid, sourceColormap);
+    var id = buffer.readResourceId();
+    var sourceColormap = buffer.readResourceId();
+    return X11CopyColormapAndFreeRequest(id, sourceColormap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(mid);
-    buffer.writeUint32(sourceColormap);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(sourceColormap);
   }
 
   @override
   String toString() =>
-      'X11CopyColormapAndFreeRequest(mid: ${mid}, sourceColormap: ${sourceColormap})';
+      'X11CopyColormapAndFreeRequest(id: ${id}, sourceColormap: ${sourceColormap})';
 }
 
 class X11InstallColormapRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
 
   X11InstallColormapRequest(this.colormap);
 
   factory X11InstallColormapRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     return X11InstallColormapRequest(colormap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
   }
 
   @override
@@ -5055,20 +5050,20 @@ class X11InstallColormapRequest extends X11Request {
 }
 
 class X11UninstallColormapRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
 
   X11UninstallColormapRequest(this.colormap);
 
   factory X11UninstallColormapRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     return X11UninstallColormapRequest(colormap);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
   }
 
   @override
@@ -5076,29 +5071,28 @@ class X11UninstallColormapRequest extends X11Request {
 }
 
 class X11ListInstalledColormapsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11ListInstalledColormapsRequest(this.window);
 
   factory X11ListInstalledColormapsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11ListInstalledColormapsRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() =>
-      'X11ListInstalledColormapsRequest(window: ${_formatId(window)})';
+  String toString() => 'X11ListInstalledColormapsRequest(window: ${window})';
 }
 
 class X11ListInstalledColormapsReply extends X11Reply {
-  final List<int> colormaps;
+  final List<X11ResourceId> colormaps;
 
   X11ListInstalledColormapsReply(this.colormaps);
 
@@ -5106,7 +5100,7 @@ class X11ListInstalledColormapsReply extends X11Reply {
     buffer.skip(1);
     var colormapsLength = buffer.readUint16();
     buffer.skip(22);
-    var colormaps = buffer.readListOfUint32(colormapsLength);
+    var colormaps = buffer.readListOfResourceId(colormapsLength);
     return X11ListInstalledColormapsReply(colormaps);
   }
 
@@ -5115,7 +5109,7 @@ class X11ListInstalledColormapsReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(colormaps.length);
     buffer.skip(22);
-    buffer.writeListOfUint32(colormaps);
+    buffer.writeListOfResourceId(colormaps);
   }
 
   @override
@@ -5124,14 +5118,14 @@ class X11ListInstalledColormapsReply extends X11Reply {
 }
 
 class X11AllocColorRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
   final X11Rgb color;
 
   X11AllocColorRequest(this.colormap, this.color);
 
   factory X11AllocColorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var red = buffer.readUint16();
     var green = buffer.readUint16();
     var blue = buffer.readUint16();
@@ -5142,7 +5136,7 @@ class X11AllocColorRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     buffer.writeUint16(color.red);
     buffer.writeUint16(color.green);
     buffer.writeUint16(color.blue);
@@ -5185,14 +5179,14 @@ class X11AllocColorReply extends X11Reply {
 }
 
 class X11AllocNamedColorRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
   final String name;
 
   X11AllocNamedColorRequest(this.colormap, this.name);
 
   factory X11AllocNamedColorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString8(nameLength);
@@ -5203,7 +5197,7 @@ class X11AllocNamedColorRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint16(nameLength);
     buffer.skip(2);
@@ -5256,7 +5250,7 @@ class X11AllocNamedColorReply extends X11Reply {
 }
 
 class X11AllocColorCellsRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
   final int colorCount;
   final int planes;
   final bool contiguous;
@@ -5266,7 +5260,7 @@ class X11AllocColorCellsRequest extends X11Request {
 
   factory X11AllocColorCellsRequest.fromBuffer(X11ReadBuffer buffer) {
     var contiguous = buffer.readBool();
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var colorCount = buffer.readUint16();
     var planes = buffer.readUint16();
     return X11AllocColorCellsRequest(colormap, colorCount,
@@ -5276,7 +5270,7 @@ class X11AllocColorCellsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(contiguous);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     buffer.writeUint16(colorCount);
     buffer.writeUint16(planes);
   }
@@ -5318,7 +5312,7 @@ class X11AllocColorCellsReply extends X11Reply {
 }
 
 class X11AllocColorPlanesRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
   final int colorCount;
   final int redDepth;
   final int greenDepth;
@@ -5333,7 +5327,7 @@ class X11AllocColorPlanesRequest extends X11Request {
 
   factory X11AllocColorPlanesRequest.fromBuffer(X11ReadBuffer buffer) {
     var contiguous = buffer.readBool();
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var colorCount = buffer.readUint16();
     var redDepth = buffer.readUint16();
     var greenDepth = buffer.readUint16();
@@ -5348,7 +5342,7 @@ class X11AllocColorPlanesRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeBool(contiguous);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     buffer.writeUint16(colorCount);
     buffer.writeUint16(redDepth);
     buffer.writeUint16(greenDepth);
@@ -5399,7 +5393,7 @@ class X11AllocColorPlanesReply extends X11Reply {
 }
 
 class X11FreeColorsRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
   final List<int> pixels;
   final int planeMask;
 
@@ -5408,7 +5402,7 @@ class X11FreeColorsRequest extends X11Request {
 
   factory X11FreeColorsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var planeMask = buffer.readUint32();
     var pixels = <int>[];
     while (buffer.remaining > 0) {
@@ -5420,7 +5414,7 @@ class X11FreeColorsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     buffer.writeUint32(planeMask);
     for (var pixel in pixels) {
       buffer.writeUint32(pixel);
@@ -5433,14 +5427,14 @@ class X11FreeColorsRequest extends X11Request {
 }
 
 class X11StoreColorsRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
   final List<X11RgbColorItem> items;
 
   X11StoreColorsRequest(this.colormap, this.items);
 
   factory X11StoreColorsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var items = <X11RgbColorItem>[];
     while (buffer.remaining > 0) {
       var pixel = buffer.readUint32();
@@ -5463,7 +5457,7 @@ class X11StoreColorsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     for (var item in items) {
       buffer.writeUint32(item.pixel);
       buffer.writeUint16(item.red ?? 0);
@@ -5490,7 +5484,7 @@ class X11StoreColorsRequest extends X11Request {
 }
 
 class X11StoreNamedColorRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
   final int pixel;
   final String name;
   final bool doRed;
@@ -5505,7 +5499,7 @@ class X11StoreNamedColorRequest extends X11Request {
     var doRed = (flags & 0x1) != 0;
     var doGreen = (flags & 0x2) != 0;
     var doBlue = (flags & 0x4) != 0;
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var pixel = buffer.readUint32();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
@@ -5528,7 +5522,7 @@ class X11StoreNamedColorRequest extends X11Request {
       flags |= 0x4;
     }
     buffer.writeUint8(flags);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     buffer.writeUint32(pixel);
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint16(nameLength);
@@ -5543,14 +5537,14 @@ class X11StoreNamedColorRequest extends X11Request {
 }
 
 class X11QueryColorsRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
   final List<int> pixels;
 
   X11QueryColorsRequest(this.colormap, this.pixels);
 
   factory X11QueryColorsRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var pixels = <int>[];
     while (buffer.remaining > 0) {
       pixels.add(buffer.readUint32());
@@ -5561,7 +5555,7 @@ class X11QueryColorsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     for (var pixel in pixels) {
       buffer.writeUint32(pixel);
     }
@@ -5610,14 +5604,14 @@ class X11QueryColorsReply extends X11Reply {
 }
 
 class X11LookupColorRequest extends X11Request {
-  final int colormap;
+  final X11ResourceId colormap;
   final String name;
 
   X11LookupColorRequest(this.colormap, this.name);
 
   factory X11LookupColorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var colormap = buffer.readUint32();
+    var colormap = buffer.readResourceId();
     var nameLength = buffer.readUint16();
     buffer.skip(2);
     var name = buffer.readString8(nameLength);
@@ -5628,7 +5622,7 @@ class X11LookupColorRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(colormap);
+    buffer.writeResourceId(colormap);
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint16(nameLength);
     buffer.skip(2);
@@ -5676,9 +5670,9 @@ class X11LookupColorReply extends X11Reply {
 }
 
 class X11CreateCursorRequest extends X11Request {
-  final int id;
-  final int sourcePixmap;
-  final int maskPixmap;
+  final X11ResourceId id;
+  final X11ResourceId sourcePixmap;
+  final X11ResourceId maskPixmap;
   final X11Rgb foreground;
   final X11Rgb background;
   final X11Point hotspot;
@@ -5687,13 +5681,13 @@ class X11CreateCursorRequest extends X11Request {
       {this.foreground = const X11Rgb(65535, 65535, 65535),
       this.background = const X11Rgb(0, 0, 0),
       this.hotspot = const X11Point(0, 0),
-      this.maskPixmap = 0});
+      this.maskPixmap = X11ResourceId.None});
 
   factory X11CreateCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var id = buffer.readUint32();
-    var sourcePixmap = buffer.readUint32();
-    var maskPixmap = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var sourcePixmap = buffer.readResourceId();
+    var maskPixmap = buffer.readResourceId();
     var foreRed = buffer.readUint16();
     var foreGreen = buffer.readUint16();
     var foreBlue = buffer.readUint16();
@@ -5712,9 +5706,9 @@ class X11CreateCursorRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(id);
-    buffer.writeUint32(sourcePixmap);
-    buffer.writeUint32(maskPixmap);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(sourcePixmap);
+    buffer.writeResourceId(maskPixmap);
     buffer.writeUint16(foreground.red);
     buffer.writeUint16(foreground.green);
     buffer.writeUint16(foreground.blue);
@@ -5727,14 +5721,14 @@ class X11CreateCursorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CreateCursorRequest(id: ${_formatId(id)}, sourcePixmap: ${sourcePixmap}, maskPixmap: ${maskPixmap}, foreground: ${foreground}, background: ${background}, hotspot: ${hotspot})';
+      'X11CreateCursorRequest(id: ${id}, sourcePixmap: ${sourcePixmap}, maskPixmap: ${maskPixmap}, foreground: ${foreground}, background: ${background}, hotspot: ${hotspot})';
 }
 
 class X11CreateGlyphCursorRequest extends X11Request {
-  final int id;
-  final int sourceFont;
+  final X11ResourceId id;
+  final X11ResourceId sourceFont;
   final int sourceChar;
-  final int maskFont;
+  final X11ResourceId maskFont;
   final int maskChar;
   final X11Rgb foreground;
   final X11Rgb background;
@@ -5742,14 +5736,14 @@ class X11CreateGlyphCursorRequest extends X11Request {
   X11CreateGlyphCursorRequest(this.id, this.sourceFont, this.sourceChar,
       {this.foreground = const X11Rgb(65535, 65535, 65535),
       this.background = const X11Rgb(0, 0, 0),
-      this.maskFont = 0,
+      this.maskFont = X11ResourceId.None,
       this.maskChar = 0});
 
   factory X11CreateGlyphCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var id = buffer.readUint32();
-    var sourceFont = buffer.readUint32();
-    var maskFont = buffer.readUint32();
+    var id = buffer.readResourceId();
+    var sourceFont = buffer.readResourceId();
+    var maskFont = buffer.readResourceId();
     var sourceChar = buffer.readUint16();
     var maskChar = buffer.readUint16();
     var foreRed = buffer.readUint16();
@@ -5768,9 +5762,9 @@ class X11CreateGlyphCursorRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(id);
-    buffer.writeUint32(sourceFont);
-    buffer.writeUint32(maskFont);
+    buffer.writeResourceId(id);
+    buffer.writeResourceId(sourceFont);
+    buffer.writeResourceId(maskFont);
     buffer.writeUint16(sourceChar);
     buffer.writeUint16(maskChar);
     buffer.writeUint16(foreground.red);
@@ -5783,24 +5777,24 @@ class X11CreateGlyphCursorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CreateGlyphCursorRequest(id: ${_formatId(id)}, sourceFont: ${sourceFont}, maskFont: ${maskFont}, sourceChar: ${sourceChar}, maskChar: ${maskChar}, foreground: ${foreground}, background: ${background})';
+      'X11CreateGlyphCursorRequest(id: ${id}, sourceFont: ${sourceFont}, maskFont: ${maskFont}, sourceChar: ${sourceChar}, maskChar: ${maskChar}, foreground: ${foreground}, background: ${background})';
 }
 
 class X11FreeCursorRequest extends X11Request {
-  final int cursor;
+  final X11ResourceId cursor;
 
   X11FreeCursorRequest(this.cursor);
 
   factory X11FreeCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cursor = buffer.readUint32();
+    var cursor = buffer.readResourceId();
     return X11FreeCursorRequest(cursor);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cursor);
+    buffer.writeResourceId(cursor);
   }
 
   @override
@@ -5808,7 +5802,7 @@ class X11FreeCursorRequest extends X11Request {
 }
 
 class X11RecolorCursorRequest extends X11Request {
-  final int cursor;
+  final X11ResourceId cursor;
   final X11Rgb foreground;
   final X11Rgb background;
 
@@ -5818,7 +5812,7 @@ class X11RecolorCursorRequest extends X11Request {
 
   factory X11RecolorCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var cursor = buffer.readUint32();
+    var cursor = buffer.readResourceId();
     var foreRed = buffer.readUint16();
     var foreGreen = buffer.readUint16();
     var foreBlue = buffer.readUint16();
@@ -5833,7 +5827,7 @@ class X11RecolorCursorRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(cursor);
+    buffer.writeResourceId(cursor);
     buffer.writeUint16(foreground.red);
     buffer.writeUint16(foreground.green);
     buffer.writeUint16(foreground.blue);
@@ -5848,7 +5842,7 @@ class X11RecolorCursorRequest extends X11Request {
 }
 
 class X11QueryBestSizeRequest extends X11Request {
-  final int drawable;
+  final X11ResourceId drawable;
   final X11QueryClass queryClass;
   final X11Size size;
 
@@ -5856,7 +5850,7 @@ class X11QueryBestSizeRequest extends X11Request {
 
   factory X11QueryBestSizeRequest.fromBuffer(X11ReadBuffer buffer) {
     var queryClass = X11QueryClass.values[buffer.readUint8()];
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     return X11QueryBestSizeRequest(
@@ -5866,14 +5860,14 @@ class X11QueryBestSizeRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(queryClass.index);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
     buffer.writeUint16(size.width);
     buffer.writeUint16(size.height);
   }
 
   @override
   String toString() =>
-      'X11QueryBestSizeRequest(drawable: ${_formatId(drawable)}, queryClass: ${queryClass}, size: ${size})';
+      'X11QueryBestSizeRequest(drawable: ${drawable}, queryClass: ${queryClass}, size: ${size})';
 }
 
 class X11QueryBestSizeReply extends X11Reply {
@@ -6694,20 +6688,20 @@ class X11SetCloseDownModeRequest extends X11Request {
 }
 
 class X11KillClientRequest extends X11Request {
-  final int resource;
+  final X11ResourceId resource;
 
   X11KillClientRequest(this.resource);
 
   factory X11KillClientRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var resource = buffer.readUint32();
+    var resource = buffer.readResourceId();
     return X11KillClientRequest(resource);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(resource);
+    buffer.writeResourceId(resource);
   }
 
   @override
@@ -6715,33 +6709,38 @@ class X11KillClientRequest extends X11Request {
 }
 
 class X11RotatePropertiesRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final int delta;
-  final List<int> atoms;
+  final List<X11Atom> atoms;
 
   X11RotatePropertiesRequest(this.window, this.delta, this.atoms);
 
   factory X11RotatePropertiesRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var atomsLength = buffer.readUint16();
     var delta = buffer.readInt16();
-    var atoms = buffer.readListOfUint32(atomsLength);
+    var atoms = <X11Atom>[];
+    for (var i = 0; i < atomsLength; i++) {
+      atoms.add(buffer.readAtom());
+    }
     return X11RotatePropertiesRequest(window, delta, atoms);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint16(atoms.length);
     buffer.writeInt16(delta);
-    buffer.writeListOfUint32(atoms);
+    for (var atom in atoms) {
+      buffer.writeAtom(atom);
+    }
   }
 
   @override
   String toString() =>
-      'X11RotatePropertiesRequest(window: ${_formatId(window)}, delta: ${delta}, atoms: ${atoms})';
+      'X11RotatePropertiesRequest(window: ${window}, delta: ${delta}, atoms: ${atoms})';
 }
 
 class X11ForceScreenSaverRequest extends X11Request {
@@ -7153,7 +7152,7 @@ class X11ShapeQueryVersionReply extends X11Reply {
 }
 
 class X11ShapeRectanglesRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final List<X11Rectangle> rectangles;
   final X11ShapeOperation operation;
   final X11ShapeKind kind;
@@ -7171,7 +7170,7 @@ class X11ShapeRectanglesRequest extends X11Request {
     var kind = X11ShapeKind.values[buffer.readUint8()];
     var ordering = X11ShapeOrdering.values[buffer.readUint8()];
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var offsetX = buffer.readInt16();
     var offsetY = buffer.readInt16();
     var rectangles = <X11Rectangle>[];
@@ -7196,7 +7195,7 @@ class X11ShapeRectanglesRequest extends X11Request {
     buffer.writeUint8(kind.index);
     buffer.writeUint8(ordering.index);
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(offset.x);
     buffer.writeInt16(offset.y);
     for (var rectangle in rectangles) {
@@ -7213,8 +7212,8 @@ class X11ShapeRectanglesRequest extends X11Request {
 }
 
 class X11ShapeMaskRequest extends X11Request {
-  final int window;
-  final int sourceBitmap;
+  final X11ResourceId window;
+  final X11ResourceId sourceBitmap;
   final X11ShapeOperation operation;
   final X11ShapeKind kind;
   final X11Point sourceOffset;
@@ -7228,10 +7227,10 @@ class X11ShapeMaskRequest extends X11Request {
     var operation = X11ShapeOperation.values[buffer.readUint8()];
     var kind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(2);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var offsetX = buffer.readInt16();
     var offsetY = buffer.readInt16();
-    var sourceBitmap = buffer.readUint32();
+    var sourceBitmap = buffer.readResourceId();
     return X11ShapeMaskRequest(window, sourceBitmap,
         operation: operation,
         kind: kind,
@@ -7244,10 +7243,10 @@ class X11ShapeMaskRequest extends X11Request {
     buffer.writeUint8(operation.index);
     buffer.writeUint8(kind.index);
     buffer.skip(2);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(sourceOffset.x);
     buffer.writeInt16(sourceOffset.y);
-    buffer.writeUint32(sourceBitmap);
+    buffer.writeResourceId(sourceBitmap);
   }
 
   @override
@@ -7256,8 +7255,8 @@ class X11ShapeMaskRequest extends X11Request {
 }
 
 class X11ShapeCombineRequest extends X11Request {
-  final int window;
-  final int sourceWindow;
+  final X11ResourceId window;
+  final X11ResourceId sourceWindow;
   final X11ShapeOperation operation;
   final X11ShapeKind kind;
   final X11ShapeKind sourceKind;
@@ -7274,10 +7273,10 @@ class X11ShapeCombineRequest extends X11Request {
     var kind = X11ShapeKind.values[buffer.readUint8()];
     var sourceKind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var offsetX = buffer.readInt16();
     var offsetY = buffer.readInt16();
-    var sourceWindow = buffer.readUint32();
+    var sourceWindow = buffer.readResourceId();
     return X11ShapeCombineRequest(window, sourceWindow,
         operation: operation,
         kind: kind,
@@ -7292,10 +7291,10 @@ class X11ShapeCombineRequest extends X11Request {
     buffer.writeUint8(kind.index);
     buffer.writeUint8(sourceKind.index);
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(sourceOffset.x);
     buffer.writeInt16(sourceOffset.y);
-    buffer.writeUint32(sourceWindow);
+    buffer.writeResourceId(sourceWindow);
   }
 
   @override
@@ -7304,7 +7303,7 @@ class X11ShapeCombineRequest extends X11Request {
 }
 
 class X11ShapeOffsetRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11ShapeKind kind;
   final X11Point offset;
 
@@ -7314,7 +7313,7 @@ class X11ShapeOffsetRequest extends X11Request {
   factory X11ShapeOffsetRequest.fromBuffer(X11ReadBuffer buffer) {
     var kind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(3);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var offsetX = buffer.readInt16();
     var offsetY = buffer.readInt16();
     return X11ShapeOffsetRequest(window,
@@ -7326,7 +7325,7 @@ class X11ShapeOffsetRequest extends X11Request {
     buffer.writeUint8(4);
     buffer.writeUint8(kind.index);
     buffer.skip(3);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(offset.x);
     buffer.writeInt16(offset.y);
   }
@@ -7337,19 +7336,19 @@ class X11ShapeOffsetRequest extends X11Request {
 }
 
 class X11ShapeQueryExtentsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11ShapeQueryExtentsRequest(this.window);
 
   factory X11ShapeQueryExtentsRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11ShapeQueryExtentsRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(5);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
@@ -7415,13 +7414,13 @@ class X11ShapeQueryExtentsReply extends X11Reply {
 }
 
 class X11ShapeSelectInputRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final bool enable;
 
   X11ShapeSelectInputRequest(this.window, this.enable);
 
   factory X11ShapeSelectInputRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var enable = buffer.readBool();
     buffer.skip(3);
     return X11ShapeSelectInputRequest(window, enable);
@@ -7430,7 +7429,7 @@ class X11ShapeSelectInputRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(6);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeBool(enable);
     buffer.skip(3);
   }
@@ -7440,19 +7439,19 @@ class X11ShapeSelectInputRequest extends X11Request {
 }
 
 class X11ShapeInputSelectedRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11ShapeInputSelectedRequest(this.window);
 
   factory X11ShapeInputSelectedRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11ShapeInputSelectedRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(7);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
@@ -7479,14 +7478,14 @@ class X11ShapeInputSelectedReply extends X11Reply {
 }
 
 class X11ShapeGetRectanglesRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11ShapeKind kind;
 
   X11ShapeGetRectanglesRequest(this.window,
       {this.kind = X11ShapeKind.bounding});
 
   factory X11ShapeGetRectanglesRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var kind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(3);
     return X11ShapeGetRectanglesRequest(window, kind: kind);
@@ -7495,7 +7494,7 @@ class X11ShapeGetRectanglesRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(8);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint8(kind.index);
     buffer.skip(3);
   }

@@ -31,7 +31,8 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Gets the mapping from pixels values to RGBA colors for [format].
-  Future<List<X11RgbaColorItem>> queryPictIndexValues(int format) async {
+  Future<List<X11RgbaColorItem>> queryPictIndexValues(
+      X11ResourceId format) async {
     var request = X11RenderQueryPictIndexValuesRequest(format);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     var reply = await _client.awaitReply<X11RenderQueryPictIndexValuesReply>(
@@ -42,11 +43,11 @@ class X11RenderExtension extends X11Extension {
   /// Creates a new pixmap with [id] and [format] that will be rendered to [drawable].
   /// When no longer required, the picture reference should be deleted with [freePicture].
   Future<int> createPicture(
-    int id,
-    int drawable,
-    int format, {
+    X11ResourceId id,
+    X11ResourceId drawable,
+    X11ResourceId format, {
     X11Repeat repeat,
-    int alphaMap,
+    X11ResourceId alphaMap,
     X11Point alphaOrigin,
     X11Point clipOrigin,
     int clipMask,
@@ -57,7 +58,7 @@ class X11RenderExtension extends X11Extension {
     String dither,
     bool componentAlpha,
   }) async {
-    int ditherAtom;
+    X11Atom ditherAtom;
     if (dither != null) {
       ditherAtom = await _client.internAtom(dither);
     }
@@ -81,9 +82,9 @@ class X11RenderExtension extends X11Extension {
   /// Changes the attributes of [picture].
   /// The values are the same as [createPicture].
   Future<int> changePicture(
-    int picture, {
+    X11ResourceId picture, {
     X11Repeat repeat,
-    int alphaMap,
+    X11ResourceId alphaMap,
     X11Point alphaOrigin,
     X11Point clipOrigin,
     int clipMask,
@@ -94,7 +95,7 @@ class X11RenderExtension extends X11Extension {
     String dither,
     bool componentAlpha,
   }) async {
-    int ditherAtom;
+    X11Atom ditherAtom;
     if (dither != null) {
       ditherAtom = await _client.internAtom(dither);
     }
@@ -116,7 +117,8 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Sets the clip mask of [picture] to [rectangles].
-  int setPictureClipRectangles(int picture, List<X11Rectangle> rectangles,
+  int setPictureClipRectangles(
+      X11ResourceId picture, List<X11Rectangle> rectangles,
       {X11Point clipOrigin = const X11Point(0, 0)}) {
     var request = X11RenderSetPictureClipRectanglesRequest(picture, rectangles,
         clipOrigin: clipOrigin);
@@ -124,17 +126,18 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Deletes the reference to a [pixmap] created in [createPicture], [createSolidFill], [createLinearGradient], [createRadialGradient] or [createConicalGradient].
-  int freePicture(int picture) {
+  int freePicture(X11ResourceId picture) {
     var request = X11RenderFreePictureRequest(picture);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Renders [area] from [sourcePicture] onto [destinationPicture].
-  int composite(int sourcePicture, int destinationPicture, X11Size area,
+  int composite(X11ResourceId sourcePicture, X11ResourceId destinationPicture,
+      X11Size area,
       {X11PictureOperation op = X11PictureOperation.src,
       X11Point sourceOrigin = const X11Point(0, 0),
       X11Point destinationOrigin = const X11Point(0, 0),
-      int maskPicture = 0,
+      X11ResourceId maskPicture = const X11ResourceId(0),
       X11Point maskOrigin = const X11Point(0, 0)}) {
     var request = X11RenderCompositeRequest(
         sourcePicture, destinationPicture, area,
@@ -148,11 +151,11 @@ class X11RenderExtension extends X11Extension {
 
   /// Renders [trapezoids] from [sourcePicture] onto [destinationPicture].
   /// This request is deprecated, use [addTrapezoids] instead.
-  int trapezoids(
-      int sourcePicture, int destinationPicture, List<X11Trap> trapezoids,
+  int trapezoids(X11ResourceId sourcePicture, X11ResourceId destinationPicture,
+      List<X11Trap> trapezoids,
       {X11PictureOperation op = X11PictureOperation.src,
       X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
+      X11ResourceId maskFormat = X11ResourceId.None}) {
     var request = X11RenderTrapezoidsRequest(
         sourcePicture, destinationPicture, trapezoids,
         op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
@@ -160,11 +163,11 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Renders [triangles] from [sourcePicture] onto [destinationPicture].
-  int triangles(
-      int sourcePicture, int destinationPicture, List<X11Triangle> triangles,
+  int triangles(X11ResourceId sourcePicture, X11ResourceId destinationPicture,
+      List<X11Triangle> triangles,
       {X11PictureOperation op = X11PictureOperation.src,
       X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
+      X11ResourceId maskFormat = X11ResourceId.None}) {
     var request = X11RenderTrianglesRequest(
         sourcePicture, destinationPicture, triangles,
         op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
@@ -172,11 +175,11 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Renders a triangle strip made from [points] from [sourcePicture] onto [destinationPicture].
-  int triangleStrip(
-      int sourcePicture, int destinationPicture, List<X11PointFixed> points,
+  int triangleStrip(X11ResourceId sourcePicture,
+      X11ResourceId destinationPicture, List<X11PointFixed> points,
       {X11PictureOperation op = X11PictureOperation.src,
       X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
+      X11ResourceId maskFormat = X11ResourceId.None}) {
     var request = X11RenderTriStripRequest(
         sourcePicture, destinationPicture, points,
         op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
@@ -184,11 +187,11 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Renders a triangle fan made from [points] from [sourcePicture] onto [destinationPicture].
-  int triangleFan(
-      int sourcePicture, int destinationPicture, List<X11PointFixed> points,
+  int triangleFan(X11ResourceId sourcePicture, X11ResourceId destinationPicture,
+      List<X11PointFixed> points,
       {X11PictureOperation op = X11PictureOperation.src,
       X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
+      X11ResourceId maskFormat = X11ResourceId.None}) {
     var request = X11RenderTriFanRequest(
         sourcePicture, destinationPicture, points,
         op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
@@ -197,43 +200,47 @@ class X11RenderExtension extends X11Extension {
 
   /// Creates a new glyphset with [id] using [format].
   /// When no longer required, the glyphset reference should be deleted with [freeGlyphSet].
-  int createGlyphSet(int id, int format) {
+  int createGlyphSet(X11ResourceId id, X11ResourceId format) {
     var request = X11RenderCreateGlyphSetRequest(id, format);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Creates a new reference to [existingGlyphset] with [id].
   /// When no longer required, the glyphset reference should be deleted with [freeGlyphSet].
-  int referenceGlyphSet(int id, int existingGlyphset) {
+  int referenceGlyphSet(X11ResourceId id, X11ResourceId existingGlyphset) {
     var request = X11RenderReferenceGlyphSetRequest(id, existingGlyphset);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Deletes the reference to a [glyphset] created in [createGlyphSet] or [referenceGlyphSet].
-  int freeGlyphSet(int glyphset) {
+  int freeGlyphSet(X11ResourceId glyphset) {
     var request = X11RenderFreeGlyphSetRequest(glyphset);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Adds [glyphs] to [glyphset]. [data] contains the image data for each glyph.
-  int addGlyphs(int glyphset, List<X11GlyphInfo> glyphs, List<int> data) {
+  int addGlyphs(
+      X11ResourceId glyphset, List<X11GlyphInfo> glyphs, List<int> data) {
     var request = X11RenderAddGlyphsRequest(glyphset, glyphs, data);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Removes [glyphs] from [glyphset] that were added in [addGlyphs].
-  int freeGlyphs(int glyphset, List<int> glyphs) {
+  int freeGlyphs(X11ResourceId glyphset, List<int> glyphs) {
     var request = X11RenderFreeGlyphsRequest(glyphset, glyphs);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Draws glyphs from [glyphset] from [sourcePicture] onto [destinationPicture].
   /// [glyphcmds] contains the commands to change glyphsets and the glyphs to render.
-  int compositeGlyphs8(int sourcePicture, int destinationPicture, int glyphset,
+  int compositeGlyphs8(
+      X11ResourceId sourcePicture,
+      X11ResourceId destinationPicture,
+      X11ResourceId glyphset,
       List<X11GlyphItem> glyphcmds,
       {X11PictureOperation op = X11PictureOperation.src,
       X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
+      X11ResourceId maskFormat = X11ResourceId.None}) {
     var request = X11RenderCompositeGlyphs8Request(
         sourcePicture, destinationPicture, glyphset, glyphcmds,
         op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
@@ -242,11 +249,14 @@ class X11RenderExtension extends X11Extension {
 
   /// Draws glyphs from [glyphset] from [sourcePicture] onto [destinationPicture].
   /// [glyphcmds] contains the commands to change glyphsets and the glyphs to render.
-  int compositeGlyphs16(int sourcePicture, int destinationPicture, int glyphset,
+  int compositeGlyphs16(
+      X11ResourceId sourcePicture,
+      X11ResourceId destinationPicture,
+      X11ResourceId glyphset,
       List<X11GlyphItem> glyphcmds,
       {X11PictureOperation op = X11PictureOperation.src,
       X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
+      X11ResourceId maskFormat = X11ResourceId.None}) {
     var request = X11RenderCompositeGlyphs16Request(
         sourcePicture, destinationPicture, glyphset, glyphcmds,
         op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
@@ -255,11 +265,14 @@ class X11RenderExtension extends X11Extension {
 
   /// Draws glyphs from [glyphset] from [sourcePicture] onto [destinationPicture].
   /// [glyphcmds] contains the commands to change glyphsets and the glyphs to render.
-  int compositeGlyphs32(int sourcePicture, int destinationPicture, int glyphset,
+  int compositeGlyphs32(
+      X11ResourceId sourcePicture,
+      X11ResourceId destinationPicture,
+      X11ResourceId glyphset,
       List<X11GlyphItem> glyphcmds,
       {X11PictureOperation op = X11PictureOperation.src,
       X11Point sourceOrigin = const X11Point(0, 0),
-      int maskFormat = 0}) {
+      X11ResourceId maskFormat = X11ResourceId.None}) {
     var request = X11RenderCompositeGlyphs32Request(
         sourcePicture, destinationPicture, glyphset, glyphcmds,
         op: op, sourceOrigin: sourceOrigin, maskFormat: maskFormat);
@@ -267,7 +280,8 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Draws [rectangles] onto [destinationPicture].
-  int fillRectangles(int destinationPicture, List<X11Rectangle> rectangles,
+  int fillRectangles(
+      X11ResourceId destinationPicture, List<X11Rectangle> rectangles,
       {X11PictureOperation op = X11PictureOperation.src,
       X11Rgba color = const X11Rgba(0, 0, 0, 0)}) {
     var request = X11RenderFillRectanglesRequest(destinationPicture, rectangles,
@@ -276,7 +290,7 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Creates a cursor with [id] from [sourcePicture].
-  int createCursor(int id, int sourcePicture,
+  int createCursor(X11ResourceId id, X11ResourceId sourcePicture,
       {X11Point hotspot = const X11Point(0, 0)}) {
     var request =
         X11RenderCreateCursorRequest(id, sourcePicture, hotspot: hotspot);
@@ -284,13 +298,14 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Sets the [transform] for [picture].
-  int setPictureTransform(int picture, X11Transform transform) {
+  int setPictureTransform(X11ResourceId picture, X11Transform transform) {
     var request = X11RenderSetPictureTransformRequest(picture, transform);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Gets the filters supported on [drawable].
-  Future<X11RenderQueryFiltersReply> queryFilters(int drawable) async {
+  Future<X11RenderQueryFiltersReply> queryFilters(
+      X11ResourceId drawable) async {
     var request = X11RenderQueryFiltersRequest(drawable);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11RenderQueryFiltersReply>(
@@ -300,7 +315,7 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Sets the [filter] for [picture].
-  int setPictureFilter(int picture, String filter,
+  int setPictureFilter(X11ResourceId picture, String filter,
       {List<double> values = const []}) {
     var request =
         X11RenderSetPictureFilterRequest(picture, filter, values: values);
@@ -308,14 +323,15 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Creates a new animated cursor with [id] and [frames].
-  int createAnimatedCursor(int id, List<X11AnimatedCursorFrame> frames) {
+  int createAnimatedCursor(
+      X11ResourceId id, List<X11AnimatedCursorFrame> frames) {
     var request = X11RenderCreateAnimatedCursorRequest(id, frames);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Renders [trapezoids] onto [picture] using [X11PictureOperation.add].
   /// [picture] must be an alpha only picture.
-  int addTrapezoids(int picture, List<X11Trapezoid> trapezoids,
+  int addTrapezoids(X11ResourceId picture, List<X11Trapezoid> trapezoids,
       {X11Point offset = const X11Point(0, 0)}) {
     var request =
         X11RenderAddTrapezoidsRequest(picture, trapezoids, offset: offset);
@@ -324,13 +340,13 @@ class X11RenderExtension extends X11Extension {
 
   /// Creates a new picture with [id] that represents a solid fill with [color].
   /// When no longer required, the picture reference should be deleted with [freePicture].
-  int createSolidFill(int id, X11Rgba color) {
+  int createSolidFill(X11ResourceId id, X11Rgba color) {
     var request = X11RenderCreateSolidFillRequest(id, color);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Creates a new picture with [id] that represents a linear gradient.
-  int createLinearGradient(int id,
+  int createLinearGradient(X11ResourceId id,
       {X11PointFixed p1 = const X11PointFixed(0, 0),
       X11PointFixed p2 = const X11PointFixed(0, 0),
       List<X11ColorStop> stops = const []}) {
@@ -340,7 +356,7 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Creates a new picture with [id] that represents a radial gradient.
-  int createRadialGradient(int id,
+  int createRadialGradient(X11ResourceId id,
       {X11PointFixed inner = const X11PointFixed(0, 0),
       X11PointFixed outer = const X11PointFixed(0, 0),
       double innerRadius = 0,
@@ -356,7 +372,7 @@ class X11RenderExtension extends X11Extension {
   }
 
   /// Creates a new picture with [id] that represents a conical gradient.
-  int createConicalGradient(int id,
+  int createConicalGradient(X11ResourceId id,
       {X11PointFixed center = const X11PointFixed(0, 0),
       double angle = 0,
       List<X11ColorStop> stops = const []}) {

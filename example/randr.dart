@@ -30,7 +30,7 @@ void main() async {
   print('CRTCs:');
   for (var crtc in resources.crtcs) {
     var info = await client.randr.getCrtcInfo(crtc);
-    if (info.mode != 0) {
+    if (info.mode != X11ResourceId.None) {
       print(
           '  ${info.area.x},${info.area.y} ${info.area.width}x${info.area.height}');
       var transformReply = await client.randr.getCrtcTransform(crtc);
@@ -55,7 +55,7 @@ void main() async {
       var typeName = await client.getAtomName(valueReply.type);
       String value;
       if (typeName == 'ATOM') {
-        value = await client.getAtomName(valueReply.data[0]);
+        value = await client.getAtomName(X11Atom(valueReply.data[0]));
       } else if (typeName == 'INTEGER') {
         if (valueReply.data.length == 1) {
           value = valueReply.data[0].toString();

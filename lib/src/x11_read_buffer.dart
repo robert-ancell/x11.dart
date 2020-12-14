@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'x11_types.dart';
+
 class X11ReadBuffer {
   /// Data in the buffer.
   final _data = <int>[];
@@ -64,6 +66,14 @@ class X11ReadBuffer {
     return ByteData.view(_readBytes(4)).getInt32(0, Endian.little);
   }
 
+  X11ResourceId readResourceId() {
+    return X11ResourceId(readUint32());
+  }
+
+  X11Atom readAtom() {
+    return X11Atom(readUint32());
+  }
+
   double readFixed() {
     var v = readUint32();
     return (v >> 16).toDouble(); // FIXME + fraction
@@ -97,6 +107,14 @@ class X11ReadBuffer {
     var values = <int>[];
     for (var i = 0; i < length; i++) {
       values.add(readInt32());
+    }
+    return values;
+  }
+
+  List<X11ResourceId> readListOfResourceId(int length) {
+    var values = <X11ResourceId>[];
+    for (var i = 0; i < length; i++) {
+      values.add(readResourceId());
     }
     return values;
   }

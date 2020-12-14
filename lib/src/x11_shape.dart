@@ -21,7 +21,7 @@ class X11ShapeExtension extends X11Extension {
   }
 
   /// Modifies the shape of [window] with [rectangles].
-  int rectangles(int window, List<X11Rectangle> rectangles,
+  int rectangles(X11ResourceId window, List<X11Rectangle> rectangles,
       {X11ShapeOperation operation = X11ShapeOperation.set,
       X11ShapeKind kind = X11ShapeKind.bounding,
       X11ShapeOrdering ordering = X11ShapeOrdering.unSorted,
@@ -32,7 +32,7 @@ class X11ShapeExtension extends X11Extension {
   }
 
   /// Modifies the shape of [window] with [sourceBitmap].
-  int mask(int window, int sourceBitmap,
+  int mask(X11ResourceId window, X11ResourceId sourceBitmap,
       {X11ShapeOperation operation = X11ShapeOperation.set,
       X11ShapeKind kind = X11ShapeKind.bounding,
       X11Point sourceOffset = const X11Point(0, 0)}) {
@@ -42,7 +42,7 @@ class X11ShapeExtension extends X11Extension {
   }
 
   /// Combine the shape of [sourceWindow] into [window].
-  int combine(int window, int sourceWindow,
+  int combine(X11ResourceId window, X11ResourceId sourceWindow,
       {X11ShapeOperation operation = X11ShapeOperation.set,
       X11ShapeKind kind = X11ShapeKind.bounding,
       X11ShapeKind sourceKind = X11ShapeKind.bounding,
@@ -56,7 +56,7 @@ class X11ShapeExtension extends X11Extension {
   }
 
   /// Move the shape of [window] by [offset].
-  int offset(int window,
+  int offset(X11ResourceId window,
       {X11ShapeKind kind = X11ShapeKind.bounding,
       X11Point offset = const X11Point(0, 0)}) {
     var request = X11ShapeOffsetRequest(window, kind: kind, offset: offset);
@@ -64,7 +64,7 @@ class X11ShapeExtension extends X11Extension {
   }
 
   /// Returns the shape extents of [window].
-  Future<X11ShapeQueryExtentsReply> queryExtents(int window) async {
+  Future<X11ShapeQueryExtentsReply> queryExtents(X11ResourceId window) async {
     var request = X11ShapeQueryExtentsRequest(window);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11ShapeQueryExtentsReply>(
@@ -72,13 +72,13 @@ class X11ShapeExtension extends X11Extension {
   }
 
   /// Selects if [window] generates shape notify events to this cliet.
-  int selectInput(int window, bool enable) {
+  int selectInput(X11ResourceId window, bool enable) {
     var request = X11ShapeSelectInputRequest(window, enable);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Returns true if shape notifiy events are generated to this client for [window].
-  Future<bool> inputSelected(int window) async {
+  Future<bool> inputSelected(X11ResourceId window) async {
     var request = X11ShapeInputSelectedRequest(window);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     var reply = await _client.awaitReply<X11ShapeInputSelectedReply>(
@@ -87,7 +87,7 @@ class X11ShapeExtension extends X11Extension {
   }
 
   /// Gets the rectangles of [kind] that make up the shape of [window].
-  Future<X11ShapeGetRectanglesReply> getRectangles(int window,
+  Future<X11ShapeGetRectanglesReply> getRectangles(X11ResourceId window,
       {X11ShapeKind kind = X11ShapeKind.bounding}) async {
     var request = X11ShapeGetRectanglesRequest(window, kind: kind);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);

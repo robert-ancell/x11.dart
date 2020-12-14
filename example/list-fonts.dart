@@ -33,7 +33,7 @@ void main() async {
         'SPACING',
         'WEIGHT_NAME'
       }.contains(name)) {
-        var stringValue = await client.getAtomName(property.value);
+        var stringValue = await client.getAtomName(X11Atom(property.value));
         value = "'${stringValue}'";
       } else {
         value = property.value.toString();

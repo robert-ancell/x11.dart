@@ -52,7 +52,7 @@ class X11ShapeQueryVersionReply extends X11Reply {
 }
 
 class X11ShapeRectanglesRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final List<X11Rectangle> rectangles;
   final X11ShapeOperation operation;
   final X11ShapeKind kind;
@@ -70,7 +70,7 @@ class X11ShapeRectanglesRequest extends X11Request {
     var kind = X11ShapeKind.values[buffer.readUint8()];
     var ordering = X11ShapeOrdering.values[buffer.readUint8()];
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var offsetX = buffer.readInt16();
     var offsetY = buffer.readInt16();
     var rectangles = <X11Rectangle>[];
@@ -95,7 +95,7 @@ class X11ShapeRectanglesRequest extends X11Request {
     buffer.writeUint8(kind.index);
     buffer.writeUint8(ordering.index);
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(offset.x);
     buffer.writeInt16(offset.y);
     for (var rectangle in rectangles) {
@@ -112,8 +112,8 @@ class X11ShapeRectanglesRequest extends X11Request {
 }
 
 class X11ShapeMaskRequest extends X11Request {
-  final int window;
-  final int sourceBitmap;
+  final X11ResourceId window;
+  final X11ResourceId sourceBitmap;
   final X11ShapeOperation operation;
   final X11ShapeKind kind;
   final X11Point sourceOffset;
@@ -127,10 +127,10 @@ class X11ShapeMaskRequest extends X11Request {
     var operation = X11ShapeOperation.values[buffer.readUint8()];
     var kind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(2);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var offsetX = buffer.readInt16();
     var offsetY = buffer.readInt16();
-    var sourceBitmap = buffer.readUint32();
+    var sourceBitmap = buffer.readResourceId();
     return X11ShapeMaskRequest(window, sourceBitmap,
         operation: operation,
         kind: kind,
@@ -143,10 +143,10 @@ class X11ShapeMaskRequest extends X11Request {
     buffer.writeUint8(operation.index);
     buffer.writeUint8(kind.index);
     buffer.skip(2);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(sourceOffset.x);
     buffer.writeInt16(sourceOffset.y);
-    buffer.writeUint32(sourceBitmap);
+    buffer.writeResourceId(sourceBitmap);
   }
 
   @override
@@ -155,8 +155,8 @@ class X11ShapeMaskRequest extends X11Request {
 }
 
 class X11ShapeCombineRequest extends X11Request {
-  final int window;
-  final int sourceWindow;
+  final X11ResourceId window;
+  final X11ResourceId sourceWindow;
   final X11ShapeOperation operation;
   final X11ShapeKind kind;
   final X11ShapeKind sourceKind;
@@ -173,10 +173,10 @@ class X11ShapeCombineRequest extends X11Request {
     var kind = X11ShapeKind.values[buffer.readUint8()];
     var sourceKind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(1);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var offsetX = buffer.readInt16();
     var offsetY = buffer.readInt16();
-    var sourceWindow = buffer.readUint32();
+    var sourceWindow = buffer.readResourceId();
     return X11ShapeCombineRequest(window, sourceWindow,
         operation: operation,
         kind: kind,
@@ -191,10 +191,10 @@ class X11ShapeCombineRequest extends X11Request {
     buffer.writeUint8(kind.index);
     buffer.writeUint8(sourceKind.index);
     buffer.skip(1);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(sourceOffset.x);
     buffer.writeInt16(sourceOffset.y);
-    buffer.writeUint32(sourceWindow);
+    buffer.writeResourceId(sourceWindow);
   }
 
   @override
@@ -203,7 +203,7 @@ class X11ShapeCombineRequest extends X11Request {
 }
 
 class X11ShapeOffsetRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11ShapeKind kind;
   final X11Point offset;
 
@@ -213,7 +213,7 @@ class X11ShapeOffsetRequest extends X11Request {
   factory X11ShapeOffsetRequest.fromBuffer(X11ReadBuffer buffer) {
     var kind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(3);
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var offsetX = buffer.readInt16();
     var offsetY = buffer.readInt16();
     return X11ShapeOffsetRequest(window,
@@ -225,7 +225,7 @@ class X11ShapeOffsetRequest extends X11Request {
     buffer.writeUint8(4);
     buffer.writeUint8(kind.index);
     buffer.skip(3);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeInt16(offset.x);
     buffer.writeInt16(offset.y);
   }
@@ -236,19 +236,19 @@ class X11ShapeOffsetRequest extends X11Request {
 }
 
 class X11ShapeQueryExtentsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11ShapeQueryExtentsRequest(this.window);
 
   factory X11ShapeQueryExtentsRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11ShapeQueryExtentsRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(5);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
@@ -314,13 +314,13 @@ class X11ShapeQueryExtentsReply extends X11Reply {
 }
 
 class X11ShapeSelectInputRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final bool enable;
 
   X11ShapeSelectInputRequest(this.window, this.enable);
 
   factory X11ShapeSelectInputRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var enable = buffer.readBool();
     buffer.skip(3);
     return X11ShapeSelectInputRequest(window, enable);
@@ -329,7 +329,7 @@ class X11ShapeSelectInputRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(6);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeBool(enable);
     buffer.skip(3);
   }
@@ -339,19 +339,19 @@ class X11ShapeSelectInputRequest extends X11Request {
 }
 
 class X11ShapeInputSelectedRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11ShapeInputSelectedRequest(this.window);
 
   factory X11ShapeInputSelectedRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11ShapeInputSelectedRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(7);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
@@ -378,14 +378,14 @@ class X11ShapeInputSelectedReply extends X11Reply {
 }
 
 class X11ShapeGetRectanglesRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11ShapeKind kind;
 
   X11ShapeGetRectanglesRequest(this.window,
       {this.kind = X11ShapeKind.bounding});
 
   factory X11ShapeGetRectanglesRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var kind = X11ShapeKind.values[buffer.readUint8()];
     buffer.skip(3);
     return X11ShapeGetRectanglesRequest(window, kind: kind);
@@ -394,7 +394,7 @@ class X11ShapeGetRectanglesRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(8);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint8(kind.index);
     buffer.skip(3);
   }

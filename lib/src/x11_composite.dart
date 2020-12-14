@@ -18,37 +18,37 @@ class X11CompositeExtension extends X11Extension {
     return reply.version;
   }
 
-  int redirectWindow(int window, int update) {
+  int redirectWindow(X11ResourceId window, int update) {
     var request = X11CompositeRedirectWindowRequest(window, update);
     return _client.sendRequest(_majorOpcode, request);
   }
 
-  int redirectSubwindows(int window, int update) {
+  int redirectSubwindows(X11ResourceId window, int update) {
     var request = X11CompositeRedirectSubwindowsRequest(window, update);
     return _client.sendRequest(_majorOpcode, request);
   }
 
-  int unredirectWindow(int window, int update) {
+  int unredirectWindow(X11ResourceId window, int update) {
     var request = X11CompositeUnredirectWindowRequest(window, update);
     return _client.sendRequest(_majorOpcode, request);
   }
 
-  int unredirectSubwindows(int window, int update) {
+  int unredirectSubwindows(X11ResourceId window, int update) {
     var request = X11CompositeUnredirectSubwindowsRequest(window, update);
     return _client.sendRequest(_majorOpcode, request);
   }
 
-  int createRegionFromBorderClip(int region, int window) {
+  int createRegionFromBorderClip(X11ResourceId region, X11ResourceId window) {
     var request = X11CompositeCreateRegionFromBorderClipRequest(region, window);
     return _client.sendRequest(_majorOpcode, request);
   }
 
-  int nameWindowPixmap(int window, int pixmap) {
+  int nameWindowPixmap(X11ResourceId window, int pixmap) {
     var request = X11CompositeNameWindowPixmapRequest(window, pixmap);
     return _client.sendRequest(_majorOpcode, request);
   }
 
-  Future<int> getOverlayWindow(int window) async {
+  Future<X11ResourceId> getOverlayWindow(X11ResourceId window) async {
     var request = X11CompositeGetOverlayWindowRequest(window);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     var reply = await _client.awaitReply<X11CompositeGetOverlayWindowReply>(
@@ -56,7 +56,7 @@ class X11CompositeExtension extends X11Extension {
     return reply.window;
   }
 
-  int releaseOverlayWindow(int window) {
+  int releaseOverlayWindow(X11ResourceId window) {
     var request = X11CompositeReleaseOverlayWindowRequest(window);
     return _client.sendRequest(_majorOpcode, request);
   }

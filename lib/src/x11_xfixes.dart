@@ -27,20 +27,20 @@ class X11XFixesExtension extends X11Extension {
   }
 
   /// Inserts [window] into the clients save-set.
-  int insertSaveSet(int window,
+  int insertSaveSet(X11ResourceId window,
       {X11ChangeSetTarget target = X11ChangeSetTarget.nearest,
       X11ChangeSetMap map = X11ChangeSetMap.map}) {
     return _changeSaveSet(window, X11ChangeSetMode.insert, target, map);
   }
 
   /// Deletes [window] from the clients save-set.
-  int deleteSaveSet(int window,
+  int deleteSaveSet(X11ResourceId window,
       {X11ChangeSetTarget target = X11ChangeSetTarget.nearest,
       X11ChangeSetMap map = X11ChangeSetMap.map}) {
     return _changeSaveSet(window, X11ChangeSetMode.delete, target, map);
   }
 
-  int _changeSaveSet(int window, X11ChangeSetMode mode,
+  int _changeSaveSet(X11ResourceId window, X11ChangeSetMode mode,
       X11ChangeSetTarget target, X11ChangeSetMap map) {
     var request =
         X11XFixesChangeSaveSetRequest(window, mode, target: target, map: map);
@@ -49,14 +49,14 @@ class X11XFixesExtension extends X11Extension {
 
   /// Selects the selection [events] for [selection] to deliver to [window].
   int selectSelectionInput(
-      int window, int selection, Set<X11EventType> events) {
+      X11ResourceId window, X11Atom selection, Set<X11EventType> events) {
     var request =
         X11XFixesSelectSelectionInputRequest(window, selection, events);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Selects the cursor [events] to deliver to [window].
-  int selectCursorInput(int window, Set<X11EventType> events) {
+  int selectCursorInput(X11ResourceId window, Set<X11EventType> events) {
     var request = X11XFixesSelectCursorInputRequest(window, events);
     return _client.sendRequest(_majorOpcode, request);
   }
@@ -71,21 +71,22 @@ class X11XFixesExtension extends X11Extension {
 
   /// Creates a new region with [id] that covers the area containing the union of [rectangles].
   /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegion(int id, List<X11Rectangle> rectangles) {
+  int createRegion(X11ResourceId id, List<X11Rectangle> rectangles) {
     var request = X11XFixesCreateRegionRequest(id, rectangles);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Creates a new region with [id] that covers the area in [bitmap].
   /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegionFromBitmap(int id, int bitmap) {
+  int createRegionFromBitmap(X11ResourceId id, X11ResourceId bitmap) {
     var request = X11XFixesCreateRegionFromBitmapRequest(id, bitmap);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Creates a new region with [id] that matches the [window] region.
   /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegionFromWindow(int id, int window, X11ShapeKind kind) {
+  int createRegionFromWindow(
+      X11ResourceId id, X11ResourceId window, X11ShapeKind kind) {
     var request =
         X11XFixesCreateRegionFromWindowRequest(id, window, kind: kind);
     return _client.sendRequest(_majorOpcode, request);
@@ -93,77 +94,81 @@ class X11XFixesExtension extends X11Extension {
 
   /// Creates a new region with [id] that matches the clip list of [gc].
   /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegionFromGC(int id, int gc) {
+  int createRegionFromGC(X11ResourceId id, X11ResourceId gc) {
     var request = X11XFixesCreateRegionFromGCRequest(id, gc);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Creates a new region with [id] that matches the clip list of [picture].
   /// When no longer required, the region reference should be deleted with [destroyRegion].
-  int createRegionFromPicture(int id, int picture) {
+  int createRegionFromPicture(X11ResourceId id, X11ResourceId picture) {
     var request = X11XFixesCreateRegionFromPictureRequest(id, picture);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Deletes the reference to a [region] created in [createRegion], [createRegionFromBitmap], [createRegionFromWindow], [createRegionFromGC] or [createRegionFromPicture].
-  int destroyRegion(int region) {
+  int destroyRegion(X11ResourceId region) {
     var request = X11XFixesDestroyRegionRequest(region);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Sets [region] to the union of [rectangles].
-  int setRegion(int region, List<X11Rectangle> rectangles) {
+  int setRegion(X11ResourceId region, List<X11Rectangle> rectangles) {
     var request = X11XFixesSetRegionRequest(region, rectangles);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Sets [region] to the contents of [sourceRegion].
-  int copyRegion(int region, int sourceRegion) {
+  int copyRegion(X11ResourceId region, X11ResourceId sourceRegion) {
     var request = X11XFixesCopyRegionRequest(region, sourceRegion);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Sets [region] to the union of [sourceRegion1] and [sourceRegion2].
-  int unionRegion(int region, int sourceRegion1, int sourceRegion2) {
+  int unionRegion(X11ResourceId region, X11ResourceId sourceRegion1,
+      X11ResourceId sourceRegion2) {
     var request =
         X11XFixesUnionRegionRequest(region, sourceRegion1, sourceRegion2);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Sets [region] to the intersection of [sourceRegion1] and [sourceRegion2].
-  int intersectRegion(int region, int sourceRegion1, int sourceRegion2) {
+  int intersectRegion(X11ResourceId region, X11ResourceId sourceRegion1,
+      X11ResourceId sourceRegion2) {
     var request =
         X11XFixesIntersectRegionRequest(region, sourceRegion1, sourceRegion2);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Subtracts [sourceRegion2] from [sourceRegion1] and sets [region] to the result.
-  int subtractRegion(int region, int sourceRegion1, int sourceRegion2) {
+  int subtractRegion(X11ResourceId region, X11ResourceId sourceRegion1,
+      X11ResourceId sourceRegion2) {
     var request =
         X11XFixesSubtractRegionRequest(region, sourceRegion1, sourceRegion2);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Takes [bounds] and subtracts [sourceRegion] and sets [region] to the result.
-  int invertRegion(int region, X11Rectangle bounds, int sourceRegion) {
+  int invertRegion(
+      X11ResourceId region, X11Rectangle bounds, X11ResourceId sourceRegion) {
     var request = X11XFixesInvertRegionRequest(region, bounds, sourceRegion);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Translates the [region] by [offset].
-  int translateRegion(int region, X11Point offset) {
+  int translateRegion(X11ResourceId region, X11Point offset) {
     var request = X11XFixesTranslateRegionRequest(region, offset);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Takes the extents from [sourceRegion] and puts them into [region].
-  int regionExtents(int region, int sourceRegion) {
+  int regionExtents(X11ResourceId region, X11ResourceId sourceRegion) {
     var request = X11XFixesRegionExtentsRequest(region, sourceRegion);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Gets the rectangles that make up [region].
-  Future<X11XFixesFetchRegionReply> fetchRegion(int region) async {
+  Future<X11XFixesFetchRegionReply> fetchRegion(X11ResourceId region) async {
     var request = X11XFixesFetchRegionRequest(region);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11XFixesFetchRegionReply>(
@@ -171,14 +176,14 @@ class X11XFixesExtension extends X11Extension {
   }
 
   /// Set the clip [region] of [gc].
-  int setGCClipRegion(int gc, int region,
+  int setGCClipRegion(X11ResourceId gc, X11ResourceId region,
       {X11Point origin = const X11Point(0, 0)}) {
     var request = X11XFixesSetGCClipRegionRequest(gc, region, origin: origin);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Sets [region] as the shape of [window].
-  int setWindowShapeRegion(int window, int region,
+  int setWindowShapeRegion(X11ResourceId window, X11ResourceId region,
       {X11ShapeKind kind = X11ShapeKind.bounding,
       offset = const X11Point(0, 0)}) {
     var request = X11XFixesSetWindowShapeRegionRequest(window, region,
@@ -187,7 +192,7 @@ class X11XFixesExtension extends X11Extension {
   }
 
   /// Sets the clip [region] of [picture].
-  int setPictureClipRegion(int picture, int region,
+  int setPictureClipRegion(X11ResourceId picture, X11ResourceId region,
       {X11Point origin = const X11Point(0, 0)}) {
     var request =
         X11XFixesSetPictureClipRegionRequest(picture, region, origin: origin);
@@ -195,13 +200,14 @@ class X11XFixesExtension extends X11Extension {
   }
 
   /// Set the [name] of [cursor].
-  int setCursorName(int cursor, String name) {
+  int setCursorName(X11ResourceId cursor, String name) {
     var request = X11XFixesSetCursorNameRequest(cursor, name);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Gets the name and atom of [cursor].
-  Future<X11XFixesGetCursorNameReply> getCursorName(int cursor) async {
+  Future<X11XFixesGetCursorNameReply> getCursorName(
+      X11ResourceId cursor) async {
     var request = X11XFixesGetCursorNameRequest(cursor);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
     return _client.awaitReply<X11XFixesGetCursorNameReply>(
@@ -217,19 +223,19 @@ class X11XFixesExtension extends X11Extension {
   }
 
   /// Changes users of [cursor] to [newCursor].
-  int changeCursor(int cursor, int newCursor) {
+  int changeCursor(X11ResourceId cursor, X11ResourceId newCursor) {
     var request = X11XFixesChangeCursorRequest(cursor, newCursor);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Sets all cursors with [name] to [cursor].
-  int changeCursorByName(String name, int cursor) {
+  int changeCursorByName(String name, X11ResourceId cursor) {
     var request = X11XFixesChangeCursorByNameRequest(name, cursor);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Sets [region] to [sourceRegion] with each component rectangle expanded with [left], [right], [top] and [bottom] pixels.
-  int expandRegion(int region, int sourceRegion,
+  int expandRegion(X11ResourceId region, X11ResourceId sourceRegion,
       {int left = 0, int right = 0, int top = 0, int bottom = 0}) {
     var request = X11XFixesExpandRegionRequest(region, sourceRegion,
         left: left, right: right, top: top, bottom: bottom);
@@ -237,19 +243,20 @@ class X11XFixesExtension extends X11Extension {
   }
 
   /// Hides the cursor on [window].
-  int hideCursor(int window) {
+  int hideCursor(X11ResourceId window) {
     var request = X11XFixesHideCursorRequest(window);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Shows the cursor on [window].
-  int showCursor(int window) {
+  int showCursor(X11ResourceId window) {
     var request = X11XFixesShowCursorRequest(window);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Creates a new pointer barrier with [id] on the screen containing [drawable] along [line].
-  int createPointerBarrier(int id, int drawable, X11Segment line,
+  int createPointerBarrier(
+      X11ResourceId id, X11ResourceId drawable, X11Segment line,
       {Set<X11BarrierDirection> directions = const {},
       List<int> devices = const []}) {
     var request = X11XFixesCreatePointerBarrierRequest(id, drawable, line,
@@ -258,7 +265,7 @@ class X11XFixesExtension extends X11Extension {
   }
 
   /// Deletes the reference to a [barrier] created in [createPointerBarrier].
-  int deletePointerBarrier(int barrier) {
+  int deletePointerBarrier(X11ResourceId barrier) {
     var request = X11XFixesDeletePointerBarrierRequest(barrier);
     return _client.sendRequest(_majorOpcode, request);
   }

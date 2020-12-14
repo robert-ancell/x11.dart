@@ -101,19 +101,19 @@ class X11ScreensaverQueryVersionReply extends X11Reply {
 }
 
 class X11ScreensaverQueryInfoRequest extends X11Request {
-  final int drawable;
+  final X11ResourceId drawable;
 
   X11ScreensaverQueryInfoRequest(this.drawable);
 
   factory X11ScreensaverQueryInfoRequest.fromBuffer(X11ReadBuffer buffer) {
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     return X11ScreensaverQueryInfoRequest(drawable);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(1);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
   }
 
   @override
@@ -122,7 +122,7 @@ class X11ScreensaverQueryInfoRequest extends X11Request {
 
 class X11ScreensaverQueryInfoReply extends X11Reply {
   final X11ScreensaverState state;
-  final int saverWindow;
+  final X11ResourceId saverWindow;
   final int tilOrSince;
   final int idle;
   final Set<X11ScreensaverEventType> events;
@@ -130,7 +130,7 @@ class X11ScreensaverQueryInfoReply extends X11Reply {
 
   X11ScreensaverQueryInfoReply(
       {this.state = X11ScreensaverState.disabled,
-      this.saverWindow = 0,
+      this.saverWindow = X11ResourceId.None,
       this.tilOrSince = 0,
       this.idle = 0,
       this.events = const {},
@@ -138,7 +138,7 @@ class X11ScreensaverQueryInfoReply extends X11Reply {
 
   static X11ScreensaverQueryInfoReply fromBuffer(X11ReadBuffer buffer) {
     var state = X11ScreensaverState.values[buffer.readUint8()];
-    var saverWindow = buffer.readUint32();
+    var saverWindow = buffer.readResourceId();
     var tilOrSince = buffer.readUint32();
     var idle = buffer.readUint32();
     var events = _decodeScreensaverEventMask(buffer.readUint32());
@@ -156,7 +156,7 @@ class X11ScreensaverQueryInfoReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(state.index);
-    buffer.writeUint32(saverWindow);
+    buffer.writeResourceId(saverWindow);
     buffer.writeUint32(tilOrSince);
     buffer.writeUint32(idle);
     buffer.writeUint32(_encodeScreensaverEventMask(events));
@@ -170,13 +170,13 @@ class X11ScreensaverQueryInfoReply extends X11Reply {
 }
 
 class X11ScreensaverSelectInputRequest extends X11Request {
-  final int drawable;
+  final X11ResourceId drawable;
   final Set<X11ScreensaverEventType> events;
 
   X11ScreensaverSelectInputRequest(this.drawable, this.events);
 
   factory X11ScreensaverSelectInputRequest.fromBuffer(X11ReadBuffer buffer) {
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     var events = _decodeScreensaverEventMask(buffer.readUint32());
     return X11ScreensaverSelectInputRequest(drawable, events);
   }
@@ -184,7 +184,7 @@ class X11ScreensaverSelectInputRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(2);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
     buffer.writeUint32(_encodeScreensaverEventMask(events));
   }
 
@@ -194,15 +194,15 @@ class X11ScreensaverSelectInputRequest extends X11Request {
 }
 
 class X11ScreensaverSetAttributesRequest extends X11Request {
-  final int drawable;
+  final X11ResourceId drawable;
   final X11Rectangle geometry;
   final int borderWidth;
   final X11WindowClass windowClass;
   final int depth;
   final int visual;
-  final int backgroundPixmap;
+  final X11ResourceId backgroundPixmap;
   final int backgroundPixel;
-  final int borderPixmap;
+  final X11ResourceId borderPixmap;
   final int borderPixel;
   final X11BitGravity bitGravity;
   final X11WinGravity winGravity;
@@ -213,8 +213,8 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
   final bool saveUnder;
   final Set<X11EventType> events;
   final Set<X11EventType> doNotPropagate;
-  final int colormap;
-  final int cursor;
+  final X11ResourceId colormap;
+  final X11ResourceId cursor;
 
   X11ScreensaverSetAttributesRequest(this.drawable, this.geometry,
       {this.borderWidth = 0,
@@ -238,7 +238,7 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
       this.cursor});
 
   factory X11ScreensaverSetAttributesRequest.fromBuffer(X11ReadBuffer buffer) {
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
     var width = buffer.readUint16();
@@ -248,17 +248,17 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
     var depth = buffer.readUint8();
     var visual = buffer.readUint32();
     var valueMask = buffer.readUint32();
-    int backgroundPixmap;
+    X11ResourceId backgroundPixmap;
     if ((valueMask & 0x0001) != 0) {
-      backgroundPixmap = buffer.readUint32();
+      backgroundPixmap = buffer.readResourceId();
     }
     int backgroundPixel;
     if ((valueMask & 0x0002) != 0) {
       backgroundPixel = buffer.readUint32();
     }
-    int borderPixmap;
+    X11ResourceId borderPixmap;
     if ((valueMask & 0x0004) != 0) {
-      borderPixmap = buffer.readUint32();
+      borderPixmap = buffer.readResourceId();
     }
     int borderPixel;
     if ((valueMask & 0x0008) != 0) {
@@ -300,13 +300,13 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
     if ((valueMask & 0x1000) != 0) {
       doNotPropagate = _decodeEventMask(buffer.readValueUint16());
     }
-    int colormap;
+    X11ResourceId colormap;
     if ((valueMask & 0x2000) != 0) {
-      colormap = buffer.readUint32();
+      colormap = buffer.readResourceId();
     }
-    int cursor;
+    X11ResourceId cursor;
     if ((valueMask & 0x4000) != 0) {
-      cursor = buffer.readUint32();
+      cursor = buffer.readResourceId();
     }
     return X11ScreensaverSetAttributesRequest(
         drawable, X11Rectangle(x, y, width, height),
@@ -334,7 +334,7 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(3);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
     buffer.writeInt16(geometry.x);
     buffer.writeInt16(geometry.y);
     buffer.writeUint16(geometry.width);
@@ -391,13 +391,13 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
     }
     buffer.writeUint32(valueMask);
     if (backgroundPixmap != null) {
-      buffer.writeUint32(backgroundPixmap);
+      buffer.writeResourceId(backgroundPixmap);
     }
     if (backgroundPixel != null) {
       buffer.writeUint32(backgroundPixel);
     }
     if (borderPixmap != null) {
-      buffer.writeUint32(borderPixmap);
+      buffer.writeResourceId(borderPixmap);
     }
     if (borderPixel != null) {
       buffer.writeUint32(borderPixel);
@@ -430,10 +430,10 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
       buffer.writeUint32(_encodeEventMask(doNotPropagate));
     }
     if (colormap != null) {
-      buffer.writeUint32(colormap);
+      buffer.writeResourceId(colormap);
     }
     if (cursor != null) {
-      buffer.writeUint32(cursor);
+      buffer.writeResourceId(cursor);
     }
   }
 
@@ -492,20 +492,20 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
 }
 
 class X11ScreensaverUnsetAttributesRequest extends X11Request {
-  final int drawable;
+  final X11ResourceId drawable;
 
   X11ScreensaverUnsetAttributesRequest(this.drawable);
 
   factory X11ScreensaverUnsetAttributesRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     return X11ScreensaverUnsetAttributesRequest(drawable);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(4);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
   }
 
   @override

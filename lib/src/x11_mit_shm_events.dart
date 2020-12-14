@@ -1,10 +1,11 @@
 import 'x11_events.dart';
 import 'x11_read_buffer.dart';
+import 'x11_types.dart';
 import 'x11_write_buffer.dart';
 
 class X11MitShmCompletionEvent extends X11Event {
   final int firstEventCode;
-  final int drawable;
+  final X11ResourceId drawable;
   final int minorEvent;
   final int majorEvent;
   final int shmseg;
@@ -16,7 +17,7 @@ class X11MitShmCompletionEvent extends X11Event {
   factory X11MitShmCompletionEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
     buffer.skip(1);
-    var drawable = buffer.readUint32();
+    var drawable = buffer.readResourceId();
     var minorEvent = buffer.readUint16();
     var majorEvent = buffer.readUint8();
     buffer.skip(1);
@@ -29,7 +30,7 @@ class X11MitShmCompletionEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(drawable);
+    buffer.writeResourceId(drawable);
     buffer.writeUint16(minorEvent);
     buffer.writeUint8(majorEvent);
     buffer.skip(1);

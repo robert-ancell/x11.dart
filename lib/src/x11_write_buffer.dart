@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'x11_types.dart';
+
 class X11WriteBuffer {
   final _data = <int>[];
 
@@ -52,6 +54,14 @@ class X11WriteBuffer {
     _data.addAll(bytes.asUint8List());
   }
 
+  void writeResourceId(X11ResourceId id) {
+    writeUint32(id.value);
+  }
+
+  void writeAtom(X11Atom atom) {
+    writeUint32(atom.value);
+  }
+
   void writeFixed(double value) {
     var v = value.truncate() << 16; // FIXME fraction
     writeUint32(v);
@@ -78,6 +88,12 @@ class X11WriteBuffer {
   void writeListOfInt32(List<int> value) {
     for (var v in value) {
       writeInt32(v);
+    }
+  }
+
+  void writeListOfResourceId(List<X11ResourceId> value) {
+    for (var id in value) {
+      writeResourceId(id);
     }
   }
 

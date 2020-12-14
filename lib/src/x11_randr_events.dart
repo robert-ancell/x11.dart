@@ -23,8 +23,8 @@ int _encodeX11RandrRotation(Set<X11RandrRotation> rotation) {
 
 class X11RandrScreenChangeNotifyEvent extends X11Event {
   final int firstEventCode;
-  final int root;
-  final int requestWindow;
+  final X11ResourceId root;
+  final X11ResourceId requestWindow;
   final X11Size sizeInPixels;
   final X11Size sizeInMillimeters;
   final Set<X11RandrRotation> rotation;
@@ -34,8 +34,8 @@ class X11RandrScreenChangeNotifyEvent extends X11Event {
   final int configTimestamp;
 
   X11RandrScreenChangeNotifyEvent(this.firstEventCode,
-      {this.root = 0,
-      this.requestWindow = 0,
+      {this.root = X11ResourceId.None,
+      this.requestWindow = X11ResourceId.None,
       this.sizeInPixels = const X11Size(0, 0),
       this.sizeInMillimeters = const X11Size(0, 0),
       this.rotation = const {X11RandrRotation.rotate0},
@@ -49,8 +49,8 @@ class X11RandrScreenChangeNotifyEvent extends X11Event {
     var rotation = _decodeX11RandrRotation(buffer.readUint8());
     var timestamp = buffer.readUint32();
     var configTimestamp = buffer.readUint32();
-    var root = buffer.readUint32();
-    var requestWindow = buffer.readUint32();
+    var root = buffer.readResourceId();
+    var requestWindow = buffer.readResourceId();
     var sizeId = buffer.readUint16();
     var subPixelOrder = X11SubPixelOrder.values[buffer.readUint16()];
     var widthInPixels = buffer.readUint16();
@@ -74,8 +74,8 @@ class X11RandrScreenChangeNotifyEvent extends X11Event {
     buffer.writeUint8(_encodeX11RandrRotation(rotation));
     buffer.writeUint32(timestamp);
     buffer.writeUint32(configTimestamp);
-    buffer.writeUint32(root);
-    buffer.writeUint32(requestWindow);
+    buffer.writeResourceId(root);
+    buffer.writeResourceId(requestWindow);
     buffer.writeUint16(sizeId);
     buffer.writeUint16(subPixelOrder.index);
     buffer.writeUint16(sizeInPixels.width);
@@ -92,17 +92,17 @@ class X11RandrScreenChangeNotifyEvent extends X11Event {
 
 class X11RandrCrtcChangeNotifyEvent extends X11Event {
   final int firstEventCode;
-  final int requestWindow;
-  final int crtc;
-  final int mode;
+  final X11ResourceId requestWindow;
+  final X11ResourceId crtc;
+  final X11ResourceId mode;
   final Set<X11RandrRotation> rotation;
   final X11Rectangle area;
   final int timestamp;
 
   X11RandrCrtcChangeNotifyEvent(this.firstEventCode,
-      {this.requestWindow = 0,
-      this.crtc = 0,
-      this.mode = 0,
+      {this.requestWindow = X11ResourceId.None,
+      this.crtc = X11ResourceId.None,
+      this.mode = X11ResourceId.None,
       this.rotation = const {X11RandrRotation.rotate0},
       this.area = const X11Rectangle(0, 0, 0, 0),
       this.timestamp = 0});
@@ -110,9 +110,9 @@ class X11RandrCrtcChangeNotifyEvent extends X11Event {
   factory X11RandrCrtcChangeNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
     var timestamp = buffer.readUint32();
-    var requestWindow = buffer.readUint32();
-    var crtc = buffer.readUint32();
-    var mode = buffer.readUint32();
+    var requestWindow = buffer.readResourceId();
+    var crtc = buffer.readResourceId();
+    var mode = buffer.readResourceId();
     var rotation = _decodeX11RandrRotation(buffer.readUint16());
     buffer.skip(2);
     var x = buffer.readInt16();
@@ -132,9 +132,9 @@ class X11RandrCrtcChangeNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(0);
     buffer.writeUint32(timestamp);
-    buffer.writeUint32(requestWindow);
-    buffer.writeUint32(crtc);
-    buffer.writeUint32(mode);
+    buffer.writeResourceId(requestWindow);
+    buffer.writeResourceId(crtc);
+    buffer.writeResourceId(mode);
     buffer.writeUint16(_encodeX11RandrRotation(rotation));
     buffer.skip(2);
     buffer.writeInt16(area.x);
@@ -151,10 +151,10 @@ class X11RandrCrtcChangeNotifyEvent extends X11Event {
 
 class X11RandrOutputChangeNotifyEvent extends X11Event {
   final int firstEventCode;
-  final int requestWindow;
-  final int output;
-  final int crtc;
-  final int mode;
+  final X11ResourceId requestWindow;
+  final X11ResourceId output;
+  final X11ResourceId crtc;
+  final X11ResourceId mode;
   final Set<X11RandrRotation> rotation;
   final int connection;
   final X11SubPixelOrder subPixelOrder;
@@ -162,10 +162,10 @@ class X11RandrOutputChangeNotifyEvent extends X11Event {
   final int configTimestamp;
 
   X11RandrOutputChangeNotifyEvent(this.firstEventCode,
-      {this.requestWindow = 0,
-      this.output = 0,
-      this.crtc = 0,
-      this.mode = 0,
+      {this.requestWindow = X11ResourceId.None,
+      this.output = X11ResourceId.None,
+      this.crtc = X11ResourceId.None,
+      this.mode = X11ResourceId.None,
       this.rotation = const {X11RandrRotation.rotate0},
       this.connection = 0,
       this.subPixelOrder = X11SubPixelOrder.unknown,
@@ -176,10 +176,10 @@ class X11RandrOutputChangeNotifyEvent extends X11Event {
       int firstEventCode, X11ReadBuffer buffer) {
     var timestamp = buffer.readUint32();
     var configTimestamp = buffer.readUint32();
-    var requestWindow = buffer.readUint32();
-    var output = buffer.readUint32();
-    var crtc = buffer.readUint32();
-    var mode = buffer.readUint32();
+    var requestWindow = buffer.readResourceId();
+    var output = buffer.readResourceId();
+    var crtc = buffer.readResourceId();
+    var mode = buffer.readResourceId();
     var rotation = _decodeX11RandrRotation(buffer.readUint16());
     var connection = buffer.readUint8();
     var subPixelOrder = X11SubPixelOrder.values[buffer.readUint8()];
@@ -200,10 +200,10 @@ class X11RandrOutputChangeNotifyEvent extends X11Event {
     buffer.writeUint8(1);
     buffer.writeUint32(timestamp);
     buffer.writeUint32(configTimestamp);
-    buffer.writeUint32(requestWindow);
-    buffer.writeUint32(output);
-    buffer.writeUint32(crtc);
-    buffer.writeUint32(mode);
+    buffer.writeResourceId(requestWindow);
+    buffer.writeResourceId(output);
+    buffer.writeResourceId(crtc);
+    buffer.writeResourceId(mode);
     buffer.writeUint16(_encodeX11RandrRotation(rotation));
     buffer.writeUint8(connection);
     buffer.writeUint8(subPixelOrder.index);
@@ -217,24 +217,24 @@ class X11RandrOutputChangeNotifyEvent extends X11Event {
 
 class X11RandrOutputPropertyNotifyEvent extends X11Event {
   final int firstEventCode;
-  final int window;
-  final int output;
-  final int atom;
+  final X11ResourceId window;
+  final X11ResourceId output;
+  final X11Atom atom;
   final int state; // FIXME: enum
   final int timestamp;
 
   X11RandrOutputPropertyNotifyEvent(this.firstEventCode,
-      {this.window = 0,
-      this.output = 0,
-      this.atom = 0,
+      {this.window = X11ResourceId.None,
+      this.output = X11ResourceId.None,
+      this.atom = X11Atom.None,
       this.state = 0,
       this.timestamp = 0});
 
   factory X11RandrOutputPropertyNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
-    var output = buffer.readUint32();
-    var atom = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var output = buffer.readResourceId();
+    var atom = buffer.readAtom();
     var timestamp = buffer.readUint32();
     var state = buffer.readUint8();
     buffer.skip(11);
@@ -249,9 +249,9 @@ class X11RandrOutputPropertyNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(2);
-    buffer.writeUint32(window);
-    buffer.writeUint32(output);
-    buffer.writeUint32(atom);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(output);
+    buffer.writeAtom(atom);
     buffer.writeUint32(timestamp);
     buffer.writeUint8(state);
     buffer.skip(11);
@@ -265,22 +265,22 @@ class X11RandrOutputPropertyNotifyEvent extends X11Event {
 
 class X11RandrProviderChangeNotifyEvent extends X11Event {
   final int firstEventCode;
-  final int requestWindow;
-  final int provider;
+  final X11ResourceId requestWindow;
+  final X11ResourceId provider;
   final int timestamp;
 
   X11RandrProviderChangeNotifyEvent(
     this.firstEventCode, {
-    this.requestWindow = 0,
-    this.provider = 0,
+    this.requestWindow = X11ResourceId.None,
+    this.provider = X11ResourceId.None,
     this.timestamp = 0,
   });
 
   factory X11RandrProviderChangeNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
     var timestamp = buffer.readUint32();
-    var requestWindow = buffer.readUint32();
-    var provider = buffer.readUint32();
+    var requestWindow = buffer.readResourceId();
+    var provider = buffer.readResourceId();
     buffer.skip(16);
     return X11RandrProviderChangeNotifyEvent(
       firstEventCode,
@@ -294,8 +294,8 @@ class X11RandrProviderChangeNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(3);
     buffer.writeUint32(timestamp);
-    buffer.writeUint32(requestWindow);
-    buffer.writeUint32(provider);
+    buffer.writeResourceId(requestWindow);
+    buffer.writeResourceId(provider);
     buffer.skip(16);
     return firstEventCode + 1;
   }
@@ -307,24 +307,24 @@ class X11RandrProviderChangeNotifyEvent extends X11Event {
 
 class X11RandrProviderPropertyNotifyEvent extends X11Event {
   final int firstEventCode;
-  final int window;
-  final int provider;
-  final int atom;
+  final X11ResourceId window;
+  final X11ResourceId provider;
+  final X11Atom atom;
   final int state; // FIXME: enum
   final int timestamp;
 
   X11RandrProviderPropertyNotifyEvent(this.firstEventCode,
-      {this.window = 0,
-      this.provider = 0,
-      this.atom = 0,
+      {this.window = X11ResourceId.None,
+      this.provider = X11ResourceId.None,
+      this.atom = X11Atom.None,
       this.state = 0,
       this.timestamp = 0});
 
   factory X11RandrProviderPropertyNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
-    var provider = buffer.readUint32();
-    var atom = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var provider = buffer.readResourceId();
+    var atom = buffer.readAtom();
     var timestamp = buffer.readUint32();
     var state = buffer.readUint8();
     buffer.skip(11);
@@ -339,9 +339,9 @@ class X11RandrProviderPropertyNotifyEvent extends X11Event {
   @override
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(4);
-    buffer.writeUint32(window);
-    buffer.writeUint32(provider);
-    buffer.writeUint32(atom);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(provider);
+    buffer.writeAtom(atom);
     buffer.writeUint32(timestamp);
     buffer.writeUint8(state);
     buffer.skip(11);
@@ -355,19 +355,19 @@ class X11RandrProviderPropertyNotifyEvent extends X11Event {
 
 class X11RandrResourceChangeNotifyEvent extends X11Event {
   final int firstEventCode;
-  final int window;
+  final X11ResourceId window;
   final int timestamp;
 
   X11RandrResourceChangeNotifyEvent(
     this.firstEventCode, {
-    this.window = 0,
+    this.window = X11ResourceId.None,
     this.timestamp = 0,
   });
 
   factory X11RandrResourceChangeNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {
     var timestamp = buffer.readUint32();
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     buffer.skip(20);
     return X11RandrResourceChangeNotifyEvent(
       firstEventCode,
@@ -380,7 +380,7 @@ class X11RandrResourceChangeNotifyEvent extends X11Event {
   int encode(X11WriteBuffer buffer) {
     buffer.writeUint8(5);
     buffer.writeUint32(timestamp);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.skip(20);
     return firstEventCode + 1;
   }

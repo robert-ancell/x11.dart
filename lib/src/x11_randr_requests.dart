@@ -14,14 +14,6 @@ int pad(int length) {
   return n;
 }
 
-String _formatHex32(int id) {
-  return '0x' + id.toRadixString(16).padLeft(8, '0');
-}
-
-String _formatId(int id) {
-  return _formatHex32(id);
-}
-
 X11Transform _readX11Transform(X11ReadBuffer buffer) {
   var p11 = buffer.readFixed();
   var p12 = buffer.readFixed();
@@ -114,7 +106,7 @@ int _encodeX11RandrRotation(Set<X11RandrRotation> rotation) {
 }
 
 class X11RandrSetScreenConfigRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final int sizeId;
   final Set<X11RandrRotation> rotation;
   final int rate;
@@ -129,7 +121,7 @@ class X11RandrSetScreenConfigRequest extends X11Request {
       this.configTimestamp = 0});
 
   factory X11RandrSetScreenConfigRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var timestamp = buffer.readUint32();
     var configTimestamp = buffer.readUint32();
     var sizeId = buffer.readUint16();
@@ -147,7 +139,7 @@ class X11RandrSetScreenConfigRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(2);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint32(timestamp);
     buffer.writeUint32(configTimestamp);
     buffer.writeUint16(sizeId);
@@ -158,19 +150,19 @@ class X11RandrSetScreenConfigRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetScreenConfigRequest(${_formatId(window)}, sizeId: ${sizeId}, rotation: ${rotation}, rate: ${rate}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
+      'X11RandrSetScreenConfigRequest(${window}, sizeId: ${sizeId}, rotation: ${rotation}, rate: ${rate}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
 }
 
 class X11RandrSetScreenConfigReply extends X11Reply {
   final X11RandrConfigStatus status;
-  final int root;
+  final X11ResourceId root;
   final X11SubPixelOrder subPixelOrder;
   final int newTimestamp;
   final int configTimestamp;
 
   X11RandrSetScreenConfigReply(
       {this.status = X11RandrConfigStatus.success,
-      this.root = 0,
+      this.root = X11ResourceId.None,
       this.subPixelOrder = X11SubPixelOrder.unknown,
       this.newTimestamp = 0,
       this.configTimestamp = 0});
@@ -179,7 +171,7 @@ class X11RandrSetScreenConfigReply extends X11Reply {
     var status = X11RandrConfigStatus.values[buffer.readUint8()];
     var newTimestamp = buffer.readUint32();
     var configTimestamp = buffer.readUint32();
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var subPixelOrder = X11SubPixelOrder.values[buffer.readUint16()];
     buffer.skip(10);
     return X11RandrSetScreenConfigReply(
@@ -195,7 +187,7 @@ class X11RandrSetScreenConfigReply extends X11Reply {
     buffer.writeUint8(status.index);
     buffer.writeUint32(newTimestamp);
     buffer.writeUint32(configTimestamp);
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeUint16(subPixelOrder.index);
     buffer.skip(10);
   }
@@ -206,13 +198,13 @@ class X11RandrSetScreenConfigReply extends X11Reply {
 }
 
 class X11RandrSelectInputRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final Set<X11RandrSelectMask> enable;
 
   X11RandrSelectInputRequest(this.window, this.enable);
 
   factory X11RandrSelectInputRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var enableValue = buffer.readUint16();
     var enable = <X11RandrSelectMask>{};
     for (var value in X11RandrSelectMask.values) {
@@ -227,7 +219,7 @@ class X11RandrSelectInputRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(4);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     var enableValue = 0;
     for (var e in enable) {
       enableValue |= 1 << e.index;
@@ -237,34 +229,32 @@ class X11RandrSelectInputRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11RandrSelectInputRequest(${_formatId(window)}, ${enable})';
+  String toString() => 'X11RandrSelectInputRequest(${window}, ${enable})';
 }
 
 class X11RandrGetScreenInfoRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11RandrGetScreenInfoRequest(this.window);
 
   factory X11RandrGetScreenInfoRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11RandrGetScreenInfoRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(5);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() =>
-      'X11RandrGetScreenInfoRequest(window: ${_formatId(window)})';
+  String toString() => 'X11RandrGetScreenInfoRequest(window: ${window})';
 }
 
 class X11RandrGetScreenInfoReply extends X11Reply {
   final Set<X11RandrRotation> rotations;
-  final int root;
+  final X11ResourceId root;
   final int sizeId;
   final Set<X11RandrRotation> rotation;
   final int rate;
@@ -274,7 +264,7 @@ class X11RandrGetScreenInfoReply extends X11Reply {
 
   X11RandrGetScreenInfoReply(
       {this.rotations = const {X11RandrRotation.rotate0},
-      this.root = 0,
+      this.root = const X11ResourceId(0),
       this.sizeId = 0,
       this.rotation = const {X11RandrRotation.rotate0},
       this.rate = 0,
@@ -284,7 +274,7 @@ class X11RandrGetScreenInfoReply extends X11Reply {
 
   static X11RandrGetScreenInfoReply fromBuffer(X11ReadBuffer buffer) {
     var rotations = _decodeX11RandrRotation(buffer.readUint8());
-    var root = buffer.readUint32();
+    var root = buffer.readResourceId();
     var timestamp = buffer.readUint32();
     var configTimestamp = buffer.readUint32();
     var sizesLength = buffer.readUint16();
@@ -325,7 +315,7 @@ class X11RandrGetScreenInfoReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(_encodeX11RandrRotation(rotations));
-    buffer.writeUint32(root);
+    buffer.writeResourceId(root);
     buffer.writeUint32(timestamp);
     buffer.writeUint32(configTimestamp);
     buffer.writeUint16(sizes.length);
@@ -352,28 +342,27 @@ class X11RandrGetScreenInfoReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetScreenInfoReply(rotations: ${rotations}, root: ${_formatId(root)}, sizeId: ${sizeId}, rotation: ${rotation}, rate: ${rate}, sizes: ${sizes}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
+      'X11RandrGetScreenInfoReply(rotations: ${rotations}, root: ${root}, sizeId: ${sizeId}, rotation: ${rotation}, rate: ${rate}, sizes: ${sizes}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
 }
 
 class X11RandrGetScreenSizeRangeRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11RandrGetScreenSizeRangeRequest(this.window);
 
   factory X11RandrGetScreenSizeRangeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11RandrGetScreenSizeRangeRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(6);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() =>
-      'X11RandrGetScreenSizeRangeRequest(window: ${_formatId(window)})';
+  String toString() => 'X11RandrGetScreenSizeRangeRequest(window: ${window})';
 }
 
 class X11RandrGetScreenSizeRangeReply extends X11Reply {
@@ -409,7 +398,7 @@ class X11RandrGetScreenSizeRangeReply extends X11Reply {
 }
 
 class X11RandrSetScreenSizeRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11Size sizeInPixels;
   final X11Size sizeInMillimeters;
 
@@ -417,7 +406,7 @@ class X11RandrSetScreenSizeRequest extends X11Request {
       this.window, this.sizeInPixels, this.sizeInMillimeters);
 
   factory X11RandrSetScreenSizeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var widthInPixels = buffer.readUint16();
     var heightInPixels = buffer.readUint16();
     var widthInMillimeters = buffer.readUint32();
@@ -431,7 +420,7 @@ class X11RandrSetScreenSizeRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(7);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint16(sizeInPixels.width);
     buffer.writeUint16(sizeInPixels.height);
     buffer.writeUint32(sizeInMillimeters.width);
@@ -440,28 +429,27 @@ class X11RandrSetScreenSizeRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetScreenSizeRequest(${_formatId(window)}, ${sizeInPixels}, ${sizeInMillimeters})';
+      'X11RandrSetScreenSizeRequest(${window}, ${sizeInPixels}, ${sizeInMillimeters})';
 }
 
 class X11RandrGetScreenResourcesRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11RandrGetScreenResourcesRequest(this.window);
 
   factory X11RandrGetScreenResourcesRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11RandrGetScreenResourcesRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(8);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() =>
-      'X11RandrGetScreenResourcesRequest(window: ${_formatId(window)})';
+  String toString() => 'X11RandrGetScreenResourcesRequest(window: ${window})';
 }
 
 Set<X11RandrModeFlag> _decodeX11RandrModeFlags(int flags) {
@@ -483,8 +471,8 @@ int _encodeX11RandrModeFlags(Set<X11RandrModeFlag> modeFlags) {
 }
 
 class X11RandrGetScreenResourcesReply extends X11Reply {
-  final List<int> crtcs;
-  final List<int> outputs;
+  final List<X11ResourceId> crtcs;
+  final List<X11ResourceId> outputs;
   final List<X11RandrModeInfo> modes;
   final int timestamp;
   final int configTimestamp;
@@ -505,12 +493,12 @@ class X11RandrGetScreenResourcesReply extends X11Reply {
     var modesLength = buffer.readUint16();
     var namesLength = buffer.readUint16();
     buffer.skip(8);
-    var crtcs = buffer.readListOfUint32(crtcsLength);
-    var outputs = buffer.readListOfUint32(outputsLength);
+    var crtcs = buffer.readListOfResourceId(crtcsLength);
+    var outputs = buffer.readListOfResourceId(outputsLength);
     var modesWithoutNames = <X11RandrModeInfo>[];
     var nameLengths = <int>[];
     for (var i = 0; i < modesLength; i++) {
-      var id = buffer.readUint32();
+      var id = buffer.readResourceId();
       var widthInPixels = buffer.readUint16();
       var heightInPixels = buffer.readUint16();
       var dotClock = buffer.readUint32();
@@ -580,8 +568,10 @@ class X11RandrGetScreenResourcesReply extends X11Reply {
     }
     buffer.writeUint16(namesLength);
     buffer.skip(8);
+    buffer.writeListOfResourceId(crtcs);
+    buffer.writeListOfResourceId(outputs);
     for (var mode in modes) {
-      buffer.writeUint32(mode.id);
+      buffer.writeResourceId(mode.id);
       buffer.writeUint16(mode.sizeInPixels.width);
       buffer.writeUint16(mode.sizeInPixels.height);
       buffer.writeUint32(mode.dotClock);
@@ -607,13 +597,13 @@ class X11RandrGetScreenResourcesReply extends X11Reply {
 }
 
 class X11RandrGetOutputInfoRequest extends X11Request {
-  final int output;
+  final X11ResourceId output;
   final int configTimestamp;
 
   X11RandrGetOutputInfoRequest(this.output, {this.configTimestamp = 0});
 
   factory X11RandrGetOutputInfoRequest.fromBuffer(X11ReadBuffer buffer) {
-    var output = buffer.readUint32();
+    var output = buffer.readResourceId();
     var configTimestamp = buffer.readUint32();
     return X11RandrGetOutputInfoRequest(output,
         configTimestamp: configTimestamp);
@@ -622,30 +612,30 @@ class X11RandrGetOutputInfoRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(9);
-    buffer.writeUint32(output);
+    buffer.writeResourceId(output);
     buffer.writeUint32(configTimestamp);
   }
 
   @override
   String toString() =>
-      'X11RandrGetOutputInfoRequest(${_formatId(output)}, configTimestamp: ${configTimestamp})';
+      'X11RandrGetOutputInfoRequest(${output}, configTimestamp: ${configTimestamp})';
 }
 
 class X11RandrGetOutputInfoReply extends X11Reply {
   final String name;
   final X11RandrConfigStatus status;
-  final int crtc;
+  final X11ResourceId crtc;
   final X11Size sizeInMillimeters;
   final int connection;
   final X11SubPixelOrder subPixelOrder;
-  final List<int> crtcs;
-  final List<int> modes;
-  final List<int> clones;
+  final List<X11ResourceId> crtcs;
+  final List<X11ResourceId> modes;
+  final List<X11ResourceId> clones;
   final int timestamp;
 
   X11RandrGetOutputInfoReply(this.name,
       {this.status = X11RandrConfigStatus.success,
-      this.crtc = 0,
+      this.crtc = X11ResourceId.None,
       this.sizeInMillimeters = const X11Size(0, 0),
       this.connection = 0,
       this.subPixelOrder = X11SubPixelOrder.unknown,
@@ -657,7 +647,7 @@ class X11RandrGetOutputInfoReply extends X11Reply {
   static X11RandrGetOutputInfoReply fromBuffer(X11ReadBuffer buffer) {
     var status = X11RandrConfigStatus.values[buffer.readUint8()];
     var timestamp = buffer.readUint32();
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     var widthInMillimeters = buffer.readUint32();
     var heightInMillimeters = buffer.readUint32();
     var connection = buffer.readUint8();
@@ -667,9 +657,9 @@ class X11RandrGetOutputInfoReply extends X11Reply {
     buffer.readUint16(); // FIXME: Not used 'preferred modes' length!?
     var clonesLength = buffer.readUint16();
     var nameLength = buffer.readUint16();
-    var crtcs = buffer.readListOfUint32(crtcsLength);
-    var modes = buffer.readListOfUint32(modesLength);
-    var clones = buffer.readListOfUint32(clonesLength);
+    var crtcs = buffer.readListOfResourceId(crtcsLength);
+    var modes = buffer.readListOfResourceId(modesLength);
+    var clones = buffer.readListOfResourceId(clonesLength);
     var name = buffer.readString8(nameLength);
     buffer.skip(pad(nameLength));
     return X11RandrGetOutputInfoReply(name,
@@ -688,7 +678,7 @@ class X11RandrGetOutputInfoReply extends X11Reply {
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(status.index);
     buffer.writeUint32(timestamp);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
     buffer.writeUint32(sizeInMillimeters.width);
     buffer.writeUint32(sizeInMillimeters.height);
     buffer.writeUint8(connection);
@@ -699,9 +689,9 @@ class X11RandrGetOutputInfoReply extends X11Reply {
     buffer.writeUint16(clones.length);
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint16(nameLength);
-    buffer.writeListOfUint32(crtcs);
-    buffer.writeListOfUint32(modes);
-    buffer.writeListOfUint32(clones);
+    buffer.writeListOfResourceId(crtcs);
+    buffer.writeListOfResourceId(modes);
+    buffer.writeListOfResourceId(clones);
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
   }
@@ -712,28 +702,27 @@ class X11RandrGetOutputInfoReply extends X11Reply {
 }
 
 class X11RandrListOutputPropertiesRequest extends X11Request {
-  final int output;
+  final X11ResourceId output;
 
   X11RandrListOutputPropertiesRequest(this.output);
 
   factory X11RandrListOutputPropertiesRequest.fromBuffer(X11ReadBuffer buffer) {
-    var output = buffer.readUint32();
+    var output = buffer.readResourceId();
     return X11RandrListOutputPropertiesRequest(output);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(10);
-    buffer.writeUint32(output);
+    buffer.writeResourceId(output);
   }
 
   @override
-  String toString() =>
-      'X11RandrListOutputPropertiesRequest(${_formatId(output)})';
+  String toString() => 'X11RandrListOutputPropertiesRequest(${output})';
 }
 
 class X11RandrListOutputPropertiesReply extends X11Reply {
-  final List<int> atoms;
+  final List<X11Atom> atoms;
 
   X11RandrListOutputPropertiesReply(this.atoms);
 
@@ -741,7 +730,10 @@ class X11RandrListOutputPropertiesReply extends X11Reply {
     buffer.skip(1);
     var atomsLength = buffer.readUint16();
     buffer.skip(22);
-    var atoms = buffer.readListOfUint32(atomsLength);
+    var atoms = <X11Atom>[];
+    for (var i = 0; i < atomsLength; i++) {
+      atoms.add(buffer.readAtom());
+    }
     return X11RandrListOutputPropertiesReply(atoms);
   }
 
@@ -750,7 +742,9 @@ class X11RandrListOutputPropertiesReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(atoms.length);
     buffer.skip(22);
-    buffer.writeListOfUint32(atoms);
+    for (var atom in atoms) {
+      buffer.writeAtom(atom);
+    }
   }
 
   @override
@@ -758,27 +752,27 @@ class X11RandrListOutputPropertiesReply extends X11Reply {
 }
 
 class X11RandrQueryOutputPropertyRequest extends X11Request {
-  final int output;
-  final int property;
+  final X11ResourceId output;
+  final X11Atom property;
 
   X11RandrQueryOutputPropertyRequest(this.output, this.property);
 
   factory X11RandrQueryOutputPropertyRequest.fromBuffer(X11ReadBuffer buffer) {
-    var output = buffer.readUint32();
-    var property = buffer.readUint32();
+    var output = buffer.readResourceId();
+    var property = buffer.readAtom();
     return X11RandrQueryOutputPropertyRequest(output, property);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(11);
-    buffer.writeUint32(output);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(output);
+    buffer.writeAtom(property);
   }
 
   @override
   String toString() =>
-      'X11RandrQueryOutputPropertyRequest(${_formatId(output)}, ${property})';
+      'X11RandrQueryOutputPropertyRequest(${output}, ${property})';
 }
 
 class X11RandrQueryOutputPropertyReply extends X11Reply {
@@ -827,8 +821,8 @@ class X11RandrQueryOutputPropertyReply extends X11Reply {
 }
 
 class X11RandrConfigureOutputPropertyRequest extends X11Request {
-  final int output;
-  final int property;
+  final X11ResourceId output;
+  final X11Atom property;
   final List<int> validValues;
   final bool range;
   final bool pending;
@@ -839,8 +833,8 @@ class X11RandrConfigureOutputPropertyRequest extends X11Request {
 
   factory X11RandrConfigureOutputPropertyRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var output = buffer.readUint32();
-    var property = buffer.readUint32();
+    var output = buffer.readResourceId();
+    var property = buffer.readAtom();
     var pending = buffer.readBool();
     var range = buffer.readBool();
     buffer.skip(2);
@@ -855,8 +849,8 @@ class X11RandrConfigureOutputPropertyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(12);
-    buffer.writeUint32(output);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(output);
+    buffer.writeAtom(property);
     buffer.writeBool(pending);
     buffer.writeBool(range);
     buffer.skip(2);
@@ -867,26 +861,26 @@ class X11RandrConfigureOutputPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrConfigureOutputPropertyRequest(${validValues}, range: ${range}, output: ${_formatId(output)}, property: ${property}, pending: ${pending})';
+      'X11RandrConfigureOutputPropertyRequest(${validValues}, range: ${range}, output: ${output}, property: ${property}, pending: ${pending})';
 }
 
 class X11RandrChangeOutputPropertyRequest extends X11Request {
-  final int output;
-  final int property;
+  final X11ResourceId output;
+  final X11Atom property;
   final List<int> data;
-  final int type;
+  final X11Atom type;
   final int format;
   final X11ChangePropertyMode mode;
 
   X11RandrChangeOutputPropertyRequest(this.output, this.property, this.data,
-      {this.type = 0,
+      {this.type = X11Atom.None,
       this.format = 0,
       this.mode = X11ChangePropertyMode.replace});
 
   factory X11RandrChangeOutputPropertyRequest.fromBuffer(X11ReadBuffer buffer) {
-    var output = buffer.readUint32();
-    var property = buffer.readUint32();
-    var type = buffer.readUint32();
+    var output = buffer.readResourceId();
+    var property = buffer.readAtom();
+    var type = buffer.readAtom();
     var format = buffer.readUint8();
     var mode = X11ChangePropertyMode.values[buffer.readUint8()];
     buffer.skip(2);
@@ -914,9 +908,9 @@ class X11RandrChangeOutputPropertyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(13);
-    buffer.writeUint32(output);
-    buffer.writeUint32(property);
-    buffer.writeUint32(type);
+    buffer.writeResourceId(output);
+    buffer.writeAtom(property);
+    buffer.writeAtom(type);
     buffer.writeUint8(format);
     buffer.writeUint8(mode.index);
     buffer.skip(2);
@@ -940,37 +934,37 @@ class X11RandrChangeOutputPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrChangeOutputPropertyRequest(${_formatId(output)}, ${property}, ${data}, type: ${type}, format: ${format}, mode: ${mode})';
+      'X11RandrChangeOutputPropertyRequest(${output}, ${property}, ${data}, type: ${type}, format: ${format}, mode: ${mode})';
 }
 
 class X11RandrDeleteOutputPropertyRequest extends X11Request {
-  final int output;
-  final int property;
+  final X11ResourceId output;
+  final X11Atom property;
 
   X11RandrDeleteOutputPropertyRequest(this.output, this.property);
 
   factory X11RandrDeleteOutputPropertyRequest.fromBuffer(X11ReadBuffer buffer) {
-    var output = buffer.readUint32();
-    var property = buffer.readUint32();
+    var output = buffer.readResourceId();
+    var property = buffer.readAtom();
     return X11RandrDeleteOutputPropertyRequest(output, property);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(14);
-    buffer.writeUint32(output);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(output);
+    buffer.writeAtom(property);
   }
 
   @override
   String toString() =>
-      'X11RandrDeleteOutputPropertyRequest(${_formatId(output)}, ${property})';
+      'X11RandrDeleteOutputPropertyRequest(${output}, ${property})';
 }
 
 class X11RandrGetOutputPropertyRequest extends X11Request {
-  final int output;
-  final int property;
-  final int type;
+  final X11ResourceId output;
+  final X11Atom property;
+  final X11Atom type;
   final int longOffset;
   final int longLength;
   final bool delete;
@@ -980,9 +974,9 @@ class X11RandrGetOutputPropertyRequest extends X11Request {
       {this.type, this.longOffset, this.longLength, this.delete, this.pending});
 
   factory X11RandrGetOutputPropertyRequest.fromBuffer(X11ReadBuffer buffer) {
-    var output = buffer.readUint32();
-    var property = buffer.readUint32();
-    var type = buffer.readUint32();
+    var output = buffer.readResourceId();
+    var property = buffer.readAtom();
+    var type = buffer.readAtom();
     var longOffset = buffer.readUint32();
     var longLength = buffer.readUint32();
     var delete = buffer.readBool();
@@ -999,9 +993,9 @@ class X11RandrGetOutputPropertyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(15);
-    buffer.writeUint32(output);
-    buffer.writeUint32(property);
-    buffer.writeUint32(type);
+    buffer.writeResourceId(output);
+    buffer.writeAtom(property);
+    buffer.writeAtom(type);
     buffer.writeUint32(longOffset);
     buffer.writeUint32(longLength);
     buffer.writeBool(delete);
@@ -1011,24 +1005,24 @@ class X11RandrGetOutputPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrGetOutputPropertyRequest(${_formatId(output)}, property: ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}, pending: ${pending})';
+      'X11RandrGetOutputPropertyRequest(${output}, property: ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}, pending: ${pending})';
 }
 
 class X11RandrGetOutputPropertyReply extends X11Reply {
   final int format;
-  final int type;
+  final X11Atom type;
   final int bytesAfter;
   final List<int> data;
 
   X11RandrGetOutputPropertyReply(
       {this.format = 0,
-      this.type = 0,
+      this.type = X11Atom.None,
       this.bytesAfter = 0,
       this.data = const []});
 
   static X11RandrGetOutputPropertyReply fromBuffer(X11ReadBuffer buffer) {
     var format = buffer.readUint8();
-    var type = buffer.readUint32();
+    var type = buffer.readAtom();
     var bytesAfter = buffer.readUint32();
     var dataLength = buffer.readUint32();
     buffer.skip(12);
@@ -1055,7 +1049,7 @@ class X11RandrGetOutputPropertyReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(format);
-    buffer.writeUint32(type);
+    buffer.writeAtom(type);
     buffer.writeUint32(bytesAfter);
     buffer.writeUint32(data.length);
     buffer.skip(12);
@@ -1082,14 +1076,14 @@ class X11RandrGetOutputPropertyReply extends X11Reply {
 }
 
 class X11RandrCreateModeRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11RandrModeInfo modeInfo;
 
   X11RandrCreateModeRequest(this.window, this.modeInfo);
 
   factory X11RandrCreateModeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
-    var id = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var id = buffer.readResourceId();
     var widthInPixels = buffer.readUint16();
     var heightInPixels = buffer.readUint16();
     var dotClock = buffer.readUint32();
@@ -1123,8 +1117,8 @@ class X11RandrCreateModeRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(16);
-    buffer.writeUint32(window);
-    buffer.writeUint32(modeInfo.id);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(modeInfo.id);
     buffer.writeUint16(modeInfo.sizeInPixels.width);
     buffer.writeUint16(modeInfo.sizeInPixels.height);
     buffer.writeUint32(modeInfo.dotClock);
@@ -1143,18 +1137,17 @@ class X11RandrCreateModeRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11RandrCreateModeRequest(${_formatId(window)}, ${modeInfo})';
+  String toString() => 'X11RandrCreateModeRequest(${window}, ${modeInfo})';
 }
 
 class X11RandrCreateModeReply extends X11Reply {
-  final int mode;
+  final X11ResourceId mode;
 
   X11RandrCreateModeReply(this.mode);
 
   static X11RandrCreateModeReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var mode = buffer.readUint32();
+    var mode = buffer.readResourceId();
     buffer.skip(20);
     return X11RandrCreateModeReply(mode);
   }
@@ -1162,7 +1155,7 @@ class X11RandrCreateModeReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(mode);
+    buffer.writeResourceId(mode);
     buffer.skip(20);
   }
 
@@ -1171,19 +1164,19 @@ class X11RandrCreateModeReply extends X11Reply {
 }
 
 class X11RandrDestroyModeRequest extends X11Request {
-  final int mode;
+  final X11ResourceId mode;
 
   X11RandrDestroyModeRequest(this.mode);
 
   factory X11RandrDestroyModeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var mode = buffer.readUint32();
+    var mode = buffer.readResourceId();
     return X11RandrDestroyModeRequest(mode);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(17);
-    buffer.writeUint32(mode);
+    buffer.writeResourceId(mode);
   }
 
   @override
@@ -1191,61 +1184,59 @@ class X11RandrDestroyModeRequest extends X11Request {
 }
 
 class X11RandrAddOutputModeRequest extends X11Request {
-  final int output;
-  final int mode;
+  final X11ResourceId output;
+  final X11ResourceId mode;
 
   X11RandrAddOutputModeRequest(this.output, this.mode);
 
   factory X11RandrAddOutputModeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var output = buffer.readUint32();
-    var mode = buffer.readUint32();
+    var output = buffer.readResourceId();
+    var mode = buffer.readResourceId();
     return X11RandrAddOutputModeRequest(output, mode);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(18);
-    buffer.writeUint32(output);
-    buffer.writeUint32(mode);
+    buffer.writeResourceId(output);
+    buffer.writeResourceId(mode);
   }
 
   @override
-  String toString() =>
-      'X11RandrAddOutputModeRequest(${_formatId(output)}, ${mode})';
+  String toString() => 'X11RandrAddOutputModeRequest(${output}, ${mode})';
 }
 
 class X11RandrDeleteOutputModeRequest extends X11Request {
-  final int output;
-  final int mode;
+  final X11ResourceId output;
+  final X11ResourceId mode;
 
   X11RandrDeleteOutputModeRequest(this.output, this.mode);
 
   factory X11RandrDeleteOutputModeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var output = buffer.readUint32();
-    var mode = buffer.readUint32();
+    var output = buffer.readResourceId();
+    var mode = buffer.readResourceId();
     return X11RandrDeleteOutputModeRequest(output, mode);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(19);
-    buffer.writeUint32(output);
-    buffer.writeUint32(mode);
+    buffer.writeResourceId(output);
+    buffer.writeResourceId(mode);
   }
 
   @override
-  String toString() =>
-      'X11RandrDeleteOutputModeRequest(${_formatId(output)}, ${mode})';
+  String toString() => 'X11RandrDeleteOutputModeRequest(${output}, ${mode})';
 }
 
 class X11RandrGetCrtcInfoRequest extends X11Request {
-  final int crtc;
+  final X11ResourceId crtc;
   final int configTimestamp;
 
   X11RandrGetCrtcInfoRequest(this.crtc, {this.configTimestamp = 0});
 
   factory X11RandrGetCrtcInfoRequest.fromBuffer(X11ReadBuffer buffer) {
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     var configTimestamp = buffer.readUint32();
     return X11RandrGetCrtcInfoRequest(crtc, configTimestamp: configTimestamp);
   }
@@ -1253,7 +1244,7 @@ class X11RandrGetCrtcInfoRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(20);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
     buffer.writeUint32(configTimestamp);
   }
 
@@ -1265,18 +1256,18 @@ class X11RandrGetCrtcInfoRequest extends X11Request {
 class X11RandrGetCrtcInfoReply extends X11Reply {
   final X11RandrConfigStatus status;
   final X11Rectangle area;
-  final int mode;
+  final X11ResourceId mode;
   final int rotation;
   final int rotations;
-  final List<int> outputs;
-  final List<int> possibleOutputs;
+  final List<X11ResourceId> outputs;
+  final List<X11ResourceId> possibleOutputs;
   final int timestamp;
 
   X11RandrGetCrtcInfoReply(
       {this.status = X11RandrConfigStatus.success,
       this.timestamp = 0,
       this.area = const X11Rectangle(0, 0, 0, 0),
-      this.mode = 0,
+      this.mode = X11ResourceId.None,
       this.rotation = 0,
       this.rotations = 0,
       this.outputs = const [],
@@ -1289,13 +1280,13 @@ class X11RandrGetCrtcInfoReply extends X11Reply {
     var y = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    var mode = buffer.readUint32();
+    var mode = buffer.readResourceId();
     var rotation = buffer.readUint16();
     var rotations = buffer.readUint16();
     var outputsLength = buffer.readUint16();
     var possibleOutputsLength = buffer.readUint16();
-    var outputs = buffer.readListOfUint32(outputsLength);
-    var possibleOutputs = buffer.readListOfUint32(possibleOutputsLength);
+    var outputs = buffer.readListOfResourceId(outputsLength);
+    var possibleOutputs = buffer.readListOfResourceId(possibleOutputsLength);
     return X11RandrGetCrtcInfoReply(
         status: status,
         timestamp: timestamp,
@@ -1315,13 +1306,13 @@ class X11RandrGetCrtcInfoReply extends X11Reply {
     buffer.writeInt16(area.y);
     buffer.writeUint16(area.width);
     buffer.writeUint16(area.height);
-    buffer.writeUint32(mode);
+    buffer.writeResourceId(mode);
     buffer.writeUint16(rotation);
     buffer.writeUint16(rotations);
     buffer.writeUint16(outputs.length);
     buffer.writeUint16(possibleOutputs.length);
-    buffer.writeListOfUint32(outputs);
-    buffer.writeListOfUint32(possibleOutputs);
+    buffer.writeListOfResourceId(outputs);
+    buffer.writeListOfResourceId(possibleOutputs);
   }
 
   @override
@@ -1330,34 +1321,34 @@ class X11RandrGetCrtcInfoReply extends X11Reply {
 }
 
 class X11RandrSetCrtcConfigRequest extends X11Request {
-  final int crtc;
-  final int mode;
+  final X11ResourceId crtc;
+  final X11ResourceId mode;
   final X11Point position;
   final Set<X11RandrRotation> rotation;
-  final List<int> outputs;
+  final List<X11ResourceId> outputs;
   final int timestamp;
   final int configTimestamp;
 
   X11RandrSetCrtcConfigRequest(this.crtc,
       {this.position,
-      this.mode = 0,
+      this.mode = X11ResourceId.None,
       this.rotation = const {X11RandrRotation.rotate0},
       this.outputs = const [],
       this.timestamp = 0,
       this.configTimestamp = 0});
 
   factory X11RandrSetCrtcConfigRequest.fromBuffer(X11ReadBuffer buffer) {
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     var timestamp = buffer.readUint32();
     var configTimestamp = buffer.readUint32();
     var x = buffer.readInt16();
     var y = buffer.readInt16();
-    var mode = buffer.readUint32();
+    var mode = buffer.readResourceId();
     var rotation = _decodeX11RandrRotation(buffer.readUint16());
     buffer.skip(2);
-    var outputs = <int>[];
+    var outputs = <X11ResourceId>[];
     while (buffer.remaining > 0) {
-      outputs.add(buffer.readUint32());
+      outputs.add(buffer.readResourceId());
     }
     return X11RandrSetCrtcConfigRequest(crtc,
         mode: mode,
@@ -1371,15 +1362,15 @@ class X11RandrSetCrtcConfigRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(21);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
     buffer.writeUint32(timestamp);
     buffer.writeUint32(configTimestamp);
     buffer.writeInt16(position.x);
     buffer.writeInt16(position.y);
-    buffer.writeUint32(mode);
+    buffer.writeResourceId(mode);
     buffer.writeUint16(_encodeX11RandrRotation(rotation));
     buffer.skip(2);
-    buffer.writeListOfUint32(outputs);
+    buffer.writeListOfResourceId(outputs);
   }
 
   @override
@@ -1413,19 +1404,19 @@ class X11RandrSetCrtcConfigReply extends X11Reply {
 }
 
 class X11RandrGetCrtcGammaSizeRequest extends X11Request {
-  final int crtc;
+  final X11ResourceId crtc;
 
   X11RandrGetCrtcGammaSizeRequest(this.crtc);
 
   factory X11RandrGetCrtcGammaSizeRequest.fromBuffer(X11ReadBuffer buffer) {
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     return X11RandrGetCrtcGammaSizeRequest(crtc);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(22);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
   }
 
   @override
@@ -1456,19 +1447,19 @@ class X11RandrGetCrtcGammaSizeReply extends X11Reply {
 }
 
 class X11RandrGetCrtcGammaRequest extends X11Request {
-  final int crtc;
+  final X11ResourceId crtc;
 
   X11RandrGetCrtcGammaRequest(this.crtc);
 
   factory X11RandrGetCrtcGammaRequest.fromBuffer(X11ReadBuffer buffer) {
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     return X11RandrGetCrtcGammaRequest(crtc);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(23);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
   }
 
   @override
@@ -1524,7 +1515,7 @@ class X11RandrGetCrtcGammaReply extends X11Reply {
 }
 
 class X11RandrSetCrtcGammaRequest extends X11Request {
-  final int crtc;
+  final X11ResourceId crtc;
   final List<int> red;
   final List<int> green;
   final List<int> blue;
@@ -1532,7 +1523,7 @@ class X11RandrSetCrtcGammaRequest extends X11Request {
   X11RandrSetCrtcGammaRequest(this.crtc, this.red, this.green, this.blue);
 
   factory X11RandrSetCrtcGammaRequest.fromBuffer(X11ReadBuffer buffer) {
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     var size = buffer.readUint16();
     buffer.skip(2);
     var red = <int>[];
@@ -1553,7 +1544,7 @@ class X11RandrSetCrtcGammaRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(24);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
     buffer.writeUint16(red.length);
     buffer.skip(2);
     for (var level in red) {
@@ -1574,32 +1565,31 @@ class X11RandrSetCrtcGammaRequest extends X11Request {
 }
 
 class X11RandrGetScreenResourcesCurrentRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11RandrGetScreenResourcesCurrentRequest(this.window);
 
   factory X11RandrGetScreenResourcesCurrentRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11RandrGetScreenResourcesCurrentRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(25);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() =>
-      'X11RandrGetScreenResourcesCurrentRequest(${_formatId(window)})';
+  String toString() => 'X11RandrGetScreenResourcesCurrentRequest(${window})';
 }
 
 class X11RandrGetScreenResourcesCurrentReply extends X11Reply {
   final int timestamp;
   final int configTimestamp;
-  final List<int> crtcs;
-  final List<int> outputs;
+  final List<X11ResourceId> crtcs;
+  final List<X11ResourceId> outputs;
   final List<X11RandrModeInfo> modes;
 
   X11RandrGetScreenResourcesCurrentReply(
@@ -1619,12 +1609,12 @@ class X11RandrGetScreenResourcesCurrentReply extends X11Reply {
     var modesLength = buffer.readUint16();
     var namesLength = buffer.readUint16();
     buffer.skip(8);
-    var crtcs = buffer.readListOfUint32(crtcsLength);
-    var outputs = buffer.readListOfUint32(outputsLength);
+    var crtcs = buffer.readListOfResourceId(crtcsLength);
+    var outputs = buffer.readListOfResourceId(outputsLength);
     var modesWithoutNames = <X11RandrModeInfo>[];
     var nameLengths = <int>[];
     for (var i = 0; i < modesLength; i++) {
-      var id = buffer.readUint32();
+      var id = buffer.readResourceId();
       var widthInPixels = buffer.readUint16();
       var heightInPixels = buffer.readUint16();
       var dotClock = buffer.readUint32();
@@ -1695,7 +1685,7 @@ class X11RandrGetScreenResourcesCurrentReply extends X11Reply {
     buffer.writeUint16(namesLength);
     buffer.skip(8);
     for (var mode in modes) {
-      buffer.writeUint32(mode.id);
+      buffer.writeResourceId(mode.id);
       buffer.writeUint16(mode.sizeInPixels.width);
       buffer.writeUint16(mode.sizeInPixels.height);
       buffer.writeUint32(mode.dotClock);
@@ -1721,7 +1711,7 @@ class X11RandrGetScreenResourcesCurrentReply extends X11Reply {
 }
 
 class X11RandrSetCrtcTransformRequest extends X11Request {
-  final int crtc;
+  final X11ResourceId crtc;
   final X11Transform transform;
   final String filterName;
   final List<double> filterParams;
@@ -1730,7 +1720,7 @@ class X11RandrSetCrtcTransformRequest extends X11Request {
       {this.filterName = '', this.filterParams = const []});
 
   factory X11RandrSetCrtcTransformRequest.fromBuffer(X11ReadBuffer buffer) {
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     var transform = _readX11Transform(buffer);
     var filterNameLength = buffer.readUint16();
     buffer.skip(2);
@@ -1747,7 +1737,7 @@ class X11RandrSetCrtcTransformRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(26);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
     _writeX11Transform(buffer, transform);
     var filterNameLength = buffer.getString8Length(filterName);
     buffer.writeUint16(filterNameLength);
@@ -1763,19 +1753,19 @@ class X11RandrSetCrtcTransformRequest extends X11Request {
 }
 
 class X11RandrGetCrtcTransformRequest extends X11Request {
-  final int crtc;
+  final X11ResourceId crtc;
 
   X11RandrGetCrtcTransformRequest(this.crtc);
 
   factory X11RandrGetCrtcTransformRequest.fromBuffer(X11ReadBuffer buffer) {
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     return X11RandrGetCrtcTransformRequest(crtc);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(27);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
   }
 
   @override
@@ -1855,19 +1845,19 @@ class X11RandrGetCrtcTransformReply extends X11Reply {
 }
 
 class X11RandrGetPanningRequest extends X11Request {
-  final int crtc;
+  final X11ResourceId crtc;
 
   X11RandrGetPanningRequest(this.crtc);
 
   factory X11RandrGetPanningRequest.fromBuffer(X11ReadBuffer buffer) {
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     return X11RandrGetPanningRequest(crtc);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(28);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
   }
 
   @override
@@ -1944,7 +1934,7 @@ class X11RandrGetPanningReply extends X11Reply {
 }
 
 class X11RandrSetPanningRequest extends X11Request {
-  final int crtc;
+  final X11ResourceId crtc;
   final X11Rectangle area;
   final X11Rectangle trackArea;
   final int borderLeft;
@@ -1963,7 +1953,7 @@ class X11RandrSetPanningRequest extends X11Request {
       this.timestamp = 0});
 
   factory X11RandrSetPanningRequest.fromBuffer(X11ReadBuffer buffer) {
-    var crtc = buffer.readUint32();
+    var crtc = buffer.readResourceId();
     var timestamp = buffer.readUint32();
     var left = buffer.readUint16();
     var top = buffer.readUint16();
@@ -1990,7 +1980,7 @@ class X11RandrSetPanningRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(29);
-    buffer.writeUint32(crtc);
+    buffer.writeResourceId(crtc);
     buffer.writeUint32(timestamp);
     buffer.writeUint16(area.x);
     buffer.writeUint16(area.y);
@@ -2035,92 +2025,91 @@ class X11RandrSetPanningReply extends X11Reply {
 }
 
 class X11RandrSetOutputPrimaryRequest extends X11Request {
-  final int window;
-  final int output;
+  final X11ResourceId window;
+  final X11ResourceId output;
 
   X11RandrSetOutputPrimaryRequest(this.window, this.output);
 
   factory X11RandrSetOutputPrimaryRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
-    var output = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var output = buffer.readResourceId();
     return X11RandrSetOutputPrimaryRequest(window, output);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(30);
-    buffer.writeUint32(window);
-    buffer.writeUint32(output);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(output);
   }
 
   @override
-  String toString() =>
-      'X11RandrSetOutputPrimaryRequest(${_formatId(window)}, ${_formatId(output)})';
+  String toString() => 'X11RandrSetOutputPrimaryRequest(${window}, ${output})';
 }
 
 class X11RandrGetOutputPrimaryRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11RandrGetOutputPrimaryRequest(this.window);
 
   factory X11RandrGetOutputPrimaryRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11RandrGetOutputPrimaryRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(31);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11RandrGetOutputPrimaryRequest(${_formatId(window)})';
+  String toString() => 'X11RandrGetOutputPrimaryRequest(${window})';
 }
 
 class X11RandrGetOutputPrimaryReply extends X11Reply {
-  final int output;
+  final X11ResourceId output;
 
   X11RandrGetOutputPrimaryReply(this.output);
 
   static X11RandrGetOutputPrimaryReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var output = buffer.readUint32();
+    var output = buffer.readResourceId();
     return X11RandrGetOutputPrimaryReply(output);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(output);
+    buffer.writeResourceId(output);
   }
 
   @override
-  String toString() => 'X11RandrGetOutputPrimaryReply(${_formatId(output)})';
+  String toString() => 'X11RandrGetOutputPrimaryReply(${output})';
 }
 
 class X11RandrGetProvidersRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
 
   X11RandrGetProvidersRequest(this.window);
 
   factory X11RandrGetProvidersRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     return X11RandrGetProvidersRequest(window);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(32);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
   }
 
   @override
-  String toString() => 'X11RandrGetProvidersRequest(${_formatId(window)})';
+  String toString() => 'X11RandrGetProvidersRequest(${window})';
 }
 
 class X11RandrGetProvidersReply extends X11Reply {
-  final List<int> providers;
+  final List<X11ResourceId> providers;
   final int timestamp;
 
   X11RandrGetProvidersReply(this.providers, {this.timestamp = 0});
@@ -2130,7 +2119,7 @@ class X11RandrGetProvidersReply extends X11Reply {
     var timestamp = buffer.readUint32();
     var providersLength = buffer.readUint16();
     buffer.skip(18);
-    var providers = buffer.readListOfUint32(providersLength);
+    var providers = buffer.readListOfResourceId(providersLength);
     return X11RandrGetProvidersReply(providers, timestamp: timestamp);
   }
 
@@ -2140,7 +2129,7 @@ class X11RandrGetProvidersReply extends X11Reply {
     buffer.writeUint32(timestamp);
     buffer.writeUint16(providers.length);
     buffer.skip(18);
-    buffer.writeListOfUint32(providers);
+    buffer.writeListOfResourceId(providers);
   }
 
   @override
@@ -2149,13 +2138,13 @@ class X11RandrGetProvidersReply extends X11Reply {
 }
 
 class X11RandrGetProviderInfoRequest extends X11Request {
-  final int provider;
+  final X11ResourceId provider;
   final int configTimestamp;
 
   X11RandrGetProviderInfoRequest(this.provider, {this.configTimestamp = 0});
 
   factory X11RandrGetProviderInfoRequest.fromBuffer(X11ReadBuffer buffer) {
-    var provider = buffer.readUint32();
+    var provider = buffer.readResourceId();
     var configTimestamp = buffer.readUint32();
     return X11RandrGetProviderInfoRequest(provider,
         configTimestamp: configTimestamp);
@@ -2164,13 +2153,13 @@ class X11RandrGetProviderInfoRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(33);
-    buffer.writeUint32(provider);
+    buffer.writeResourceId(provider);
     buffer.writeUint32(configTimestamp);
   }
 
   @override
   String toString() =>
-      'X11RandrGetProviderInfoRequest(${_formatId(provider)}, configTimestamp: ${configTimestamp})';
+      'X11RandrGetProviderInfoRequest(${provider}, configTimestamp: ${configTimestamp})';
 }
 
 class X11RandrGetProviderInfoReply extends X11Reply {
@@ -2178,9 +2167,9 @@ class X11RandrGetProviderInfoReply extends X11Reply {
   final X11RandrConfigStatus status;
   final int timestamp;
   final int capabilities;
-  final List<int> crtcs;
-  final List<int> outputs;
-  final List<int> associatedProviders;
+  final List<X11ResourceId> crtcs;
+  final List<X11ResourceId> outputs;
+  final List<X11ResourceId> associatedProviders;
   final List<int> associatedProviderCapability;
 
   X11RandrGetProviderInfoReply(
@@ -2203,10 +2192,10 @@ class X11RandrGetProviderInfoReply extends X11Reply {
     var associatedProvidersLength = buffer.readUint16();
     var nameLength = buffer.readUint16();
     buffer.skip(8);
-    var crtcs = buffer.readListOfUint32(crtcsLength);
-    var outputs = buffer.readListOfUint32(outputsLength);
+    var crtcs = buffer.readListOfResourceId(crtcsLength);
+    var outputs = buffer.readListOfResourceId(outputsLength);
     var associatedProviders =
-        buffer.readListOfUint32(associatedProvidersLength);
+        buffer.readListOfResourceId(associatedProvidersLength);
     var associatedProviderCapability =
         buffer.readListOfUint32(associatedProvidersLength);
     var name = buffer.readString8(nameLength);
@@ -2232,9 +2221,9 @@ class X11RandrGetProviderInfoReply extends X11Reply {
     var nameLength = buffer.getString8Length(name);
     buffer.writeUint16(nameLength);
     buffer.skip(8);
-    buffer.writeListOfUint32(crtcs);
-    buffer.writeListOfUint32(outputs);
-    buffer.writeListOfUint32(associatedProviders);
+    buffer.writeListOfResourceId(crtcs);
+    buffer.writeListOfResourceId(outputs);
+    buffer.writeListOfResourceId(associatedProviders);
     buffer.writeListOfUint32(associatedProviderCapability);
     buffer.writeString8(name);
     buffer.skip(pad(nameLength));
@@ -2246,8 +2235,8 @@ class X11RandrGetProviderInfoReply extends X11Reply {
 }
 
 class X11RandrSetProviderOffloadSinkRequest extends X11Request {
-  final int provider;
-  final int sinkProvider;
+  final X11ResourceId provider;
+  final X11ResourceId sinkProvider;
   final int configTimestamp;
 
   X11RandrSetProviderOffloadSinkRequest(this.provider, this.sinkProvider,
@@ -2255,8 +2244,8 @@ class X11RandrSetProviderOffloadSinkRequest extends X11Request {
 
   factory X11RandrSetProviderOffloadSinkRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var provider = buffer.readUint32();
-    var sinkProvider = buffer.readUint32();
+    var provider = buffer.readResourceId();
+    var sinkProvider = buffer.readResourceId();
     var configTimestamp = buffer.readUint32();
     return X11RandrSetProviderOffloadSinkRequest(provider, sinkProvider,
         configTimestamp: configTimestamp);
@@ -2265,19 +2254,19 @@ class X11RandrSetProviderOffloadSinkRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(34);
-    buffer.writeUint32(provider);
-    buffer.writeUint32(sinkProvider);
+    buffer.writeResourceId(provider);
+    buffer.writeResourceId(sinkProvider);
     buffer.writeUint32(configTimestamp);
   }
 
   @override
   String toString() =>
-      'X11RandrSetProviderOffloadSinkRequest(${_formatId(provider)}, sinkProvider: ${sinkProvider}, configTimestamp: ${configTimestamp})';
+      'X11RandrSetProviderOffloadSinkRequest(${provider}, sinkProvider: ${sinkProvider}, configTimestamp: ${configTimestamp})';
 }
 
 class X11RandrSetProviderOutputSourceRequest extends X11Request {
-  final int provider;
-  final int sourceProvider;
+  final X11ResourceId provider;
+  final X11ResourceId sourceProvider;
   final int configTimestamp;
 
   X11RandrSetProviderOutputSourceRequest(this.provider, this.sourceProvider,
@@ -2285,8 +2274,8 @@ class X11RandrSetProviderOutputSourceRequest extends X11Request {
 
   factory X11RandrSetProviderOutputSourceRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var provider = buffer.readUint32();
-    var sourceProvider = buffer.readUint32();
+    var provider = buffer.readResourceId();
+    var sourceProvider = buffer.readResourceId();
     var configTimestamp = buffer.readUint32();
     return X11RandrSetProviderOutputSourceRequest(provider, sourceProvider,
         configTimestamp: configTimestamp);
@@ -2295,40 +2284,39 @@ class X11RandrSetProviderOutputSourceRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(35);
-    buffer.writeUint32(provider);
-    buffer.writeUint32(sourceProvider);
+    buffer.writeResourceId(provider);
+    buffer.writeResourceId(sourceProvider);
     buffer.writeUint32(configTimestamp);
   }
 
   @override
   String toString() =>
-      'X11RandrSetProviderOutputSourceRequest(${_formatId(provider)}, sourceProvider: ${sourceProvider}, configTimestamp: ${configTimestamp})';
+      'X11RandrSetProviderOutputSourceRequest(${provider}, sourceProvider: ${sourceProvider}, configTimestamp: ${configTimestamp})';
 }
 
 class X11RandrListProviderPropertiesRequest extends X11Request {
-  final int provider;
+  final X11ResourceId provider;
 
   X11RandrListProviderPropertiesRequest(this.provider);
 
   factory X11RandrListProviderPropertiesRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var provider = buffer.readUint32();
+    var provider = buffer.readResourceId();
     return X11RandrListProviderPropertiesRequest(provider);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(36);
-    buffer.writeUint32(provider);
+    buffer.writeResourceId(provider);
   }
 
   @override
-  String toString() =>
-      'X11RandrListProviderPropertiesRequest(${_formatId(provider)})';
+  String toString() => 'X11RandrListProviderPropertiesRequest(${provider})';
 }
 
 class X11RandrListProviderPropertiesReply extends X11Reply {
-  final List<int> atoms;
+  final List<X11Atom> atoms;
 
   X11RandrListProviderPropertiesReply(this.atoms);
 
@@ -2336,7 +2324,10 @@ class X11RandrListProviderPropertiesReply extends X11Reply {
     buffer.skip(1);
     var atomsLength = buffer.readUint16();
     buffer.skip(22);
-    var atoms = buffer.readListOfUint32(atomsLength);
+    var atoms = <X11Atom>[];
+    for (var i = 0; i < atomsLength; i++) {
+      atoms.add(buffer.readAtom());
+    }
     return X11RandrListProviderPropertiesReply(atoms);
   }
 
@@ -2345,7 +2336,9 @@ class X11RandrListProviderPropertiesReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(atoms.length);
     buffer.skip(22);
-    buffer.writeListOfUint32(atoms);
+    for (var atom in atoms) {
+      buffer.writeAtom(atom);
+    }
   }
 
   @override
@@ -2353,28 +2346,28 @@ class X11RandrListProviderPropertiesReply extends X11Reply {
 }
 
 class X11RandrQueryProviderPropertyRequest extends X11Request {
-  final int provider;
-  final int property;
+  final X11ResourceId provider;
+  final X11Atom property;
 
   X11RandrQueryProviderPropertyRequest(this.provider, this.property);
 
   factory X11RandrQueryProviderPropertyRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var provider = buffer.readUint32();
-    var property = buffer.readUint32();
+    var provider = buffer.readResourceId();
+    var property = buffer.readAtom();
     return X11RandrQueryProviderPropertyRequest(provider, property);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(37);
-    buffer.writeUint32(provider);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(provider);
+    buffer.writeAtom(property);
   }
 
   @override
   String toString() =>
-      'X11RandrQueryProviderPropertyRequest(${_formatId(provider)}, property: ${property})';
+      'X11RandrQueryProviderPropertyRequest(${provider}, property: ${property})';
 }
 
 class X11RandrQueryProviderPropertyReply extends X11Reply {
@@ -2422,8 +2415,8 @@ class X11RandrQueryProviderPropertyReply extends X11Reply {
 }
 
 class X11RandrConfigureProviderPropertyRequest extends X11Request {
-  final int provider;
-  final int property;
+  final X11ResourceId provider;
+  final X11Atom property;
   final bool pending;
   final bool range;
   final List<int> validValues;
@@ -2434,8 +2427,8 @@ class X11RandrConfigureProviderPropertyRequest extends X11Request {
 
   factory X11RandrConfigureProviderPropertyRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var provider = buffer.readUint32();
-    var property = buffer.readUint32();
+    var provider = buffer.readResourceId();
+    var property = buffer.readAtom();
     var pending = buffer.readBool();
     var range = buffer.readBool();
     buffer.skip(2);
@@ -2451,8 +2444,8 @@ class X11RandrConfigureProviderPropertyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(38);
-    buffer.writeUint32(provider);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(provider);
+    buffer.writeAtom(property);
     buffer.writeBool(pending);
     buffer.writeBool(range);
     buffer.skip(2);
@@ -2461,27 +2454,27 @@ class X11RandrConfigureProviderPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrConfigureProviderPropertyRequest(${_formatId(provider)},${property},  ${validValues}, pending: ${pending}, range: ${range})';
+      'X11RandrConfigureProviderPropertyRequest(${provider},${property},  ${validValues}, pending: ${pending}, range: ${range})';
 }
 
 class X11RandrChangeProviderPropertyRequest extends X11Request {
-  final int provider;
-  final int property;
+  final X11ResourceId provider;
+  final X11Atom property;
   final List<int> data;
-  final int type;
+  final X11Atom type;
   final int format;
   final X11ChangePropertyMode mode;
 
   X11RandrChangeProviderPropertyRequest(this.provider, this.property, this.data,
-      {this.type = 0,
+      {this.type = X11Atom.None,
       this.format = 0,
       this.mode = X11ChangePropertyMode.replace});
 
   factory X11RandrChangeProviderPropertyRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var provider = buffer.readUint32();
-    var property = buffer.readUint32();
-    var type = buffer.readUint32();
+    var provider = buffer.readResourceId();
+    var property = buffer.readAtom();
+    var type = buffer.readAtom();
     var format = buffer.readUint8();
     var mode = X11ChangePropertyMode.values[buffer.readUint8()];
     buffer.skip(2);
@@ -2509,9 +2502,9 @@ class X11RandrChangeProviderPropertyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(39);
-    buffer.writeUint32(provider);
-    buffer.writeUint32(property);
-    buffer.writeUint32(type);
+    buffer.writeResourceId(provider);
+    buffer.writeAtom(property);
+    buffer.writeAtom(type);
     buffer.writeUint8(format);
     buffer.writeUint8(mode.index);
     buffer.skip(2);
@@ -2535,54 +2528,54 @@ class X11RandrChangeProviderPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrChangeProviderPropertyRequest(${_formatId(provider)}, ${property}, ${data}, type: ${type}, format: ${format}, mode: ${mode})';
+      'X11RandrChangeProviderPropertyRequest(${provider}, ${property}, ${data}, type: ${type}, format: ${format}, mode: ${mode})';
 }
 
 class X11RandrDeleteProviderPropertyRequest extends X11Request {
-  final int provider;
-  final int property;
+  final X11ResourceId provider;
+  final X11Atom property;
 
   X11RandrDeleteProviderPropertyRequest(this.provider, this.property);
 
   factory X11RandrDeleteProviderPropertyRequest.fromBuffer(
       X11ReadBuffer buffer) {
-    var provider = buffer.readUint32();
-    var property = buffer.readUint32();
+    var provider = buffer.readResourceId();
+    var property = buffer.readAtom();
     return X11RandrDeleteProviderPropertyRequest(provider, property);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(40);
-    buffer.writeUint32(provider);
-    buffer.writeUint32(property);
+    buffer.writeResourceId(provider);
+    buffer.writeAtom(property);
   }
 
   @override
   String toString() =>
-      'X11RandrDeleteProviderPropertyRequest(${_formatId(provider)}, ${property})';
+      'X11RandrDeleteProviderPropertyRequest(${provider}, ${property})';
 }
 
 class X11RandrGetProviderPropertyRequest extends X11Request {
-  final int provider;
-  final int property;
-  final int type;
+  final X11ResourceId provider;
+  final X11Atom property;
+  final X11Atom type;
   final int longOffset;
   final int longLength;
   final bool delete;
   final bool pending;
 
   X11RandrGetProviderPropertyRequest(this.provider, this.property,
-      {this.type = 0,
+      {this.type = X11Atom.None,
       this.longOffset = 0,
       this.longLength = 0,
       this.delete = false,
       this.pending = false});
 
   factory X11RandrGetProviderPropertyRequest.fromBuffer(X11ReadBuffer buffer) {
-    var provider = buffer.readUint32();
-    var property = buffer.readUint32();
-    var type = buffer.readUint32();
+    var provider = buffer.readResourceId();
+    var property = buffer.readAtom();
+    var type = buffer.readAtom();
     var longOffset = buffer.readUint32();
     var longLength = buffer.readUint32();
     var delete = buffer.readBool();
@@ -2599,9 +2592,9 @@ class X11RandrGetProviderPropertyRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(41);
-    buffer.writeUint32(provider);
-    buffer.writeUint32(property);
-    buffer.writeUint32(type);
+    buffer.writeResourceId(provider);
+    buffer.writeAtom(property);
+    buffer.writeAtom(type);
     buffer.writeUint32(longOffset);
     buffer.writeUint32(longLength);
     buffer.writeBool(delete);
@@ -2611,24 +2604,24 @@ class X11RandrGetProviderPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrGetProviderPropertyRequest(${_formatId(provider)}, ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}, pending: ${pending})';
+      'X11RandrGetProviderPropertyRequest(${provider}, ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}, pending: ${pending})';
 }
 
 class X11RandrGetProviderPropertyReply extends X11Reply {
   final int format;
-  final int type;
+  final X11Atom type;
   final int bytesAfter;
   final List<int> data;
 
   X11RandrGetProviderPropertyReply(
       {this.format = 0,
-      this.type = 0,
+      this.type = X11Atom.None,
       this.bytesAfter = 0,
       this.data = const []});
 
   static X11RandrGetProviderPropertyReply fromBuffer(X11ReadBuffer buffer) {
     var format = buffer.readUint8();
-    var type = buffer.readUint32();
+    var type = buffer.readAtom();
     var bytesAfter = buffer.readUint32();
     var dataLength = buffer.readUint32();
     buffer.skip(12);
@@ -2655,7 +2648,7 @@ class X11RandrGetProviderPropertyReply extends X11Reply {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(format);
-    buffer.writeUint32(type);
+    buffer.writeAtom(type);
     buffer.writeUint32(bytesAfter);
     buffer.writeUint32(data.length);
     buffer.skip(12);
@@ -2682,13 +2675,13 @@ class X11RandrGetProviderPropertyReply extends X11Reply {
 }
 
 class X11RandrGetMonitorsRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final bool getActive;
 
   X11RandrGetMonitorsRequest(this.window, {this.getActive = false});
 
   factory X11RandrGetMonitorsRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var getActive = buffer.readBool();
     return X11RandrGetMonitorsRequest(window, getActive: getActive);
   }
@@ -2696,13 +2689,13 @@ class X11RandrGetMonitorsRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(42);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeBool(getActive);
   }
 
   @override
   String toString() =>
-      'X11RandrGetMonitorsRequest(${_formatId(window)}, getActive: ${getActive})';
+      'X11RandrGetMonitorsRequest(${window}, getActive: ${getActive})';
 }
 
 class X11RandrGetMonitorsReply extends X11Reply {
@@ -2728,10 +2721,10 @@ class X11RandrGetMonitorsReply extends X11Reply {
       var heightInPixels = buffer.readUint16();
       var widthInMillimeters = buffer.readUint32();
       var heightInMillimeters = buffer.readUint32();
-      var outputs = <int>[];
+      var outputs = <X11ResourceId>[];
       for (var i = 0; i < outputsLength; i++) {
-        var output = buffer.readUint32();
-        if (output != 0) {
+        var output = buffer.readResourceId();
+        if (output.value != 0) {
           outputs.add(output);
         }
       }
@@ -2784,13 +2777,13 @@ class X11RandrGetMonitorsReply extends X11Reply {
 }
 
 class X11RandrSetMonitorRequest extends X11Request {
-  final int window;
+  final X11ResourceId window;
   final X11RandrMonitorInfo monitorInfo;
 
   X11RandrSetMonitorRequest(this.window, this.monitorInfo);
 
   factory X11RandrSetMonitorRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
+    var window = buffer.readResourceId();
     var name = buffer.readUint32();
     var primary = buffer.readBool();
     var automatic = buffer.readBool();
@@ -2801,7 +2794,7 @@ class X11RandrSetMonitorRequest extends X11Request {
     var heightInPixels = buffer.readUint16();
     var widthInMillimeters = buffer.readUint32();
     var heightInMillimeters = buffer.readUint32();
-    var outputs = buffer.readListOfUint32(outputsLength);
+    var outputs = buffer.readListOfResourceId(outputsLength);
     var monitorInfo = X11RandrMonitorInfo(
         name: name,
         primary: primary,
@@ -2816,7 +2809,7 @@ class X11RandrSetMonitorRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(43);
-    buffer.writeUint32(window);
+    buffer.writeResourceId(window);
     buffer.writeUint32(monitorInfo.name);
     buffer.writeBool(monitorInfo.primary);
     buffer.writeBool(monitorInfo.automatic);
@@ -2827,54 +2820,52 @@ class X11RandrSetMonitorRequest extends X11Request {
     buffer.writeUint16(monitorInfo.sizeInPixels.height);
     buffer.writeUint32(monitorInfo.sizeInMillimeters.width);
     buffer.writeUint32(monitorInfo.sizeInMillimeters.height);
-    buffer.writeListOfUint32(monitorInfo.outputs);
+    buffer.writeListOfResourceId(monitorInfo.outputs);
   }
 
   @override
-  String toString() =>
-      'X11RandrSetMonitorRequest(${_formatId(window)}, ${monitorInfo})';
+  String toString() => 'X11RandrSetMonitorRequest(${window}, ${monitorInfo})';
 }
 
 class X11RandrDeleteMonitorRequest extends X11Request {
-  final int window;
-  final int name;
+  final X11ResourceId window;
+  final X11Atom name;
 
   X11RandrDeleteMonitorRequest(this.window, this.name);
 
   factory X11RandrDeleteMonitorRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
-    var name = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var name = buffer.readAtom();
     return X11RandrDeleteMonitorRequest(window, name);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(44);
-    buffer.writeUint32(window);
-    buffer.writeUint32(name);
+    buffer.writeResourceId(window);
+    buffer.writeAtom(name);
   }
 
   @override
-  String toString() =>
-      'X11RandrDeleteMonitorRequest(${_formatId(window)}, ${name})';
+  String toString() => 'X11RandrDeleteMonitorRequest(${window}, ${name})';
 }
 
 class X11RandrCreateLeaseRequest extends X11Request {
-  final int window;
-  final int id;
-  final List<int> crtcs;
-  final List<int> outputs;
+  final X11ResourceId window;
+  final X11ResourceId id;
+  final List<X11ResourceId> crtcs;
+  final List<X11ResourceId> outputs;
 
   X11RandrCreateLeaseRequest(this.window, this.id,
       {this.crtcs = const [], this.outputs = const []});
 
   factory X11RandrCreateLeaseRequest.fromBuffer(X11ReadBuffer buffer) {
-    var window = buffer.readUint32();
-    var id = buffer.readUint32();
+    var window = buffer.readResourceId();
+    var id = buffer.readResourceId();
     var crtcsLength = buffer.readUint16();
     var outputsLength = buffer.readUint16();
-    var crtcs = buffer.readListOfUint32(crtcsLength);
-    var outputs = buffer.readListOfUint32(outputsLength);
+    var crtcs = buffer.readListOfResourceId(crtcsLength);
+    var outputs = buffer.readListOfResourceId(outputsLength);
     return X11RandrCreateLeaseRequest(window, id,
         crtcs: crtcs, outputs: outputs);
   }
@@ -2882,17 +2873,17 @@ class X11RandrCreateLeaseRequest extends X11Request {
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.writeUint8(45);
-    buffer.writeUint32(window);
-    buffer.writeUint32(id);
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(id);
     buffer.writeUint16(crtcs.length);
     buffer.writeUint16(outputs.length);
-    buffer.writeListOfUint32(crtcs);
-    buffer.writeListOfUint32(outputs);
+    buffer.writeListOfResourceId(crtcs);
+    buffer.writeListOfResourceId(outputs);
   }
 
   @override
   String toString() =>
-      'X11RandrCreateLeaseRequest(${_formatId(window)}, ${_formatId(id)}, crtcs: ${crtcs}, outputs: ${outputs})';
+      'X11RandrCreateLeaseRequest(${window}, ${id}, crtcs: ${crtcs}, outputs: ${outputs})';
 }
 
 class X11RandrCreateLeaseReply extends X11Reply {
@@ -2937,5 +2928,5 @@ class X11RandrFreeLeaseRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrFreeLeaseRequest(${_formatId(lease)}, terminate: ${terminate})';
+      'X11RandrFreeLeaseRequest(${lease}, terminate: ${terminate})';
 }

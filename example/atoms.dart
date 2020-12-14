@@ -6,7 +6,7 @@ void main() async {
   var atom = 1;
   while (true) {
     try {
-      var name = await client.getAtomName(atom);
+      var name = await client.getAtomName(X11Atom(atom));
       print(name);
     } catch (X11AtomError) {
       await client.close();

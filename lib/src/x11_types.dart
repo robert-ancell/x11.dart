@@ -6,10 +6,6 @@ String _formatHex32(int id) {
   return '0x' + id.toRadixString(16).padLeft(8, '0');
 }
 
-String _formatId(int id) {
-  return _formatHex32(id);
-}
-
 String _formatPixel(int pixel) {
   return _formatHex32(pixel);
 }
@@ -350,6 +346,26 @@ enum X11WinGravity {
   static
 }
 
+class X11ResourceId {
+  final int value;
+  static const None = X11ResourceId(0);
+
+  const X11ResourceId(this.value);
+
+  @override
+  String toString() => _formatHex32(value);
+}
+
+class X11Atom {
+  final int value;
+  static const None = X11Atom(0);
+
+  const X11Atom(this.value);
+
+  @override
+  String toString() => 'X11Atom(${value})';
+}
+
 class X11CharacterInfo {
   final int leftSideBearing;
   final int rightSideBearing;
@@ -380,14 +396,14 @@ class X11ColorStop {
 class X11DeviceInfo {
   final int id;
   final String name;
-  final int type;
+  final X11Atom type;
   final List<X11InputInfo> inputClasses;
   final X11DeviceUse deviceUse;
 
   const X11DeviceInfo(
       {this.id = 0,
       this.name = '',
-      this.type = 0,
+      this.type = X11Atom.None,
       this.inputClasses = const [],
       this.deviceUse = X11DeviceUse.pointer});
 
@@ -455,7 +471,7 @@ class X11RgbaColorItem {
 }
 
 class X11FontProperty {
-  int name;
+  X11Atom name;
   int value; // FIXME: Make getter to get signedValue
 
   X11FontProperty(this.name, this.value);
@@ -480,12 +496,12 @@ abstract class X11GlyphItem {
 }
 
 class X11GlyphItemGlyphable extends X11GlyphItem {
-  final int glyphable;
+  final X11ResourceId glyphable;
 
   const X11GlyphItemGlyphable(this.glyphable);
 
   @override
-  String toString() => 'X11GlyphItemGlyphable(${_formatId(glyphable)})';
+  String toString() => 'X11GlyphItemGlyphable(${glyphable})';
 }
 
 class X11GlyphItemGlyphs extends X11GlyphItem {
@@ -552,8 +568,8 @@ class X11Fraction {
 }
 
 class X11Screen {
-  final int window;
-  final int defaultColormap;
+  final X11ResourceId window;
+  final X11ResourceId defaultColormap;
   final int whitePixel;
   final int blackPixel;
   final int currentInputMasks;
@@ -568,8 +584,8 @@ class X11Screen {
   final Map<int, List<X11Visual>> allowedDepths;
 
   const X11Screen(
-      {this.window = 0,
-      this.defaultColormap = 0,
+      {this.window = X11ResourceId.None,
+      this.defaultColormap = X11ResourceId.None,
       this.whitePixel = 0,
       this.blackPixel = 0,
       this.currentInputMasks = 0,
@@ -585,12 +601,12 @@ class X11Screen {
 
   @override
   String toString() =>
-      'X11Window(window: ${_formatId(window)}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatPixel(whitePixel)}, blackPixel: ${_formatPixel(blackPixel)}, currentInputMasks: ${_formatHex32(currentInputMasks)}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
+      'X11Window(window: ${window}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatPixel(whitePixel)}, blackPixel: ${_formatPixel(blackPixel)}, currentInputMasks: ${_formatHex32(currentInputMasks)}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
 }
 
 class X11AnimatedCursorFrame {
   /// The cursor that this frame uses.
-  final int cursor;
+  final X11ResourceId cursor;
 
   /// The number of milliseconds to show this frame.
   final int delay;
@@ -657,7 +673,7 @@ class X11PointFixed {
 enum X11QueryClass { cursor, tile, stipple }
 
 class X11RandrModeInfo {
-  final int id;
+  final X11ResourceId id;
   final String name;
   final X11Size sizeInPixels;
   final int dotClock;
@@ -696,7 +712,7 @@ class X11RandrMonitorInfo {
   final X11Point location; // FIXME: X11Rectangle area
   final X11Size sizeInPixels;
   final X11Size sizeInMillimeters;
-  final List<int> outputs; // FIXME: or crtcs? spec is unclear
+  final List<X11ResourceId> outputs; // FIXME: or crtcs? spec is unclear
 
   const X11RandrMonitorInfo(
       {this.name,
@@ -734,7 +750,7 @@ class X11Rectangle {
 }
 
 class X11PictFormatInfo {
-  final int id;
+  final X11ResourceId id;
   final X11PictureType type;
   final int depth;
   final int redShift;
@@ -745,7 +761,7 @@ class X11PictFormatInfo {
   final int blueMask;
   final int alphaShift;
   final int alphaMask;
-  final int colormap;
+  final X11ResourceId colormap;
 
   const X11PictFormatInfo(this.id,
       {this.type = X11PictureType.direct,
@@ -758,15 +774,15 @@ class X11PictFormatInfo {
       this.blueMask = 0,
       this.alphaShift = 0,
       this.alphaMask = 0,
-      this.colormap = 0});
+      this.colormap = X11ResourceId.None});
 
   @override
   String toString() =>
-      'X11PictFormatInfo(${_formatId(id)}, type: ${type}, depth: ${depth}, redShift: ${redShift}, redMask: ${_formatHex(redMask)}, greenShift: ${greenShift}, greenMask: ${_formatHex(greenMask)}, blueShift: ${blueShift}, blueMask: ${_formatHex(blueMask)}, alphaShift: ${alphaShift}, alphaMask: ${_formatHex(alphaMask)}, colormap: ${colormap})';
+      'X11PictFormatInfo(${id}, type: ${type}, depth: ${depth}, redShift: ${redShift}, redMask: ${_formatHex(redMask)}, greenShift: ${greenShift}, greenMask: ${_formatHex(greenMask)}, blueShift: ${blueShift}, blueMask: ${_formatHex(blueMask)}, alphaShift: ${alphaShift}, alphaMask: ${_formatHex(alphaMask)}, colormap: ${colormap})';
 }
 
 class X11PictScreen {
-  final Map<int, Map<int, int>> visuals;
+  final Map<int, Map<int, X11ResourceId>> visuals;
   final int fallback;
   final X11SubPixelOrder subPixelOrder;
 
@@ -831,7 +847,7 @@ class X11TextItemFont extends X11TextItem {
   const X11TextItemFont(this.font);
 
   @override
-  String toString() => 'X11TextItemFont(${_formatId(font)})';
+  String toString() => 'X11TextItemFont(${font})';
 }
 
 class X11TextItemString extends X11TextItem {
@@ -953,5 +969,5 @@ class X11Visual {
 
   @override
   String toString() =>
-      'X11Visual(id: ${id}, visualClass: ${visualClass}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: ${_formatId(redMask)}, greenMask: ${_formatId(greenMask)}, blueMask: ${_formatId(blueMask)})';
+      'X11Visual(id: ${id}, visualClass: ${visualClass}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: ${redMask}, greenMask: ${greenMask}, blueMask: ${blueMask})';
 }

@@ -28,26 +28,28 @@ class X11DamageExtension extends X11Extension {
 
   /// Creates a damage object with [id] to monitor changes to [drawable].
   /// When no longer required, the damage object reference should be deleted with [destroy].
-  int create(int id, int drawable, X11DamageReportLevel level) {
+  int create(
+      X11ResourceId id, X11ResourceId drawable, X11DamageReportLevel level) {
     var request = X11DamageCreateRequest(id, drawable, level);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Deletes the reference to [damage] created in [create].
-  int destroy(int damage) {
+  int destroy(X11ResourceId damage) {
     var request = X11DamageDestroyRequest(damage);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Marks [repairRegion] from [damage] as repaired.
-  int subtract(int damage, int repairRegion, {int partsRegion = 0}) {
+  int subtract(X11ResourceId damage, X11ResourceId repairRegion,
+      {X11ResourceId partsRegion = X11ResourceId.None}) {
     var request = X11DamageSubtractRequest(damage, repairRegion,
         partsRegion: partsRegion);
     return _client.sendRequest(_majorOpcode, request);
   }
 
   /// Reports damage in [region] of the [drawable].
-  int add(int drawable, int region) {
+  int add(X11ResourceId drawable, X11ResourceId region) {
     var request = X11DamageAddRequest(drawable, region);
     return _client.sendRequest(_majorOpcode, request);
   }
