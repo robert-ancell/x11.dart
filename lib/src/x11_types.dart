@@ -70,6 +70,14 @@ enum X11DamageReportLevel {
   nonEmpty
 }
 
+enum X11DeviceType {
+  masterPointer,
+  masterKeyboard,
+  SlavePointer,
+  SlaveKeyboard,
+  FloatingSlave
+}
+
 enum X11DeviceUse {
   pointer,
   keyboard,
@@ -287,6 +295,8 @@ enum X11ScreensaverKind { blanked, internal, external }
 
 enum X11ScreensaverState { disabled, off, on }
 
+enum X11ScrollType { vertical, horizontal }
+
 enum X11ShapeKind { bounding, clip, input }
 
 enum X11ShapeOperation { set, union, intersect, invert }
@@ -391,6 +401,97 @@ class X11ColorStop {
 
   @override
   String toString() => 'X11ColorStop(${point}, ${color})';
+}
+
+abstract class X11DeviceClass {
+  const X11DeviceClass();
+}
+
+class X11DeviceClassKey extends X11DeviceClass {
+  final int sourceId;
+  final List<int> keys;
+
+  const X11DeviceClassKey({this.sourceId = 0, this.keys = const []});
+
+  @override
+  String toString() =>
+      'X11DeviceClassKey(sourceId: ${sourceId}, keys: ${keys})';
+}
+
+class X11DeviceClassButton extends X11DeviceClass {
+  final int sourceId;
+  final List<bool> state;
+  final List<X11Atom> labels;
+
+  const X11DeviceClassButton(
+      {this.sourceId = 0, this.state = const [], this.labels = const []});
+
+  @override
+  String toString() =>
+      'X11DeviceClassButton(sourceId: ${sourceId}, state: ${state}, labels: ${labels})';
+}
+
+class X11DeviceClassValuator extends X11DeviceClass {
+  final int sourceId;
+  final int number;
+  final X11Atom label;
+  final double min;
+  final double max;
+  final double value;
+  final int resolution;
+  final int mode; // FIXME: enum
+
+  const X11DeviceClassValuator(
+      {this.sourceId = 0,
+      this.number = 0,
+      this.label = X11Atom.None,
+      this.min = 0,
+      this.max = 0,
+      this.value = 0,
+      this.resolution = 0,
+      this.mode = 0});
+
+  @override
+  String toString() =>
+      'X11DeviceClassValuator(sourceId: ${sourceId}, number: ${number}, label: ${label}, min: ${min}, max: ${max}, value: ${value}, resolution: ${resolution}, mode: ${mode})';
+}
+
+class X11DeviceClassScroll extends X11DeviceClass {
+  final int sourceId;
+  final int number;
+  final X11ScrollType type;
+  final int flags; // FIXME: enum
+  final double increment;
+
+  const X11DeviceClassScroll(
+      {this.sourceId = 0,
+      this.number = 0,
+      this.type = X11ScrollType.vertical,
+      this.flags = 0,
+      this.increment = 0});
+
+  @override
+  String toString() =>
+      'X11DeviceClassScroll(sourceId: ${sourceId}, number: ${number}, type: ${type}, flags: ${flags}, increment: ${increment})';
+}
+
+class X11DeviceClassTouch extends X11DeviceClass {
+  final int sourceId;
+  final int mode; // FIXME: enum
+  final int numTouches;
+
+  const X11DeviceClassTouch(
+      {this.sourceId = 0, this.mode = 0, this.numTouches = 0});
+}
+
+class X11DeviceClassUnknown extends X11DeviceClass {
+  final int type;
+  final List<int> data;
+
+  const X11DeviceClassUnknown(this.type, this.data);
+
+  @override
+  String toString() => 'X11DeviceClassUnknown(${type}, data: ${data})';
 }
 
 class X11DeviceInfo {
@@ -980,4 +1081,23 @@ class X11Visual {
   @override
   String toString() =>
       'X11Visual(id: ${id}, visualClass: ${visualClass}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: ${redMask}, greenMask: ${greenMask}, blueMask: ${blueMask})';
+}
+
+class X11XiDeviceInfo {
+  final int id;
+  final X11DeviceType type;
+  final int attachment;
+  final List<X11DeviceClass> classes;
+  final String name;
+  final bool enabled;
+
+  const X11XiDeviceInfo(this.id, this.type,
+      {this.attachment = 0,
+      this.classes = const [],
+      this.name = '',
+      this.enabled = false});
+
+  @override
+  String toString() =>
+      "X11DeviceInfo(${id}, type: ${type}, attachment: ${attachment}, classes: ${classes}, name: '${name}', enabled: ${enabled})";
 }

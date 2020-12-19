@@ -237,6 +237,14 @@ class X11XInputExtension extends X11Extension {
         sequenceNumber, X11XInputXiQueryVersionReply.fromBuffer);
   }
 
+  Future<List<X11XiDeviceInfo>> xiQueryDevice(int deviceId) async {
+    var request = X11XInputXiQueryDeviceRequest(deviceId);
+    var sequenceNumber = _client.sendRequest(_majorOpcode, request);
+    var reply = await _client.awaitReply<X11XInputXiQueryDeviceReply>(
+        sequenceNumber, X11XInputXiQueryDeviceReply.fromBuffer);
+    return reply.infos;
+  }
+
   int xiSetFocus(int deviceId, X11ResourceId window, {int time = 0}) {
     var request = X11XInputXiSetFocusRequest(deviceId, window, time: time);
     return _client.sendRequest(_majorOpcode, request);

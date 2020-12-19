@@ -24,6 +24,33 @@ void main() async {
   print('Devices:');
   for (var device in devices) {
     print('  ${device.name}');
+
+    var infos = await client.xinput.xiQueryDevice(device.id);
+    for (var info in infos) {
+      for (var c in info.classes) {
+        if (c is X11DeviceClassKey) {
+          print('    Keys: ${c.keys}');
+        } else if (c is X11DeviceClassButton) {
+          for (var i = 0; i < c.state.length; i++) {
+            var label = c.labels[i].value != 0
+                ? await client.getAtomName(c.labels[i])
+                : '(unnamed)';
+            print("    Button: '${label}' (${c.state[i]})");
+          }
+        } else if (c is X11DeviceClassValuator) {
+          var label = await client.getAtomName(c.label);
+          print(
+              "    Valuator: '${label}' (${c.min} <= ${c.value} <= ${c.max})");
+        } else if (c is X11DeviceClassScroll) {
+          print('    Scroll: ${c.type}');
+        } else if (c is X11DeviceClassTouch) {
+          print('    Touch: ${c.mode}');
+        } else {
+          print('    ${c}');
+        }
+      }
+    }
+
     var properties = await client.xinput.listDeviceProperties(device.id);
     for (var property in properties) {
       var propertyReply =

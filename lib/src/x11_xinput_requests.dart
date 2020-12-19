@@ -5,6 +5,19 @@ import 'x11_requests.dart';
 import 'x11_types.dart';
 import 'x11_write_buffer.dart';
 
+double readFP3232(X11ReadBuffer buffer) {
+  var integral = buffer.readInt32();
+  var fraction = buffer.readUint32(); // FIXME fraction
+  return integral.toDouble() + fraction.toDouble() / 4294967296; // FIXME: check
+}
+
+void writeFP3232(X11WriteBuffer buffer, double value) {
+  var integral = value.truncate();
+  buffer.writeInt32(integral);
+  buffer.writeUint32(
+      ((value - integral) * 4294967296).truncate()); // FIXME: check
+}
+
 class X11XInputGetExtensionVersionRequest extends X11Request {
   final String name;
 
@@ -1233,7 +1246,7 @@ class X11XInputXiQueryVersionReply extends X11Reply {
   String toString() => 'X11XInputXiQueryVersionReply(${version})';
 }
 
-/*class X11XInputXiQueryDeviceRequest extends X11Request {
+class X11XInputXiQueryDeviceRequest extends X11Request {
   final int deviceId;
 
   X11XInputXiQueryDeviceRequest(this.deviceId);
@@ -1256,7 +1269,7 @@ class X11XInputXiQueryVersionReply extends X11Reply {
 }
 
 class X11XInputXiQueryDeviceReply extends X11Reply {
-  final List<X11DeviceInfo> infos;
+  final List<X11XiDeviceInfo> infos;
 
   X11XInputXiQueryDeviceReply(this.infos);
 
@@ -1264,6 +1277,88 @@ class X11XInputXiQueryDeviceReply extends X11Reply {
     buffer.skip(1);
     var infosLength = buffer.readUint16();
     buffer.skip(22);
+    var infos = <X11XiDeviceInfo>[];
+    for (var i = 0; i < infosLength; i++) {
+      var deviceId = buffer.readUint16();
+      var type = X11DeviceType.values[buffer.readUint16() - 1];
+      var attachment = buffer.readUint16();
+      var classesLength = buffer.readUint16();
+      var nameLength = buffer.readUint16();
+      var enabled = buffer.readBool();
+      buffer.skip(1);
+      var name = buffer.readString8(nameLength);
+      buffer.skip(pad(nameLength));
+      var classes = <X11DeviceClass>[];
+      for (var j = 0; j < classesLength; j++) {
+        var classType = buffer.readUint16();
+        var length = buffer.readUint16();
+        if (classType == 0) {
+          var sourceId = buffer.readUint16();
+          var keysLength = buffer.readUint16();
+          var keys = buffer.readListOfUint32(keysLength);
+          classes.add(X11DeviceClassKey(sourceId: sourceId, keys: keys));
+        } else if (classType == 1) {
+          var sourceId = buffer.readUint16();
+          var buttonsLength = buffer.readUint16();
+          var state = <bool>[];
+          for (var i = 0; i < buttonsLength; i += 32) {
+            var b = buffer.readUint32();
+            for (var j = i; j < buttonsLength && j < i + 32; j++) {
+              state.add((b & 1 << (j - i)) != 0);
+            }
+          }
+          var labels = buffer.readListOfAtom(buttonsLength);
+          classes.add(X11DeviceClassButton(
+              sourceId: sourceId, state: state, labels: labels));
+        } else if (classType == 2) {
+          var sourceId = buffer.readUint16();
+          var number = buffer.readUint16();
+          var label = buffer.readAtom();
+          var min = readFP3232(buffer);
+          var max = readFP3232(buffer);
+          var value = readFP3232(buffer);
+          var resolution = buffer.readUint32();
+          var mode = buffer.readUint8();
+          buffer.skip(3);
+          classes.add(X11DeviceClassValuator(
+              sourceId: sourceId,
+              number: number,
+              label: label,
+              min: min,
+              max: max,
+              value: value,
+              resolution: resolution,
+              mode: mode));
+        } else if (classType == 3) {
+          var sourceId = buffer.readUint16();
+          var number = buffer.readUint16();
+          var scrollType = X11ScrollType.values[buffer.readUint16() - 1];
+          buffer.skip(2);
+          var flags = buffer.readUint32();
+          var increment = readFP3232(buffer);
+          classes.add(X11DeviceClassScroll(
+              sourceId: sourceId,
+              number: number,
+              type: scrollType,
+              flags: flags,
+              increment: increment));
+        } else if (classType == 4) {
+          var sourceId = buffer.readUint16();
+          var mode = buffer.readUint8();
+          var numTouches = buffer.readUint8();
+          classes.add(X11DeviceClassTouch(
+              sourceId: sourceId, mode: mode, numTouches: numTouches));
+        } else {
+          var data = buffer.readListOfUint32(length - 1);
+          classes.add(X11DeviceClassUnknown(classType, data));
+        }
+      }
+      infos.add(X11XiDeviceInfo(deviceId, type,
+          attachment: attachment,
+          classes: classes,
+          name: name,
+          enabled: enabled));
+    }
     return X11XInputXiQueryDeviceReply(infos);
   }
 
@@ -1272,11 +1367,76 @@ class X11XInputXiQueryDeviceReply extends X11Reply {
     buffer.skip(1);
     buffer.writeUint16(infos.length);
     buffer.skip(22);
+    for (var info in infos) {
+      buffer.writeUint16(info.id);
+      buffer.writeUint16(info.type.index + 1);
+      buffer.writeUint16(info.attachment);
+      buffer.writeUint16(info.classes.length);
+      var nameLength = buffer.getString8Length(info.name);
+      buffer.writeUint16(nameLength);
+      buffer.writeBool(info.enabled);
+      buffer.skip(3);
+      buffer.writeString8(info.name);
+      buffer.skip(pad(nameLength));
+      for (var c in info.classes) {
+        if (c is X11DeviceClassKey) {
+          buffer.writeUint16(0);
+          buffer.writeUint16(1 + c.keys.length);
+          buffer.writeUint16(c.sourceId);
+          buffer.writeUint16(c.keys.length);
+          buffer.writeListOfUint32(c.keys);
+        } else if (c is X11DeviceClassButton) {
+          buffer.writeUint16(2);
+          buffer.writeUint16(1 + c.state.length ~/ 32 + c.labels.length);
+          buffer.writeUint16(c.sourceId);
+          buffer.writeUint16(c.state.length ~/ 32);
+          for (var i = 0; i < c.state.length; i += 32) {
+            var b = 0;
+            for (var j = i; j < c.state.length && j < i + 32; j++) {
+              if (c.state[j]) b |= 1 << (j - i);
+            }
+            buffer.writeUint32(b);
+          }
+          buffer.writeListOfAtom(c.labels);
+        } else if (c is X11DeviceClassValuator) {
+          buffer.writeUint16(2);
+          buffer.writeUint16(10);
+          buffer.writeUint16(c.sourceId);
+          buffer.writeUint16(c.number);
+          buffer.writeAtom(c.label);
+          writeFP3232(buffer, c.min);
+          writeFP3232(buffer, c.max);
+          writeFP3232(buffer, c.value);
+          buffer.writeUint32(c.resolution);
+          buffer.writeUint8(c.mode);
+          buffer.skip(3);
+        } else if (c is X11DeviceClassScroll) {
+          buffer.writeUint16(3);
+          buffer.writeUint16(6);
+          buffer.writeUint16(c.sourceId);
+          buffer.writeUint16(c.number);
+          buffer.writeUint16(c.type.index + 1);
+          buffer.skip(3);
+          buffer.writeUint32(c.flags);
+          writeFP3232(buffer, c.increment);
+        } else if (c is X11DeviceClassTouch) {
+          buffer.writeUint16(4);
+          buffer.writeUint16(2);
+          buffer.writeUint16(c.sourceId);
+          buffer.writeUint8(c.mode);
+          buffer.writeUint8(c.numTouches);
+        } else if (c is X11DeviceClassUnknown) {
+          buffer.writeUint16(c.type);
+          buffer.writeUint16(c.data.length);
+          buffer.writeListOfUint32(c.data);
+        }
+      }
+    }
   }
 
   @override
-  String toString() => 'X11XInputXiQueryDeviceReply(infos: ${infos})';
-}*/
+  String toString() => 'X11XInputXiQueryDeviceReply(${infos})';
+}
 
 class X11XInputXiSetFocusRequest extends X11Request {
   final int deviceId;
