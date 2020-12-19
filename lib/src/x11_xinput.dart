@@ -105,6 +105,24 @@ class X11XInputExtension extends X11Extension {
     return reply.status;
   }
 
+  Future<X11XInputGrabDeviceReply> grabDevice(
+      X11ResourceId grabWindow, int deviceId,
+      {int thisDeviceMode = 0,
+      int otherDeviceMode = 0,
+      bool ownerEvents = false,
+      List<int> classes = const [],
+      int time = 0}) async {
+    var request = X11XInputGrabDeviceRequest(grabWindow, deviceId,
+        thisDeviceMode: thisDeviceMode,
+        otherDeviceMode: otherDeviceMode,
+        ownerEvents: ownerEvents,
+        classes: classes,
+        time: time);
+    var sequenceNumber = _client.sendRequest(_majorOpcode, request);
+    return _client.awaitReply<X11XInputGrabDeviceReply>(
+        sequenceNumber, X11XInputGrabDeviceReply.fromBuffer);
+  }
+
   int ungrabDevice(int deviceId, {int time = 0}) {
     var request = X11XInputUngrabDeviceRequest(deviceId, time: time);
     return _client.sendRequest(_majorOpcode, request);
@@ -142,8 +160,41 @@ class X11XInputExtension extends X11Extension {
     return properties;
   }
 
-  int deleteDeviceProperty(X11Atom property, int deviceId) {
-    var request = X11XInputDeleteDevicePropertyRequest(deviceId, property);
+  Future<int> changeDevicePropertyUint8(
+      int deviceId, String property, List<int> value,
+      {String type = '', int mode = 0}) async {
+    return _changeDeviceProperty(deviceId, property, value,
+        type: type, format: 8, mode: mode);
+  }
+
+  Future<int> changeDevicePropertyUint16(
+      int deviceId, String property, List<int> value,
+      {String type = '', int mode = 0}) async {
+    return _changeDeviceProperty(deviceId, property, value,
+        type: type, format: 16, mode: mode);
+  }
+
+  Future<int> changeDevicePropertyUint32(
+      int deviceId, String property, List<int> value,
+      {String type = '', int mode = 0}) async {
+    return _changeDeviceProperty(deviceId, property, value,
+        type: type, format: 32, mode: mode);
+  }
+
+  Future<int> _changeDeviceProperty(
+      int deviceId, String property, List<int> value,
+      {String type = '', int format = 32, int mode = 0}) async {
+    var propertyAtom = await _client.internAtom(property);
+    var typeAtom = await _client.internAtom(type);
+    var request = X11XInputChangeDevicePropertyRequest(
+        deviceId, propertyAtom, value,
+        type: typeAtom, format: format, mode: mode);
+    return _client.sendRequest(_majorOpcode, request);
+  }
+
+  Future<int> deleteDeviceProperty(int deviceId, String property) async {
+    var propertyAtom = await _client.internAtom(property);
+    var request = X11XInputDeleteDevicePropertyRequest(deviceId, propertyAtom);
     return _client.sendRequest(_majorOpcode, request);
   }
 
@@ -199,6 +250,26 @@ class X11XInputExtension extends X11Extension {
     return reply.focus;
   }
 
+  Future<int> xiGrabDevice(X11ResourceId window, int deviceId,
+      {X11ResourceId cursor = X11ResourceId.None,
+      int mode = 0,
+      int pairedDeviceMode = 0,
+      bool ownerEvents = false,
+      List<int> mask = const [],
+      int time = 0}) async {
+    var request = X11XInputXiGrabDeviceRequest(window, deviceId,
+        cursor: cursor,
+        mode: mode,
+        pairedDeviceMode: pairedDeviceMode,
+        ownerEvents: ownerEvents,
+        mask: mask,
+        time: time);
+    var sequenceNumber = _client.sendRequest(_majorOpcode, request);
+    var reply = await _client.awaitReply<X11XInputXiGrabDeviceReply>(
+        sequenceNumber, X11XInputXiGrabDeviceReply.fromBuffer);
+    return reply.status;
+  }
+
   int xiUngrabDevice(int deviceId, {int time = 0}) {
     var request = X11XInputXiUngrabDeviceRequest(deviceId, time: time);
     return _client.sendRequest(_majorOpcode, request);
@@ -216,8 +287,40 @@ class X11XInputExtension extends X11Extension {
     return properties;
   }
 
-  int xiDeleteProperty(int deviceId, X11Atom property) {
-    var request = X11XInputXiDeletePropertyRequest(deviceId, property);
+  Future<int> xiChangePropertyUint8(
+      int deviceId, String property, List<int> value,
+      {String type = '', int mode = 0}) async {
+    return _xiChangeProperty(deviceId, property, value,
+        type: type, format: 8, mode: mode);
+  }
+
+  Future<int> xiChangePropertyUint16(
+      int deviceId, String property, List<int> value,
+      {String type = '', int mode = 0}) async {
+    return _xiChangeProperty(deviceId, property, value,
+        type: type, format: 16, mode: mode);
+  }
+
+  Future<int> xiChangePropertyUint32(
+      int deviceId, String property, List<int> value,
+      {String type = '', int mode = 0}) async {
+    return _xiChangeProperty(deviceId, property, value,
+        type: type, format: 32, mode: mode);
+  }
+
+  Future<int> _xiChangeProperty(int deviceId, String property, List<int> value,
+      {String type = '', int format = 32, int mode = 0}) async {
+    var propertyAtom = await _client.internAtom(property);
+    var typeAtom = await _client.internAtom(type);
+    var request = X11XInputXiChangePropertyRequest(
+        deviceId, propertyAtom, value,
+        type: typeAtom, format: format, mode: mode);
+    return _client.sendRequest(_majorOpcode, request);
+  }
+
+  Future<int> xiDeleteProperty(int deviceId, String property) async {
+    var propertyAtom = await _client.internAtom(property);
+    var request = X11XInputXiDeletePropertyRequest(deviceId, propertyAtom);
     return _client.sendRequest(_majorOpcode, request);
   }
 

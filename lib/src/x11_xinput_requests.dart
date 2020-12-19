@@ -628,6 +628,81 @@ class X11XInputChangePointerDeviceReply extends X11Reply {
   String toString() => 'X11XInputChangePointerDeviceReply(${status})';
 }
 
+class X11XInputGrabDeviceRequest extends X11Request {
+  final X11ResourceId grabWindow;
+  final int deviceId;
+  final int thisDeviceMode; // FIXME: enum
+  final int otherDeviceMode; // FIXME: enum
+  final bool ownerEvents;
+  final List<int> classes;
+  final int time;
+
+  X11XInputGrabDeviceRequest(this.grabWindow, this.deviceId,
+      {this.thisDeviceMode = 0,
+      this.otherDeviceMode = 0,
+      this.ownerEvents = false,
+      this.classes = const [],
+      this.time = 0});
+
+  factory X11XInputGrabDeviceRequest.fromBuffer(X11ReadBuffer buffer) {
+    var grabWindow = buffer.readResourceId();
+    var time = buffer.readUint32();
+    var classesLength = buffer.readUint16();
+    var thisDeviceMode = buffer.readUint8();
+    var otherDeviceMode = buffer.readUint8();
+    var ownerEvents = buffer.readBool();
+    var deviceId = buffer.readUint8();
+    buffer.skip(2);
+    var classes = buffer.readListOfUint32(classesLength);
+    return X11XInputGrabDeviceRequest(grabWindow, deviceId,
+        thisDeviceMode: thisDeviceMode,
+        otherDeviceMode: otherDeviceMode,
+        ownerEvents: ownerEvents,
+        classes: classes,
+        time: time);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(13);
+    buffer.writeResourceId(grabWindow);
+    buffer.writeUint32(time);
+    buffer.writeUint16(classes.length);
+    buffer.writeUint8(thisDeviceMode);
+    buffer.writeUint8(otherDeviceMode);
+    buffer.writeBool(ownerEvents);
+    buffer.writeUint8(deviceId);
+    buffer.skip(2);
+    buffer.writeListOfUint32(classes);
+  }
+
+  @override
+  String toString() =>
+      'X11XInputGrabDeviceRequest(${grabWindow}, ${deviceId}, thisDeviceMode: ${thisDeviceMode}, otherDeviceMode: ${otherDeviceMode}, ownerEvents: ${ownerEvents}, classes: ${classes}, time: ${time})';
+}
+
+class X11XInputGrabDeviceReply extends X11Reply {
+  final int status;
+
+  X11XInputGrabDeviceReply(this.status);
+
+  static X11XInputGrabDeviceReply fromBuffer(X11ReadBuffer buffer) {
+    var status = buffer.readUint8();
+    buffer.skip(23);
+    return X11XInputGrabDeviceReply(status);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint8(status);
+    buffer.skip(23);
+  }
+
+  @override
+  String toString() => 'X11XInputGrabDeviceReply(${status})';
+}
+
 class X11XInputUngrabDeviceRequest extends X11Request {
   final int deviceId;
   final int time;
@@ -817,6 +892,77 @@ class X11XInputListDevicePropertiesReply extends X11Reply {
 
   @override
   String toString() => 'X11XInputListDevicePropertiesReply(${properties})';
+}
+
+class X11XInputChangeDevicePropertyRequest extends X11Request {
+  final int deviceId;
+  final X11Atom property;
+  final List<int> value;
+  final int mode; // FIXME: enum
+  final X11Atom type;
+  final int format;
+
+  X11XInputChangeDevicePropertyRequest(this.deviceId, this.property, this.value,
+      {this.type = X11Atom.None, this.format = 32, this.mode = 0});
+
+  factory X11XInputChangeDevicePropertyRequest.fromBuffer(
+      X11ReadBuffer buffer) {
+    var property = buffer.readAtom();
+    var type = buffer.readAtom();
+    var deviceId = buffer.readUint8();
+    var format = buffer.readUint8();
+    var mode = buffer.readUint8();
+    buffer.skip(1);
+    var valueLength = buffer.readUint32();
+    var value = <int>[];
+    if (format == 8) {
+      for (var i = 0; i < valueLength; i++) {
+        value.add(buffer.readUint8());
+      }
+      buffer.skip(pad(valueLength));
+    } else if (format == 16) {
+      for (var i = 0; i < valueLength; i++) {
+        value.add(buffer.readUint16());
+      }
+      buffer.skip(pad(valueLength * 2));
+    } else if (format == 32) {
+      for (var i = 0; i < valueLength; i++) {
+        value.add(buffer.readUint32());
+      }
+    }
+    return X11XInputChangeDevicePropertyRequest(deviceId, property, value,
+        type: type, format: format, mode: mode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeAtom(property);
+    buffer.writeAtom(type);
+    buffer.writeUint8(deviceId);
+    buffer.writeUint8(format);
+    buffer.writeUint8(mode);
+    buffer.skip(1);
+    buffer.writeUint32(value.length);
+    if (format == 8) {
+      for (var d in value) {
+        buffer.writeUint8(d);
+      }
+      buffer.skip(pad(value.length));
+    } else if (format == 16) {
+      for (var d in value) {
+        buffer.writeUint16(d);
+      }
+      buffer.skip(pad(value.length * 2));
+    } else if (format == 32) {
+      for (var d in value) {
+        buffer.writeUint32(d);
+      }
+    }
+  }
+
+  @override
+  String toString() =>
+      'X11XInputChangeDevicePropertyRequest(${deviceId}, ${property}, <${value.length} bytes>, type: ${type}, format: ${format}, mode: ${mode})';
 }
 
 class X11XInputDeleteDevicePropertyRequest extends X11Request {
@@ -1205,6 +1351,87 @@ class X11XInputXiGetFocusReply extends X11Reply {
   String toString() => 'X11XInputXiGetFocusReply(${focus})';
 }
 
+class X11XInputXiGrabDeviceRequest extends X11Request {
+  final X11ResourceId window;
+  final int deviceId;
+  final X11ResourceId cursor;
+  final int mode; // FIXME: enum
+  final int pairedDeviceMode; // FIXME: enum
+  final bool ownerEvents;
+  final List<int> mask;
+  final int time;
+
+  X11XInputXiGrabDeviceRequest(this.window, this.deviceId,
+      {this.cursor = X11ResourceId.None,
+      this.mode = 0,
+      this.pairedDeviceMode = 0,
+      this.ownerEvents = false,
+      this.mask = const [],
+      this.time = 0});
+
+  factory X11XInputXiGrabDeviceRequest.fromBuffer(X11ReadBuffer buffer) {
+    var window = buffer.readResourceId();
+    var time = buffer.readUint32();
+    var cursor = buffer.readResourceId();
+    var deviceId = buffer.readUint16();
+    var mode = buffer.readUint8();
+    var pairedDeviceMode = buffer.readUint8();
+    var ownerEvents = buffer.readBool();
+    buffer.skip(1);
+    var maskLength = buffer.readUint16();
+    var mask = buffer.readListOfUint32(maskLength);
+    return X11XInputXiGrabDeviceRequest(window, deviceId,
+        time: time,
+        cursor: cursor,
+        mode: mode,
+        pairedDeviceMode: pairedDeviceMode,
+        ownerEvents: ownerEvents,
+        mask: mask);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(51);
+    buffer.writeResourceId(window);
+    buffer.writeUint32(time);
+    buffer.writeResourceId(cursor);
+    buffer.writeUint16(deviceId);
+    buffer.writeUint8(mode);
+    buffer.writeUint8(pairedDeviceMode);
+    buffer.writeBool(ownerEvents);
+    buffer.skip(1);
+    buffer.writeUint16(mask.length);
+    buffer.writeListOfUint32(mask);
+  }
+
+  @override
+  String toString() =>
+      'X11XInputXiGrabDeviceRequest(${window}, ${deviceId}, cursor: ${cursor}, mode: ${mode}, pairedDeviceMode: ${pairedDeviceMode}, ownerEvents: ${ownerEvents}, mask: ${mask}, time: ${time})';
+}
+
+class X11XInputXiGrabDeviceReply extends X11Reply {
+  final int status;
+
+  X11XInputXiGrabDeviceReply(this.status);
+
+  static X11XInputXiGrabDeviceReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var status = buffer.readUint8();
+    buffer.skip(23);
+    return X11XInputXiGrabDeviceReply(status);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint8(status);
+    buffer.skip(23);
+  }
+
+  @override
+  String toString() => 'X11XInputXiGrabDeviceReply(${status})';
+}
+
 class X11XInputXiUngrabDeviceRequest extends X11Request {
   final int deviceId;
   final int time;
@@ -1276,6 +1503,74 @@ class X11XInputXiListPropertiesReply extends X11Reply {
 
   @override
   String toString() => 'X11XInputXiListPropertiesReply(${properties})';
+}
+
+class X11XInputXiChangePropertyRequest extends X11Request {
+  final int deviceId;
+  final X11Atom property;
+  final List<int> value;
+  final int mode; // FIXME: enum
+  final X11Atom type;
+  final int format;
+
+  X11XInputXiChangePropertyRequest(this.deviceId, this.property, this.value,
+      {this.type = X11Atom.None, this.format = 32, this.mode = 0});
+
+  factory X11XInputXiChangePropertyRequest.fromBuffer(X11ReadBuffer buffer) {
+    var deviceId = buffer.readUint16();
+    var mode = buffer.readUint8();
+    var format = buffer.readUint8();
+    var property = buffer.readAtom();
+    var type = buffer.readAtom();
+    var valueLength = buffer.readUint32();
+    var value = <int>[];
+    if (format == 8) {
+      for (var i = 0; i < valueLength; i++) {
+        value.add(buffer.readUint8());
+      }
+      buffer.skip(pad(valueLength));
+    } else if (format == 16) {
+      for (var i = 0; i < valueLength; i++) {
+        value.add(buffer.readUint16());
+      }
+      buffer.skip(pad(valueLength * 2));
+    } else if (format == 32) {
+      for (var i = 0; i < valueLength; i++) {
+        value.add(buffer.readUint32());
+      }
+    }
+    return X11XInputXiChangePropertyRequest(deviceId, property, value,
+        type: type, format: format, mode: mode);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint16(deviceId);
+    buffer.writeUint8(mode);
+    buffer.writeUint8(format);
+    buffer.writeAtom(property);
+    buffer.writeAtom(type);
+    buffer.writeUint32(value.length);
+    if (format == 8) {
+      for (var d in value) {
+        buffer.writeUint8(d);
+      }
+      buffer.skip(pad(value.length));
+    } else if (format == 16) {
+      for (var d in value) {
+        buffer.writeUint16(d);
+      }
+      buffer.skip(pad(value.length * 2));
+    } else if (format == 32) {
+      for (var d in value) {
+        buffer.writeUint32(d);
+      }
+    }
+  }
+
+  @override
+  String toString() =>
+      'X11XInputXiChangePropertyRequest(${deviceId}, ${property}, <${value.length} bytes>, type: ${type}, format: ${format}, mode: ${mode})';
 }
 
 class X11XInputXiDeletePropertyRequest extends X11Request {
