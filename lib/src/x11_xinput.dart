@@ -216,6 +216,11 @@ class X11XInputExtension extends X11Extension {
         sequenceNumber, X11XInputGetDevicePropertyReply.fromBuffer);
   }
 
+  int xiChangeCursor(X11ResourceId window, int deviceId, X11ResourceId cursor) {
+    var request = X11XInputXiChangeCursorRequest(window, deviceId, cursor);
+    return _client.sendRequest(_majorOpcode, request);
+  }
+
   int xiSetClientPointer(X11ResourceId window, int deviceId) {
     var request = X11XInputXiSetClientPointerRequest(window, deviceId);
     return _client.sendRequest(_majorOpcode, request);

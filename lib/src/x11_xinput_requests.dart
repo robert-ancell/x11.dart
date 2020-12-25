@@ -1123,6 +1123,34 @@ class X11XInputGetDevicePropertyReply extends X11Reply {
       'X11XInputGetDevicePropertyReply(${deviceId}, type: ${type}, format: ${format}, value: <${value.length} bytes>, bytesAfter: ${bytesAfter})';
 }
 
+class X11XInputXiChangeCursorRequest extends X11Request {
+  final X11ResourceId window;
+  final X11ResourceId cursor;
+  final int deviceid;
+
+  X11XInputXiChangeCursorRequest(this.window, this.deviceid, this.cursor);
+
+  factory X11XInputXiChangeCursorRequest.fromBuffer(X11ReadBuffer buffer) {
+    var window = buffer.readResourceId();
+    var cursor = buffer.readResourceId();
+    var deviceid = buffer.readUint16();
+    buffer.skip(2);
+    return X11XInputXiChangeCursorRequest(window, deviceid, cursor);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeResourceId(window);
+    buffer.writeResourceId(cursor);
+    buffer.writeUint16(deviceid);
+    buffer.skip(2);
+  }
+
+  @override
+  String toString() =>
+      'X11XInputXiChangeCursorRequest(window: ${window}, cursor: ${cursor}, deviceid: ${deviceid})';
+}
+
 class X11XInputXiSetClientPointerRequest extends X11Request {
   final X11ResourceId window;
   final int deviceId;
