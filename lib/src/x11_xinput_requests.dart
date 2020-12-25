@@ -859,6 +859,62 @@ class X11XInputDeviceBellRequest extends X11Request {
       'X11XInputDeviceBellRequest(${deviceId}, feedbackId: ${feedbackId}, feedbackClass: ${feedbackClass}, percent: ${percent})';
 }
 
+class X11XInputSetDeviceValuatorsRequest extends X11Request {
+  final int deviceId;
+  final int firstValuator;
+  final List<int> valuators;
+
+  X11XInputSetDeviceValuatorsRequest(
+      this.deviceId, this.firstValuator, this.valuators);
+
+  factory X11XInputSetDeviceValuatorsRequest.fromBuffer(X11ReadBuffer buffer) {
+    var deviceId = buffer.readUint8();
+    var firstValuator = buffer.readUint8();
+    var valuatorsLength = buffer.readUint8();
+    buffer.skip(1);
+    var valuators = buffer.readListOfInt32(valuatorsLength);
+    return X11XInputSetDeviceValuatorsRequest(
+        deviceId, firstValuator, valuators);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(33);
+    buffer.writeUint8(deviceId);
+    buffer.writeUint8(firstValuator);
+    buffer.writeUint8(valuators.length);
+    buffer.writeListOfInt32(valuators);
+    buffer.skip(1);
+  }
+
+  @override
+  String toString() =>
+      'X11XInputSetDeviceValuatorsRequest(deviceId: ${deviceId}, firstValuator: ${firstValuator}, valuators: ${valuators})';
+}
+
+class X11XInputSetDeviceValuatorsReply extends X11Reply {
+  final int status;
+
+  X11XInputSetDeviceValuatorsReply(this.status);
+
+  static X11XInputSetDeviceValuatorsReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
+    var status = buffer.readUint8();
+    buffer.skip(23);
+    return X11XInputSetDeviceValuatorsReply(status);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(1);
+    buffer.writeUint8(status);
+    buffer.skip(23);
+  }
+
+  @override
+  String toString() => 'X11XInputSetDeviceValuatorsReply(${status})';
+}
+
 class X11XInputListDevicePropertiesRequest extends X11Request {
   final int deviceId;
 
@@ -1140,6 +1196,7 @@ class X11XInputXiChangeCursorRequest extends X11Request {
 
   @override
   void encode(X11WriteBuffer buffer) {
+    buffer.writeUint8(42);
     buffer.writeResourceId(window);
     buffer.writeResourceId(cursor);
     buffer.writeUint16(deviceid);

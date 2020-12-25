@@ -148,6 +148,16 @@ class X11XInputExtension extends X11Extension {
     return _client.sendRequest(_majorOpcode, request);
   }
 
+  Future<int> setDeviceValuators(
+      int deviceId, int firstValuator, List<int> valuators) async {
+    var request =
+        X11XInputSetDeviceValuatorsRequest(deviceId, firstValuator, valuators);
+    var sequenceNumber = _client.sendRequest(_majorOpcode, request);
+    var reply = await _client.awaitReply<X11XInputSetDeviceValuatorsReply>(
+        sequenceNumber, X11XInputSetDeviceValuatorsReply.fromBuffer);
+    return reply.status;
+  }
+
   Future<List<String>> listDeviceProperties(int deviceId) async {
     var request = X11XInputListDevicePropertiesRequest(deviceId);
     var sequenceNumber = _client.sendRequest(_majorOpcode, request);
