@@ -366,6 +366,7 @@ class X11XInputGetSelectedExtensionEventsReply extends X11Reply {
 
   static X11XInputGetSelectedExtensionEventsReply fromBuffer(
       X11ReadBuffer buffer) {
+    buffer.skip(1);
     var thisClassesLength = buffer.readUint16();
     var allClassesLength = buffer.readUint16();
     buffer.skip(20);
@@ -451,6 +452,7 @@ class X11XInputGetDeviceDontPropagateListReply extends X11Reply {
 
   static X11XInputGetDeviceDontPropagateListReply fromBuffer(
       X11ReadBuffer buffer) {
+    buffer.skip(1);
     var classesLength = buffer.readUint16();
     buffer.skip(22);
     var classes = buffer.readListOfUint32(classesLength);
@@ -506,6 +508,7 @@ class X11XInputGetDeviceMotionEventsReply extends X11Reply {
   X11XInputGetDeviceMotionEventsReply(this.deviceMode, this.events);
 
   static X11XInputGetDeviceMotionEventsReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var eventsLength = buffer.readUint32();
     var axesLength = buffer.readUint8();
     var deviceMode = buffer.readUint8();
@@ -700,6 +703,7 @@ class X11XInputGrabDeviceReply extends X11Reply {
   X11XInputGrabDeviceReply(this.status);
 
   static X11XInputGrabDeviceReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var status = buffer.readUint8();
     buffer.skip(23);
     return X11XInputGrabDeviceReply(status);
@@ -772,6 +776,7 @@ class X11XInputGetDeviceFocusReply extends X11Reply {
   X11XInputGetDeviceFocusReply(this.focus, {this.revertTo = 0, this.time = 0});
 
   static X11XInputGetDeviceFocusReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var focus = buffer.readResourceId();
     var time = buffer.readUint32();
     var revertTo = buffer.readUint8();
@@ -1580,6 +1585,7 @@ class X11XInputXiGetFocusReply extends X11Reply {
   X11XInputXiGetFocusReply(this.focus);
 
   static X11XInputXiGetFocusReply fromBuffer(X11ReadBuffer buffer) {
+    buffer.skip(1);
     var focus = buffer.readResourceId();
     buffer.skip(20);
     return X11XInputXiGetFocusReply(focus);
