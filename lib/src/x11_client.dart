@@ -21,6 +21,7 @@ import 'x11_types.dart';
 import 'x11_write_buffer.dart';
 import 'x11_xfixes.dart';
 import 'x11_xinput.dart';
+import 'x11_xkeyboard.dart';
 
 abstract class _RequestHandler {
   bool get done;
@@ -132,6 +133,9 @@ class X11Client {
   /// XInput extension, or null if it doesn't exist.
   X11XInputExtension get xinput => _xinput;
 
+  /// XKeyboard extension, or null if it doesn't exist.
+  X11XKeyboardExtension get xkeyboard => _xkeyboard;
+
   Socket _socket;
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
@@ -158,6 +162,7 @@ class X11Client {
   X11SyncExtension _sync;
   X11XFixesExtension _xfixes;
   X11XInputExtension _xinput;
+  X11XKeyboardExtension _xkeyboard;
 
   /// Creates a new X client.
   /// Call [connect] or [connectToHost] to connect to an X server.
@@ -353,6 +358,11 @@ class X11Client {
         if (reply.present) {
           _xinput = X11XInputExtension(
               this, reply.majorOpcode, reply.firstEvent, reply.firstError);
+        }
+      }),
+      queryExtension('XKEYBOARD').then((reply) {
+        if (reply.present) {
+          _xkeyboard = X11XKeyboardExtension(this, reply.majorOpcode);
         }
       }),
     ]);
