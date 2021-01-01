@@ -320,6 +320,9 @@ class X11UnknownError extends X11Error {
   void encode(X11WriteBuffer buffer) {
     buffer.writeListOfUint8(data);
   }
+
+  @override
+  String toString() => 'X11UnknownError(${code}, ${data})';
 }
 
 class X11RegionError extends X11Error {
@@ -592,6 +595,38 @@ class X11ClassError extends X11Error {
   factory X11ClassError.fromBuffer(int sequenceNumber, X11ReadBuffer buffer) {
     buffer.skip(25);
     return X11ClassError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11SecurityBadAuthorizationError extends X11Error {
+  const X11SecurityBadAuthorizationError(int sequenceNumber)
+      : super(sequenceNumber);
+
+  factory X11SecurityBadAuthorizationError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11SecurityBadAuthorizationError(sequenceNumber);
+  }
+
+  @override
+  void encode(X11WriteBuffer buffer) {
+    buffer.skip(25);
+  }
+}
+
+class X11SecurityBadAuthorizationProtocolError extends X11Error {
+  const X11SecurityBadAuthorizationProtocolError(int sequenceNumber)
+      : super(sequenceNumber);
+
+  factory X11SecurityBadAuthorizationProtocolError.fromBuffer(
+      int sequenceNumber, X11ReadBuffer buffer) {
+    buffer.skip(25);
+    return X11SecurityBadAuthorizationProtocolError(sequenceNumber);
   }
 
   @override

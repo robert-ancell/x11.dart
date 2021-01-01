@@ -56,9 +56,7 @@ class X11SetupRequest {
     buffer.skip(2);
     buffer.writeString8(authorizationProtocolName);
     buffer.skip(pad(authorizationProtocolNameLength));
-    for (var d in authorizationProtocolData) {
-      buffer.writeUint8(d);
-    }
+    buffer.writeListOfUint8(authorizationProtocolData);
     buffer.skip(pad(authorizationProtocolData.length));
   }
 

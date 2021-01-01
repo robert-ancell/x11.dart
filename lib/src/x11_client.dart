@@ -15,6 +15,7 @@ import 'x11_randr.dart';
 import 'x11_requests.dart';
 import 'x11_read_buffer.dart';
 import 'x11_render.dart';
+import 'x11_security.dart';
 import 'x11_shape.dart';
 import 'x11_sync.dart';
 import 'x11_types.dart';
@@ -121,6 +122,9 @@ class X11Client {
   /// RENDER extension, or null if it doesn't exist.
   X11RenderExtension get render => _render;
 
+  /// SECURITY extension, or null if it doesn't exist.
+  X11SecurityExtension get security => _security;
+
   /// SHAPE extension, or null if it doesn't exist.
   X11ShapeExtension get shape => _shape;
 
@@ -158,6 +162,7 @@ class X11Client {
   X11MitShmExtension _mitShm;
   X11RandrExtension _randr;
   X11RenderExtension _render;
+  X11SecurityExtension _security;
   X11ShapeExtension _shape;
   X11SyncExtension _sync;
   X11XFixesExtension _xfixes;
@@ -336,6 +341,12 @@ class X11Client {
         if (reply.present) {
           _render =
               X11RenderExtension(this, reply.majorOpcode, reply.firstError);
+        }
+      }),
+      queryExtension('SECURITY').then((reply) {
+        if (reply.present) {
+          _security = X11SecurityExtension(
+              this, reply.majorOpcode, reply.firstEvent, reply.firstError);
         }
       }),
       queryExtension('SHAPE').then((reply) {
@@ -1887,7 +1898,27 @@ class X11Client {
         error = X11ImplementationError.fromBuffer(sequenceNumber, errorBuffer);
       }
 
-      error ??= randr.decodeError(code, sequenceNumber, errorBuffer);
+      if (damage != null) {
+        error ??= damage.decodeError(code, sequenceNumber, errorBuffer);
+      }
+      if (mitShm != null) {
+        error ??= mitShm.decodeError(code, sequenceNumber, errorBuffer);
+      }
+      if (randr != null) {
+        error ??= randr.decodeError(code, sequenceNumber, errorBuffer);
+      }
+      if (render != null) {
+        error ??= render.decodeError(code, sequenceNumber, errorBuffer);
+      }
+      if (security != null) {
+        error ??= security.decodeError(code, sequenceNumber, errorBuffer);
+      }
+      if (xfixes != null) {
+        error ??= xfixes.decodeError(code, sequenceNumber, errorBuffer);
+      }
+      if (xinput != null) {
+        error ??= xinput.decodeError(code, sequenceNumber, errorBuffer);
+      }
       error ??= X11UnknownError.fromBuffer(code, sequenceNumber, errorBuffer);
 
       var handler = _requests[error.sequenceNumber];
@@ -1995,7 +2026,30 @@ class X11Client {
         event = X11MappingNotifyEvent.fromBuffer(eventBuffer);
       }
 
-      event ??= randr.decodeEvent(code, eventBuffer);
+      if (damage != null) {
+        event ??= damage.decodeEvent(code, eventBuffer);
+      }
+      if (mitScreenSaver != null) {
+        event ??= mitScreenSaver.decodeEvent(code, eventBuffer);
+      }
+      if (mitShm != null) {
+        event ??= mitShm.decodeEvent(code, eventBuffer);
+      }
+      if (randr != null) {
+        event ??= randr.decodeEvent(code, eventBuffer);
+      }
+      if (security != null) {
+        event ??= security.decodeEvent(code, eventBuffer);
+      }
+      if (shape != null) {
+        event ??= shape.decodeEvent(code, eventBuffer);
+      }
+      if (xfixes != null) {
+        event ??= xfixes.decodeEvent(code, eventBuffer);
+      }
+      if (xinput != null) {
+        event ??= xinput.decodeEvent(code, eventBuffer);
+      }
       event ??= X11UnknownEvent.fromBuffer(code, eventBuffer);
 
       _eventStreamController.add(event);

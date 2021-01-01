@@ -316,6 +316,8 @@ enum X11SubPixelOrder {
 
 enum X11SubwindowMode { clipByChildren, includeInferiors }
 
+enum X11TrustLevel { trusted, untrusted }
+
 /// The class of visual.
 ///
 /// For [staticColor] and [pseudoColor] each pixel value indexes a colormap of RGB values.
