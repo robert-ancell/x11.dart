@@ -254,7 +254,7 @@ class X11Client {
   /// The server location is determined from the `DISPLAY` environment variable.
   ///
   /// If you need to choose the server details use [connectToHost].
-  void connect() async {
+  Future<void> connect() async {
     var display = Platform.environment['DISPLAY'];
     if (display == null) {
       throw 'No DISPLAY set';
@@ -278,7 +278,7 @@ class X11Client {
   }
 
   /// Connects to the X server on [host] using [displayNumber].
-  void connectToHost(String host, int displayNumber) async {
+  Future<void> connectToHost(String host, int displayNumber) async {
     if (!(host == '' || host == 'localhost')) {
       throw 'Connecting to host $host not supported';
     }
@@ -2111,7 +2111,7 @@ class X11Client {
   }
 
   /// Closes the connection to the server.
-  void close() async {
+  Future<void> close() async {
     if (_socket != null) {
       await _socket.close();
     }

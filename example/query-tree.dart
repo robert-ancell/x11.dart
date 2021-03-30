@@ -4,7 +4,8 @@ void main() async {
   var client = X11Client();
   await client.connect();
 
-  void printChildren(List<X11ResourceId> children, [String indent = '']) async {
+  Future<void> printChildren(List<X11ResourceId> children,
+      [String indent = '']) async {
     for (var window in children) {
       var reply = await client.getGeometry(window);
       var attributes = await client.getWindowAttributes(window);

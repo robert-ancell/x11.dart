@@ -566,7 +566,7 @@ class X11Server {
 
   X11Server(this.displayNumber);
 
-  void start() async {
+  Future<void> start() async {
     var socketAddress = InternetAddress('/tmp/.X11-unix/X$displayNumber',
         type: InternetAddressType.unix);
     _socket = await ServerSocket.bind(socketAddress, 0);
