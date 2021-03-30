@@ -375,7 +375,7 @@ class X11Atom {
   const X11Atom(this.value);
 
   @override
-  String toString() => 'X11Atom(${value})';
+  String toString() => 'X11Atom($value)';
 }
 
 class X11CharacterInfo {
@@ -402,7 +402,7 @@ class X11ColorStop {
   const X11ColorStop(this.point, this.color);
 
   @override
-  String toString() => 'X11ColorStop(${point}, ${color})';
+  String toString() => 'X11ColorStop($point, $color)';
 }
 
 abstract class X11DeviceClass {
@@ -416,8 +416,7 @@ class X11DeviceClassKey extends X11DeviceClass {
   const X11DeviceClassKey({this.sourceId = 0, this.keys = const []});
 
   @override
-  String toString() =>
-      'X11DeviceClassKey(sourceId: ${sourceId}, keys: ${keys})';
+  String toString() => 'X11DeviceClassKey(sourceId: $sourceId, keys: $keys)';
 }
 
 class X11DeviceClassButton extends X11DeviceClass {
@@ -430,7 +429,7 @@ class X11DeviceClassButton extends X11DeviceClass {
 
   @override
   String toString() =>
-      'X11DeviceClassButton(sourceId: ${sourceId}, state: ${state}, labels: ${labels})';
+      'X11DeviceClassButton(sourceId: $sourceId, state: $state, labels: $labels)';
 }
 
 class X11DeviceClassValuator extends X11DeviceClass {
@@ -455,7 +454,7 @@ class X11DeviceClassValuator extends X11DeviceClass {
 
   @override
   String toString() =>
-      'X11DeviceClassValuator(sourceId: ${sourceId}, number: ${number}, label: ${label}, min: ${min}, max: ${max}, value: ${value}, resolution: ${resolution}, mode: ${mode})';
+      'X11DeviceClassValuator(sourceId: $sourceId, number: $number, label: $label, min: $min, max: $max, value: $value, resolution: $resolution, mode: $mode)';
 }
 
 class X11DeviceClassScroll extends X11DeviceClass {
@@ -474,7 +473,7 @@ class X11DeviceClassScroll extends X11DeviceClass {
 
   @override
   String toString() =>
-      'X11DeviceClassScroll(sourceId: ${sourceId}, number: ${number}, type: ${type}, flags: ${flags}, increment: ${increment})';
+      'X11DeviceClassScroll(sourceId: $sourceId, number: $number, type: $type, flags: $flags, increment: $increment)';
 }
 
 class X11DeviceClassTouch extends X11DeviceClass {
@@ -493,7 +492,7 @@ class X11DeviceClassUnknown extends X11DeviceClass {
   const X11DeviceClassUnknown(this.type, this.data);
 
   @override
-  String toString() => 'X11DeviceClassUnknown(${type}, data: ${data})';
+  String toString() => 'X11DeviceClassUnknown($type, data: $data)';
 }
 
 class X11DeviceInfo {
@@ -512,7 +511,7 @@ class X11DeviceInfo {
 
   @override
   String toString() =>
-      "X11DeviceInfo(id: ${id}, name: '${name}', type: ${type}, inputClasses: ${inputClasses}, deviceUse: ${deviceUse})";
+      "X11DeviceInfo(id: $id, name: '$name', type: $type, inputClasses: $inputClasses, deviceUse: $deviceUse)";
 }
 
 class X11DeviceTimeCoord {
@@ -522,7 +521,7 @@ class X11DeviceTimeCoord {
   const X11DeviceTimeCoord(this.axes, this.time);
 
   @override
-  String toString() => 'X11DeviceTimeCoord(${axes}, time: ${time})';
+  String toString() => 'X11DeviceTimeCoord($axes, time: $time)';
 }
 
 abstract class X11InputInfo {
@@ -538,7 +537,7 @@ class X11KeyInfo extends X11InputInfo {
 
   @override
   String toString() =>
-      'X11KeyInfo(minimumKeycode: ${minimumKeycode}, maximumKeycode: ${maximumKeycode}, keysLength: ${keysLength})';
+      'X11KeyInfo(minimumKeycode: $minimumKeycode, maximumKeycode: $maximumKeycode, keysLength: $keysLength)';
 }
 
 class X11ButtonInfo extends X11InputInfo {
@@ -547,7 +546,7 @@ class X11ButtonInfo extends X11InputInfo {
   const X11ButtonInfo(this.buttonsLength);
 
   @override
-  String toString() => 'X11ButtonInfo(${buttonsLength})';
+  String toString() => 'X11ButtonInfo($buttonsLength)';
 }
 
 class X11ValuatorInfo extends X11InputInfo {
@@ -565,7 +564,7 @@ class X11RgbColorItem {
 
   @override
   String toString() =>
-      'X11RgbColorItem(pixel: ${_formatPixel(pixel)}, red: ${red}, green: ${green}, blue: ${blue})';
+      'X11RgbColorItem(pixel: ${_formatPixel(pixel)}, red: $red, green: $green, blue: $blue)';
 }
 
 class X11RgbaColorItem {
@@ -580,7 +579,7 @@ class X11RgbaColorItem {
 
   @override
   String toString() =>
-      'X11RgbaColorItem(pixel: ${_formatPixel(pixel)}, red: ${red}, green: ${green}, blue: ${blue}, alpha: ${alpha})';
+      'X11RgbaColorItem(pixel: ${_formatPixel(pixel)}, red: $red, green: $green, blue: $blue, alpha: $alpha)';
 }
 
 class X11FontProperty {
@@ -590,7 +589,7 @@ class X11FontProperty {
   X11FontProperty(this.name, this.value);
 
   @override
-  String toString() => 'X11FontProperty(${name}, ${value})';
+  String toString() => 'X11FontProperty($name, $value)';
 }
 
 class X11GlyphInfo {
@@ -601,7 +600,7 @@ class X11GlyphInfo {
   const X11GlyphInfo(this.id, this.area, {this.offset = const X11Point(0, 0)});
 
   @override
-  String toString() => 'X11GlyphInfo(${id}, ${area}, offset: ${offset})';
+  String toString() => 'X11GlyphInfo($id, $area, offset: $offset)';
 }
 
 abstract class X11GlyphItem {
@@ -614,7 +613,7 @@ class X11GlyphItemGlyphable extends X11GlyphItem {
   const X11GlyphItemGlyphable(this.glyphable);
 
   @override
-  String toString() => 'X11GlyphItemGlyphable(${glyphable})';
+  String toString() => 'X11GlyphItemGlyphable($glyphable)';
 }
 
 class X11GlyphItemGlyphs extends X11GlyphItem {
@@ -624,7 +623,7 @@ class X11GlyphItemGlyphs extends X11GlyphItem {
   const X11GlyphItemGlyphs(this.glyphs, {this.offset = const X11Point(0, 0)});
 
   @override
-  String toString() => 'X11GlyphItemGlyphs(${glyphs}, offset: ${offset})';
+  String toString() => 'X11GlyphItemGlyphs($glyphs, offset: $offset)';
 }
 
 class X11InputClassInfo {
@@ -654,7 +653,7 @@ class X11ModifierMap {
 
   @override
   String toString() =>
-      'X11ModifierMap(shiftKeycodes: ${shiftKeycodes}, lockKeycodes: ${lockKeycodes}, controlKeycodes: ${controlKeycodes}, mod1Keycodes: ${mod1Keycodes}, mod2Keycodes: ${mod2Keycodes}, mod3Keycodes: ${mod3Keycodes}, mod4Keycodes: ${mod4Keycodes}, mod5Keycodes: ${mod5Keycodes})';
+      'X11ModifierMap(shiftKeycodes: $shiftKeycodes, lockKeycodes: $lockKeycodes, controlKeycodes: $controlKeycodes, mod1Keycodes: $mod1Keycodes, mod2Keycodes: $mod2Keycodes, mod3Keycodes: $mod3Keycodes, mod4Keycodes: $mod4Keycodes, mod5Keycodes: $mod5Keycodes)';
 }
 
 class X11Format {
@@ -667,7 +666,7 @@ class X11Format {
 
   @override
   String toString() =>
-      'X11Format(depth: ${depth}, bitsPerPixel: ${bitsPerPixel}, scanlinePad: ${scanlinePad})';
+      'X11Format(depth: $depth, bitsPerPixel: $bitsPerPixel, scanlinePad: $scanlinePad)';
 }
 
 class X11Fraction {
@@ -677,7 +676,7 @@ class X11Fraction {
   X11Fraction(this.numerator, this.denominator);
 
   @override
-  String toString() => 'X11Fraction(${numerator}, ${denominator})';
+  String toString() => 'X11Fraction($numerator, $denominator)';
 }
 
 class X11Screen {
@@ -714,7 +713,7 @@ class X11Screen {
 
   @override
   String toString() =>
-      'X11Window(window: ${window}, defaultColormap: ${defaultColormap}, whitePixel: ${_formatPixel(whitePixel)}, blackPixel: ${_formatPixel(blackPixel)}, currentInputMasks: ${_formatHex32(currentInputMasks)}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, minInstalledMaps: ${minInstalledMaps}, maxInstalledMaps: ${maxInstalledMaps}, rootVisual: ${rootVisual}, backingStores: ${backingStores}, saveUnders: ${saveUnders}, rootDepth: ${rootDepth}, allowedDepths: ${allowedDepths})';
+      'X11Window(window: $window, defaultColormap: $defaultColormap, whitePixel: ${_formatPixel(whitePixel)}, blackPixel: ${_formatPixel(blackPixel)}, currentInputMasks: ${_formatHex32(currentInputMasks)}, sizeInPixels: $sizeInPixels, sizeInMillimeters: $sizeInMillimeters, minInstalledMaps: $minInstalledMaps, maxInstalledMaps: $maxInstalledMaps, rootVisual: $rootVisual, backingStores: $backingStores, saveUnders: $saveUnders, rootDepth: $rootDepth, allowedDepths: $allowedDepths)';
 }
 
 class X11AnimatedCursorFrame {
@@ -740,7 +739,7 @@ class X11Arc {
 
   @override
   String toString() =>
-      'X11Arc(x: ${x}, y: ${y}, width: ${width}, height: ${height}, angle1: ${angle1}, angle2: ${angle2})';
+      'X11Arc(x: $x, y: $y, width: $width, height: $height, angle1: $angle1, angle2: $angle2)';
 }
 
 class X11Host {
@@ -750,7 +749,7 @@ class X11Host {
   X11Host(this.family, this.address);
 
   @override
-  String toString() => 'X11Host(family: ${family}, address: ${address})';
+  String toString() => 'X11Host(family: $family, address: $address)';
 }
 
 class X11LineFixed {
@@ -760,7 +759,7 @@ class X11LineFixed {
   const X11LineFixed(this.p1, this.p2);
 
   @override
-  String toString() => 'X11LineFixed(${p1}, ${p2})';
+  String toString() => 'X11LineFixed($p1, $p2)';
 }
 
 class X11Point {
@@ -770,7 +769,7 @@ class X11Point {
   const X11Point(this.x, this.y);
 
   @override
-  String toString() => 'X11Point(${x}, ${y})';
+  String toString() => 'X11Point($x, $y)';
 }
 
 class X11PointFixed {
@@ -780,7 +779,7 @@ class X11PointFixed {
   const X11PointFixed(this.x, this.y);
 
   @override
-  String toString() => 'X11PointFixed(${x}, ${y})';
+  String toString() => 'X11PointFixed($x, $y)';
 }
 
 enum X11QueryClass { cursor, tile, stipple }
@@ -815,7 +814,7 @@ class X11RandrModeInfo {
 
   @override
   String toString() =>
-      "X11RandrModeInfo(id: ${id}, name: '${name}', sizeInPixels: ${sizeInPixels}, dotClock: ${dotClock}, hSyncStart: ${hSyncStart}, hSyncEnd: ${hSyncEnd}, hTotal: ${hTotal}, hSkew: ${hSkew}, vSyncStart: ${vSyncStart}, vSyncEnd: ${vSyncEnd}, vTotal: ${vTotal}, modeFlags: ${modeFlags})";
+      "X11RandrModeInfo(id: $id, name: '$name', sizeInPixels: $sizeInPixels, dotClock: $dotClock, hSyncStart: $hSyncStart, hSyncEnd: $hSyncEnd, hTotal: $hTotal, hSkew: $hSkew, vSyncStart: $vSyncStart, vSyncEnd: $vSyncEnd, vTotal: $vTotal, modeFlags: $modeFlags)";
 }
 
 class X11RandrMonitorInfo {
@@ -847,7 +846,7 @@ class X11RandrScreenSize {
 
   @override
   String toString() =>
-      'X11RandrScreenSize(${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, rates: ${rates})';
+      'X11RandrScreenSize($sizeInPixels, sizeInMillimeters: $sizeInMillimeters, rates: $rates)';
 }
 
 class X11Rectangle {
@@ -859,7 +858,7 @@ class X11Rectangle {
   const X11Rectangle(this.x, this.y, this.width, this.height);
 
   @override
-  String toString() => 'X11Rectangle(${x}, ${y}, ${width}, ${height})';
+  String toString() => 'X11Rectangle($x, $y, $width, $height)';
 }
 
 class X11PictFormatInfo {
@@ -891,7 +890,7 @@ class X11PictFormatInfo {
 
   @override
   String toString() =>
-      'X11PictFormatInfo(${id}, type: ${type}, depth: ${depth}, redShift: ${redShift}, redMask: ${_formatHex(redMask)}, greenShift: ${greenShift}, greenMask: ${_formatHex(greenMask)}, blueShift: ${blueShift}, blueMask: ${_formatHex(blueMask)}, alphaShift: ${alphaShift}, alphaMask: ${_formatHex(alphaMask)}, colormap: ${colormap})';
+      'X11PictFormatInfo($id, type: $type, depth: $depth, redShift: $redShift, redMask: ${_formatHex(redMask)}, greenShift: $greenShift, greenMask: ${_formatHex(greenMask)}, blueShift: $blueShift, blueMask: ${_formatHex(blueMask)}, alphaShift: $alphaShift, alphaMask: ${_formatHex(alphaMask)}, colormap: $colormap)';
 }
 
 class X11PictScreen {
@@ -904,7 +903,7 @@ class X11PictScreen {
 
   @override
   String toString() =>
-      'X11PictScreen(${visuals}, fallback: ${fallback}, subPixelOrder: ${subPixelOrder})';
+      'X11PictScreen($visuals, fallback: $fallback, subPixelOrder: $subPixelOrder)';
 }
 
 class X11Rgb {
@@ -915,7 +914,7 @@ class X11Rgb {
   const X11Rgb(this.red, this.green, this.blue);
 
   @override
-  String toString() => 'X11Rgb(${red}, ${green}, ${blue})';
+  String toString() => 'X11Rgb($red, $green, $blue)';
 }
 
 class X11Rgba {
@@ -927,7 +926,7 @@ class X11Rgba {
   const X11Rgba(this.red, this.green, this.blue, this.alpha);
 
   @override
-  String toString() => 'X11Rgba(${red}, ${green}, ${blue}, ${alpha})';
+  String toString() => 'X11Rgba($red, $green, $blue, $alpha)';
 }
 
 class X11Segment {
@@ -937,7 +936,7 @@ class X11Segment {
   const X11Segment(this.p1, this.p2);
 
   @override
-  String toString() => 'X11Segment(p1: ${p1}, p2: ${p2})';
+  String toString() => 'X11Segment(p1: $p1, p2: $p2)';
 }
 
 class X11Size {
@@ -947,7 +946,7 @@ class X11Size {
   const X11Size(this.width, this.height);
 
   @override
-  String toString() => 'X11Size(${width}, ${height})';
+  String toString() => 'X11Size($width, $height)';
 }
 
 abstract class X11TextItem {
@@ -960,7 +959,7 @@ class X11TextItemFont extends X11TextItem {
   const X11TextItemFont(this.font);
 
   @override
-  String toString() => 'X11TextItemFont(${font})';
+  String toString() => 'X11TextItemFont($font)';
 }
 
 class X11TextItemString extends X11TextItem {
@@ -970,8 +969,7 @@ class X11TextItemString extends X11TextItem {
   const X11TextItemString(this.delta, this.string);
 
   @override
-  String toString() =>
-      "X11TextItemString(delta: ${delta}, string: '${string}')";
+  String toString() => "X11TextItemString(delta: $delta, string: '$string')";
 }
 
 class X11TimeCoord {
@@ -982,7 +980,7 @@ class X11TimeCoord {
   const X11TimeCoord(this.x, this.y, this.time);
 
   @override
-  String toString() => 'X11TimeCoord(x: ${x}, y: ${y}, time: ${time})';
+  String toString() => 'X11TimeCoord(x: $x, y: $y, time: $time)';
 }
 
 class X11Transform {
@@ -995,7 +993,7 @@ class X11Transform {
 
   @override
   String toString() =>
-      'X11Transform(${p11}, ${p12}, ${p13}, ${p21}, ${p22}, ${p23}, ${p31}, ${p32}, ${p33})';
+      'X11Transform($p11, $p12, $p13, $p21, $p22, $p23, $p31, $p32, $p33)';
 }
 
 /// This format for trapezoids is deprecated, use [X11Trapezoid] instead.
@@ -1009,7 +1007,7 @@ class X11Trap {
 
   @override
   String toString() =>
-      'X11Trap(top: ${top}, bottom: ${bottom}, left: ${left}, right: ${right})';
+      'X11Trap(top: $top, bottom: $bottom, left: $left, right: $right)';
 }
 
 class X11Trapezoid {
@@ -1025,7 +1023,7 @@ class X11Trapezoid {
 
   @override
   String toString() =>
-      'X11Trapezoid(topLeft: ${topLeft}, topRight: ${topRight}, topY: ${topY}, bottomLeft: ${bottomLeft}, bottomRight: ${bottomRight}, bottomY: ${bottomY})';
+      'X11Trapezoid(topLeft: $topLeft, topRight: $topRight, topY: $topY, bottomLeft: $bottomLeft, bottomRight: $bottomRight, bottomY: $bottomY)';
 }
 
 class X11Triangle {
@@ -1036,7 +1034,7 @@ class X11Triangle {
   const X11Triangle(this.p1, this.p2, this.p3);
 
   @override
-  String toString() => 'X11Triangle(${p1}, ${p2}, ${p3})';
+  String toString() => 'X11Triangle($p1, $p2, $p3)';
 }
 
 class X11Version {
@@ -1046,7 +1044,7 @@ class X11Version {
   const X11Version(this.major, this.minor);
 
   @override
-  String toString() => 'X11Version(${major}, ${minor})';
+  String toString() => 'X11Version($major, $minor)';
 }
 
 /// Information about a visual supported by the X server.
@@ -1082,7 +1080,7 @@ class X11Visual {
 
   @override
   String toString() =>
-      'X11Visual(id: ${id}, visualClass: ${visualClass}, bitsPerRgbValue: ${bitsPerRgbValue}, colormapEntries: ${colormapEntries}, redMask: ${redMask}, greenMask: ${greenMask}, blueMask: ${blueMask})';
+      'X11Visual(id: $id, visualClass: $visualClass, bitsPerRgbValue: $bitsPerRgbValue, colormapEntries: $colormapEntries, redMask: $redMask, greenMask: $greenMask, blueMask: $blueMask)';
 }
 
 class X11XiDeviceInfo {
@@ -1101,5 +1099,5 @@ class X11XiDeviceInfo {
 
   @override
   String toString() =>
-      "X11DeviceInfo(${id}, type: ${type}, attachment: ${attachment}, classes: ${classes}, name: '${name}', enabled: ${enabled})";
+      "X11DeviceInfo($id, type: $type, attachment: $attachment, classes: $classes, name: '$name', enabled: $enabled)";
 }

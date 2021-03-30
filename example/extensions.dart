@@ -8,7 +8,7 @@ void main() async {
   for (var name in extensions) {
     var reply = await client.queryExtension(name);
     print(
-        '${name} opcode ${reply.majorOpcode} event=${reply.firstEvent} error=${reply.firstError}');
+        '$name opcode ${reply.majorOpcode} event=${reply.firstEvent} error=${reply.firstError}');
   }
 
   await client.close();

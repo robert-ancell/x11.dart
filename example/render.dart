@@ -18,7 +18,7 @@ void main() async {
   for (var format in formatsReply.formats) {
     if (format.type == X11PictureType.indexed) {
       var bitMask = 'i' * format.depth;
-      print('  ${bitMask} (${format.colormap})');
+      print('  $bitMask (${format.colormap})');
     } else {
       var bitMask = '';
       for (var i = format.depth - 1; i >= 0; i--) {
@@ -35,7 +35,7 @@ void main() async {
           bitMask += '-';
         }
       }
-      print('  ${bitMask}');
+      print('  $bitMask');
     }
   }
 

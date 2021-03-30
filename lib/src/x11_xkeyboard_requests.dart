@@ -24,7 +24,7 @@ class X11XKeyboardUseExtensionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XKeyboardUseExtensionRequest(${wantedVersion})';
+  String toString() => 'X11XKeyboardUseExtensionRequest($wantedVersion)';
 }
 
 class X11XKeyboardUseExtensionReply extends X11Reply {
@@ -53,5 +53,5 @@ class X11XKeyboardUseExtensionReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XKeyboardUseExtensionReply(${version}, supported: ${supported})';
+      'X11XKeyboardUseExtensionReply($version, supported: $supported)';
 }

@@ -322,7 +322,7 @@ class X11UnknownError extends X11Error {
   }
 
   @override
-  String toString() => 'X11UnknownError(${code}, ${data})';
+  String toString() => 'X11UnknownError($code, $data)';
 }
 
 class X11RegionError extends X11Error {

@@ -32,7 +32,7 @@ class X11DamageQueryVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11DamageQueryVersionRequest(${clientVersion})';
+  String toString() => 'X11DamageQueryVersionRequest($clientVersion)';
 }
 
 class X11DamageQueryVersionReply extends X11Reply {
@@ -57,7 +57,7 @@ class X11DamageQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11DamageQueryVersionReply(${version})';
+  String toString() => 'X11DamageQueryVersionReply($version)';
 }
 
 class X11DamageCreateRequest extends X11Request {
@@ -85,8 +85,7 @@ class X11DamageCreateRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11DamageCreateRequest(${damage}, ${drawable}, ${level})';
+  String toString() => 'X11DamageCreateRequest($damage, $drawable, $level)';
 }
 
 class X11DamageDestroyRequest extends X11Request {
@@ -106,7 +105,7 @@ class X11DamageDestroyRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11DamageDestroyRequest(${damage})';
+  String toString() => 'X11DamageDestroyRequest($damage)';
 }
 
 class X11DamageSubtractRequest extends X11Request {
@@ -135,7 +134,7 @@ class X11DamageSubtractRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11DamageSubtractRequest(${damage}, ${repairRegion}, ${partsRegion})';
+      'X11DamageSubtractRequest($damage, $repairRegion, $partsRegion)';
 }
 
 class X11DamageAddRequest extends X11Request {
@@ -158,5 +157,5 @@ class X11DamageAddRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11DamageAddRequest(${drawable}, ${region})';
+  String toString() => 'X11DamageAddRequest($drawable, $region)';
 }

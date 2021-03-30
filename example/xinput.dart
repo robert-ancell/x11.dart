@@ -35,18 +35,17 @@ void main() async {
             var label = c.labels[i].value != 0
                 ? await client.getAtomName(c.labels[i])
                 : '(unnamed)';
-            print("    Button: '${label}' (${c.state[i]})");
+            print("    Button: '$label' (${c.state[i]})");
           }
         } else if (c is X11DeviceClassValuator) {
           var label = await client.getAtomName(c.label);
-          print(
-              "    Valuator: '${label}' (${c.min} <= ${c.value} <= ${c.max})");
+          print("    Valuator: '$label' (${c.min} <= ${c.value} <= ${c.max})");
         } else if (c is X11DeviceClassScroll) {
           print('    Scroll: ${c.type}');
         } else if (c is X11DeviceClassTouch) {
           print('    Touch: ${c.mode}');
         } else {
-          print('    ${c}');
+          print('    $c');
         }
       }
     }
@@ -68,9 +67,9 @@ void main() async {
       } else if (typeName == 'STRING') {
         value = utf8.decode(propertyReply.value);
       } else {
-        value = '${typeName} ${propertyReply.value.toString()}';
+        value = '$typeName ${propertyReply.value.toString()}';
       }
-      print("    '${property}': ${value}");
+      print("    '$property': $value");
     }
   }
 

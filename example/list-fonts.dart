@@ -6,7 +6,7 @@ void main() async {
   var path = await client.getFontPath();
   print('Paths:');
   for (var directory in path) {
-    print('  ${directory}');
+    print('  $directory');
   }
   var infos = await client.listFontsWithInfo();
   print('Fonts:');
@@ -34,11 +34,11 @@ void main() async {
         'WEIGHT_NAME'
       }.contains(name)) {
         var stringValue = await client.getAtomName(X11Atom(property.value));
-        value = "'${stringValue}'";
+        value = "'$stringValue'";
       } else {
         value = property.value.toString();
       }
-      print('    ${name}: ${value}');
+      print('    $name: $value');
     }
   }
   await client.close();

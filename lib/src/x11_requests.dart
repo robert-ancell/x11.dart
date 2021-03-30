@@ -62,7 +62,7 @@ class X11SetupRequest {
 
   @override
   String toString() =>
-      "X11SetupRequest(protocolVersion = ${protocolVersion}, authorizationProtocolName: '${authorizationProtocolName}', authorizationProtocolData: ${authorizationProtocolData})";
+      "X11SetupRequest(protocolVersion = $protocolVersion, authorizationProtocolName: '$authorizationProtocolName', authorizationProtocolData: $authorizationProtocolData)";
 }
 
 class X11SetupFailedReply {
@@ -86,7 +86,7 @@ class X11SetupFailedReply {
   }
 
   @override
-  String toString() => "X11SetupFailedReply(reason: '${reason}')";
+  String toString() => "X11SetupFailedReply(reason: '$reason')";
 }
 
 class X11SetupSuccessReply {
@@ -289,7 +289,7 @@ class X11SetupSuccessReply {
 
   @override
   String toString() =>
-      "X11SetupSuccessReply(releaseNumber: ${releaseNumber}, resourceIdBase: ${resourceIdBase}, resourceIdMask: ${resourceIdMask}, motionBufferSize: ${motionBufferSize}, maximumRequestLength: ${maximumRequestLength}, imageByteOrder: ${imageByteOrder}, bitmapFormatBitOrder: ${bitmapFormatBitOrder}, bitmapFormatScanlineUnit: ${bitmapFormatScanlineUnit}, bitmapFormatScanlinePad: ${bitmapFormatScanlinePad}, minKeycode: ${minKeycode}, maxKeycode: ${maxKeycode}, vendor: '${vendor}', pixmapFormats: ${pixmapFormats}, screens: ${screens})";
+      "X11SetupSuccessReply(releaseNumber: $releaseNumber, resourceIdBase: $resourceIdBase, resourceIdMask: $resourceIdMask, motionBufferSize: $motionBufferSize, maximumRequestLength: $maximumRequestLength, imageByteOrder: $imageByteOrder, bitmapFormatBitOrder: $bitmapFormatBitOrder, bitmapFormatScanlineUnit: $bitmapFormatScanlineUnit, bitmapFormatScanlinePad: $bitmapFormatScanlinePad, minKeycode: $minKeycode, maxKeycode: $maxKeycode, vendor: '$vendor', pixmapFormats: $pixmapFormats, screens: $screens)";
 }
 
 class X11SetupAuthenticateReply {
@@ -311,7 +311,7 @@ class X11SetupAuthenticateReply {
   }
 
   @override
-  String toString() => "X11SetupAuthenticateReply(reason: '${reason}')";
+  String toString() => "X11SetupAuthenticateReply(reason: '$reason')";
 }
 
 class X11Request {
@@ -587,51 +587,51 @@ class X11CreateWindowRequest extends X11Request {
   @override
   String toString() {
     var string =
-        'X11CreateWindowRequest(id: ${id}, parent: ${parent}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth}, windowClass: ${windowClass}, visual: ${visual}';
+        'X11CreateWindowRequest(id: $id, parent: $parent, geometry: $geometry, depth: $depth, borderWidth: $borderWidth, windowClass: $windowClass, visual: $visual';
     if (backgroundPixmap != null) {
-      string += ', backgroundPixmap: ${backgroundPixmap}';
+      string += ', backgroundPixmap: $backgroundPixmap';
     }
     if (backgroundPixel != null) {
-      string += ', backgroundPixel: ${backgroundPixel}';
+      string += ', backgroundPixel: $backgroundPixel';
     }
     if (borderPixmap != null) {
-      string += ', borderPixmap: ${borderPixmap}';
+      string += ', borderPixmap: $borderPixmap';
     }
     if (borderPixel != null) {
-      string += ', borderPixel: ${borderPixel}';
+      string += ', borderPixel: $borderPixel';
     }
     if (bitGravity != null) {
-      string += ', bitGravity: ${bitGravity}';
+      string += ', bitGravity: $bitGravity';
     }
     if (winGravity != null) {
-      string += ', winGravity: ${winGravity}';
+      string += ', winGravity: $winGravity';
     }
     if (backingStore != null) {
-      string += ', backingStore: ${backingStore}';
+      string += ', backingStore: $backingStore';
     }
     if (backingPlanes != null) {
-      string += ', backingPlanes: ${backingPlanes}';
+      string += ', backingPlanes: $backingPlanes';
     }
     if (backingPixel != null) {
-      string += ', backingPixel: ${backingPixel}';
+      string += ', backingPixel: $backingPixel';
     }
     if (overrideRedirect != null) {
-      string += ', overrideRedirect: ${overrideRedirect}';
+      string += ', overrideRedirect: $overrideRedirect';
     }
     if (saveUnder != null) {
-      string += ', saveUnder: ${saveUnder}';
+      string += ', saveUnder: $saveUnder';
     }
     if (events != null) {
-      string += ', events: ${events}';
+      string += ', events: $events';
     }
     if (doNotPropagate != null) {
-      string += ', doNotPropagate: ${doNotPropagate}';
+      string += ', doNotPropagate: $doNotPropagate';
     }
     if (colormap != null) {
-      string += ', colormap: ${colormap}';
+      string += ', colormap: $colormap';
     }
     if (cursor != null) {
-      string += ', cursor: ${cursor}';
+      string += ', cursor: $cursor';
     }
     string += ')';
     return string;
@@ -855,7 +855,7 @@ class X11ChangeWindowAttributesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangeWindowAttributesRequest(window: ${window}, backgroundPixmap: ${backgroundPixmap}, backgroundPixel: ${backgroundPixel}, borderPixmap: ${borderPixmap}, borderPixel: ${borderPixel}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingStore: ${backingStore}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, overrideRedirect: ${overrideRedirect}, saveUnder: ${saveUnder}, events: ${events}, doNotPropagate: ${doNotPropagate}, colormap: ${colormap}, cursor: ${cursor})';
+      'X11ChangeWindowAttributesRequest(window: $window, backgroundPixmap: $backgroundPixmap, backgroundPixel: $backgroundPixel, borderPixmap: $borderPixmap, borderPixel: $borderPixel, bitGravity: $bitGravity, winGravity: $winGravity, backingStore: $backingStore, backingPlanes: $backingPlanes, backingPixel: $backingPixel, overrideRedirect: $overrideRedirect, saveUnder: $saveUnder, events: $events, doNotPropagate: $doNotPropagate, colormap: $colormap, cursor: $cursor)';
 }
 
 class X11GetWindowAttributesRequest extends X11Request {
@@ -876,7 +876,7 @@ class X11GetWindowAttributesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11GetWindowAttributesRequest(window: ${window})';
+  String toString() => 'X11GetWindowAttributesRequest(window: $window)';
 }
 
 class X11GetWindowAttributesReply extends X11Reply {
@@ -970,7 +970,7 @@ class X11GetWindowAttributesReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetWindowAttributesReply(visual: ${visual}, windowClass: ${windowClass}, bitGravity: ${bitGravity}, winGravity: ${winGravity}, backingStore: ${backingStore}, backingPlanes: ${backingPlanes}, backingPixel: ${backingPixel}, saveUnder: ${saveUnder}, mapIsInstalled: ${mapIsInstalled}, mapState: ${mapState}, overrideRedirect: ${overrideRedirect}, colormap: ${colormap}, allEvents: ${allEvents}, yourEvents: ${yourEvents}, doNotPropagate: ${doNotPropagate})';
+      'X11GetWindowAttributesReply(visual: $visual, windowClass: $windowClass, bitGravity: $bitGravity, winGravity: $winGravity, backingStore: $backingStore, backingPlanes: $backingPlanes, backingPixel: $backingPixel, saveUnder: $saveUnder, mapIsInstalled: $mapIsInstalled, mapState: $mapState, overrideRedirect: $overrideRedirect, colormap: $colormap, allEvents: $allEvents, yourEvents: $yourEvents, doNotPropagate: $doNotPropagate)';
 }
 
 class X11DestroyWindowRequest extends X11Request {
@@ -991,7 +991,7 @@ class X11DestroyWindowRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11DestroyWindowRequest(window: ${window})';
+  String toString() => 'X11DestroyWindowRequest(window: $window)';
 }
 
 class X11DestroySubwindowsRequest extends X11Request {
@@ -1012,7 +1012,7 @@ class X11DestroySubwindowsRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11DestroySubwindowsRequest(window: ${window})';
+  String toString() => 'X11DestroySubwindowsRequest(window: $window)';
 }
 
 class X11ChangeSaveSetRequest extends X11Request {
@@ -1034,8 +1034,7 @@ class X11ChangeSaveSetRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11ChangeSaveSetRequest(window: ${window}, mode: ${mode})';
+  String toString() => 'X11ChangeSaveSetRequest(window: $window, mode: $mode)';
 }
 
 class X11ReparentWindowRequest extends X11Request {
@@ -1065,7 +1064,7 @@ class X11ReparentWindowRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ReparentWindowRequest(window: ${window}, parent: ${parent}, position: ${position})';
+      'X11ReparentWindowRequest(window: $window, parent: $parent, position: $position)';
 }
 
 class X11MapWindowRequest extends X11Request {
@@ -1086,7 +1085,7 @@ class X11MapWindowRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11MapWindowRequest(${window})';
+  String toString() => 'X11MapWindowRequest($window)';
 }
 
 class X11MapSubwindowsRequest extends X11Request {
@@ -1107,7 +1106,7 @@ class X11MapSubwindowsRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11MapSubwindowsRequest(${window})';
+  String toString() => 'X11MapSubwindowsRequest($window)';
 }
 
 class X11UnmapWindowRequest extends X11Request {
@@ -1128,7 +1127,7 @@ class X11UnmapWindowRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11UnmapWindowRequest(${window})';
+  String toString() => 'X11UnmapWindowRequest($window)';
 }
 
 class X11UnmapSubwindowsRequest extends X11Request {
@@ -1149,7 +1148,7 @@ class X11UnmapSubwindowsRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11UnmapSubwindowsRequest(${window})';
+  String toString() => 'X11UnmapSubwindowsRequest($window)';
 }
 
 class X11ConfigureWindowRequest extends X11Request {
@@ -1267,7 +1266,7 @@ class X11ConfigureWindowRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ConfigureWindowRequest(window: ${window}, x: ${x}, y: ${y}, width: ${width}, height: ${height}, borderWidth: ${borderWidth}, sibling: ${sibling}, stackMode: ${stackMode})';
+      'X11ConfigureWindowRequest(window: $window, x: $x, y: $y, width: $width, height: $height, borderWidth: $borderWidth, sibling: $sibling, stackMode: $stackMode)';
 }
 
 class X11CirculateWindowRequest extends X11Request {
@@ -1290,7 +1289,7 @@ class X11CirculateWindowRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CirculateWindowRequest(window: ${window}, direction: ${direction})';
+      'X11CirculateWindowRequest(window: $window, direction: $direction)';
 }
 
 class X11GetGeometryRequest extends X11Request {
@@ -1311,7 +1310,7 @@ class X11GetGeometryRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11GetGeometryRequest(${drawable})';
+  String toString() => 'X11GetGeometryRequest($drawable)';
 }
 
 class X11GetGeometryReply extends X11Reply {
@@ -1349,7 +1348,7 @@ class X11GetGeometryReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetGeometryReply(root: ${root}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth})';
+      'X11GetGeometryReply(root: $root, geometry: $geometry, depth: $depth, borderWidth: $borderWidth)';
 }
 
 class X11QueryTreeRequest extends X11Request {
@@ -1370,7 +1369,7 @@ class X11QueryTreeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11QueryTreeRequest(window: ${window})';
+  String toString() => 'X11QueryTreeRequest(window: $window)';
 }
 
 class X11QueryTreeReply extends X11Reply {
@@ -1402,7 +1401,7 @@ class X11QueryTreeReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11QueryTreeReply(root: ${root}, parent: ${parent}, children: ${children.map((window) => window).toList()})';
+      'X11QueryTreeReply(root: $root, parent: $parent, children: ${children.map((window) => window).toList()})';
 }
 
 class X11InternAtomRequest extends X11Request {
@@ -1432,7 +1431,7 @@ class X11InternAtomRequest extends X11Request {
 
   @override
   String toString() =>
-      "X11InternAtomRequest('${name}', onlyIfExists: ${onlyIfExists})";
+      "X11InternAtomRequest('$name', onlyIfExists: $onlyIfExists)";
 }
 
 class X11InternAtomReply extends X11Reply {
@@ -1454,7 +1453,7 @@ class X11InternAtomReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11InternAtomReply(${atom})';
+  String toString() => 'X11InternAtomReply($atom)';
 }
 
 class X11GetAtomNameRequest extends X11Request {
@@ -1475,7 +1474,7 @@ class X11GetAtomNameRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11GetAtomNameRequest(${atom})';
+  String toString() => 'X11GetAtomNameRequest($atom)';
 }
 
 class X11GetAtomNameReply extends X11Reply {
@@ -1503,7 +1502,7 @@ class X11GetAtomNameReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11GetAtomNameReply(${name})';
+  String toString() => 'X11GetAtomNameReply($name)';
 }
 
 class X11ChangePropertyRequest extends X11Request {
@@ -1575,7 +1574,7 @@ class X11ChangePropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangePropertyRequest(${window}, ${property}, <${data.length} bytes>, type: ${type}, format: ${format}, mode: ${mode})';
+      'X11ChangePropertyRequest($window, $property, <${data.length} bytes>, type: $type, format: $format, mode: $mode)';
 }
 
 class X11DeletePropertyRequest extends X11Request {
@@ -1600,7 +1599,7 @@ class X11DeletePropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11DeletePropertyRequest(window: ${window}, property: ${property})';
+      'X11DeletePropertyRequest(window: $window, property: $property)';
 }
 
 class X11GetPropertyRequest extends X11Request {
@@ -1643,7 +1642,7 @@ class X11GetPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GetPropertyRequest(window: ${window}, property: ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}})';
+      'X11GetPropertyRequest(window: $window, property: $property, type: $type, longOffset: $longOffset, longLength: $longLength, delete: $delete})';
 }
 
 class X11GetPropertyReply extends X11Reply {
@@ -1710,7 +1709,7 @@ class X11GetPropertyReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetPropertyReply(type: ${type}, format: ${format}, value: <${value.length} bytes>, bytesAfter: ${bytesAfter})';
+      'X11GetPropertyReply(type: $type, format: $format, value: <${value.length} bytes>, bytesAfter: $bytesAfter)';
 }
 
 class X11ListPropertiesRequest extends X11Request {
@@ -1731,7 +1730,7 @@ class X11ListPropertiesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ListPropertiesRequest(${window})';
+  String toString() => 'X11ListPropertiesRequest($window)';
 }
 
 class X11ListPropertiesReply extends X11Reply {
@@ -1761,7 +1760,7 @@ class X11ListPropertiesReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ListPropertiesReply(${atoms})';
+  String toString() => 'X11ListPropertiesReply($atoms)';
 }
 
 class X11SetSelectionOwnerRequest extends X11Request {
@@ -1789,7 +1788,7 @@ class X11SetSelectionOwnerRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SetSelectionOwnerRequest(selection: ${selection}, owner: ${owner}, time: ${time})';
+      'X11SetSelectionOwnerRequest(selection: $selection, owner: $owner, time: $time)';
 }
 
 class X11GetSelectionOwnerRequest extends X11Request {
@@ -1810,7 +1809,7 @@ class X11GetSelectionOwnerRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11GetSelectionOwnerRequest(selection: ${selection})';
+  String toString() => 'X11GetSelectionOwnerRequest(selection: $selection)';
 }
 
 class X11GetSelectionOwnerReply extends X11Reply {
@@ -1831,7 +1830,7 @@ class X11GetSelectionOwnerReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11GetSelectionOwnerReply(owner: ${owner})';
+  String toString() => 'X11GetSelectionOwnerReply(owner: $owner)';
 }
 
 class X11ConvertSelectionRequest extends X11Request {
@@ -1867,7 +1866,7 @@ class X11ConvertSelectionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ConvertSelectionRequest(selection: ${selection}, requestor: ${requestor}, target: ${target}, property: ${property}, time: ${time})';
+      'X11ConvertSelectionRequest(selection: $selection, requestor: $requestor, target: $target, property: $property, time: $time)';
 }
 
 class X11SendEventRequest extends X11Request {
@@ -1908,7 +1907,7 @@ class X11SendEventRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SendEventRequest(destination: ${destination}, code: ${code}, event: ${event}, propagate: ${propagate}, events: ${events}, sequenceNumber: ${sequenceNumber})';
+      'X11SendEventRequest(destination: $destination, code: $code, event: $event, propagate: $propagate, events: $events, sequenceNumber: $sequenceNumber)';
 }
 
 class X11GrabPointerRequest extends X11Request {
@@ -1958,7 +1957,7 @@ class X11GrabPointerRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GrabPointerRequest(grabWindow: ${grabWindow}, ownerEvents: ${ownerEvents}, events: ${events}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode}, confineTo: ${confineTo}, cursor: ${cursor}, time: ${time})';
+      'X11GrabPointerRequest(grabWindow: $grabWindow, ownerEvents: $ownerEvents, events: $events, pointerMode: $pointerMode, keyboardMode: $keyboardMode, confineTo: $confineTo, cursor: $cursor, time: $time)';
 }
 
 class X11GrabPointerReply extends X11Reply {
@@ -1977,7 +1976,7 @@ class X11GrabPointerReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11GrabPointerReply(status: ${status})';
+  String toString() => 'X11GrabPointerReply(status: $status)';
 }
 
 class X11UngrabPointerRequest extends X11Request {
@@ -1998,7 +1997,7 @@ class X11UngrabPointerRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11UngrabPointerRequest(time: ${time})';
+  String toString() => 'X11UngrabPointerRequest(time: $time)';
 }
 
 class X11GrabButtonRequest extends X11Request {
@@ -2054,7 +2053,7 @@ class X11GrabButtonRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GrabButtonRequest(grabWindow: ${grabWindow}, ownerEvents: ${ownerEvents}, events: ${events}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode}, confineTo: ${confineTo}, cursor: ${cursor}, button: ${button}, modifiers: ${modifiers})';
+      'X11GrabButtonRequest(grabWindow: $grabWindow, ownerEvents: $ownerEvents, events: $events, pointerMode: $pointerMode, keyboardMode: $keyboardMode, confineTo: $confineTo, cursor: $cursor, button: $button, modifiers: $modifiers)';
 }
 
 class X11UngrabButtonRequest extends X11Request {
@@ -2082,7 +2081,7 @@ class X11UngrabButtonRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11UngrabButtonRequest(button: ${button}, grabWindow: ${grabWindow}, modifiers: ${modifiers})';
+      'X11UngrabButtonRequest(button: $button, grabWindow: $grabWindow, modifiers: $modifiers)';
 }
 
 class X11ChangeActivePointerGrabRequest extends X11Request {
@@ -2114,7 +2113,7 @@ class X11ChangeActivePointerGrabRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangeActivePointerGrabRequest(events: ${events}, cursor: ${cursor}, time: ${time})';
+      'X11ChangeActivePointerGrabRequest(events: $events, cursor: $cursor, time: $time)';
 }
 
 class X11GrabKeyboardRequest extends X11Request {
@@ -2156,7 +2155,7 @@ class X11GrabKeyboardRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GrabKeyboardRequest(ownerEvents: ${ownerEvents}, grabWindow: ${grabWindow}, time: ${time}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode})';
+      'X11GrabKeyboardRequest(ownerEvents: $ownerEvents, grabWindow: $grabWindow, time: $time, pointerMode: $pointerMode, keyboardMode: $keyboardMode)';
 }
 
 class X11GrabKeyboardReply extends X11Reply {
@@ -2175,7 +2174,7 @@ class X11GrabKeyboardReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11GrabKeyboardReply(status: ${status})';
+  String toString() => 'X11GrabKeyboardReply(status: $status)';
 }
 
 class X11UngrabKeyboardRequest extends X11Request {
@@ -2196,7 +2195,7 @@ class X11UngrabKeyboardRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11UngrabKeyboardRequest(time: ${time})';
+  String toString() => 'X11UngrabKeyboardRequest(time: $time)';
 }
 
 class X11GrabKeyRequest extends X11Request {
@@ -2241,7 +2240,7 @@ class X11GrabKeyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GrabKeyRequest(ownerEvents: ${ownerEvents}, grabWindow: ${grabWindow}, modifiers: ${modifiers}, key: ${key}, pointerMode: ${pointerMode}, keyboardMode: ${keyboardMode})';
+      'X11GrabKeyRequest(ownerEvents: $ownerEvents, grabWindow: $grabWindow, modifiers: $modifiers, key: $key, pointerMode: $pointerMode, keyboardMode: $keyboardMode)';
 }
 
 class X11UngrabKeyRequest extends X11Request {
@@ -2269,7 +2268,7 @@ class X11UngrabKeyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11UngrabKeyRequest(key: ${key}, grabWindow: ${grabWindow}, modifiers: ${modifiers})';
+      'X11UngrabKeyRequest(key: $key, grabWindow: $grabWindow, modifiers: $modifiers)';
 }
 
 class X11AllowEventsRequest extends X11Request {
@@ -2291,7 +2290,7 @@ class X11AllowEventsRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11AllowEventsRequest(mode: ${mode}, time: ${time})';
+  String toString() => 'X11AllowEventsRequest(mode: $mode, time: $time)';
 }
 
 class X11GrabServerRequest extends X11Request {
@@ -2346,7 +2345,7 @@ class X11QueryPointerRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11QueryPointerRequest(window: ${window})';
+  String toString() => 'X11QueryPointerRequest(window: $window)';
 }
 
 class X11QueryPointerReply extends X11Reply {
@@ -2395,7 +2394,7 @@ class X11QueryPointerReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11QueryPointerReply(root: ${root}, child: ${child}, positionRoot: ${positionRoot}, posiitionWindow: ${positionWindow}, mask: ${mask}, sameScreen: ${sameScreen})';
+      'X11QueryPointerReply(root: $root, child: $child, positionRoot: $positionRoot, posiitionWindow: $positionWindow, mask: $mask, sameScreen: $sameScreen)';
 }
 
 class X11GetMotionEventsRequest extends X11Request {
@@ -2423,7 +2422,7 @@ class X11GetMotionEventsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GetMotionEventsRequest(window: ${window}, start: ${start}, stop: ${stop})';
+      'X11GetMotionEventsRequest(window: $window, start: $start, stop: $stop)';
 }
 
 class X11GetMotionEventsReply extends X11Reply {
@@ -2458,7 +2457,7 @@ class X11GetMotionEventsReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11GetMotionEventsReply(events: ${events})';
+  String toString() => 'X11GetMotionEventsReply(events: $events)';
 }
 
 class X11TranslateCoordinatesRequest extends X11Request {
@@ -2490,7 +2489,7 @@ class X11TranslateCoordinatesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11TranslateCoordinatesRequest(sourceWindow: ${sourceWindow}, source: ${source}, destinationWindow: ${destinationWindow})';
+      'X11TranslateCoordinatesRequest(sourceWindow: $sourceWindow, source: $source, destinationWindow: $destinationWindow)';
 }
 
 class X11TranslateCoordinatesReply extends X11Reply {
@@ -2521,7 +2520,7 @@ class X11TranslateCoordinatesReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11TranslateCoordinatesReply(child: ${child}, destination: ${destination}, sameScreen: ${sameScreen})';
+      'X11TranslateCoordinatesReply(child: $child, destination: $destination, sameScreen: $sameScreen)';
 }
 
 class X11WarpPointerRequest extends X11Request {
@@ -2566,7 +2565,7 @@ class X11WarpPointerRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11WarpPointerRequest(destination: ${destination}, sourceWindow: ${sourceWindow}, destinationWindow: ${destinationWindow}, source: ${source})';
+      'X11WarpPointerRequest(destination: $destination, sourceWindow: $sourceWindow, destinationWindow: $destinationWindow, source: $source)';
 }
 
 class X11SetInputFocusRequest extends X11Request {
@@ -2596,7 +2595,7 @@ class X11SetInputFocusRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SetInputFocusRequest(window: ${window}, revertTo: ${revertTo}, time: ${time})';
+      'X11SetInputFocusRequest(window: $window, revertTo: $revertTo, time: $time)';
 }
 
 class X11GetInputFocusRequest extends X11Request {
@@ -2638,7 +2637,7 @@ class X11GetInputFocusReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetInputFocusReply(window: ${window}, revertTo: ${revertTo})';
+      'X11GetInputFocusReply(window: $window, revertTo: $revertTo)';
 }
 
 class X11QueryKeymapRequest extends X11Request {
@@ -2681,7 +2680,7 @@ class X11QueryKeymapReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11QueryKeymapReply(keys: ${keys})';
+  String toString() => 'X11QueryKeymapReply(keys: $keys)';
 }
 
 class X11OpenFontRequest extends X11Request {
@@ -2712,7 +2711,7 @@ class X11OpenFontRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11OpenFontRequest(id: ${id}, name: ${name})';
+  String toString() => 'X11OpenFontRequest(id: $id, name: $name)';
 }
 
 class X11CloseFontRequest extends X11Request {
@@ -2733,7 +2732,7 @@ class X11CloseFontRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11CloseFontRequest(font: ${font})';
+  String toString() => 'X11CloseFontRequest(font: $font)';
 }
 
 class X11QueryFontRequest extends X11Request {
@@ -2754,7 +2753,7 @@ class X11QueryFontRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11QueryFontRequest(font: ${font})';
+  String toString() => 'X11QueryFontRequest(font: $font)';
 }
 
 X11CharacterInfo _readCharacterInfo(X11ReadBuffer buffer) {
@@ -2884,7 +2883,7 @@ class X11QueryFontReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11QueryFontReply(minBounds: ${minBounds}, maxBounds: ${maxBounds}, minCharOrByte2: ${minCharOrByte2}, maxCharOrByte2: ${maxCharOrByte2}, defaultChar: ${defaultChar}, drawDirection: ${drawDirection}, minByte1: ${minByte1}, maxByte1: ${maxByte1}, allCharsExist: ${allCharsExist}, fontAscent: ${fontAscent}, fontDescent: ${fontDescent}, properties: ${properties}, charInfos: ${charInfos})';
+      'X11QueryFontReply(minBounds: $minBounds, maxBounds: $maxBounds, minCharOrByte2: $minCharOrByte2, maxCharOrByte2: $maxCharOrByte2, defaultChar: $defaultChar, drawDirection: $drawDirection, minByte1: $minByte1, maxByte1: $maxByte1, allCharsExist: $allCharsExist, fontAscent: $fontAscent, fontDescent: $fontDescent, properties: $properties, charInfos: $charInfos)';
 }
 
 class X11QueryTextExtentsRequest extends X11Request {
@@ -2915,7 +2914,7 @@ class X11QueryTextExtentsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11QueryTextExtentsRequest(font: ${font}, string: ${string})';
+      'X11QueryTextExtentsRequest(font: $font, string: $string)';
 }
 
 class X11QueryTextExtentsReply extends X11Reply {
@@ -2972,7 +2971,7 @@ class X11QueryTextExtentsReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11QueryTextExtentsReply(drawDirection: ${drawDirection}, fontAscent: ${fontAscent}, fontDescent: ${fontDescent}, overallAscent: ${overallAscent}, overallDescent: ${overallDescent}, overallWidth: ${overallWidth}, overallLeft: ${overallLeft}, overallRight: ${overallRight})';
+      'X11QueryTextExtentsReply(drawDirection: $drawDirection, fontAscent: $fontAscent, fontDescent: $fontDescent, overallAscent: $overallAscent, overallDescent: $overallDescent, overallWidth: $overallWidth, overallLeft: $overallLeft, overallRight: $overallRight)';
 }
 
 class X11ListFontsRequest extends X11Request {
@@ -3002,7 +3001,7 @@ class X11ListFontsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ListFontsRequest(maxNames: ${maxNames}, pattern: ${pattern})';
+      'X11ListFontsRequest(maxNames: $maxNames, pattern: $pattern)';
 }
 
 class X11ListFontsReply extends X11Reply {
@@ -3031,7 +3030,7 @@ class X11ListFontsReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ListFontsReply(names: ${names})';
+  String toString() => 'X11ListFontsReply(names: $names)';
 }
 
 class X11ListFontsWithInfoRequest extends X11Request {
@@ -3061,7 +3060,7 @@ class X11ListFontsWithInfoRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ListFontsWithInfoRequest(maxNames: ${maxNames}, pattern: ${pattern})';
+      'X11ListFontsWithInfoRequest(maxNames: $maxNames, pattern: $pattern)';
 }
 
 class X11ListFontsWithInfoReply extends X11Reply {
@@ -3165,7 +3164,7 @@ class X11ListFontsWithInfoReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11ListFontsWithInfoReply(minBounds: ${minBounds}, maxBounds: ${maxBounds}, minCharOrByte2: ${minCharOrByte2}, maxCharOrByte2: ${maxCharOrByte2}, defaultChar: ${defaultChar}, drawDirection: ${drawDirection}, minByte1: ${minByte1}, maxByte1: ${maxByte1}, allCharsExist: ${allCharsExist}, fontAscent: ${fontAscent}, fontDescent: ${fontDescent}, repliesHint: ${repliesHint}, properties: ${properties}, name: ${name})';
+      'X11ListFontsWithInfoReply(minBounds: $minBounds, maxBounds: $maxBounds, minCharOrByte2: $minCharOrByte2, maxCharOrByte2: $maxCharOrByte2, defaultChar: $defaultChar, drawDirection: $drawDirection, minByte1: $minByte1, maxByte1: $maxByte1, allCharsExist: $allCharsExist, fontAscent: $fontAscent, fontDescent: $fontDescent, repliesHint: $repliesHint, properties: $properties, name: $name)';
 }
 
 class X11SetFontPathRequest extends X11Request {
@@ -3194,7 +3193,7 @@ class X11SetFontPathRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11SetFontPathRequest(path: ${path})';
+  String toString() => 'X11SetFontPathRequest(path: $path)';
 }
 
 class X11GetFontPathRequest extends X11Request {
@@ -3240,7 +3239,7 @@ class X11GetFontPathReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11GetFontPathReply(path: ${path})';
+  String toString() => 'X11GetFontPathReply(path: $path)';
 }
 
 class X11CreatePixmapRequest extends X11Request {
@@ -3271,7 +3270,7 @@ class X11CreatePixmapRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CreatePixmapRequest(id: ${id}, drawable: ${drawable}, size: ${size}, depth: ${depth})';
+      'X11CreatePixmapRequest(id: $id, drawable: $drawable, size: $size, depth: $depth)';
 }
 
 class X11FreePixmapRequest extends X11Request {
@@ -3292,7 +3291,7 @@ class X11FreePixmapRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FreePixmapRequest(${pixmap})';
+  String toString() => 'X11FreePixmapRequest($pixmap)';
 }
 
 class X11CreateGCRequest extends X11Request {
@@ -3619,75 +3618,75 @@ class X11CreateGCRequest extends X11Request {
 
   @override
   String toString() {
-    var string = 'X11CreateGCRequest(id: ${id}, drawable: ${drawable}';
+    var string = 'X11CreateGCRequest(id: $id, drawable: $drawable';
     if (function != null) {
-      string += ', function: ${function}';
+      string += ', function: $function';
     }
     if (planeMask != null) {
-      string += ', planeMask: ${planeMask}';
+      string += ', planeMask: $planeMask';
     }
     if (foreground != null) {
-      string += ', foreground: ${foreground}';
+      string += ', foreground: $foreground';
     }
     if (background != null) {
-      string += ', background: ${background}';
+      string += ', background: $background';
     }
     if (lineWidth != null) {
-      string += ', lineWidth: ${lineWidth}';
+      string += ', lineWidth: $lineWidth';
     }
     if (lineStyle != null) {
-      string += ', lineStyle: ${lineStyle}';
+      string += ', lineStyle: $lineStyle';
     }
     if (capStyle != null) {
-      string += ', capStyle: ${capStyle}';
+      string += ', capStyle: $capStyle';
     }
     if (joinStyle != null) {
-      string += ', joinStyle: ${joinStyle}';
+      string += ', joinStyle: $joinStyle';
     }
     if (fillStyle != null) {
-      string += ', fillStyle: ${fillStyle}';
+      string += ', fillStyle: $fillStyle';
     }
     if (fillRule != null) {
-      string += ', fillRule: ${fillRule}';
+      string += ', fillRule: $fillRule';
     }
     if (tile != null) {
-      string += ', tile: ${tile}';
+      string += ', tile: $tile';
     }
     if (stipple != null) {
-      string += ', stipple: ${stipple}';
+      string += ', stipple: $stipple';
     }
     if (tileStippleXOrigin != null) {
-      string += ', tileStippleXOrigin: ${tileStippleXOrigin}';
+      string += ', tileStippleXOrigin: $tileStippleXOrigin';
     }
     if (tileStippleYOrigin != null) {
-      string += ', tileStippleYOrigin: ${tileStippleYOrigin}';
+      string += ', tileStippleYOrigin: $tileStippleYOrigin';
     }
     if (font != null) {
-      string += ', font: ${font}';
+      string += ', font: $font';
     }
     if (subwindowMode != null) {
-      string += ', subwindowMode: ${subwindowMode}';
+      string += ', subwindowMode: $subwindowMode';
     }
     if (graphicsExposures != null) {
-      string += ', graphicsExposures: ${graphicsExposures}';
+      string += ', graphicsExposures: $graphicsExposures';
     }
     if (clipXOrigin != null) {
-      string += ', clipXOrigin: ${clipXOrigin}';
+      string += ', clipXOrigin: $clipXOrigin';
     }
     if (clipYOrigin != null) {
-      string += ', clipYOrigin: ${clipYOrigin}';
+      string += ', clipYOrigin: $clipYOrigin';
     }
     if (clipMask != null) {
-      string += ', clipMask: ${clipMask}';
+      string += ', clipMask: $clipMask';
     }
     if (dashOffset != null) {
-      string += ', dashOffset: ${dashOffset}';
+      string += ', dashOffset: $dashOffset';
     }
     if (dashes != null) {
-      string += ', dashes: ${dashes}';
+      string += ', dashes: $dashes';
     }
     if (arcMode != null) {
-      string += ', arcMode: ${arcMode}';
+      string += ', arcMode: $arcMode';
     }
     string += ')';
     return string;
@@ -4015,7 +4014,7 @@ class X11ChangeGCRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangeGCRequest(gc: ${gc}, function: ${function}, planeMask: ${planeMask}, foreground: ${foreground}, background: ${background}, lineWidth: ${lineWidth}, lineStyle: ${lineStyle}, capStyle: ${capStyle}, joinStyle: ${joinStyle}, fillStyle: ${fillStyle}, fillRule: ${fillRule}, tile: ${tile}, stipple: ${stipple}, tileStippleXOrigin: ${tileStippleXOrigin}, tileStippleYOrigin: ${tileStippleYOrigin}, font: ${font}, subwindowMode: ${subwindowMode}, graphicsExposures: ${graphicsExposures}, clipXOrigin: ${clipXOrigin}, clipYOrigin: ${clipYOrigin}, clipMask: ${clipMask}, dashOffset: ${dashOffset}, dashes: ${dashes}, arcMode: ${arcMode})';
+      'X11ChangeGCRequest(gc: $gc, function: $function, planeMask: $planeMask, foreground: $foreground, background: $background, lineWidth: $lineWidth, lineStyle: $lineStyle, capStyle: $capStyle, joinStyle: $joinStyle, fillStyle: $fillStyle, fillRule: $fillRule, tile: $tile, stipple: $stipple, tileStippleXOrigin: $tileStippleXOrigin, tileStippleYOrigin: $tileStippleYOrigin, font: $font, subwindowMode: $subwindowMode, graphicsExposures: $graphicsExposures, clipXOrigin: $clipXOrigin, clipYOrigin: $clipYOrigin, clipMask: $clipMask, dashOffset: $dashOffset, dashes: $dashes, arcMode: $arcMode)';
 }
 
 class X11CopyGCRequest extends X11Request {
@@ -4053,7 +4052,7 @@ class X11CopyGCRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CopyGCRequest(sourceGc: ${sourceGc}, destinationGc: ${destinationGc}, values: ${values})';
+      'X11CopyGCRequest(sourceGc: $sourceGc, destinationGc: $destinationGc, values: $values)';
 }
 
 class X11SetDashesRequest extends X11Request {
@@ -4090,7 +4089,7 @@ class X11SetDashesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SetDashesRequest(gc: ${gc}, dashOffset: ${dashOffset}, dashes: ${dashes})';
+      'X11SetDashesRequest(gc: $gc, dashOffset: $dashOffset, dashes: $dashes)';
 }
 
 class X11SetClipRectanglesRequest extends X11Request {
@@ -4136,7 +4135,7 @@ class X11SetClipRectanglesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SetClipRectanglesRequest(ordering: ${ordering}, gc: ${gc}, clipOrigin: ${clipOrigin}, rectangles: ${rectangles})';
+      'X11SetClipRectanglesRequest(ordering: $ordering, gc: $gc, clipOrigin: $clipOrigin, rectangles: $rectangles)';
 }
 
 class X11FreeGCRequest extends X11Request {
@@ -4157,7 +4156,7 @@ class X11FreeGCRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FreeGCRequest(gc: ${gc})';
+  String toString() => 'X11FreeGCRequest(gc: $gc)';
 }
 
 class X11ClearAreaRequest extends X11Request {
@@ -4190,7 +4189,7 @@ class X11ClearAreaRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ClearAreaRequest(exposures: ${exposures}, window: ${window}, area: ${area})';
+      'X11ClearAreaRequest(exposures: $exposures, window: $window, area: $area)';
 }
 
 class X11CopyAreaRequest extends X11Request {
@@ -4238,7 +4237,7 @@ class X11CopyAreaRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CopyAreaRequest(sourceDrawable: ${sourceDrawable}, destinationDrawable: ${destinationDrawable}, gc: ${gc}, sourceArea: ${sourceArea}, destinationPosition: ${destinationPosition})';
+      'X11CopyAreaRequest(sourceDrawable: $sourceDrawable, destinationDrawable: $destinationDrawable, gc: $gc, sourceArea: $sourceArea, destinationPosition: $destinationPosition)';
 }
 
 class X11CopyPlaneRequest extends X11Request {
@@ -4290,7 +4289,7 @@ class X11CopyPlaneRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CopyPlaneRequest(sourceDrawable: ${sourceDrawable}, destinationDrawable: ${destinationDrawable}, gc: ${gc}, sourceArea: ${sourceArea}, destinationPosition: ${destinationPosition}, bitPlane: ${bitPlane})';
+      'X11CopyPlaneRequest(sourceDrawable: $sourceDrawable, destinationDrawable: $destinationDrawable, gc: $gc, sourceArea: $sourceArea, destinationPosition: $destinationPosition, bitPlane: $bitPlane)';
 }
 
 class X11PolyPointRequest extends X11Request {
@@ -4329,7 +4328,7 @@ class X11PolyPointRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyPointRequest(coordinateMode: ${coordinateMode}, drawable: ${drawable}, gc: ${gc}, points: ${points})';
+      'X11PolyPointRequest(coordinateMode: $coordinateMode, drawable: $drawable, gc: $gc, points: $points)';
 }
 
 class X11PolyLineRequest extends X11Request {
@@ -4368,7 +4367,7 @@ class X11PolyLineRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyLineRequest(coordinateMode: ${coordinateMode}, drawable: ${drawable}, gc: ${gc}, points: ${points})';
+      'X11PolyLineRequest(coordinateMode: $coordinateMode, drawable: $drawable, gc: $gc, points: $points)';
 }
 
 class X11PolySegmentRequest extends X11Request {
@@ -4408,7 +4407,7 @@ class X11PolySegmentRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolySegmentRequest(drawable: ${drawable}, gc: ${gc}, segments: ${segments})';
+      'X11PolySegmentRequest(drawable: $drawable, gc: $gc, segments: $segments)';
 }
 
 class X11PolyRectangleRequest extends X11Request {
@@ -4448,7 +4447,7 @@ class X11PolyRectangleRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyRectangleRequest(drawable: ${drawable}, gc: ${gc}, rectangles: ${rectangles})';
+      'X11PolyRectangleRequest(drawable: $drawable, gc: $gc, rectangles: $rectangles)';
 }
 
 class X11PolyArcRequest extends X11Request {
@@ -4492,7 +4491,7 @@ class X11PolyArcRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyArcRequest(drawable: ${drawable}, gc: ${gc}, arcs: ${arcs})';
+      'X11PolyArcRequest(drawable: $drawable, gc: $gc, arcs: $arcs)';
 }
 
 class X11FillPolyRequest extends X11Request {
@@ -4539,7 +4538,7 @@ class X11FillPolyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FillPolyRequest(drawable: ${drawable}, gc: ${gc}, shape: ${shape}, coordinateMode: ${coordinateMode}, points: ${points})';
+      'X11FillPolyRequest(drawable: $drawable, gc: $gc, shape: $shape, coordinateMode: $coordinateMode, points: $points)';
 }
 
 class X11PolyFillRectangleRequest extends X11Request {
@@ -4579,7 +4578,7 @@ class X11PolyFillRectangleRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyFillRectangleRequest(drawable: ${drawable}, gc: ${gc}, rectangles: ${rectangles})';
+      'X11PolyFillRectangleRequest(drawable: $drawable, gc: $gc, rectangles: $rectangles)';
 }
 
 class X11PolyFillArcRequest extends X11Request {
@@ -4623,7 +4622,7 @@ class X11PolyFillArcRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyFillArcRequest(drawable: ${drawable}, gc: ${gc}, arcs: ${arcs})';
+      'X11PolyFillArcRequest(drawable: $drawable, gc: $gc, arcs: $arcs)';
 }
 
 class X11PutImageRequest extends X11Request {
@@ -4681,7 +4680,7 @@ class X11PutImageRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11PutImageRequest(format: ${format}, drawable: ${drawable}, gc: ${gc}, area: ${area}, leftPad: ${leftPad}, depth: ${depth}, data: <${data.length} bytes>)';
+      'X11PutImageRequest(format: $format, drawable: $drawable, gc: $gc, area: $area, leftPad: $leftPad, depth: $depth, data: <${data.length} bytes>)';
 }
 
 class X11GetImageRequest extends X11Request {
@@ -4718,7 +4717,7 @@ class X11GetImageRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GetImageRequest(format: ${format}, drawable: ${drawable}, area: ${area}, planeMask: ${planeMask})';
+      'X11GetImageRequest(format: $format, drawable: $drawable, area: $area, planeMask: $planeMask)';
 }
 
 class X11GetImageReply extends X11Reply {
@@ -4753,7 +4752,7 @@ class X11GetImageReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetImageReply(depth: ${depth}, visual: ${visual}, data: <${data.length} bytes>)';
+      'X11GetImageReply(depth: $depth, visual: $visual, data: <${data.length} bytes>)';
 }
 
 class X11PolyText8Request extends X11Request {
@@ -4815,7 +4814,7 @@ class X11PolyText8Request extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyText8Request(drawable: ${drawable}, gc: ${gc}, position: ${position}, items: ${items})';
+      'X11PolyText8Request(drawable: $drawable, gc: $gc, position: $position, items: $items)';
 }
 
 class X11PolyText16Request extends X11Request {
@@ -4876,7 +4875,7 @@ class X11PolyText16Request extends X11Request {
 
   @override
   String toString() =>
-      'X11PolyText16Request(drawable: ${drawable}, gc: ${gc}, position: ${position}, items: ${items})';
+      'X11PolyText16Request(drawable: $drawable, gc: $gc, position: $position, items: $items)';
 }
 
 class X11ImageText8Request extends X11Request {
@@ -4912,7 +4911,7 @@ class X11ImageText8Request extends X11Request {
 
   @override
   String toString() =>
-      'X11ImageText8Request(drawable: ${drawable}, gc: ${gc}, position: ${position}, string: ${string})';
+      'X11ImageText8Request(drawable: $drawable, gc: $gc, position: $position, string: $string)';
 }
 
 class X11ImageText16Request extends X11Request {
@@ -4948,7 +4947,7 @@ class X11ImageText16Request extends X11Request {
 
   @override
   String toString() =>
-      'X11ImageText16Request(drawable: ${drawable}, gc: ${gc}, position: ${position}, string: ${string})';
+      'X11ImageText16Request(drawable: $drawable, gc: $gc, position: $position, string: $string)';
 }
 
 class X11CreateColormapRequest extends X11Request {
@@ -4977,7 +4976,7 @@ class X11CreateColormapRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CreateColormapRequest(alloc: ${alloc}, id: ${id}, window: ${window}, visual: ${visual})';
+      'X11CreateColormapRequest(alloc: $alloc, id: $id, window: $window, visual: $visual)';
 }
 
 class X11FreeColormapRequest extends X11Request {
@@ -4998,7 +4997,7 @@ class X11FreeColormapRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FreeColormapRequest(${colormap})';
+  String toString() => 'X11FreeColormapRequest($colormap)';
 }
 
 class X11CopyColormapAndFreeRequest extends X11Request {
@@ -5023,7 +5022,7 @@ class X11CopyColormapAndFreeRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CopyColormapAndFreeRequest(id: ${id}, sourceColormap: ${sourceColormap})';
+      'X11CopyColormapAndFreeRequest(id: $id, sourceColormap: $sourceColormap)';
 }
 
 class X11InstallColormapRequest extends X11Request {
@@ -5044,7 +5043,7 @@ class X11InstallColormapRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11InstallColormapRequest(${colormap})';
+  String toString() => 'X11InstallColormapRequest($colormap)';
 }
 
 class X11UninstallColormapRequest extends X11Request {
@@ -5065,7 +5064,7 @@ class X11UninstallColormapRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11UninstallColormapRequest(${colormap})';
+  String toString() => 'X11UninstallColormapRequest($colormap)';
 }
 
 class X11ListInstalledColormapsRequest extends X11Request {
@@ -5086,7 +5085,7 @@ class X11ListInstalledColormapsRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ListInstalledColormapsRequest(window: ${window})';
+  String toString() => 'X11ListInstalledColormapsRequest(window: $window)';
 }
 
 class X11ListInstalledColormapsReply extends X11Reply {
@@ -5111,8 +5110,7 @@ class X11ListInstalledColormapsReply extends X11Reply {
   }
 
   @override
-  String toString() =>
-      'X11ListInstalledColormapsReply(colormaps: ${colormaps})';
+  String toString() => 'X11ListInstalledColormapsReply(colormaps: $colormaps)';
 }
 
 class X11AllocColorRequest extends X11Request {
@@ -5143,7 +5141,7 @@ class X11AllocColorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11AllocColorRequest(colormap: ${colormap}, color: ${color})';
+      'X11AllocColorRequest(colormap: $colormap, color: $color)';
 }
 
 class X11AllocColorReply extends X11Reply {
@@ -5173,7 +5171,7 @@ class X11AllocColorReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11AllocColorReply(pixel: ${pixel}, color: ${color})';
+  String toString() => 'X11AllocColorReply(pixel: $pixel, color: $color)';
 }
 
 class X11AllocNamedColorRequest extends X11Request {
@@ -5205,7 +5203,7 @@ class X11AllocNamedColorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11AllocNamedColorRequest(colormap: ${colormap}, name: ${name})';
+      'X11AllocNamedColorRequest(colormap: $colormap, name: $name)';
 }
 
 class X11AllocNamedColorReply extends X11Reply {
@@ -5244,7 +5242,7 @@ class X11AllocNamedColorReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11AllocNamedColorReply(pixel: ${pixel}, exact: ${exact}, visual: ${visual})';
+      'X11AllocNamedColorReply(pixel: $pixel, exact: $exact, visual: $visual)';
 }
 
 class X11AllocColorCellsRequest extends X11Request {
@@ -5275,7 +5273,7 @@ class X11AllocColorCellsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11AllocColorCellsRequest(colormap: ${colormap}, colorCount: ${colorCount}, planes: ${planes}, contiguous: ${contiguous})';
+      'X11AllocColorCellsRequest(colormap: $colormap, colorCount: $colorCount, planes: $planes, contiguous: $contiguous)';
 }
 
 class X11AllocColorCellsReply extends X11Reply {
@@ -5306,7 +5304,7 @@ class X11AllocColorCellsReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11AllocColorCellsReply(pixels: ${pixels}, masks: ${masks})';
+      'X11AllocColorCellsReply(pixels: $pixels, masks: $masks)';
 }
 
 class X11AllocColorPlanesRequest extends X11Request {
@@ -5349,7 +5347,7 @@ class X11AllocColorPlanesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11AllocColorPlanesRequest(colormap: ${colormap}, colorCount: ${colorCount}, redDepth: ${redDepth}, greenDepth: ${greenDepth}, blueDepth: ${blueDepth}, contiguous: ${contiguous})';
+      'X11AllocColorPlanesRequest(colormap: $colormap, colorCount: $colorCount, redDepth: $redDepth, greenDepth: $greenDepth, blueDepth: $blueDepth, contiguous: $contiguous)';
 }
 
 class X11AllocColorPlanesReply extends X11Reply {
@@ -5387,7 +5385,7 @@ class X11AllocColorPlanesReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11AllocColorPlanesReply(redMask: ${redMask}, greenMask: ${greenMask}, blueMask: ${blueMask}, pixels: ${pixels})';
+      'X11AllocColorPlanesReply(redMask: $redMask, greenMask: $greenMask, blueMask: $blueMask, pixels: $pixels)';
 }
 
 class X11FreeColorsRequest extends X11Request {
@@ -5421,7 +5419,7 @@ class X11FreeColorsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11FreeColorsRequest(colormap: ${colormap}, planeMask: ${planeMask}, pixels: ${pixels})';
+      'X11FreeColorsRequest(colormap: $colormap, planeMask: $planeMask, pixels: $pixels)';
 }
 
 class X11StoreColorsRequest extends X11Request {
@@ -5478,7 +5476,7 @@ class X11StoreColorsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11StoreColorsRequest(colormap: ${colormap}, items: ${items})';
+      'X11StoreColorsRequest(colormap: $colormap, items: $items)';
 }
 
 class X11StoreNamedColorRequest extends X11Request {
@@ -5531,7 +5529,7 @@ class X11StoreNamedColorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11StoreNamedColorRequest(colormap: ${colormap}, pixel: ${pixel}, name: ${name}, doRed: ${doRed}, doGreen: ${doGreen}, doBlue: ${doBlue})';
+      'X11StoreNamedColorRequest(colormap: $colormap, pixel: $pixel, name: $name, doRed: $doRed, doGreen: $doGreen, doBlue: $doBlue)';
 }
 
 class X11QueryColorsRequest extends X11Request {
@@ -5561,7 +5559,7 @@ class X11QueryColorsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11QueryColorsRequest(colormap: ${colormap}, pixels: ${pixels})';
+      'X11QueryColorsRequest(colormap: $colormap, pixels: $pixels)';
 }
 
 class X11QueryColorsReply extends X11Reply {
@@ -5598,7 +5596,7 @@ class X11QueryColorsReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11QueryColorsReply(colors: ${colors})';
+  String toString() => 'X11QueryColorsReply(colors: $colors)';
 }
 
 class X11LookupColorRequest extends X11Request {
@@ -5630,7 +5628,7 @@ class X11LookupColorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11LookupColorRequest(colormap: ${colormap}, name: ${name})';
+      'X11LookupColorRequest(colormap: $colormap, name: $name)';
 }
 
 class X11LookupColorReply extends X11Reply {
@@ -5663,8 +5661,7 @@ class X11LookupColorReply extends X11Reply {
   }
 
   @override
-  String toString() =>
-      'X11LookupColorReply(exact: ${exact}, visual: ${visual})';
+  String toString() => 'X11LookupColorReply(exact: $exact, visual: $visual)';
 }
 
 class X11CreateCursorRequest extends X11Request {
@@ -5719,7 +5716,7 @@ class X11CreateCursorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CreateCursorRequest(id: ${id}, sourcePixmap: ${sourcePixmap}, maskPixmap: ${maskPixmap}, foreground: ${foreground}, background: ${background}, hotspot: ${hotspot})';
+      'X11CreateCursorRequest(id: $id, sourcePixmap: $sourcePixmap, maskPixmap: $maskPixmap, foreground: $foreground, background: $background, hotspot: $hotspot)';
 }
 
 class X11CreateGlyphCursorRequest extends X11Request {
@@ -5775,7 +5772,7 @@ class X11CreateGlyphCursorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CreateGlyphCursorRequest(id: ${id}, sourceFont: ${sourceFont}, maskFont: ${maskFont}, sourceChar: ${sourceChar}, maskChar: ${maskChar}, foreground: ${foreground}, background: ${background})';
+      'X11CreateGlyphCursorRequest(id: $id, sourceFont: $sourceFont, maskFont: $maskFont, sourceChar: $sourceChar, maskChar: $maskChar, foreground: $foreground, background: $background)';
 }
 
 class X11FreeCursorRequest extends X11Request {
@@ -5796,7 +5793,7 @@ class X11FreeCursorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11FreeCursorRequest(cursor: ${cursor})';
+  String toString() => 'X11FreeCursorRequest(cursor: $cursor)';
 }
 
 class X11RecolorCursorRequest extends X11Request {
@@ -5836,7 +5833,7 @@ class X11RecolorCursorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RecolorCursorRequest(cursor: ${cursor}, foreground: ${foreground}, background: ${background})';
+      'X11RecolorCursorRequest(cursor: $cursor, foreground: $foreground, background: $background)';
 }
 
 class X11QueryBestSizeRequest extends X11Request {
@@ -5865,7 +5862,7 @@ class X11QueryBestSizeRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11QueryBestSizeRequest(drawable: ${drawable}, queryClass: ${queryClass}, size: ${size})';
+      'X11QueryBestSizeRequest(drawable: $drawable, queryClass: $queryClass, size: $size)';
 }
 
 class X11QueryBestSizeReply extends X11Reply {
@@ -5888,7 +5885,7 @@ class X11QueryBestSizeReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11QueryBestSizeReply(size: ${size})';
+  String toString() => 'X11QueryBestSizeReply(size: $size)';
 }
 
 class X11QueryExtensionRequest extends X11Request {
@@ -5915,7 +5912,7 @@ class X11QueryExtensionRequest extends X11Request {
   }
 
   @override
-  String toString() => "X11QueryExtensionRequest('${name}')";
+  String toString() => "X11QueryExtensionRequest('$name')";
 }
 
 class X11QueryExtensionReply extends X11Reply {
@@ -5956,7 +5953,7 @@ class X11QueryExtensionReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11QueryExtensionReply(present: ${present}, majorOpcode: ${majorOpcode}, firstEvent: ${firstEvent}, firstError: ${firstError})';
+      'X11QueryExtensionReply(present: $present, majorOpcode: $majorOpcode, firstEvent: $firstEvent, firstError: $firstError)';
 }
 
 class X11ListExtensionsRequest extends X11Request {
@@ -6000,7 +5997,7 @@ class X11ListExtensionsReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ListExtensionsReply(names: ${names})';
+  String toString() => 'X11ListExtensionsReply(names: $names)';
 }
 
 class X11ChangeKeyboardMappingRequest extends X11Request {
@@ -6047,7 +6044,7 @@ class X11ChangeKeyboardMappingRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangeKeyboardMappingRequest(firstKeycode: ${firstKeycode}, map: ${map})';
+      'X11ChangeKeyboardMappingRequest(firstKeycode: $firstKeycode, map: $map)';
 }
 
 class X11GetKeyboardMappingRequest extends X11Request {
@@ -6072,7 +6069,7 @@ class X11GetKeyboardMappingRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GetKeyboardMappingRequest(firstKeycode: ${firstKeycode}, count: ${count})';
+      'X11GetKeyboardMappingRequest(firstKeycode: $firstKeycode, count: $count)';
 }
 
 class X11GetKeyboardMappingReply extends X11Reply {
@@ -6113,7 +6110,7 @@ class X11GetKeyboardMappingReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11GetKeyboardMappingReply(map: ${map})';
+  String toString() => 'X11GetKeyboardMappingReply(map: $map)';
 }
 
 class X11ChangeKeyboardControlRequest extends X11Request {
@@ -6344,7 +6341,7 @@ class X11GetKeyboardControlReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetKeyboardControlReply(globalAutoRepeat: ${globalAutoRepeat}, ledMask: ${ledMask}, keyClickPercent: ${keyClickPercent}, bellPercent: ${bellPercent}, bellPitch: ${bellPitch}, bellDuration: ${bellDuration}, autoRepeats: ${autoRepeats})';
+      'X11GetKeyboardControlReply(globalAutoRepeat: $globalAutoRepeat, ledMask: $ledMask, keyClickPercent: $keyClickPercent, bellPercent: $bellPercent, bellPitch: $bellPitch, bellDuration: $bellDuration, autoRepeats: $autoRepeats)';
 }
 
 class X11BellRequest extends X11Request {
@@ -6363,7 +6360,7 @@ class X11BellRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11BellRequest(percent: ${percent})';
+  String toString() => 'X11BellRequest(percent: $percent)';
 }
 
 class X11ChangePointerControlRequest extends X11Request {
@@ -6398,7 +6395,7 @@ class X11ChangePointerControlRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangePointerControlRequest(acceleration: ${acceleration}, threshold: ${threshold})';
+      'X11ChangePointerControlRequest(acceleration: $acceleration, threshold: $threshold)';
 }
 
 class X11GetPointerControlRequest extends X11Request {
@@ -6445,7 +6442,7 @@ class X11GetPointerControlReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetPointerControlReply(acceleration: ${acceleration}, threshold: ${threshold})';
+      'X11GetPointerControlReply(acceleration: $acceleration, threshold: $threshold)';
 }
 
 class X11SetScreenSaverRequest extends X11Request {
@@ -6492,7 +6489,7 @@ class X11SetScreenSaverRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SetScreenSaverRequest(timeout: ${timeout}, interval: ${interval}, preferBlanking: ${preferBlanking}, allowExposures: ${allowExposures})';
+      'X11SetScreenSaverRequest(timeout: $timeout, interval: $interval, preferBlanking: $preferBlanking, allowExposures: $allowExposures)';
 }
 
 class X11GetScreenSaverRequest extends X11Request {
@@ -6544,7 +6541,7 @@ class X11GetScreenSaverReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11GetScreenSaverReply(timeout: ${timeout}, interval: ${interval}, preferBlanking: ${preferBlanking}, allowExposures: ${allowExposures})';
+      'X11GetScreenSaverReply(timeout: $timeout, interval: $interval, preferBlanking: $preferBlanking, allowExposures: $allowExposures)';
 }
 
 class X11ChangeHostsRequest extends X11Request {
@@ -6581,7 +6578,7 @@ class X11ChangeHostsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ChangeHostsRequest(mode: ${mode}, family: ${family}, address: ${address})';
+      'X11ChangeHostsRequest(mode: $mode, family: $family, address: $address)';
 }
 
 class X11ListHostsRequest extends X11Request {
@@ -6643,8 +6640,7 @@ class X11ListHostsReply extends X11Reply {
   }
 
   @override
-  String toString() =>
-      'X11ListHostsReply(enabled: ${enabled}, hosts: ${hosts})';
+  String toString() => 'X11ListHostsReply(enabled: $enabled, hosts: $hosts)';
 }
 
 class X11SetAccessControlRequest extends X11Request {
@@ -6663,7 +6659,7 @@ class X11SetAccessControlRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11SetAccessControlRequest(${enabled})';
+  String toString() => 'X11SetAccessControlRequest($enabled)';
 }
 
 class X11SetCloseDownModeRequest extends X11Request {
@@ -6682,7 +6678,7 @@ class X11SetCloseDownModeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11SetCloseDownModeRequest(${mode})';
+  String toString() => 'X11SetCloseDownModeRequest($mode)';
 }
 
 class X11KillClientRequest extends X11Request {
@@ -6703,7 +6699,7 @@ class X11KillClientRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11KillClientRequest(resource: ${resource})';
+  String toString() => 'X11KillClientRequest(resource: $resource)';
 }
 
 class X11RotatePropertiesRequest extends X11Request {
@@ -6738,7 +6734,7 @@ class X11RotatePropertiesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RotatePropertiesRequest(window: ${window}, delta: ${delta}, atoms: ${atoms})';
+      'X11RotatePropertiesRequest(window: $window, delta: $delta, atoms: $atoms)';
 }
 
 class X11ForceScreenSaverRequest extends X11Request {
@@ -6757,7 +6753,7 @@ class X11ForceScreenSaverRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ForceScreenSaverRequest(mode: ${mode})';
+  String toString() => 'X11ForceScreenSaverRequest(mode: $mode)';
 }
 
 class X11SetPointerMappingRequest extends X11Request {
@@ -6785,7 +6781,7 @@ class X11SetPointerMappingRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11SetPointerMappingRequest(map: ${map})';
+  String toString() => 'X11SetPointerMappingRequest(map: $map)';
 }
 
 class X11SetPointerMappingReply extends X11Reply {
@@ -6804,7 +6800,7 @@ class X11SetPointerMappingReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11SetPointerMappingReply(status: ${status})';
+  String toString() => 'X11SetPointerMappingReply(status: $status)';
 }
 
 class X11GetPointerMappingRequest extends X11Request {
@@ -6851,7 +6847,7 @@ class X11GetPointerMappingReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11GetPointerMappingReply(map: ${map})';
+  String toString() => 'X11GetPointerMappingReply(map: $map)';
 }
 
 class X11SetModifierMappingRequest extends X11Request {
@@ -6936,7 +6932,7 @@ class X11SetModifierMappingReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11SetModifierMappingReply(status: ${status})';
+  String toString() => 'X11SetModifierMappingReply(status: $status)';
 }
 
 class X11GetModifierMappingRequest extends X11Request {
@@ -7060,7 +7056,7 @@ class X11BigReqEnableReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11BigReqEnableReply(maximumRequestLength: ${maximumRequestLength})';
+      'X11BigReqEnableReply(maximumRequestLength: $maximumRequestLength)';
 }
 
 class X11SyncInitializeRequest extends X11Request {
@@ -7082,7 +7078,7 @@ class X11SyncInitializeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11SyncInitializeRequest(${clientVersion})';
+  String toString() => 'X11SyncInitializeRequest($clientVersion)';
 }
 
 class X11SyncInitializeReply extends X11Reply {
@@ -7107,7 +7103,7 @@ class X11SyncInitializeReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11SyncInitializeReply(${version})';
+  String toString() => 'X11SyncInitializeReply($version)';
 }
 
 class X11ShapeQueryVersionRequest extends X11Request {
@@ -7146,7 +7142,7 @@ class X11ShapeQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ShapeQueryVersionReply(${version})';
+  String toString() => 'X11ShapeQueryVersionReply($version)';
 }
 
 class X11ShapeRectanglesRequest extends X11Request {
@@ -7206,7 +7202,7 @@ class X11ShapeRectanglesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ShapeRectanglesRequest(${window}, ${rectangles}, operation: ${operation}, kind: ${kind}, ordering: ${ordering}, offset: ${offset})';
+      'X11ShapeRectanglesRequest($window, $rectangles, operation: $operation, kind: $kind, ordering: $ordering, offset: $offset)';
 }
 
 class X11ShapeMaskRequest extends X11Request {
@@ -7249,7 +7245,7 @@ class X11ShapeMaskRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ShapeMaskRequest(${window}, ${sourceBitmap}, operation: ${operation}, kind: ${kind}, sourceOffset: ${sourceOffset})';
+      'X11ShapeMaskRequest($window, $sourceBitmap, operation: $operation, kind: $kind, sourceOffset: $sourceOffset)';
 }
 
 class X11ShapeCombineRequest extends X11Request {
@@ -7297,7 +7293,7 @@ class X11ShapeCombineRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ShapeCombineRequest(${window}, ${sourceWindow}, operation: ${operation}, kind: ${kind}, sourceKind: ${sourceKind}, sourceOffset: ${sourceOffset})';
+      'X11ShapeCombineRequest($window, $sourceWindow, operation: $operation, kind: $kind, sourceKind: $sourceKind, sourceOffset: $sourceOffset)';
 }
 
 class X11ShapeOffsetRequest extends X11Request {
@@ -7330,7 +7326,7 @@ class X11ShapeOffsetRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ShapeOffsetRequest(${window}, kind: ${kind}, offset: ${offset})';
+      'X11ShapeOffsetRequest($window, kind: $kind, offset: $offset)';
 }
 
 class X11ShapeQueryExtentsRequest extends X11Request {
@@ -7350,7 +7346,7 @@ class X11ShapeQueryExtentsRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ShapeQueryExtentsRequest(${window})';
+  String toString() => 'X11ShapeQueryExtentsRequest($window)';
 }
 
 class X11ShapeQueryExtentsReply extends X11Reply {
@@ -7408,7 +7404,7 @@ class X11ShapeQueryExtentsReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11ShapeQueryExtentsReply(boundingShaped: ${boundingShaped}, clipShaped: ${clipShaped}, boundingShapeExtents: ${boundingShapeExtents}, clipShapeExtents: ${clipShapeExtents})';
+      'X11ShapeQueryExtentsReply(boundingShaped: $boundingShaped, clipShaped: $clipShaped, boundingShapeExtents: $boundingShapeExtents, clipShapeExtents: $clipShapeExtents)';
 }
 
 class X11ShapeSelectInputRequest extends X11Request {
@@ -7433,7 +7429,7 @@ class X11ShapeSelectInputRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ShapeSelectInputRequest(${window}, ${enable})';
+  String toString() => 'X11ShapeSelectInputRequest($window, $enable)';
 }
 
 class X11ShapeInputSelectedRequest extends X11Request {
@@ -7453,7 +7449,7 @@ class X11ShapeInputSelectedRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ShapeInputSelectedRequest(${window})';
+  String toString() => 'X11ShapeInputSelectedRequest($window)';
 }
 
 class X11ShapeInputSelectedReply extends X11Reply {
@@ -7472,7 +7468,7 @@ class X11ShapeInputSelectedReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ShapeInputSelectedReply(enabled: ${enabled})';
+  String toString() => 'X11ShapeInputSelectedReply(enabled: $enabled)';
 }
 
 class X11ShapeGetRectanglesRequest extends X11Request {
@@ -7498,7 +7494,7 @@ class X11ShapeGetRectanglesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ShapeGetRectanglesRequest(${window}, kind: ${kind})';
+  String toString() => 'X11ShapeGetRectanglesRequest($window, kind: $kind)';
 }
 
 class X11ShapeGetRectanglesReply extends X11Reply {
@@ -7538,5 +7534,5 @@ class X11ShapeGetRectanglesReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11ShapeGetRectanglesReply(${rectangles}, ordering: ${ordering})';
+      'X11ShapeGetRectanglesReply($rectangles, ordering: $ordering)';
 }

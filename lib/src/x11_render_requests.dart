@@ -58,7 +58,7 @@ class X11RenderQueryVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RenderQueryVersionRequest(${clientVersion})';
+  String toString() => 'X11RenderQueryVersionRequest($clientVersion)';
 }
 
 class X11RenderQueryVersionReply extends X11Reply {
@@ -83,7 +83,7 @@ class X11RenderQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RenderQueryVersionReply(${version})';
+  String toString() => 'X11RenderQueryVersionReply($version)';
 }
 
 class X11RenderQueryPictFormatsRequest extends X11Request {
@@ -218,7 +218,7 @@ class X11RenderQueryPictFormatsReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RenderQueryPictFormatsReply(formats: ${formats}, screens: ${screens})';
+      'X11RenderQueryPictFormatsReply(formats: $formats, screens: $screens)';
 }
 
 class X11RenderQueryPictIndexValuesRequest extends X11Request {
@@ -238,8 +238,7 @@ class X11RenderQueryPictIndexValuesRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11RenderQueryPictIndexValuesRequest(format: ${format})';
+  String toString() => 'X11RenderQueryPictIndexValuesRequest(format: $format)';
 }
 
 class X11RenderQueryPictIndexValuesReply extends X11Reply {
@@ -278,7 +277,7 @@ class X11RenderQueryPictIndexValuesReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RenderQueryPictIndexValuesReply(${values})';
+  String toString() => 'X11RenderQueryPictIndexValuesReply($values)';
 }
 
 class X11RenderCreatePictureRequest extends X11Request {
@@ -478,45 +477,45 @@ class X11RenderCreatePictureRequest extends X11Request {
   @override
   String toString() {
     var string =
-        'X11CreatePictureRequest(${id}, drawable: ${drawable} format: ${format}';
+        'X11CreatePictureRequest($id, drawable: $drawable format: $format';
     if (repeat != null) {
-      string += ', repeat: ${repeat}';
+      string += ', repeat: $repeat';
     }
     if (alphaMap != null) {
-      string += ', alphaMap: ${alphaMap}';
+      string += ', alphaMap: $alphaMap';
     }
     if (alphaXOrigin != null) {
-      string += ', alphaXOrigin: ${alphaXOrigin}';
+      string += ', alphaXOrigin: $alphaXOrigin';
     }
     if (alphaYOrigin != null) {
-      string += ', alphaYOrigin: ${alphaYOrigin}';
+      string += ', alphaYOrigin: $alphaYOrigin';
     }
     if (clipXOrigin != null) {
-      string += ', clipXOrigin: ${clipXOrigin}';
+      string += ', clipXOrigin: $clipXOrigin';
     }
     if (clipYOrigin != null) {
-      string += ', clipYOrigin: ${clipYOrigin}';
+      string += ', clipYOrigin: $clipYOrigin';
     }
     if (clipMask != null) {
-      string += ', clipMask: ${clipMask}';
+      string += ', clipMask: $clipMask';
     }
     if (graphicsExposures != null) {
-      string += ', graphicsExposures: ${graphicsExposures}';
+      string += ', graphicsExposures: $graphicsExposures';
     }
     if (subwindowMode != null) {
-      string += ', subwindowMode: ${subwindowMode}';
+      string += ', subwindowMode: $subwindowMode';
     }
     if (polyEdge != null) {
-      string += ', polyEdge: ${polyEdge}';
+      string += ', polyEdge: $polyEdge';
     }
     if (polyMode != null) {
-      string += ', polyMode: ${polyMode}';
+      string += ', polyMode: $polyMode';
     }
     if (dither != null) {
-      string += ', dither: ${dither}';
+      string += ', dither: $dither';
     }
     if (componentAlpha != null) {
-      string += ', componentAlpha: ${componentAlpha}';
+      string += ', componentAlpha: $componentAlpha';
     }
     string += ')';
     return string;
@@ -713,45 +712,45 @@ class X11RenderChangePictureRequest extends X11Request {
 
   @override
   String toString() {
-    var string = 'X11ChangePictureRequest(${picture}';
+    var string = 'X11ChangePictureRequest($picture';
     if (repeat != null) {
-      string += ', repeat: ${repeat}';
+      string += ', repeat: $repeat';
     }
     if (alphaMap != null) {
-      string += ', alphaMap: ${alphaMap}';
+      string += ', alphaMap: $alphaMap';
     }
     if (alphaXOrigin != null) {
-      string += ', alphaXOrigin: ${alphaXOrigin}';
+      string += ', alphaXOrigin: $alphaXOrigin';
     }
     if (alphaYOrigin != null) {
-      string += ', alphaYOrigin: ${alphaYOrigin}';
+      string += ', alphaYOrigin: $alphaYOrigin';
     }
     if (clipXOrigin != null) {
-      string += ', clipXOrigin: ${clipXOrigin}';
+      string += ', clipXOrigin: $clipXOrigin';
     }
     if (clipYOrigin != null) {
-      string += ', clipYOrigin: ${clipYOrigin}';
+      string += ', clipYOrigin: $clipYOrigin';
     }
     if (clipMask != null) {
-      string += ', clipMask: ${clipMask}';
+      string += ', clipMask: $clipMask';
     }
     if (graphicsExposures != null) {
-      string += ', graphicsExposures: ${graphicsExposures}';
+      string += ', graphicsExposures: $graphicsExposures';
     }
     if (subwindowMode != null) {
-      string += ', subwindowMode: ${subwindowMode}';
+      string += ', subwindowMode: $subwindowMode';
     }
     if (polyEdge != null) {
-      string += ', polyEdge: ${polyEdge}';
+      string += ', polyEdge: $polyEdge';
     }
     if (polyMode != null) {
-      string += ', polyMode: ${polyMode}';
+      string += ', polyMode: $polyMode';
     }
     if (dither != null) {
-      string += ', dither: ${dither}';
+      string += ', dither: $dither';
     }
     if (componentAlpha != null) {
-      string += ', componentAlpha: ${componentAlpha}';
+      string += ', componentAlpha: $componentAlpha';
     }
     string += ')';
     return string;
@@ -799,7 +798,7 @@ class X11RenderSetPictureClipRectanglesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderSetPictureClipRectanglesRequest(${picture}, ${rectangles}, clipOrigin: ${clipOrigin})';
+      'X11RenderSetPictureClipRectanglesRequest($picture, $rectangles, clipOrigin: $clipOrigin)';
 }
 
 class X11RenderFreePictureRequest extends X11Request {
@@ -819,7 +818,7 @@ class X11RenderFreePictureRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RenderFreePictureRequest(${picture})';
+  String toString() => 'X11RenderFreePictureRequest($picture)';
 }
 
 class X11RenderCompositeRequest extends X11Request {
@@ -884,7 +883,7 @@ class X11RenderCompositeRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCompositeRequest(${sourcePicture}, ${destinationPicture}, ${area}, op: ${op}, sourceOrigin: ${sourceOrigin}, destinationOrigin: ${destinationOrigin}, maskPicture: ${maskPicture}, maskOrigin: ${maskOrigin})';
+      'X11RenderCompositeRequest($sourcePicture, $destinationPicture, $area, op: $op, sourceOrigin: $sourceOrigin, destinationOrigin: $destinationOrigin, maskPicture: $maskPicture, maskOrigin: $maskOrigin)';
 }
 
 class X11RenderTrapezoidsRequest extends X11Request {
@@ -960,7 +959,7 @@ class X11RenderTrapezoidsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderTrapezoidsRequest(${sourcePicture}, ${destinationPicture}, ${trapezoids}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderTrapezoidsRequest($sourcePicture, $destinationPicture, $trapezoids, op: $op, sourceOrigin: $sourceOrigin, maskFormat: $maskFormat)';
 }
 
 class X11RenderTrianglesRequest extends X11Request {
@@ -1025,7 +1024,7 @@ class X11RenderTrianglesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderTrianglesRequest(${sourcePicture}, ${destinationPicture}, ${triangles}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderTrianglesRequest($sourcePicture, $destinationPicture, $triangles, op: $op, sourceOrigin: $sourceOrigin, maskFormat: $maskFormat)';
 }
 
 class X11RenderTriStripRequest extends X11Request {
@@ -1080,7 +1079,7 @@ class X11RenderTriStripRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderTriStripRequest(${sourcePicture}, ${destinationPicture}, ${points}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderTriStripRequest($sourcePicture, $destinationPicture, $points, op: $op, sourceOrigin: $sourceOrigin, maskFormat: $maskFormat)';
 }
 
 class X11RenderTriFanRequest extends X11Request {
@@ -1135,7 +1134,7 @@ class X11RenderTriFanRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderTriFanRequest(${sourcePicture}, ${destinationPicture}, ${points}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderTriFanRequest($sourcePicture, $destinationPicture, $points, op: $op, sourceOrigin: $sourceOrigin, maskFormat: $maskFormat)';
 }
 
 class X11RenderCreateGlyphSetRequest extends X11Request {
@@ -1158,7 +1157,7 @@ class X11RenderCreateGlyphSetRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RenderCreateGlyphSetRequest(${id}, ${format})';
+  String toString() => 'X11RenderCreateGlyphSetRequest($id, $format)';
 }
 
 class X11RenderReferenceGlyphSetRequest extends X11Request {
@@ -1182,7 +1181,7 @@ class X11RenderReferenceGlyphSetRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderReferenceGlyphSetRequest(${id}, ${existingGlyphset})';
+      'X11RenderReferenceGlyphSetRequest($id, $existingGlyphset)';
 }
 
 class X11RenderFreeGlyphSetRequest extends X11Request {
@@ -1202,7 +1201,7 @@ class X11RenderFreeGlyphSetRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RenderFreeGlyphSetRequest(${glyphset})';
+  String toString() => 'X11RenderFreeGlyphSetRequest($glyphset)';
 }
 
 class X11RenderAddGlyphsRequest extends X11Request {
@@ -1256,7 +1255,7 @@ class X11RenderAddGlyphsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderAddGlyphsRequest(glyphset: ${glyphset}, ${glyphs}, ${data})';
+      'X11RenderAddGlyphsRequest(glyphset: $glyphset, $glyphs, $data)';
 }
 
 class X11RenderFreeGlyphsRequest extends X11Request {
@@ -1282,7 +1281,7 @@ class X11RenderFreeGlyphsRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RenderFreeGlyphsRequest(${glyphset}, ${glyphs})';
+  String toString() => 'X11RenderFreeGlyphsRequest($glyphset, $glyphs)';
 }
 
 class X11RenderCompositeGlyphs8Request extends X11Request {
@@ -1360,7 +1359,7 @@ class X11RenderCompositeGlyphs8Request extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCompositeGlyphs8Request(${sourcePicture}, ${destinationPicture}, ${glyphset}, ${glyphcmds}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderCompositeGlyphs8Request($sourcePicture, $destinationPicture, $glyphset, $glyphcmds, op: $op, sourceOrigin: $sourceOrigin, maskFormat: $maskFormat)';
 }
 
 class X11RenderCompositeGlyphs16Request extends X11Request {
@@ -1438,7 +1437,7 @@ class X11RenderCompositeGlyphs16Request extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCompositeGlyphs16Request(${sourcePicture}, ${destinationPicture}, ${glyphset}, ${glyphcmds}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderCompositeGlyphs16Request($sourcePicture, $destinationPicture, $glyphset, $glyphcmds, op: $op, sourceOrigin: $sourceOrigin, maskFormat: $maskFormat)';
 }
 
 class X11RenderCompositeGlyphs32Request extends X11Request {
@@ -1550,7 +1549,7 @@ class X11RenderCompositeGlyphs32Request extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCompositeGlyphs32Request(${sourcePicture}, ${destinationPicture}, ${glyphset}, ${glyphcmds}, op: ${op}, sourceOrigin: ${sourceOrigin}, maskFormat: ${maskFormat})';
+      'X11RenderCompositeGlyphs32Request($sourcePicture, $destinationPicture, $glyphset, $glyphcmds, op: $op, sourceOrigin: $sourceOrigin, maskFormat: $maskFormat)';
 }
 
 class X11RenderFillRectanglesRequest extends X11Request {
@@ -1603,7 +1602,7 @@ class X11RenderFillRectanglesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderFillRectanglesRequest(${destinationPicture}, rectangles: ${rectangles}, op: ${op}, color: ${color})';
+      'X11RenderFillRectanglesRequest($destinationPicture, rectangles: $rectangles, op: $op, color: $color)';
 }
 
 class X11RenderCreateCursorRequest extends X11Request {
@@ -1633,7 +1632,7 @@ class X11RenderCreateCursorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCreateCursorRequest(${id}, ${sourcePicture}, hotspot: ${hotspot})';
+      'X11RenderCreateCursorRequest($id, $sourcePicture, hotspot: $hotspot)';
 }
 
 class X11RenderSetPictureTransformRequest extends X11Request {
@@ -1657,7 +1656,7 @@ class X11RenderSetPictureTransformRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderSetPictureTransformRequest({picture}, ${transform})';
+      'X11RenderSetPictureTransformRequest({picture}, $transform)';
 }
 
 class X11RenderQueryFiltersRequest extends X11Request {
@@ -1677,7 +1676,7 @@ class X11RenderQueryFiltersRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RenderQueryFiltersRequest(${drawable})';
+  String toString() => 'X11RenderQueryFiltersRequest($drawable)';
 }
 
 class X11RenderQueryFiltersReply extends X11Reply {
@@ -1707,7 +1706,7 @@ class X11RenderQueryFiltersReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RenderQueryFiltersReply(${filters}, ${aliases})';
+  String toString() => 'X11RenderQueryFiltersReply($filters, $aliases)';
 }
 
 class X11RenderSetPictureFilterRequest extends X11Request {
@@ -1745,7 +1744,7 @@ class X11RenderSetPictureFilterRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderSetPictureFilterRequest(picture: ${picture}, filter: ${filter}, values: ${values})';
+      'X11RenderSetPictureFilterRequest(picture: $picture, filter: $filter, values: $values)';
 }
 
 class X11RenderCreateAnimatedCursorRequest extends X11Request {
@@ -1777,7 +1776,7 @@ class X11RenderCreateAnimatedCursorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RenderCreateAnimatedCursorRequest(${id}, ${frames})';
+  String toString() => 'X11RenderCreateAnimatedCursorRequest($id, $frames)';
 }
 
 class X11RenderAddTrapezoidsRequest extends X11Request {
@@ -1825,7 +1824,7 @@ class X11RenderAddTrapezoidsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderAddTrapezoidsRequest(picture: ${picture}, ${trapezoids}, offset: ${offset})';
+      'X11RenderAddTrapezoidsRequest(picture: $picture, $trapezoids, offset: $offset)';
 }
 
 class X11RenderCreateSolidFillRequest extends X11Request {
@@ -1855,7 +1854,7 @@ class X11RenderCreateSolidFillRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RenderCreateSolidFillRequest(${id}, ${color})';
+  String toString() => 'X11RenderCreateSolidFillRequest($id, $color)';
 }
 
 class X11RenderCreateLinearGradientRequest extends X11Request {
@@ -1915,7 +1914,7 @@ class X11RenderCreateLinearGradientRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCreateLinearGradientRequest(${id}, p1: ${p1}, p2: ${p2}, stops: ${stops})';
+      'X11RenderCreateLinearGradientRequest($id, p1: $p1, p2: $p2, stops: $stops)';
 }
 
 class X11RenderCreateRadialGradientRequest extends X11Request {
@@ -1987,7 +1986,7 @@ class X11RenderCreateRadialGradientRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCreateRadialGradientRequest(${id}, inner: ${inner}, outer: ${outer}, innerRadius: ${innerRadius}, outerRadius: ${outerRadius}, stops: ${stops})';
+      'X11RenderCreateRadialGradientRequest($id, inner: $inner, outer: $outer, innerRadius: $innerRadius, outerRadius: $outerRadius, stops: $stops)';
 }
 
 class X11RenderCreateConicalGradientRequest extends X11Request {
@@ -2045,5 +2044,5 @@ class X11RenderCreateConicalGradientRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RenderCreateConicalGradientRequest(${id}, center: ${center}, angle: ${angle}, stops: ${stops})';
+      'X11RenderCreateConicalGradientRequest($id, center: $center, angle: $angle, stops: $stops)';
 }

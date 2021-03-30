@@ -39,5 +39,5 @@ class X11XInputDeviceValuatorEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11XInputDeviceValuatorEvent(${deviceId}, deviceState: ${deviceState}, firstValuator: ${firstValuator}, valuators: ${valuators})';
+      'X11XInputDeviceValuatorEvent($deviceId, deviceState: $deviceState, firstValuator: $firstValuator, valuators: $valuators)';
 }

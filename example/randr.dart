@@ -65,7 +65,7 @@ void main() async {
       } else {
         value = valueReply.data.toString();
       }
-      print("    '${property}': ${value}");
+      print("    '$property': $value");
     }
   }
 

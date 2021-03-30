@@ -87,7 +87,7 @@ class X11RandrScreenChangeNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11RandrScreenChangeNotifyEvent(root: ${root}, requestWindow: ${requestWindow}, sizeInPixels: ${sizeInPixels}, sizeInMillimeters: ${sizeInMillimeters}, rotation: ${rotation}, sizeId: ${sizeId}, subPixelOrder: ${subPixelOrder}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
+      'X11RandrScreenChangeNotifyEvent(root: $root, requestWindow: $requestWindow, sizeInPixels: $sizeInPixels, sizeInMillimeters: $sizeInMillimeters, rotation: $rotation, sizeId: $sizeId, subPixelOrder: $subPixelOrder, timestamp: $timestamp, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrCrtcChangeNotifyEvent extends X11Event {
@@ -146,7 +146,7 @@ class X11RandrCrtcChangeNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11RandrCrtcChangeNotifyEvent(requestWindow: ${requestWindow}, crtc: ${crtc}, mode: ${mode}, rotation: ${rotation}, area: ${area}, timestamp: ${timestamp})';
+      'X11RandrCrtcChangeNotifyEvent(requestWindow: $requestWindow, crtc: $crtc, mode: $mode, rotation: $rotation, area: $area, timestamp: $timestamp)';
 }
 
 class X11RandrOutputChangeNotifyEvent extends X11Event {
@@ -212,7 +212,7 @@ class X11RandrOutputChangeNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11RandrOutputChangeNotifyEvent(requestWindow: ${requestWindow}, output: {$output}, crtc: ${crtc}, mode: ${mode}, rotation: ${rotation}, connection: ${connection}, subPixelOrder: ${subPixelOrder}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
+      'X11RandrOutputChangeNotifyEvent(requestWindow: $requestWindow, output: {$output}, crtc: $crtc, mode: $mode, rotation: $rotation, connection: $connection, subPixelOrder: $subPixelOrder, timestamp: $timestamp, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrOutputPropertyNotifyEvent extends X11Event {
@@ -260,7 +260,7 @@ class X11RandrOutputPropertyNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11RandrOutputPropertyNotifyEvent(window: ${window}, output: {$output}, atom: ${atom}, state: ${state}, timestamp: ${timestamp})';
+      'X11RandrOutputPropertyNotifyEvent(window: $window, output: {$output}, atom: $atom, state: $state, timestamp: $timestamp)';
 }
 
 class X11RandrProviderChangeNotifyEvent extends X11Event {
@@ -302,7 +302,7 @@ class X11RandrProviderChangeNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11RandrProviderChangeNotifyEvent(requestWindow: ${requestWindow}, provider: {$provider}, timestamp: ${timestamp})';
+      'X11RandrProviderChangeNotifyEvent(requestWindow: $requestWindow, provider: {$provider}, timestamp: $timestamp)';
 }
 
 class X11RandrProviderPropertyNotifyEvent extends X11Event {
@@ -350,7 +350,7 @@ class X11RandrProviderPropertyNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11RandrProviderPropertyNotifyEvent(window: ${window}, provider: {$provider}, atom: ${atom}, state: ${state}, timestamp: ${timestamp})';
+      'X11RandrProviderPropertyNotifyEvent(window: $window, provider: {$provider}, atom: $atom, state: $state, timestamp: $timestamp)';
 }
 
 class X11RandrResourceChangeNotifyEvent extends X11Event {
@@ -387,7 +387,7 @@ class X11RandrResourceChangeNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11RandrResourceChangeNotifyEvent(window: ${window}, timestamp: ${timestamp})';
+      'X11RandrResourceChangeNotifyEvent(window: $window, timestamp: $timestamp)';
 }
 
 class X11RandrUnknownEvent extends X11Event {
@@ -411,5 +411,5 @@ class X11RandrUnknownEvent extends X11Event {
   }
 
   @override
-  String toString() => 'X11RandrUnknownEvent(subCode: ${subCode})';
+  String toString() => 'X11RandrUnknownEvent(subCode: $subCode)';
 }

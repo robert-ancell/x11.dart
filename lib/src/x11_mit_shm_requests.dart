@@ -62,7 +62,7 @@ class X11MitShmQueryVersionReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11MitShmQueryVersionReply(${version}, uid: ${uid}, gid: ${gid}, pixmapFormat: ${pixmapFormat}, sharedPixmaps: ${sharedPixmaps})';
+      'X11MitShmQueryVersionReply($version, uid: $uid, gid: $gid, pixmapFormat: $pixmapFormat, sharedPixmaps: $sharedPixmaps)';
 }
 
 class X11MitShmAttachRequest extends X11Request {
@@ -91,7 +91,7 @@ class X11MitShmAttachRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11MitShmAttachRequest(${shmseg}, ${shmid}, readOnly: ${readOnly})';
+      'X11MitShmAttachRequest($shmseg, $shmid, readOnly: $readOnly)';
 }
 
 class X11MitShmDetachRequest extends X11Request {
@@ -111,7 +111,7 @@ class X11MitShmDetachRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11MitShmDetachRequest(${shmseg})';
+  String toString() => 'X11MitShmDetachRequest($shmseg)';
 }
 
 class X11MitShmPutImageRequest extends X11Request {
@@ -186,7 +186,7 @@ class X11MitShmPutImageRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11MitShmPutImageRequest(${gc}, ${drawable}, ${shmseg}, ${size}, ${sourceArea}, ${destinationPosition}, depth: ${depth}, format: ${format}, offset: ${offset}, sendEvent: ${sendEvent})';
+      'X11MitShmPutImageRequest($gc, $drawable, $shmseg, $size, $sourceArea, $destinationPosition, depth: $depth, format: $format, offset: $offset, sendEvent: $sendEvent)';
 }
 
 class X11MitShmGetImageRequest extends X11Request {
@@ -233,7 +233,7 @@ class X11MitShmGetImageRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11MitShmGetImageRequest(${drawable}, ${area}, ${shmseg}, planeMask: ${planeMask}, format: ${format}, offset: ${offset})';
+      'X11MitShmGetImageRequest($drawable, $area, $shmseg, planeMask: $planeMask, format: $format, offset: $offset)';
 }
 
 class X11MitShmGetImageReply extends X11Reply {
@@ -259,7 +259,7 @@ class X11MitShmGetImageReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11MitShmGetImageReply(depth: ${depth}, visual: ${visual}, size: ${size})';
+      'X11MitShmGetImageReply(depth: $depth, visual: $visual, size: $size)';
 }
 
 class X11MitShmCreatePixmapRequest extends X11Request {
@@ -302,5 +302,5 @@ class X11MitShmCreatePixmapRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11MitShmCreatePixmapRequest(${id}, ${drawable}, ${shmseg}, ${size}, depth: ${depth}, offset: ${offset})';
+      'X11MitShmCreatePixmapRequest($id, $drawable, $shmseg, $size, depth: $depth, offset: $offset)';
 }

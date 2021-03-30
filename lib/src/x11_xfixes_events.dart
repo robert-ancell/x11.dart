@@ -44,7 +44,7 @@ class X11XFixesSelectionNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11XFixesSelectionNotifyEvent(${subtype}, ${window}, ${owner}, ${selection}, timestamp: ${timestamp}, selectionTimestamp: ${selectionTimestamp})';
+      'X11XFixesSelectionNotifyEvent($subtype, $window, $owner, $selection, timestamp: $timestamp, selectionTimestamp: $selectionTimestamp)';
 }
 
 class X11CursorNotifyEvent extends X11Event {
@@ -85,5 +85,5 @@ class X11CursorNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11CursorNotifyEvent(${subtype}, ${window}, cursorSerial: ${cursorSerial}, timestamp: ${timestamp}, nameAtom: ${nameAtom})';
+      'X11CursorNotifyEvent($subtype, $window, cursorSerial: $cursorSerial, timestamp: $timestamp, nameAtom: $nameAtom)';
 }

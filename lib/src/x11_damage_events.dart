@@ -56,5 +56,5 @@ class X11DamageNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11DamageNotifyEvent(${drawable}, ${damage}, level: ${level}, area: ${area}, geometry: ${geometry}, timestamp: ${timestamp})';
+      'X11DamageNotifyEvent($drawable, $damage, level: $level, area: $area, geometry: $geometry, timestamp: $timestamp)';
 }

@@ -27,6 +27,5 @@ class X11SecurityAuthorizationRevokedEvent extends X11Event {
   }
 
   @override
-  String toString() =>
-      'X11SecurityAuthorizationRevokedEvent(${authorizationId})';
+  String toString() => 'X11SecurityAuthorizationRevokedEvent($authorizationId)';
 }

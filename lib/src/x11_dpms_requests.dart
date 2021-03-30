@@ -23,7 +23,7 @@ class X11DpmsGetVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11DpmsGetVersionRequest(${clientVersion})';
+  String toString() => 'X11DpmsGetVersionRequest($clientVersion)';
 }
 
 class X11DpmsGetVersionReply extends X11Reply {
@@ -85,7 +85,7 @@ class X11DpmsCapableReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11DpmsCapableReply(${capable})';
+  String toString() => 'X11DpmsCapableReply($capable)';
 }
 
 class X11DpmsGetTimeoutsRequest extends X11Request {
@@ -135,7 +135,7 @@ class X11DpmsGetTimeoutsReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11DpmsGetTimeoutsReply(standbyTimeout: ${standbyTimeout}, suspendTimeout: ${suspendTimeout}, offTimeout: ${offTimeout})';
+      'X11DpmsGetTimeoutsReply(standbyTimeout: $standbyTimeout, suspendTimeout: $suspendTimeout, offTimeout: $offTimeout)';
 }
 
 class X11DpmsSetTimeoutsRequest extends X11Request {
@@ -166,7 +166,7 @@ class X11DpmsSetTimeoutsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11DpmsSetTimeoutsRequest(standbyTimeout: ${standbyTimeout}, suspendTimeout: ${suspendTimeout}, offTimeout: ${offTimeout})';
+      'X11DpmsSetTimeoutsRequest(standbyTimeout: $standbyTimeout, suspendTimeout: $suspendTimeout, offTimeout: $offTimeout)';
 }
 
 class X11DpmsEnableRequest extends X11Request {
@@ -218,7 +218,7 @@ class X11DpmsForceLevelRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11DpmsForceLevelRequest(${powerLevel})';
+  String toString() => 'X11DpmsForceLevelRequest($powerLevel)';
 }
 
 class X11DpmsInfoRequest extends X11Request {
@@ -261,5 +261,5 @@ class X11DpmsInfoReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11DpmsInfoReply(powerLevel: ${powerLevel}, state: ${state})';
+      'X11DpmsInfoReply(powerLevel: $powerLevel, state: $state)';
 }

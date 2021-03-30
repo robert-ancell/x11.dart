@@ -50,7 +50,7 @@ class X11XFixesQueryVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesQueryVersionRequest(${clientVersion})';
+  String toString() => 'X11XFixesQueryVersionRequest($clientVersion)';
 }
 
 class X11XFixesQueryVersionReply extends X11Reply {
@@ -75,7 +75,7 @@ class X11XFixesQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XFixesQueryVersionReply(${version})';
+  String toString() => 'X11XFixesQueryVersionReply($version)';
 }
 
 class X11XFixesChangeSaveSetRequest extends X11Request {
@@ -110,7 +110,7 @@ class X11XFixesChangeSaveSetRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesChangeSaveSetRequest(${window}, ${mode}, target: ${target}, map: ${map})';
+      'X11XFixesChangeSaveSetRequest($window, $mode, target: $target, map: $map)';
 }
 
 class X11XFixesSelectSelectionInputRequest extends X11Request {
@@ -139,7 +139,7 @@ class X11XFixesSelectSelectionInputRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesSelectSelectionInputRequest(${window}, ${selection}, ${events})';
+      'X11XFixesSelectSelectionInputRequest($window, $selection, $events)';
 }
 
 class X11XFixesSelectCursorInputRequest extends X11Request {
@@ -162,8 +162,7 @@ class X11XFixesSelectCursorInputRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11XFixesSelectCursorInputRequest(${window}, ${events})';
+  String toString() => 'X11XFixesSelectCursorInputRequest($window, $events)';
 }
 
 class X11XFixesGetCursorImageRequest extends X11Request {
@@ -230,7 +229,7 @@ class X11XFixesGetCursorImageReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XFixesGetCursorImageReply(${size}, location: ${location}, hotspot: ${hotspot}, cursorSerial: ${cursorSerial})';
+      'X11XFixesGetCursorImageReply($size, location: $location, hotspot: $hotspot, cursorSerial: $cursorSerial)';
 }
 
 class X11XFixesCreateRegionRequest extends X11Request {
@@ -265,7 +264,7 @@ class X11XFixesCreateRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesCreateRegionRequest(${id}, ${rectangles})';
+  String toString() => 'X11XFixesCreateRegionRequest($id, $rectangles)';
 }
 
 class X11XFixesCreateRegionFromBitmapRequest extends X11Request {
@@ -289,8 +288,7 @@ class X11XFixesCreateRegionFromBitmapRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11XFixesCreateRegionFromBitmapRequest(${id}, ${bitmap})';
+  String toString() => 'X11XFixesCreateRegionFromBitmapRequest($id, $bitmap)';
 }
 
 class X11XFixesCreateRegionFromWindowRequest extends X11Request {
@@ -320,7 +318,7 @@ class X11XFixesCreateRegionFromWindowRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesCreateRegionFromWindowRequest(${id}, ${window}, kind: ${kind})';
+      'X11XFixesCreateRegionFromWindowRequest($id, $window, kind: $kind)';
 }
 
 class X11XFixesCreateRegionFromGCRequest extends X11Request {
@@ -343,7 +341,7 @@ class X11XFixesCreateRegionFromGCRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesCreateRegionFromGCRequest(${id}, ${gc})';
+  String toString() => 'X11XFixesCreateRegionFromGCRequest($id, $gc)';
 }
 
 class X11XFixesCreateRegionFromPictureRequest extends X11Request {
@@ -367,8 +365,7 @@ class X11XFixesCreateRegionFromPictureRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11XFixesCreateRegionFromPictureRequest(${id}, ${picture})';
+  String toString() => 'X11XFixesCreateRegionFromPictureRequest($id, $picture)';
 }
 
 class X11XFixesDestroyRegionRequest extends X11Request {
@@ -388,7 +385,7 @@ class X11XFixesDestroyRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesDestroyRegionRequest(${region})';
+  String toString() => 'X11XFixesDestroyRegionRequest($region)';
 }
 
 class X11XFixesSetRegionRequest extends X11Request {
@@ -423,7 +420,7 @@ class X11XFixesSetRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesSetRegionRequest(${region}, ${rectangles})';
+  String toString() => 'X11XFixesSetRegionRequest($region, $rectangles)';
 }
 
 class X11XFixesCopyRegionRequest extends X11Request {
@@ -446,7 +443,7 @@ class X11XFixesCopyRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesCopyRegionRequest(${region}, ${sourceRegion})';
+  String toString() => 'X11XFixesCopyRegionRequest($region, $sourceRegion)';
 }
 
 class X11XFixesUnionRegionRequest extends X11Request {
@@ -474,7 +471,7 @@ class X11XFixesUnionRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesUnionRegionRequest(${region}, ${sourceRegion1}, ${sourceRegion2})';
+      'X11XFixesUnionRegionRequest($region, $sourceRegion1, $sourceRegion2)';
 }
 
 class X11XFixesIntersectRegionRequest extends X11Request {
@@ -503,7 +500,7 @@ class X11XFixesIntersectRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesIntersectRegionRequest(${region}, ${sourceRegion1}, ${sourceRegion2})';
+      'X11XFixesIntersectRegionRequest($region, $sourceRegion1, $sourceRegion2)';
 }
 
 class X11XFixesSubtractRegionRequest extends X11Request {
@@ -531,7 +528,7 @@ class X11XFixesSubtractRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesSubtractRegionRequest(${region}, ${sourceRegion1}, ${sourceRegion2})';
+      'X11XFixesSubtractRegionRequest($region, $sourceRegion1, $sourceRegion2)';
 }
 
 class X11XFixesInvertRegionRequest extends X11Request {
@@ -565,7 +562,7 @@ class X11XFixesInvertRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesInvertRegionRequest(${region}, ${bounds}, ${sourceRegion})';
+      'X11XFixesInvertRegionRequest($region, $bounds, $sourceRegion)';
 }
 
 class X11XFixesTranslateRegionRequest extends X11Request {
@@ -590,7 +587,7 @@ class X11XFixesTranslateRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesTranslateRegionRequest(${region}, ${offset})';
+  String toString() => 'X11XFixesTranslateRegionRequest($region, $offset)';
 }
 
 class X11XFixesRegionExtentsRequest extends X11Request {
@@ -613,8 +610,7 @@ class X11XFixesRegionExtentsRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11XFixesRegionExtentsRequest(${region}, ${sourceRegion})';
+  String toString() => 'X11XFixesRegionExtentsRequest($region, $sourceRegion)';
 }
 
 class X11XFixesFetchRegionRequest extends X11Request {
@@ -634,7 +630,7 @@ class X11XFixesFetchRegionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesFetchRegionRequest(region: ${region})';
+  String toString() => 'X11XFixesFetchRegionRequest(region: $region)';
 }
 
 class X11XFixesFetchRegionReply extends X11Reply {
@@ -680,7 +676,7 @@ class X11XFixesFetchRegionReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XFixesFetchRegionReply(extents: ${extents}, rectangles: ${rectangles})';
+      'X11XFixesFetchRegionReply(extents: $extents, rectangles: $rectangles)';
 }
 
 class X11XFixesSetGCClipRegionRequest extends X11Request {
@@ -710,8 +706,7 @@ class X11XFixesSetGCClipRegionRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11XFixesSetGCClipRegionRequest(${gc}, ${region}, ${origin})';
+  String toString() => 'X11XFixesSetGCClipRegionRequest($gc, $region, $origin)';
 }
 
 class X11XFixesSetWindowShapeRegionRequest extends X11Request {
@@ -748,7 +743,7 @@ class X11XFixesSetWindowShapeRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesSetWindowShapeRegionRequest(${window}, ${region}, kind: ${kind}, offset: ${offset})';
+      'X11XFixesSetWindowShapeRegionRequest($window, $region, kind: $kind, offset: $offset)';
 }
 
 class X11XFixesSetPictureClipRegionRequest extends X11Request {
@@ -780,7 +775,7 @@ class X11XFixesSetPictureClipRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesSetPictureClipRegionRequest(${picture}, ${region}, origin: ${origin})';
+      'X11XFixesSetPictureClipRegionRequest($picture, $region, origin: $origin)';
 }
 
 class X11XFixesSetCursorNameRequest extends X11Request {
@@ -810,7 +805,7 @@ class X11XFixesSetCursorNameRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesSetCursorNameRequest(${cursor}, ${name})';
+  String toString() => 'X11XFixesSetCursorNameRequest($cursor, $name)';
 }
 
 class X11XFixesGetCursorNameRequest extends X11Request {
@@ -830,7 +825,7 @@ class X11XFixesGetCursorNameRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesGetCursorNameRequest(${cursor})';
+  String toString() => 'X11XFixesGetCursorNameRequest($cursor)';
 }
 
 class X11XFixesGetCursorNameReply extends X11Reply {
@@ -861,7 +856,7 @@ class X11XFixesGetCursorNameReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XFixesGetCursorNameReply(${atom}, ${name})';
+  String toString() => 'X11XFixesGetCursorNameReply($atom, $name)';
 }
 
 class X11XFixesGetCursorImageAndNameRequest extends X11Request {
@@ -941,7 +936,7 @@ class X11XFixesGetCursorImageAndNameReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XFixesGetCursorImageAndNameReply(${size}, location: ${location}, hotspot: ${hotspot}, cursorSerial: ${cursorSerial}, cursorAtom: ${cursorAtom}, name: ${name})';
+      'X11XFixesGetCursorImageAndNameReply($size, location: $location, hotspot: $hotspot, cursorSerial: $cursorSerial, cursorAtom: $cursorAtom, name: $name)';
 }
 
 class X11XFixesChangeCursorRequest extends X11Request {
@@ -964,7 +959,7 @@ class X11XFixesChangeCursorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesChangeCursorRequest(${cursor}, ${newCursor})';
+  String toString() => 'X11XFixesChangeCursorRequest($cursor, $newCursor)';
 }
 
 class X11XFixesChangeCursorByNameRequest extends X11Request {
@@ -994,7 +989,7 @@ class X11XFixesChangeCursorByNameRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesChangeCursorByNameRequest(${name}, ${cursor})';
+  String toString() => 'X11XFixesChangeCursorByNameRequest($name, $cursor)';
 }
 
 class X11XFixesExpandRegionRequest extends X11Request {
@@ -1032,7 +1027,7 @@ class X11XFixesExpandRegionRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesExpandRegionRequest(${region}, ${sourceRegion}, left: ${left}, right: ${right}, top: ${top}, bottom: ${bottom})';
+      'X11XFixesExpandRegionRequest($region, $sourceRegion, left: $left, right: $right, top: $top, bottom: $bottom)';
 }
 
 class X11XFixesHideCursorRequest extends X11Request {
@@ -1052,7 +1047,7 @@ class X11XFixesHideCursorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesHideCursorRequest(${window})';
+  String toString() => 'X11XFixesHideCursorRequest($window)';
 }
 
 class X11XFixesShowCursorRequest extends X11Request {
@@ -1072,7 +1067,7 @@ class X11XFixesShowCursorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesShowCursorRequest(${window})';
+  String toString() => 'X11XFixesShowCursorRequest($window)';
 }
 
 class X11XFixesCreatePointerBarrierRequest extends X11Request {
@@ -1129,7 +1124,7 @@ class X11XFixesCreatePointerBarrierRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XFixesCreatePointerBarrierRequest(${id}, ${drawable}, ${line}, directions: ${directions}, devices: ${devices})';
+      'X11XFixesCreatePointerBarrierRequest($id, $drawable, $line, directions: $directions, devices: $devices)';
 }
 
 class X11XFixesDeletePointerBarrierRequest extends X11Request {
@@ -1150,5 +1145,5 @@ class X11XFixesDeletePointerBarrierRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XFixesDeletePointerBarrierRequest(${barrier})';
+  String toString() => 'X11XFixesDeletePointerBarrierRequest($barrier)';
 }

@@ -52,5 +52,5 @@ class X11ScreensaverNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11ScreensaverNotifyEvent(state: ${state}, time: ${time}, root: ${root}, window: ${window}, kind: ${kind}, forced: ${forced})';
+      'X11ScreensaverNotifyEvent(state: $state, time: $time, root: $root, window: $window, kind: $kind, forced: $forced)';
 }

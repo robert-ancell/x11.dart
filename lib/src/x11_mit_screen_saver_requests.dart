@@ -71,7 +71,7 @@ class X11ScreensaverQueryVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ScreensaverQueryVersionRequest(${clientVersion})';
+  String toString() => 'X11ScreensaverQueryVersionRequest($clientVersion)';
 }
 
 class X11ScreensaverQueryVersionReply extends X11Reply {
@@ -97,7 +97,7 @@ class X11ScreensaverQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ScreensaverQueryVersionReply(${version})';
+  String toString() => 'X11ScreensaverQueryVersionReply($version)';
 }
 
 class X11ScreensaverQueryInfoRequest extends X11Request {
@@ -117,7 +117,7 @@ class X11ScreensaverQueryInfoRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ScreensaverQueryInfoRequest(${drawable})';
+  String toString() => 'X11ScreensaverQueryInfoRequest($drawable)';
 }
 
 class X11ScreensaverQueryInfoReply extends X11Reply {
@@ -166,7 +166,7 @@ class X11ScreensaverQueryInfoReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11ScreensaverQueryInfoReply(state: ${state}, saverWindow: ${saverWindow}, tilOrSince: ${tilOrSince}, idle: ${idle}, events: ${events}, kind: ${kind})';
+      'X11ScreensaverQueryInfoReply(state: $state, saverWindow: $saverWindow, tilOrSince: $tilOrSince, idle: $idle, events: $events, kind: $kind)';
 }
 
 class X11ScreensaverSelectInputRequest extends X11Request {
@@ -189,8 +189,7 @@ class X11ScreensaverSelectInputRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11ScreensaverSelectInputRequest(${drawable}, ${events})';
+  String toString() => 'X11ScreensaverSelectInputRequest($drawable, $events)';
 }
 
 class X11ScreensaverSetAttributesRequest extends X11Request {
@@ -440,51 +439,51 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
   @override
   String toString() {
     var string =
-        'X11ScreensaverSetAttributesRequest(${drawable}, geometry: ${geometry}, depth: ${depth}, borderWidth: ${borderWidth}, windowClass: ${windowClass}, visual: ${visual}';
+        'X11ScreensaverSetAttributesRequest($drawable, geometry: $geometry, depth: $depth, borderWidth: $borderWidth, windowClass: $windowClass, visual: $visual';
     if (backgroundPixmap != null) {
-      string += ', backgroundPixmap: ${backgroundPixmap}';
+      string += ', backgroundPixmap: $backgroundPixmap';
     }
     if (backgroundPixel != null) {
-      string += ', backgroundPixel: ${backgroundPixel}';
+      string += ', backgroundPixel: $backgroundPixel';
     }
     if (borderPixmap != null) {
-      string += ', borderPixmap: ${borderPixmap}';
+      string += ', borderPixmap: $borderPixmap';
     }
     if (borderPixel != null) {
-      string += ', borderPixel: ${borderPixel}';
+      string += ', borderPixel: $borderPixel';
     }
     if (bitGravity != null) {
-      string += ', bitGravity: ${bitGravity}';
+      string += ', bitGravity: $bitGravity';
     }
     if (winGravity != null) {
-      string += ', winGravity: ${winGravity}';
+      string += ', winGravity: $winGravity';
     }
     if (backingStore != null) {
-      string += ', backingStore: ${backingStore}';
+      string += ', backingStore: $backingStore';
     }
     if (backingPlanes != null) {
-      string += ', backingPlanes: ${backingPlanes}';
+      string += ', backingPlanes: $backingPlanes';
     }
     if (backingPixel != null) {
-      string += ', backingPixel: ${backingPixel}';
+      string += ', backingPixel: $backingPixel';
     }
     if (overrideRedirect != null) {
-      string += ', overrideRedirect: ${overrideRedirect}';
+      string += ', overrideRedirect: $overrideRedirect';
     }
     if (saveUnder != null) {
-      string += ', saveUnder: ${saveUnder}';
+      string += ', saveUnder: $saveUnder';
     }
     if (events != null) {
-      string += ', events: ${events}';
+      string += ', events: $events';
     }
     if (doNotPropagate != null) {
-      string += ', doNotPropagate: ${doNotPropagate}';
+      string += ', doNotPropagate: $doNotPropagate';
     }
     if (colormap != null) {
-      string += ', colormap: ${colormap}';
+      string += ', colormap: $colormap';
     }
     if (cursor != null) {
-      string += ', cursor: ${cursor}';
+      string += ', cursor: $cursor';
     }
     string += ')';
     return string;
@@ -509,7 +508,7 @@ class X11ScreensaverUnsetAttributesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ScreensaverUnsetAttributesRequest(${drawable})';
+  String toString() => 'X11ScreensaverUnsetAttributesRequest($drawable)';
 }
 
 class X11ScreensaverSuspendRequest extends X11Request {
@@ -529,5 +528,5 @@ class X11ScreensaverSuspendRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ScreensaverSuspendRequest(suspend: ${suspend})';
+  String toString() => 'X11ScreensaverSuspendRequest(suspend: $suspend)';
 }

@@ -41,5 +41,5 @@ class X11MitShmCompletionEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11MitShmCompletionEvent(${drawable}, ${shmseg}, minorEvent: ${minorEvent}, majorEvent: ${majorEvent}, offset: ${offset})';
+      'X11MitShmCompletionEvent($drawable, $shmseg, minorEvent: $minorEvent, majorEvent: $majorEvent, offset: $offset)';
 }

@@ -59,7 +59,7 @@ class X11RandrQueryVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrQueryVersionRequest(${clientVersion})';
+  String toString() => 'X11RandrQueryVersionRequest($clientVersion)';
 }
 
 class X11RandrQueryVersionReply extends X11Reply {
@@ -84,7 +84,7 @@ class X11RandrQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RandrQueryVersionReply(${version})';
+  String toString() => 'X11RandrQueryVersionReply($version)';
 }
 
 Set<X11RandrRotation> _decodeX11RandrRotation(int flags) {
@@ -150,7 +150,7 @@ class X11RandrSetScreenConfigRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetScreenConfigRequest(${window}, sizeId: ${sizeId}, rotation: ${rotation}, rate: ${rate}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
+      'X11RandrSetScreenConfigRequest($window, sizeId: $sizeId, rotation: $rotation, rate: $rate, timestamp: $timestamp, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrSetScreenConfigReply extends X11Reply {
@@ -194,7 +194,7 @@ class X11RandrSetScreenConfigReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrSetScreenConfigReply(status: ${status}, root: ${root}, subPixelOrder: ${subPixelOrder}, newTimestamp: ${newTimestamp}, configTimestamp: ${configTimestamp})';
+      'X11RandrSetScreenConfigReply(status: $status, root: $root, subPixelOrder: $subPixelOrder, newTimestamp: $newTimestamp, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrSelectInputRequest extends X11Request {
@@ -229,7 +229,7 @@ class X11RandrSelectInputRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrSelectInputRequest(${window}, ${enable})';
+  String toString() => 'X11RandrSelectInputRequest($window, $enable)';
 }
 
 class X11RandrGetScreenInfoRequest extends X11Request {
@@ -249,7 +249,7 @@ class X11RandrGetScreenInfoRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetScreenInfoRequest(window: ${window})';
+  String toString() => 'X11RandrGetScreenInfoRequest(window: $window)';
 }
 
 class X11RandrGetScreenInfoReply extends X11Reply {
@@ -342,7 +342,7 @@ class X11RandrGetScreenInfoReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetScreenInfoReply(rotations: ${rotations}, root: ${root}, sizeId: ${sizeId}, rotation: ${rotation}, rate: ${rate}, sizes: ${sizes}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
+      'X11RandrGetScreenInfoReply(rotations: $rotations, root: $root, sizeId: $sizeId, rotation: $rotation, rate: $rate, sizes: $sizes, timestamp: $timestamp, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrGetScreenSizeRangeRequest extends X11Request {
@@ -362,7 +362,7 @@ class X11RandrGetScreenSizeRangeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetScreenSizeRangeRequest(window: ${window})';
+  String toString() => 'X11RandrGetScreenSizeRangeRequest(window: $window)';
 }
 
 class X11RandrGetScreenSizeRangeReply extends X11Reply {
@@ -394,7 +394,7 @@ class X11RandrGetScreenSizeRangeReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetScreenSizeRangeReply(minSize: ${minSize}, maxSize: ${maxSize})';
+      'X11RandrGetScreenSizeRangeReply(minSize: $minSize, maxSize: $maxSize)';
 }
 
 class X11RandrSetScreenSizeRequest extends X11Request {
@@ -429,7 +429,7 @@ class X11RandrSetScreenSizeRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetScreenSizeRequest(${window}, ${sizeInPixels}, ${sizeInMillimeters})';
+      'X11RandrSetScreenSizeRequest($window, $sizeInPixels, $sizeInMillimeters)';
 }
 
 class X11RandrGetScreenResourcesRequest extends X11Request {
@@ -449,7 +449,7 @@ class X11RandrGetScreenResourcesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetScreenResourcesRequest(window: ${window})';
+  String toString() => 'X11RandrGetScreenResourcesRequest(window: $window)';
 }
 
 Set<X11RandrModeFlag> _decodeX11RandrModeFlags(int flags) {
@@ -593,7 +593,7 @@ class X11RandrGetScreenResourcesReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetScreenResourcesReply(crtcs: ${crtcs}, outputs: ${outputs}, modes: ${modes}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
+      'X11RandrGetScreenResourcesReply(crtcs: $crtcs, outputs: $outputs, modes: $modes, timestamp: $timestamp, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrGetOutputInfoRequest extends X11Request {
@@ -618,7 +618,7 @@ class X11RandrGetOutputInfoRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrGetOutputInfoRequest(${output}, configTimestamp: ${configTimestamp})';
+      'X11RandrGetOutputInfoRequest($output, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrGetOutputInfoReply extends X11Reply {
@@ -698,7 +698,7 @@ class X11RandrGetOutputInfoReply extends X11Reply {
 
   @override
   String toString() =>
-      "X11RandrGetOutputInfoReply('${name}', status: ${status}, crtc: ${crtc}, sizeInMillimeters: ${sizeInMillimeters}, connection: ${connection}, subPixelOrder: ${subPixelOrder}, crtcs: ${crtcs}, modes: ${modes}, clones: ${clones}, timestamp: ${timestamp})";
+      "X11RandrGetOutputInfoReply('$name', status: $status, crtc: $crtc, sizeInMillimeters: $sizeInMillimeters, connection: $connection, subPixelOrder: $subPixelOrder, crtcs: $crtcs, modes: $modes, clones: $clones, timestamp: $timestamp)";
 }
 
 class X11RandrListOutputPropertiesRequest extends X11Request {
@@ -718,7 +718,7 @@ class X11RandrListOutputPropertiesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrListOutputPropertiesRequest(${output})';
+  String toString() => 'X11RandrListOutputPropertiesRequest($output)';
 }
 
 class X11RandrListOutputPropertiesReply extends X11Reply {
@@ -748,7 +748,7 @@ class X11RandrListOutputPropertiesReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RandrListOutputPropertiesReply(atoms: ${atoms})';
+  String toString() => 'X11RandrListOutputPropertiesReply(atoms: $atoms)';
 }
 
 class X11RandrQueryOutputPropertyRequest extends X11Request {
@@ -771,8 +771,7 @@ class X11RandrQueryOutputPropertyRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11RandrQueryOutputPropertyRequest(${output}, ${property})';
+  String toString() => 'X11RandrQueryOutputPropertyRequest($output, $property)';
 }
 
 class X11RandrQueryOutputPropertyReply extends X11Reply {
@@ -817,7 +816,7 @@ class X11RandrQueryOutputPropertyReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrQueryOutputPropertyReply(${validValues}, range: ${range}, pending: ${pending}, immutable: ${immutable})';
+      'X11RandrQueryOutputPropertyReply($validValues, range: $range, pending: $pending, immutable: $immutable)';
 }
 
 class X11RandrConfigureOutputPropertyRequest extends X11Request {
@@ -861,7 +860,7 @@ class X11RandrConfigureOutputPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrConfigureOutputPropertyRequest(${validValues}, range: ${range}, output: ${output}, property: ${property}, pending: ${pending})';
+      'X11RandrConfigureOutputPropertyRequest($validValues, range: $range, output: $output, property: $property, pending: $pending)';
 }
 
 class X11RandrChangeOutputPropertyRequest extends X11Request {
@@ -934,7 +933,7 @@ class X11RandrChangeOutputPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrChangeOutputPropertyRequest(${output}, ${property}, ${data}, type: ${type}, format: ${format}, mode: ${mode})';
+      'X11RandrChangeOutputPropertyRequest($output, $property, $data, type: $type, format: $format, mode: $mode)';
 }
 
 class X11RandrDeleteOutputPropertyRequest extends X11Request {
@@ -958,7 +957,7 @@ class X11RandrDeleteOutputPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrDeleteOutputPropertyRequest(${output}, ${property})';
+      'X11RandrDeleteOutputPropertyRequest($output, $property)';
 }
 
 class X11RandrGetOutputPropertyRequest extends X11Request {
@@ -1005,7 +1004,7 @@ class X11RandrGetOutputPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrGetOutputPropertyRequest(${output}, property: ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}, pending: ${pending})';
+      'X11RandrGetOutputPropertyRequest($output, property: $property, type: $type, longOffset: $longOffset, longLength: $longLength, delete: $delete, pending: $pending)';
 }
 
 class X11RandrGetOutputPropertyReply extends X11Reply {
@@ -1072,7 +1071,7 @@ class X11RandrGetOutputPropertyReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetOutputPropertyReply(format: ${format}, type: ${type}, bytesAfter: ${bytesAfter}, data: ${data})';
+      'X11RandrGetOutputPropertyReply(format: $format, type: $type, bytesAfter: $bytesAfter, data: $data)';
 }
 
 class X11RandrCreateModeRequest extends X11Request {
@@ -1137,7 +1136,7 @@ class X11RandrCreateModeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrCreateModeRequest(${window}, ${modeInfo})';
+  String toString() => 'X11RandrCreateModeRequest($window, $modeInfo)';
 }
 
 class X11RandrCreateModeReply extends X11Reply {
@@ -1160,7 +1159,7 @@ class X11RandrCreateModeReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RandrCreateModeReply(${mode})';
+  String toString() => 'X11RandrCreateModeReply($mode)';
 }
 
 class X11RandrDestroyModeRequest extends X11Request {
@@ -1180,7 +1179,7 @@ class X11RandrDestroyModeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrDestroyModeRequest(${mode})';
+  String toString() => 'X11RandrDestroyModeRequest($mode)';
 }
 
 class X11RandrAddOutputModeRequest extends X11Request {
@@ -1203,7 +1202,7 @@ class X11RandrAddOutputModeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrAddOutputModeRequest(${output}, ${mode})';
+  String toString() => 'X11RandrAddOutputModeRequest($output, $mode)';
 }
 
 class X11RandrDeleteOutputModeRequest extends X11Request {
@@ -1226,7 +1225,7 @@ class X11RandrDeleteOutputModeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrDeleteOutputModeRequest(${output}, ${mode})';
+  String toString() => 'X11RandrDeleteOutputModeRequest($output, $mode)';
 }
 
 class X11RandrGetCrtcInfoRequest extends X11Request {
@@ -1250,7 +1249,7 @@ class X11RandrGetCrtcInfoRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrGetCrtcInfoRequest(${crtc}, configTimestamp: ${configTimestamp})';
+      'X11RandrGetCrtcInfoRequest($crtc, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrGetCrtcInfoReply extends X11Reply {
@@ -1317,7 +1316,7 @@ class X11RandrGetCrtcInfoReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetCrtcInfoReply(status: ${status}, area: ${area}, mode: ${mode}, rotation: ${rotation}, rotations: ${rotations}, outputs: ${outputs}, possibleOutputs: ${possibleOutputs}, timestamp: ${timestamp})';
+      'X11RandrGetCrtcInfoReply(status: $status, area: $area, mode: $mode, rotation: $rotation, rotations: $rotations, outputs: $outputs, possibleOutputs: $possibleOutputs, timestamp: $timestamp)';
 }
 
 class X11RandrSetCrtcConfigRequest extends X11Request {
@@ -1375,7 +1374,7 @@ class X11RandrSetCrtcConfigRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetCrtcConfigRequest(crtc: ${crtc}, mode: ${mode}, position: ${position}, rotation: ${rotation}, outputs: ${outputs}, timestamp: ${timestamp}, configTimestamp: ${configTimestamp})';
+      'X11RandrSetCrtcConfigRequest(crtc: $crtc, mode: $mode, position: $position, rotation: $rotation, outputs: $outputs, timestamp: $timestamp, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrSetCrtcConfigReply extends X11Reply {
@@ -1400,7 +1399,7 @@ class X11RandrSetCrtcConfigReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrSetCrtcConfigReply(${status}, timestamp: ${timestamp})';
+      'X11RandrSetCrtcConfigReply($status, timestamp: $timestamp)';
 }
 
 class X11RandrGetCrtcGammaSizeRequest extends X11Request {
@@ -1420,7 +1419,7 @@ class X11RandrGetCrtcGammaSizeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetCrtcGammaSizeRequest(crtc: ${crtc})';
+  String toString() => 'X11RandrGetCrtcGammaSizeRequest(crtc: $crtc)';
 }
 
 class X11RandrGetCrtcGammaSizeReply extends X11Reply {
@@ -1443,7 +1442,7 @@ class X11RandrGetCrtcGammaSizeReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RandrGetCrtcGammaSizeReply(${size})';
+  String toString() => 'X11RandrGetCrtcGammaSizeReply($size)';
 }
 
 class X11RandrGetCrtcGammaRequest extends X11Request {
@@ -1463,7 +1462,7 @@ class X11RandrGetCrtcGammaRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetCrtcGammaRequest(crtc: ${crtc})';
+  String toString() => 'X11RandrGetCrtcGammaRequest(crtc: $crtc)';
 }
 
 class X11RandrGetCrtcGammaReply extends X11Reply {
@@ -1511,7 +1510,7 @@ class X11RandrGetCrtcGammaReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetCrtcGammaReply(red: ${red}, green: ${green}, blue: ${blue})';
+      'X11RandrGetCrtcGammaReply(red: $red, green: $green, blue: $blue)';
 }
 
 class X11RandrSetCrtcGammaRequest extends X11Request {
@@ -1561,7 +1560,7 @@ class X11RandrSetCrtcGammaRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetCrtcGammaRequest(${crtc}, red: ${red}, green: ${green}, blue: ${blue})';
+      'X11RandrSetCrtcGammaRequest($crtc, red: $red, green: $green, blue: $blue)';
 }
 
 class X11RandrGetScreenResourcesCurrentRequest extends X11Request {
@@ -1582,7 +1581,7 @@ class X11RandrGetScreenResourcesCurrentRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetScreenResourcesCurrentRequest(${window})';
+  String toString() => 'X11RandrGetScreenResourcesCurrentRequest($window)';
 }
 
 class X11RandrGetScreenResourcesCurrentReply extends X11Reply {
@@ -1707,7 +1706,7 @@ class X11RandrGetScreenResourcesCurrentReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetScreenResourcesCurrentReply(timestamp: ${timestamp}, configTimestamp: ${configTimestamp}, crtcs: ${crtcs}, outputs: ${outputs}, modes: ${modes})';
+      'X11RandrGetScreenResourcesCurrentReply(timestamp: $timestamp, configTimestamp: $configTimestamp, crtcs: $crtcs, outputs: $outputs, modes: $modes)';
 }
 
 class X11RandrSetCrtcTransformRequest extends X11Request {
@@ -1749,7 +1748,7 @@ class X11RandrSetCrtcTransformRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetCrtcTransformRequest(${crtc}, ${transform}, filterName: ${filterName}, filterParams: ${filterParams})';
+      'X11RandrSetCrtcTransformRequest($crtc, $transform, filterName: $filterName, filterParams: $filterParams)';
 }
 
 class X11RandrGetCrtcTransformRequest extends X11Request {
@@ -1769,7 +1768,7 @@ class X11RandrGetCrtcTransformRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetCrtcTransformRequest(${crtc})';
+  String toString() => 'X11RandrGetCrtcTransformRequest($crtc)';
 }
 
 class X11RandrGetCrtcTransformReply extends X11Reply {
@@ -1841,7 +1840,7 @@ class X11RandrGetCrtcTransformReply extends X11Reply {
 
   @override
   String toString() =>
-      "X11RandrGetCrtcTransformReply(hasTransforms: ${hasTransforms}, currentTransform: ${currentTransform}, currentFilterName: '${currentFilterName}', currentFilterParams: ${currentFilterParams}, pendingTransform: ${pendingTransform}, pendingFilterName: '${pendingFilterName}', pendingFilterParams: ${pendingFilterParams})";
+      "X11RandrGetCrtcTransformReply(hasTransforms: $hasTransforms, currentTransform: $currentTransform, currentFilterName: '$currentFilterName', currentFilterParams: $currentFilterParams, pendingTransform: $pendingTransform, pendingFilterName: '$pendingFilterName', pendingFilterParams: $pendingFilterParams)";
 }
 
 class X11RandrGetPanningRequest extends X11Request {
@@ -1861,7 +1860,7 @@ class X11RandrGetPanningRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetPanningRequest(c${crtc})';
+  String toString() => 'X11RandrGetPanningRequest(c$crtc)';
 }
 
 class X11RandrGetPanningReply extends X11Reply {
@@ -1930,7 +1929,7 @@ class X11RandrGetPanningReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetPanningReply(status: ${status}, area: ${area}, trackArea: ${trackArea}, borderLeft: ${borderLeft}, borderTop: ${borderTop}, borderRight: ${borderRight}, borderBottom: ${borderBottom}, timestamp: ${timestamp})';
+      'X11RandrGetPanningReply(status: $status, area: $area, trackArea: $trackArea, borderLeft: $borderLeft, borderTop: $borderTop, borderRight: $borderRight, borderBottom: $borderBottom, timestamp: $timestamp)';
 }
 
 class X11RandrSetPanningRequest extends X11Request {
@@ -1998,7 +1997,7 @@ class X11RandrSetPanningRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetPanningRequest(${crtc}, area: ${area}, trackArea: ${trackArea}, borderLeft: ${borderLeft}, borderTop: ${borderTop}, borderRight: ${borderRight}, borderBottom: ${borderBottom}, timestamp: ${timestamp})';
+      'X11RandrSetPanningRequest($crtc, area: $area, trackArea: $trackArea, borderLeft: $borderLeft, borderTop: $borderTop, borderRight: $borderRight, borderBottom: $borderBottom, timestamp: $timestamp)';
 }
 
 class X11RandrSetPanningReply extends X11Reply {
@@ -2021,7 +2020,7 @@ class X11RandrSetPanningReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrSetPanningReply(${status}, timestamp: ${timestamp})';
+      'X11RandrSetPanningReply($status, timestamp: $timestamp)';
 }
 
 class X11RandrSetOutputPrimaryRequest extends X11Request {
@@ -2044,7 +2043,7 @@ class X11RandrSetOutputPrimaryRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrSetOutputPrimaryRequest(${window}, ${output})';
+  String toString() => 'X11RandrSetOutputPrimaryRequest($window, $output)';
 }
 
 class X11RandrGetOutputPrimaryRequest extends X11Request {
@@ -2064,7 +2063,7 @@ class X11RandrGetOutputPrimaryRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetOutputPrimaryRequest(${window})';
+  String toString() => 'X11RandrGetOutputPrimaryRequest($window)';
 }
 
 class X11RandrGetOutputPrimaryReply extends X11Reply {
@@ -2085,7 +2084,7 @@ class X11RandrGetOutputPrimaryReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RandrGetOutputPrimaryReply(${output})';
+  String toString() => 'X11RandrGetOutputPrimaryReply($output)';
 }
 
 class X11RandrGetProvidersRequest extends X11Request {
@@ -2105,7 +2104,7 @@ class X11RandrGetProvidersRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrGetProvidersRequest(${window})';
+  String toString() => 'X11RandrGetProvidersRequest($window)';
 }
 
 class X11RandrGetProvidersReply extends X11Reply {
@@ -2134,7 +2133,7 @@ class X11RandrGetProvidersReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetProvidersReply(${providers}, timestamp: ${timestamp})';
+      'X11RandrGetProvidersReply($providers, timestamp: $timestamp)';
 }
 
 class X11RandrGetProviderInfoRequest extends X11Request {
@@ -2159,7 +2158,7 @@ class X11RandrGetProviderInfoRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrGetProviderInfoRequest(${provider}, configTimestamp: ${configTimestamp})';
+      'X11RandrGetProviderInfoRequest($provider, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrGetProviderInfoReply extends X11Reply {
@@ -2231,7 +2230,7 @@ class X11RandrGetProviderInfoReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetProviderInfoReply(name: ${name}, status: ${status}, timestamp: ${timestamp}, capabilities: ${capabilities}, crtcs: ${crtcs}, outputs: ${outputs}, associatedProviders: ${associatedProviders}, associatedProviderCapability: ${associatedProviderCapability})';
+      'X11RandrGetProviderInfoReply(name: $name, status: $status, timestamp: $timestamp, capabilities: $capabilities, crtcs: $crtcs, outputs: $outputs, associatedProviders: $associatedProviders, associatedProviderCapability: $associatedProviderCapability)';
 }
 
 class X11RandrSetProviderOffloadSinkRequest extends X11Request {
@@ -2261,7 +2260,7 @@ class X11RandrSetProviderOffloadSinkRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetProviderOffloadSinkRequest(${provider}, sinkProvider: ${sinkProvider}, configTimestamp: ${configTimestamp})';
+      'X11RandrSetProviderOffloadSinkRequest($provider, sinkProvider: $sinkProvider, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrSetProviderOutputSourceRequest extends X11Request {
@@ -2291,7 +2290,7 @@ class X11RandrSetProviderOutputSourceRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrSetProviderOutputSourceRequest(${provider}, sourceProvider: ${sourceProvider}, configTimestamp: ${configTimestamp})';
+      'X11RandrSetProviderOutputSourceRequest($provider, sourceProvider: $sourceProvider, configTimestamp: $configTimestamp)';
 }
 
 class X11RandrListProviderPropertiesRequest extends X11Request {
@@ -2312,7 +2311,7 @@ class X11RandrListProviderPropertiesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrListProviderPropertiesRequest(${provider})';
+  String toString() => 'X11RandrListProviderPropertiesRequest($provider)';
 }
 
 class X11RandrListProviderPropertiesReply extends X11Reply {
@@ -2342,7 +2341,7 @@ class X11RandrListProviderPropertiesReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RandrListProviderPropertiesReply(atoms: ${atoms})';
+  String toString() => 'X11RandrListProviderPropertiesReply(atoms: $atoms)';
 }
 
 class X11RandrQueryProviderPropertyRequest extends X11Request {
@@ -2367,7 +2366,7 @@ class X11RandrQueryProviderPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrQueryProviderPropertyRequest(${provider}, property: ${property})';
+      'X11RandrQueryProviderPropertyRequest($provider, property: $property)';
 }
 
 class X11RandrQueryProviderPropertyReply extends X11Reply {
@@ -2411,7 +2410,7 @@ class X11RandrQueryProviderPropertyReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrQueryProviderPropertyReply(pending: ${pending}, range: ${range}, immutable: ${immutable}, validValues: ${validValues})';
+      'X11RandrQueryProviderPropertyReply(pending: $pending, range: $range, immutable: $immutable, validValues: $validValues)';
 }
 
 class X11RandrConfigureProviderPropertyRequest extends X11Request {
@@ -2454,7 +2453,7 @@ class X11RandrConfigureProviderPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrConfigureProviderPropertyRequest(${provider},${property},  ${validValues}, pending: ${pending}, range: ${range})';
+      'X11RandrConfigureProviderPropertyRequest($provider,$property,  $validValues, pending: $pending, range: $range)';
 }
 
 class X11RandrChangeProviderPropertyRequest extends X11Request {
@@ -2528,7 +2527,7 @@ class X11RandrChangeProviderPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrChangeProviderPropertyRequest(${provider}, ${property}, ${data}, type: ${type}, format: ${format}, mode: ${mode})';
+      'X11RandrChangeProviderPropertyRequest($provider, $property, $data, type: $type, format: $format, mode: $mode)';
 }
 
 class X11RandrDeleteProviderPropertyRequest extends X11Request {
@@ -2553,7 +2552,7 @@ class X11RandrDeleteProviderPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrDeleteProviderPropertyRequest(${provider}, ${property})';
+      'X11RandrDeleteProviderPropertyRequest($provider, $property)';
 }
 
 class X11RandrGetProviderPropertyRequest extends X11Request {
@@ -2604,7 +2603,7 @@ class X11RandrGetProviderPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrGetProviderPropertyRequest(${provider}, ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete}, pending: ${pending})';
+      'X11RandrGetProviderPropertyRequest($provider, $property, type: $type, longOffset: $longOffset, longLength: $longLength, delete: $delete, pending: $pending)';
 }
 
 class X11RandrGetProviderPropertyReply extends X11Reply {
@@ -2671,7 +2670,7 @@ class X11RandrGetProviderPropertyReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetProviderPropertyReply(format: ${format}, type: ${type}, bytesAfter: ${bytesAfter}, data: ${data})';
+      'X11RandrGetProviderPropertyReply(format: $format, type: $type, bytesAfter: $bytesAfter, data: $data)';
 }
 
 class X11RandrGetMonitorsRequest extends X11Request {
@@ -2695,7 +2694,7 @@ class X11RandrGetMonitorsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrGetMonitorsRequest(${window}, getActive: ${getActive})';
+      'X11RandrGetMonitorsRequest($window, getActive: $getActive)';
 }
 
 class X11RandrGetMonitorsReply extends X11Reply {
@@ -2773,7 +2772,7 @@ class X11RandrGetMonitorsReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11RandrGetMonitorsReply(${monitors}, timestamp: ${timestamp})';
+      'X11RandrGetMonitorsReply($monitors, timestamp: $timestamp)';
 }
 
 class X11RandrSetMonitorRequest extends X11Request {
@@ -2824,7 +2823,7 @@ class X11RandrSetMonitorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrSetMonitorRequest(${window}, ${monitorInfo})';
+  String toString() => 'X11RandrSetMonitorRequest($window, $monitorInfo)';
 }
 
 class X11RandrDeleteMonitorRequest extends X11Request {
@@ -2847,7 +2846,7 @@ class X11RandrDeleteMonitorRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11RandrDeleteMonitorRequest(${window}, ${name})';
+  String toString() => 'X11RandrDeleteMonitorRequest($window, $name)';
 }
 
 class X11RandrCreateLeaseRequest extends X11Request {
@@ -2883,7 +2882,7 @@ class X11RandrCreateLeaseRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrCreateLeaseRequest(${window}, ${id}, crtcs: ${crtcs}, outputs: ${outputs})';
+      'X11RandrCreateLeaseRequest($window, $id, crtcs: $crtcs, outputs: $outputs)';
 }
 
 class X11RandrCreateLeaseReply extends X11Reply {
@@ -2904,7 +2903,7 @@ class X11RandrCreateLeaseReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11RandrCreateLeaseReply(${nfd})';
+  String toString() => 'X11RandrCreateLeaseReply($nfd)';
 }
 
 class X11RandrFreeLeaseRequest extends X11Request {
@@ -2928,5 +2927,5 @@ class X11RandrFreeLeaseRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11RandrFreeLeaseRequest(${lease}, terminate: ${terminate})';
+      'X11RandrFreeLeaseRequest($lease, terminate: $terminate)';
 }

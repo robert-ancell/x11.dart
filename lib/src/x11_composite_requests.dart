@@ -24,7 +24,7 @@ class X11CompositeQueryVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11CompositeQueryVersionRequest(${clientVersion})';
+  String toString() => 'X11CompositeQueryVersionRequest($clientVersion)';
 }
 
 class X11CompositeQueryVersionReply extends X11Reply {
@@ -50,7 +50,7 @@ class X11CompositeQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11CompositeQueryVersionReply(${version})';
+  String toString() => 'X11CompositeQueryVersionReply($version)';
 }
 
 class X11CompositeRedirectWindowRequest extends X11Request {
@@ -75,8 +75,7 @@ class X11CompositeRedirectWindowRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11CompositeRedirectWindowRequest(${window}, ${update})';
+  String toString() => 'X11CompositeRedirectWindowRequest($window, $update)';
 }
 
 class X11CompositeRedirectSubwindowsRequest extends X11Request {
@@ -103,7 +102,7 @@ class X11CompositeRedirectSubwindowsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CompositeRedirectSubwindowsRequest(${window}, ${update})';
+      'X11CompositeRedirectSubwindowsRequest($window, $update)';
 }
 
 class X11CompositeUnredirectWindowRequest extends X11Request {
@@ -129,7 +128,7 @@ class X11CompositeUnredirectWindowRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CompositeUnredirectWindowRequest(window: ${window}, update: ${update})';
+      'X11CompositeUnredirectWindowRequest(window: $window, update: $update)';
 }
 
 class X11CompositeUnredirectSubwindowsRequest extends X11Request {
@@ -156,7 +155,7 @@ class X11CompositeUnredirectSubwindowsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CompositeUnredirectSubwindowsRequest(${window}, ${update})';
+      'X11CompositeUnredirectSubwindowsRequest($window, $update)';
 }
 
 class X11CompositeCreateRegionFromBorderClipRequest extends X11Request {
@@ -181,7 +180,7 @@ class X11CompositeCreateRegionFromBorderClipRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11CompositeCreateRegionFromBorderClipRequest(${region}, ${window})';
+      'X11CompositeCreateRegionFromBorderClipRequest($region, $window)';
 }
 
 class X11CompositeNameWindowPixmapRequest extends X11Request {
@@ -204,8 +203,7 @@ class X11CompositeNameWindowPixmapRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11CompositeNameWindowPixmapRequest(${window}, ${pixmap})';
+  String toString() => 'X11CompositeNameWindowPixmapRequest($window, $pixmap)';
 }
 
 class X11CompositeGetOverlayWindowRequest extends X11Request {
@@ -225,7 +223,7 @@ class X11CompositeGetOverlayWindowRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11CompositeGetOverlayWindowRequest(${window})';
+  String toString() => 'X11CompositeGetOverlayWindowRequest($window)';
 }
 
 class X11CompositeGetOverlayWindowReply extends X11Reply {
@@ -248,7 +246,7 @@ class X11CompositeGetOverlayWindowReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11CompositeGetOverlayWindowReply(${window})';
+  String toString() => 'X11CompositeGetOverlayWindowReply($window)';
 }
 
 class X11CompositeReleaseOverlayWindowRequest extends X11Request {
@@ -269,5 +267,5 @@ class X11CompositeReleaseOverlayWindowRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11CompositeReleaseOverlayWindowRequest(${window})';
+  String toString() => 'X11CompositeReleaseOverlayWindowRequest($window)';
 }

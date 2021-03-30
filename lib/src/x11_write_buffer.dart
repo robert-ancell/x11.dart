@@ -168,6 +168,6 @@ class X11WriteBuffer {
         s += '\\' + d.toRadixString(8);
       }
     }
-    return "X11WriteBuffer('${s}')";
+    return "X11WriteBuffer('$s')";
   }
 }

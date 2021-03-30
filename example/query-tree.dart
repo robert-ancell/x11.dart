@@ -10,10 +10,10 @@ void main() async {
       var attributes = await client.getWindowAttributes(window);
       var properties = await client.listProperties(window);
       print(
-          '${indent}${window} ${reply.geometry.x},${reply.geometry.y} ${reply.geometry.width}x${reply.geometry.height} ${attributes.windowClass} ${properties.join(', ')}');
+          '$indent$window ${reply.geometry.x},${reply.geometry.y} ${reply.geometry.width}x${reply.geometry.height} ${attributes.windowClass} ${properties.join(', ')}');
       var wmName = await client.getPropertyString(window, 'WM_NAME');
       if (wmName != null) {
-        print('  ${indent} "${wmName}"');
+        print('  $indent "$wmName"');
       }
       var tree = await client.queryTree(window);
       await printChildren(tree.children, indent + '  ');

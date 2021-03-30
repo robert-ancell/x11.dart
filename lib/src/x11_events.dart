@@ -1235,7 +1235,7 @@ class X11UnknownEvent extends X11Event {
   }
 
   @override
-  String toString() => 'X11UnknownEvent(code: ${code})';
+  String toString() => 'X11UnknownEvent(code: $code)';
 }
 
 class X11ShapeNotifyEvent extends X11Event {
@@ -1288,5 +1288,5 @@ class X11ShapeNotifyEvent extends X11Event {
 
   @override
   String toString() =>
-      'X11NotifyEvent(shapeKind: ${shapeKind}, affectedWindow: ${affectedWindow}, extents: ${extents}, serverTime: ${serverTime}, shaped: ${shaped})';
+      'X11NotifyEvent(shapeKind: $shapeKind, affectedWindow: $affectedWindow, extents: $extents, serverTime: $serverTime, shaped: $shaped)';
 }

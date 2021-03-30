@@ -36,7 +36,7 @@ class _X11Client {
 
     var byteOrder = buffer.readUint8();
     if (!(byteOrder == 0x42 || byteOrder == 0x6c)) {
-      throw 'Unknown byte order ${byteOrder} received';
+      throw 'Unknown byte order $byteOrder received';
     }
     var request = X11SetupRequest.fromBuffer(buffer);
     buffer.flush();
@@ -464,12 +464,12 @@ class _X11Client {
       request = r;
     } else {
       // FIXME: Add UnknownRequest
-      print('Unknown opcode ${opcode}');
+      print('Unknown opcode $opcode');
     }
 
     print(request);
     if (reply != null) {
-      print('  ${reply}');
+      print('  $reply');
       var replyBuffer = X11WriteBuffer();
       reply.encode(replyBuffer);
 
@@ -567,7 +567,7 @@ class X11Server {
   X11Server(this.displayNumber);
 
   void start() async {
-    var socketAddress = InternetAddress('/tmp/.X11-unix/X${displayNumber}',
+    var socketAddress = InternetAddress('/tmp/.X11-unix/X$displayNumber',
         type: InternetAddressType.unix);
     _socket = await ServerSocket.bind(socketAddress, 0);
     _socket.listen(_onConnect);

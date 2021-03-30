@@ -42,7 +42,7 @@ class X11XInputGetExtensionVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputGetExtensionVersionRequest(${name})';
+  String toString() => 'X11XInputGetExtensionVersionRequest($name)';
 }
 
 class X11XInputGetExtensionVersionReply extends X11Reply {
@@ -73,7 +73,7 @@ class X11XInputGetExtensionVersionReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XInputGetExtensionVersionReply(version: ${version}, present: ${present})';
+      'X11XInputGetExtensionVersionReply(version: $version, present: $present)';
 }
 
 class X11XInputListInputDevicesRequest extends X11Request {
@@ -178,7 +178,7 @@ class X11XInputListInputDevicesReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputListInputDevicesReply(${devices})';
+  String toString() => 'X11XInputListInputDevicesReply($devices)';
 }
 
 class X11XInputOpenDeviceRequest extends X11Request {
@@ -200,7 +200,7 @@ class X11XInputOpenDeviceRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputOpenDeviceRequest(${deviceId})';
+  String toString() => 'X11XInputOpenDeviceRequest($deviceId)';
 }
 
 class X11XInputOpenDeviceReply extends X11Reply {
@@ -234,7 +234,7 @@ class X11XInputOpenDeviceReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputOpenDeviceReply(${classInfo})';
+  String toString() => 'X11XInputOpenDeviceReply($classInfo)';
 }
 
 class X11XInputCloseDeviceRequest extends X11Request {
@@ -256,7 +256,7 @@ class X11XInputCloseDeviceRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputCloseDeviceRequest(${deviceId})';
+  String toString() => 'X11XInputCloseDeviceRequest($deviceId)';
 }
 
 class X11XInputSetDeviceModeRequest extends X11Request {
@@ -281,7 +281,7 @@ class X11XInputSetDeviceModeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputSetDeviceModeRequest(${deviceId}, ${mode})';
+  String toString() => 'X11XInputSetDeviceModeRequest($deviceId, $mode)';
 }
 
 class X11XInputSetDeviceModeReply extends X11Reply {
@@ -304,7 +304,7 @@ class X11XInputSetDeviceModeReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputSetDeviceModeReply(${status})';
+  String toString() => 'X11XInputSetDeviceModeReply($status)';
 }
 
 class X11XInputSelectExtensionEventRequest extends X11Request {
@@ -333,7 +333,7 @@ class X11XInputSelectExtensionEventRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputSelectExtensionEventRequest(window: ${window}, classes: ${classes})';
+      'X11XInputSelectExtensionEventRequest(window: $window, classes: $classes)';
 }
 
 class X11XInputGetSelectedExtensionEventsRequest extends X11Request {
@@ -355,7 +355,7 @@ class X11XInputGetSelectedExtensionEventsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputGetSelectedExtensionEventsRequest(window: ${window})';
+      'X11XInputGetSelectedExtensionEventsRequest(window: $window)';
 }
 
 class X11XInputGetSelectedExtensionEventsReply extends X11Reply {
@@ -387,7 +387,7 @@ class X11XInputGetSelectedExtensionEventsReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XInputGetSelectedExtensionEventsReply(thisClasses: ${thisClasses}, allClasses: ${allClasses})';
+      'X11XInputGetSelectedExtensionEventsReply(thisClasses: $thisClasses, allClasses: $allClasses)';
 }
 
 class X11XInputChangeDeviceDontPropagateListRequest extends X11Request {
@@ -420,7 +420,7 @@ class X11XInputChangeDeviceDontPropagateListRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputChangeDeviceDontPropagateListRequest(${window}, mode: ${mode}, classes: ${classes})';
+      'X11XInputChangeDeviceDontPropagateListRequest($window, mode: $mode, classes: $classes)';
 }
 
 class X11XInputGetDeviceDontPropagateListRequest extends X11Request {
@@ -441,8 +441,7 @@ class X11XInputGetDeviceDontPropagateListRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11GetDeviceDontPropagateListRequest(window: ${window})';
+  String toString() => 'X11GetDeviceDontPropagateListRequest(window: $window)';
 }
 
 class X11XInputGetDeviceDontPropagateListReply extends X11Reply {
@@ -468,7 +467,7 @@ class X11XInputGetDeviceDontPropagateListReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11GetDeviceDontPropagateListReply(${classes})';
+  String toString() => 'X11GetDeviceDontPropagateListReply($classes)';
 }
 
 class X11XInputGetDeviceMotionEventsRequest extends X11Request {
@@ -498,7 +497,7 @@ class X11XInputGetDeviceMotionEventsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11GetDeviceMotionEventsRequest(${deviceId}, ${start}, ${stop})';
+      'X11GetDeviceMotionEventsRequest($deviceId, $start, $stop)';
 }
 
 class X11XInputGetDeviceMotionEventsReply extends X11Reply {
@@ -542,8 +541,7 @@ class X11XInputGetDeviceMotionEventsReply extends X11Reply {
   }
 
   @override
-  String toString() =>
-      'X11GetDeviceMotionEventsReply(${deviceMode}, ${events})';
+  String toString() => 'X11GetDeviceMotionEventsReply($deviceMode, $events)';
 }
 
 class X11XInputChangeKeyboardDeviceRequest extends X11Request {
@@ -566,7 +564,7 @@ class X11XInputChangeKeyboardDeviceRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputChangeKeyboardDeviceRequest(${deviceId})';
+  String toString() => 'X11XInputChangeKeyboardDeviceRequest($deviceId)';
 }
 
 class X11XInputChangeKeyboardDeviceReply extends X11Reply {
@@ -589,7 +587,7 @@ class X11XInputChangeKeyboardDeviceReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputChangeKeyboardDeviceReply(${status})';
+  String toString() => 'X11XInputChangeKeyboardDeviceReply($status)';
 }
 
 class X11XInputChangePointerDeviceRequest extends X11Request {
@@ -618,7 +616,7 @@ class X11XInputChangePointerDeviceRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputChangePointerDeviceRequest(${deviceId}, ${xAxis}, ${yAxis})';
+      'X11XInputChangePointerDeviceRequest($deviceId, $xAxis, $yAxis)';
 }
 
 class X11XInputChangePointerDeviceReply extends X11Reply {
@@ -641,7 +639,7 @@ class X11XInputChangePointerDeviceReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputChangePointerDeviceReply(${status})';
+  String toString() => 'X11XInputChangePointerDeviceReply($status)';
 }
 
 class X11XInputGrabDeviceRequest extends X11Request {
@@ -694,7 +692,7 @@ class X11XInputGrabDeviceRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputGrabDeviceRequest(${grabWindow}, ${deviceId}, thisDeviceMode: ${thisDeviceMode}, otherDeviceMode: ${otherDeviceMode}, ownerEvents: ${ownerEvents}, classes: ${classes}, time: ${time})';
+      'X11XInputGrabDeviceRequest($grabWindow, $deviceId, thisDeviceMode: $thisDeviceMode, otherDeviceMode: $otherDeviceMode, ownerEvents: $ownerEvents, classes: $classes, time: $time)';
 }
 
 class X11XInputGrabDeviceReply extends X11Reply {
@@ -717,7 +715,7 @@ class X11XInputGrabDeviceReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputGrabDeviceReply(${status})';
+  String toString() => 'X11XInputGrabDeviceReply($status)';
 }
 
 class X11XInputUngrabDeviceRequest extends X11Request {
@@ -742,8 +740,7 @@ class X11XInputUngrabDeviceRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11XInputUngrabDeviceRequest(${deviceId}, time: ${time})';
+  String toString() => 'X11XInputUngrabDeviceRequest($deviceId, time: $time)';
 }
 
 class X11XInputGetDeviceFocusRequest extends X11Request {
@@ -765,7 +762,7 @@ class X11XInputGetDeviceFocusRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputGetDeviceFocusRequest(${deviceId})';
+  String toString() => 'X11XInputGetDeviceFocusRequest($deviceId)';
 }
 
 class X11XInputGetDeviceFocusReply extends X11Reply {
@@ -795,7 +792,7 @@ class X11XInputGetDeviceFocusReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XInputGetDeviceFocusReply(${focus}, revertTo: ${revertTo}, time: ${time})';
+      'X11XInputGetDeviceFocusReply($focus, revertTo: $revertTo, time: $time)';
 }
 
 class X11XInputSetDeviceFocusRequest extends X11Request {
@@ -829,7 +826,7 @@ class X11XInputSetDeviceFocusRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputSetDeviceFocusRequest(${deviceId}, ${focus}, revertTo: ${revertTo}, time: ${time})';
+      'X11XInputSetDeviceFocusRequest($deviceId, $focus, revertTo: $revertTo, time: $time)';
 }
 
 class X11XInputDeviceBellRequest extends X11Request {
@@ -861,7 +858,7 @@ class X11XInputDeviceBellRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputDeviceBellRequest(${deviceId}, feedbackId: ${feedbackId}, feedbackClass: ${feedbackClass}, percent: ${percent})';
+      'X11XInputDeviceBellRequest($deviceId, feedbackId: $feedbackId, feedbackClass: $feedbackClass, percent: $percent)';
 }
 
 class X11XInputSetDeviceValuatorsRequest extends X11Request {
@@ -894,7 +891,7 @@ class X11XInputSetDeviceValuatorsRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputSetDeviceValuatorsRequest(deviceId: ${deviceId}, firstValuator: ${firstValuator}, valuators: ${valuators})';
+      'X11XInputSetDeviceValuatorsRequest(deviceId: $deviceId, firstValuator: $firstValuator, valuators: $valuators)';
 }
 
 class X11XInputSetDeviceValuatorsReply extends X11Reply {
@@ -917,7 +914,7 @@ class X11XInputSetDeviceValuatorsReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputSetDeviceValuatorsReply(${status})';
+  String toString() => 'X11XInputSetDeviceValuatorsReply($status)';
 }
 
 class X11XInputListDevicePropertiesRequest extends X11Request {
@@ -940,7 +937,7 @@ class X11XInputListDevicePropertiesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputListDevicePropertiesRequest(${deviceId})';
+  String toString() => 'X11XInputListDevicePropertiesRequest($deviceId)';
 }
 
 class X11XInputListDevicePropertiesReply extends X11Reply {
@@ -965,7 +962,7 @@ class X11XInputListDevicePropertiesReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputListDevicePropertiesReply(${properties})';
+  String toString() => 'X11XInputListDevicePropertiesReply($properties)';
 }
 
 class X11XInputChangeDevicePropertyRequest extends X11Request {
@@ -1036,7 +1033,7 @@ class X11XInputChangeDevicePropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputChangeDevicePropertyRequest(${deviceId}, ${property}, <${value.length} bytes>, type: ${type}, format: ${format}, mode: ${mode})';
+      'X11XInputChangeDevicePropertyRequest($deviceId, $property, <${value.length} bytes>, type: $type, format: $format, mode: $mode)';
 }
 
 class X11XInputDeleteDevicePropertyRequest extends X11Request {
@@ -1063,7 +1060,7 @@ class X11XInputDeleteDevicePropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputDeleteDevicePropertyRequest(${deviceId}, ${property})';
+      'X11XInputDeleteDevicePropertyRequest($deviceId, $property)';
 }
 
 class X11XInputGetDevicePropertyRequest extends X11Request {
@@ -1109,7 +1106,7 @@ class X11XInputGetDevicePropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputGetDevicePropertyRequest(${deviceId}, ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete})';
+      'X11XInputGetDevicePropertyRequest($deviceId, $property, type: $type, longOffset: $longOffset, longLength: $longLength, delete: $delete)';
 }
 
 class X11XInputGetDevicePropertyReply extends X11Reply {
@@ -1181,7 +1178,7 @@ class X11XInputGetDevicePropertyReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XInputGetDevicePropertyReply(${deviceId}, type: ${type}, format: ${format}, value: <${value.length} bytes>, bytesAfter: ${bytesAfter})';
+      'X11XInputGetDevicePropertyReply($deviceId, type: $type, format: $format, value: <${value.length} bytes>, bytesAfter: $bytesAfter)';
 }
 
 class X11XInputXiChangeCursorRequest extends X11Request {
@@ -1210,7 +1207,7 @@ class X11XInputXiChangeCursorRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputXiChangeCursorRequest(window: ${window}, cursor: ${cursor}, deviceid: ${deviceid})';
+      'X11XInputXiChangeCursorRequest(window: $window, cursor: $cursor, deviceid: $deviceid)';
 }
 
 class X11XInputXiSetClientPointerRequest extends X11Request {
@@ -1235,8 +1232,7 @@ class X11XInputXiSetClientPointerRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11XInputXiSetClientPointerRequest(${window}, ${deviceId})';
+  String toString() => 'X11XInputXiSetClientPointerRequest($window, $deviceId)';
 }
 
 class X11XInputXiGetClientPointerRequest extends X11Request {
@@ -1256,7 +1252,7 @@ class X11XInputXiGetClientPointerRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputXiGetClientPointerRequest(${window})';
+  String toString() => 'X11XInputXiGetClientPointerRequest($window)';
 }
 
 class X11XInputXiGetClientPointerReply extends X11Reply {
@@ -1285,7 +1281,7 @@ class X11XInputXiGetClientPointerReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XInputXiGetClientPointerReply(set: ${set}, deviceId: ${deviceId})';
+      'X11XInputXiGetClientPointerReply(set: $set, deviceId: $deviceId)';
 }
 
 class X11XInputXiQueryVersionRequest extends X11Request {
@@ -1308,7 +1304,7 @@ class X11XInputXiQueryVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputXiQueryVersionRequest(${clientVersion})';
+  String toString() => 'X11XInputXiQueryVersionRequest($clientVersion)';
 }
 
 class X11XInputXiQueryVersionReply extends X11Reply {
@@ -1333,7 +1329,7 @@ class X11XInputXiQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputXiQueryVersionReply(${version})';
+  String toString() => 'X11XInputXiQueryVersionReply($version)';
 }
 
 class X11XInputXiQueryDeviceRequest extends X11Request {
@@ -1355,7 +1351,7 @@ class X11XInputXiQueryDeviceRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputXiQueryDeviceRequest(${deviceId})';
+  String toString() => 'X11XInputXiQueryDeviceRequest($deviceId)';
 }
 
 class X11XInputXiQueryDeviceReply extends X11Reply {
@@ -1525,7 +1521,7 @@ class X11XInputXiQueryDeviceReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputXiQueryDeviceReply(${infos})';
+  String toString() => 'X11XInputXiQueryDeviceReply($infos)';
 }
 
 class X11XInputXiSetFocusRequest extends X11Request {
@@ -1554,7 +1550,7 @@ class X11XInputXiSetFocusRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputXiSetFocusRequest(${deviceId}, ${window}, time: ${time})';
+      'X11XInputXiSetFocusRequest($deviceId, $window, time: $time)';
 }
 
 class X11XInputXiGetFocusRequest extends X11Request {
@@ -1576,7 +1572,7 @@ class X11XInputXiGetFocusRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputXiGetFocusRequest(${deviceId})';
+  String toString() => 'X11XInputXiGetFocusRequest($deviceId)';
 }
 
 class X11XInputXiGetFocusReply extends X11Reply {
@@ -1599,7 +1595,7 @@ class X11XInputXiGetFocusReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputXiGetFocusReply(${focus})';
+  String toString() => 'X11XInputXiGetFocusReply($focus)';
 }
 
 class X11XInputXiGrabDeviceRequest extends X11Request {
@@ -1657,7 +1653,7 @@ class X11XInputXiGrabDeviceRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputXiGrabDeviceRequest(${window}, ${deviceId}, cursor: ${cursor}, mode: ${mode}, pairedDeviceMode: ${pairedDeviceMode}, ownerEvents: ${ownerEvents}, mask: ${mask}, time: ${time})';
+      'X11XInputXiGrabDeviceRequest($window, $deviceId, cursor: $cursor, mode: $mode, pairedDeviceMode: $pairedDeviceMode, ownerEvents: $ownerEvents, mask: $mask, time: $time)';
 }
 
 class X11XInputXiGrabDeviceReply extends X11Reply {
@@ -1680,7 +1676,7 @@ class X11XInputXiGrabDeviceReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputXiGrabDeviceReply(${status})';
+  String toString() => 'X11XInputXiGrabDeviceReply($status)';
 }
 
 class X11XInputXiUngrabDeviceRequest extends X11Request {
@@ -1705,8 +1701,7 @@ class X11XInputXiUngrabDeviceRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11XInputXiUngrabDeviceRequest(${deviceId}, time: ${time})';
+  String toString() => 'X11XInputXiUngrabDeviceRequest($deviceId, time: $time)';
 }
 
 class X11XInputXiListPropertiesRequest extends X11Request {
@@ -1728,7 +1723,7 @@ class X11XInputXiListPropertiesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11XInputXiListPropertiesRequest(${deviceId})';
+  String toString() => 'X11XInputXiListPropertiesRequest($deviceId)';
 }
 
 class X11XInputXiListPropertiesReply extends X11Reply {
@@ -1753,7 +1748,7 @@ class X11XInputXiListPropertiesReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11XInputXiListPropertiesReply(${properties})';
+  String toString() => 'X11XInputXiListPropertiesReply($properties)';
 }
 
 class X11XInputXiChangePropertyRequest extends X11Request {
@@ -1821,7 +1816,7 @@ class X11XInputXiChangePropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputXiChangePropertyRequest(${deviceId}, ${property}, <${value.length} bytes>, type: ${type}, format: ${format}, mode: ${mode})';
+      'X11XInputXiChangePropertyRequest($deviceId, $property, <${value.length} bytes>, type: $type, format: $format, mode: $mode)';
 }
 
 class X11XInputXiDeletePropertyRequest extends X11Request {
@@ -1846,8 +1841,7 @@ class X11XInputXiDeletePropertyRequest extends X11Request {
   }
 
   @override
-  String toString() =>
-      'X11XInputXiDeletePropertyRequest(${deviceId}, ${property})';
+  String toString() => 'X11XInputXiDeletePropertyRequest($deviceId, $property)';
 }
 
 class X11XInputXiGetPropertyRequest extends X11Request {
@@ -1893,7 +1887,7 @@ class X11XInputXiGetPropertyRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11XInputXiGetPropertyRequest(${deviceId}, ${property}, type: ${type}, longOffset: ${longOffset}, longLength: ${longLength}, delete: ${delete})';
+      'X11XInputXiGetPropertyRequest($deviceId, $property, type: $type, longOffset: $longOffset, longLength: $longLength, delete: $delete)';
 }
 
 class X11XInputXiGetPropertyReply extends X11Reply {
@@ -1962,5 +1956,5 @@ class X11XInputXiGetPropertyReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11XInputXiGetPropertyReply(type: ${type}, format: ${format}, value: <${value.length} bytes>, bytesAfter: ${bytesAfter})';
+      'X11XInputXiGetPropertyReply(type: $type, format: $format, value: <${value.length} bytes>, bytesAfter: $bytesAfter)';
 }

@@ -50,7 +50,7 @@ class X11SecurityQueryVersionRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11SecurityQueryVersionRequest(${clientVersion})';
+  String toString() => 'X11SecurityQueryVersionRequest($clientVersion)';
 }
 
 class X11SecurityQueryVersionReply extends X11Reply {
@@ -75,7 +75,7 @@ class X11SecurityQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11SecurityQueryVersionReply(${version})';
+  String toString() => 'X11SecurityQueryVersionReply($version)';
 }
 
 class X11SecurityGenerateAuthorizationRequest extends X11Request {
@@ -158,7 +158,7 @@ class X11SecurityGenerateAuthorizationRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SecurityGenerateAuthorizationRequest(${protocolName}, ${protocolData})';
+      'X11SecurityGenerateAuthorizationRequest($protocolName, $protocolData)';
 }
 
 class X11SecurityGenerateAuthorizationReply extends X11Reply {
@@ -192,7 +192,7 @@ class X11SecurityGenerateAuthorizationReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11SecurityGenerateAuthorizationReply(${authorizationId}, ${authorizationData})';
+      'X11SecurityGenerateAuthorizationReply($authorizationId, $authorizationData)';
 }
 
 class X11SecurityRevokeAuthorizationRequest extends X11Request {
@@ -214,5 +214,5 @@ class X11SecurityRevokeAuthorizationRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11SecurityRevokeAuthorizationRequest(${authorizationId})';
+      'X11SecurityRevokeAuthorizationRequest($authorizationId)';
 }

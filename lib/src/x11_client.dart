@@ -271,7 +271,7 @@ class X11Client {
       }
     }
     if (host == null || displayNumber == null) {
-      throw "Invalid DISPLAY: '${display}'";
+      throw "Invalid DISPLAY: '$display'";
     }
 
     await connectToHost(host, displayNumber);
@@ -280,10 +280,10 @@ class X11Client {
   /// Connects to the X server on [host] using [displayNumber].
   void connectToHost(String host, int displayNumber) async {
     if (!(host == '' || host == 'localhost')) {
-      throw 'Connecting to host ${host} not supported';
+      throw 'Connecting to host $host not supported';
     }
 
-    var socketAddress = InternetAddress('/tmp/.X11-unix/X${displayNumber}',
+    var socketAddress = InternetAddress('/tmp/.X11-unix/X$displayNumber',
         type: InternetAddressType.unix);
     _socket = await Socket.connect(socketAddress, 0);
     _socket.listen(_processData);
@@ -2075,7 +2075,7 @@ class X11Client {
     }
     var length = 1 + dataLength ~/ 4;
     if (length > _maximumRequestLength) {
-      throw 'Request of ${dataLength} is larger than maximum ${_maximumRequestLength}';
+      throw 'Request of $dataLength is larger than maximum $_maximumRequestLength';
     }
 
     // In a quirk of X11 there is a one byte field in the header that we take from the data.

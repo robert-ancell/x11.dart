@@ -48,7 +48,7 @@ class X11ShapeQueryVersionReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ShapeQueryVersionReply(${version})';
+  String toString() => 'X11ShapeQueryVersionReply($version)';
 }
 
 class X11ShapeRectanglesRequest extends X11Request {
@@ -108,7 +108,7 @@ class X11ShapeRectanglesRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ShapeRectanglesRequest(${window}, ${rectangles}, operation: ${operation}, kind: ${kind}, ordering: ${ordering}, offset: ${offset})';
+      'X11ShapeRectanglesRequest($window, $rectangles, operation: $operation, kind: $kind, ordering: $ordering, offset: $offset)';
 }
 
 class X11ShapeMaskRequest extends X11Request {
@@ -151,7 +151,7 @@ class X11ShapeMaskRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ShapeMaskRequest(${window}, ${sourceBitmap}, operation: ${operation}, kind: ${kind}, sourceOffset: ${sourceOffset})';
+      'X11ShapeMaskRequest($window, $sourceBitmap, operation: $operation, kind: $kind, sourceOffset: $sourceOffset)';
 }
 
 class X11ShapeCombineRequest extends X11Request {
@@ -199,7 +199,7 @@ class X11ShapeCombineRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ShapeCombineRequest(${window}, ${sourceWindow}, operation: ${operation}, kind: ${kind}, sourceKind: ${sourceKind}, sourceOffset: ${sourceOffset})';
+      'X11ShapeCombineRequest($window, $sourceWindow, operation: $operation, kind: $kind, sourceKind: $sourceKind, sourceOffset: $sourceOffset)';
 }
 
 class X11ShapeOffsetRequest extends X11Request {
@@ -232,7 +232,7 @@ class X11ShapeOffsetRequest extends X11Request {
 
   @override
   String toString() =>
-      'X11ShapeOffsetRequest(${window}, kind: ${kind}, offset: ${offset})';
+      'X11ShapeOffsetRequest($window, kind: $kind, offset: $offset)';
 }
 
 class X11ShapeQueryExtentsRequest extends X11Request {
@@ -252,7 +252,7 @@ class X11ShapeQueryExtentsRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ShapeQueryExtentsRequest(${window})';
+  String toString() => 'X11ShapeQueryExtentsRequest($window)';
 }
 
 class X11ShapeQueryExtentsReply extends X11Reply {
@@ -310,7 +310,7 @@ class X11ShapeQueryExtentsReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11ShapeQueryExtentsReply(boundingShaped: ${boundingShaped}, clipShaped: ${clipShaped}, boundingShapeExtents: ${boundingShapeExtents}, clipShapeExtents: ${clipShapeExtents})';
+      'X11ShapeQueryExtentsReply(boundingShaped: $boundingShaped, clipShaped: $clipShaped, boundingShapeExtents: $boundingShapeExtents, clipShapeExtents: $clipShapeExtents)';
 }
 
 class X11ShapeSelectInputRequest extends X11Request {
@@ -335,7 +335,7 @@ class X11ShapeSelectInputRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ShapeSelectInputRequest(${window}, ${enable})';
+  String toString() => 'X11ShapeSelectInputRequest($window, $enable)';
 }
 
 class X11ShapeInputSelectedRequest extends X11Request {
@@ -355,7 +355,7 @@ class X11ShapeInputSelectedRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ShapeInputSelectedRequest(${window})';
+  String toString() => 'X11ShapeInputSelectedRequest($window)';
 }
 
 class X11ShapeInputSelectedReply extends X11Reply {
@@ -374,7 +374,7 @@ class X11ShapeInputSelectedReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11ShapeInputSelectedReply(enabled: ${enabled})';
+  String toString() => 'X11ShapeInputSelectedReply(enabled: $enabled)';
 }
 
 class X11ShapeGetRectanglesRequest extends X11Request {
@@ -400,7 +400,7 @@ class X11ShapeGetRectanglesRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11ShapeGetRectanglesRequest(${window}, kind: ${kind})';
+  String toString() => 'X11ShapeGetRectanglesRequest($window, kind: $kind)';
 }
 
 class X11ShapeGetRectanglesReply extends X11Reply {
@@ -440,5 +440,5 @@ class X11ShapeGetRectanglesReply extends X11Reply {
 
   @override
   String toString() =>
-      'X11ShapeGetRectanglesReply(${rectangles}, ordering: ${ordering})';
+      'X11ShapeGetRectanglesReply($rectangles, ordering: $ordering)';
 }

@@ -31,7 +31,7 @@ class X11SyncInitializeRequest extends X11Request {
   }
 
   @override
-  String toString() => 'X11SyncInitializeRequest(${clientVersion})';
+  String toString() => 'X11SyncInitializeRequest($clientVersion)';
 }
 
 class X11SyncInitializeReply extends X11Reply {
@@ -56,5 +56,5 @@ class X11SyncInitializeReply extends X11Reply {
   }
 
   @override
-  String toString() => 'X11SyncInitializeReply(${version})';
+  String toString() => 'X11SyncInitializeReply($version)';
 }

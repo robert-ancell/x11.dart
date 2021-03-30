@@ -18,7 +18,7 @@ void main() async {
   var cookie = reply.authorizationData
       .map((e) => e.toRadixString(16).padLeft(2, '0'))
       .join();
-  print('Generated cookie ${cookie}');
+  print('Generated cookie $cookie');
 
   client.security.revokeAuthorization(reply.authorizationId);
 

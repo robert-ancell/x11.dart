@@ -209,6 +209,6 @@ class X11ReadBuffer {
         s += '\\' + d.toRadixString(8);
       }
     }
-    return "X11ReadBuffer('${s}')";
+    return "X11ReadBuffer('$s')";
   }
 }
