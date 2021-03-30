@@ -8,7 +8,7 @@ void main() async {
   for (var directory in path) {
     print('  $directory');
   }
-  var infos = await client.listFontsWithInfo();
+  var infos = client.listFontsWithInfo();
   print('Fonts:');
   await for (var info in infos) {
     print('  ${info.name}');
