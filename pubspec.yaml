@@ -1,5 +1,5 @@
 name: x11
-version: 0.0.0-dev.11
+version: 0.1.0
 
 description:
   A native Dart implementation of the X window system protocol, version 11 (X11).
