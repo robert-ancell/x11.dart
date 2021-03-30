@@ -43,21 +43,21 @@ class X11MitScreenSaverExtension extends X11Extension {
       X11WindowClass windowClass = X11WindowClass.copyFromParent,
       int depth = 24,
       int visual = 0,
-      X11ResourceId backgroundPixmap,
-      int backgroundPixel,
-      X11ResourceId borderPixmap,
-      int borderPixel,
-      X11BitGravity bitGravity,
-      X11WinGravity winGravity,
-      X11BackingStore backingStore,
-      int backingPlanes,
-      int backingPixel,
-      bool overrideRedirect,
-      bool saveUnder,
-      Set<X11EventType> events,
-      Set<X11EventType> doNotPropagate,
-      X11ResourceId colormap,
-      X11ResourceId cursor}) {
+      X11ResourceId? backgroundPixmap,
+      int? backgroundPixel,
+      X11ResourceId? borderPixmap,
+      int? borderPixel,
+      X11BitGravity? bitGravity,
+      X11WinGravity? winGravity,
+      X11BackingStore? backingStore,
+      int? backingPlanes,
+      int? backingPixel,
+      bool? overrideRedirect,
+      bool? saveUnder,
+      Set<X11EventType>? events,
+      Set<X11EventType>? doNotPropagate,
+      X11ResourceId? colormap,
+      X11ResourceId? cursor}) {
     var request = X11ScreensaverSetAttributesRequest(drawable, geometry,
         windowClass: windowClass,
         depth: depth,
@@ -92,7 +92,7 @@ class X11MitScreenSaverExtension extends X11Extension {
   }
 
   @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+  X11Event? decodeEvent(int code, X11ReadBuffer buffer) {
     if (code == _firstEvent) {
       return X11ScreensaverNotifyEvent.fromBuffer(_firstEvent, buffer);
     } else {

@@ -513,6 +513,7 @@ class X11RandrGetScreenResourcesReply extends X11Reply {
       var modeFlags = _decodeX11RandrModeFlags(buffer.readUint32());
       var mode = X11RandrModeInfo(
           id: id,
+          name: '',
           sizeInPixels: X11Size(widthInPixels, heightInPixels),
           dotClock: dotClock,
           hSyncStart: hSyncStart,
@@ -970,7 +971,11 @@ class X11RandrGetOutputPropertyRequest extends X11Request {
   final bool pending;
 
   X11RandrGetOutputPropertyRequest(this.output, this.property,
-      {this.type, this.longOffset, this.longLength, this.delete, this.pending});
+      {required this.type,
+      required this.longOffset,
+      required this.longLength,
+      required this.delete,
+      required this.pending});
 
   factory X11RandrGetOutputPropertyRequest.fromBuffer(X11ReadBuffer buffer) {
     var output = buffer.readResourceId();
@@ -1329,7 +1334,7 @@ class X11RandrSetCrtcConfigRequest extends X11Request {
   final int configTimestamp;
 
   X11RandrSetCrtcConfigRequest(this.crtc,
-      {this.position,
+      {required this.position,
       this.mode = X11ResourceId.None,
       this.rotation = const {X11RandrRotation.rotate0},
       this.outputs = const [],
@@ -1628,6 +1633,7 @@ class X11RandrGetScreenResourcesCurrentReply extends X11Reply {
       var modeFlags = _decodeX11RandrModeFlags(buffer.readUint32());
       var mode = X11RandrModeInfo(
           id: id,
+          name: '',
           sizeInPixels: X11Size(widthInPixels, heightInPixels),
           dotClock: dotClock,
           hSyncStart: hSyncStart,
@@ -1874,14 +1880,14 @@ class X11RandrGetPanningReply extends X11Reply {
   final int timestamp;
 
   X11RandrGetPanningReply(
-      {this.status,
+      {required this.status,
       this.area = const X11Rectangle(0, 0, 0, 0),
       this.trackArea = const X11Rectangle(0, 0, 0, 0),
-      this.borderLeft,
-      this.borderTop,
-      this.borderRight,
-      this.borderBottom,
-      this.timestamp});
+      required this.borderLeft,
+      required this.borderTop,
+      required this.borderRight,
+      required this.borderBottom,
+      required this.timestamp});
 
   static X11RandrGetPanningReply fromBuffer(X11ReadBuffer buffer) {
     var status = X11RandrConfigStatus.values[buffer.readUint8()];
@@ -2764,7 +2770,9 @@ class X11RandrGetMonitorsReply extends X11Reply {
       buffer.writeUint32(monitor.sizeInMillimeters.width);
       buffer.writeUint32(monitor.sizeInMillimeters.height);
       for (var i = 0; i < outputsLength; i++) {
-        buffer.writeUint32(i < monitor.outputs.length ? monitor.outputs[i] : 0);
+        buffer.writeResourceId(i < monitor.outputs.length
+            ? monitor.outputs[i]
+            : X11ResourceId.None);
       }
     }
     buffer.skip(12);

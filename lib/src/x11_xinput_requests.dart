@@ -836,7 +836,9 @@ class X11XInputDeviceBellRequest extends X11Request {
   final int percent;
 
   X11XInputDeviceBellRequest(this.deviceId,
-      {this.feedbackId, this.feedbackClass, this.percent});
+      {required this.feedbackId,
+      required this.feedbackClass,
+      required this.percent});
 
   factory X11XInputDeviceBellRequest.fromBuffer(X11ReadBuffer buffer) {
     var deviceId = buffer.readUint8();

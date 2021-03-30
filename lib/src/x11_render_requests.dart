@@ -284,19 +284,19 @@ class X11RenderCreatePictureRequest extends X11Request {
   final X11ResourceId id;
   final X11ResourceId drawable;
   final X11ResourceId format;
-  final X11Repeat repeat;
-  final X11ResourceId alphaMap;
-  final int alphaXOrigin;
-  final int alphaYOrigin;
-  final int clipXOrigin;
-  final int clipYOrigin;
-  final int clipMask;
-  final bool graphicsExposures;
-  final X11SubwindowMode subwindowMode;
-  final X11PolyEdge polyEdge;
-  final X11PolyMode polyMode;
-  final X11Atom dither;
-  final bool componentAlpha;
+  final X11Repeat? repeat;
+  final X11ResourceId? alphaMap;
+  final int? alphaXOrigin;
+  final int? alphaYOrigin;
+  final int? clipXOrigin;
+  final int? clipYOrigin;
+  final int? clipMask;
+  final bool? graphicsExposures;
+  final X11SubwindowMode? subwindowMode;
+  final X11PolyEdge? polyEdge;
+  final X11PolyMode? polyMode;
+  final X11Atom? dither;
+  final bool? componentAlpha;
 
   X11RenderCreatePictureRequest(this.id, this.drawable, this.format,
       {this.repeat,
@@ -318,55 +318,55 @@ class X11RenderCreatePictureRequest extends X11Request {
     var drawable = buffer.readResourceId();
     var format = buffer.readResourceId();
     var valueMask = buffer.readUint32();
-    X11Repeat repeat;
+    X11Repeat? repeat;
     if ((valueMask & 0x0001) != 0) {
       repeat = X11Repeat.values[buffer.readValueUint8()];
     }
-    X11ResourceId alphaMap;
+    X11ResourceId? alphaMap;
     if ((valueMask & 0x0002) != 0) {
       alphaMap = buffer.readResourceId();
     }
-    int alphaXOrigin;
+    int? alphaXOrigin;
     if ((valueMask & 0x0004) != 0) {
       alphaXOrigin = buffer.readValueInt16();
     }
-    int alphaYOrigin;
+    int? alphaYOrigin;
     if ((valueMask & 0x0008) != 0) {
       alphaXOrigin = buffer.readValueInt16();
     }
-    int clipXOrigin;
+    int? clipXOrigin;
     if ((valueMask & 0x0010) != 0) {
       clipXOrigin = buffer.readValueInt16();
     }
-    int clipYOrigin;
+    int? clipYOrigin;
     if ((valueMask & 0x0020) != 0) {
       clipXOrigin = buffer.readValueInt16();
     }
-    int clipMask;
+    int? clipMask;
     if ((valueMask & 0x0040) != 0) {
       clipMask = buffer.readUint32();
     }
-    bool graphicsExposures;
+    bool? graphicsExposures;
     if ((valueMask & 0x0080) != 0) {
       graphicsExposures = buffer.readValueBool();
     }
-    X11SubwindowMode subwindowMode;
+    X11SubwindowMode? subwindowMode;
     if ((valueMask & 0x0100) != 0) {
       subwindowMode = X11SubwindowMode.values[buffer.readValueUint8()];
     }
-    X11PolyEdge polyEdge;
+    X11PolyEdge? polyEdge;
     if ((valueMask & 0x0200) != 0) {
       polyEdge = X11PolyEdge.values[buffer.readValueUint8()];
     }
-    X11PolyMode polyMode;
+    X11PolyMode? polyMode;
     if ((valueMask & 0x0400) != 0) {
       polyMode = X11PolyMode.values[buffer.readValueUint8()];
     }
-    X11Atom dither;
+    X11Atom? dither;
     if ((valueMask & 0x0800) != 0) {
       dither = buffer.readAtom();
     }
-    bool componentAlpha;
+    bool? componentAlpha;
     if ((valueMask & 0x1000) != 0) {
       componentAlpha = buffer.readValueBool();
     }
@@ -434,43 +434,43 @@ class X11RenderCreatePictureRequest extends X11Request {
     }
     buffer.writeUint32(valueMask);
     if (repeat != null) {
-      buffer.writeValueUint8(repeat.index);
+      buffer.writeValueUint8(repeat!.index);
     }
     if (alphaMap != null) {
-      buffer.writeResourceId(alphaMap);
+      buffer.writeResourceId(alphaMap!);
     }
     if (alphaXOrigin != null) {
-      buffer.writeValueInt16(alphaXOrigin);
+      buffer.writeValueInt16(alphaXOrigin!);
     }
     if (alphaYOrigin != null) {
-      buffer.writeValueInt16(alphaYOrigin);
+      buffer.writeValueInt16(alphaYOrigin!);
     }
     if (clipXOrigin != null) {
-      buffer.writeValueInt16(clipXOrigin);
+      buffer.writeValueInt16(clipXOrigin!);
     }
     if (clipYOrigin != null) {
-      buffer.writeValueInt16(clipYOrigin);
+      buffer.writeValueInt16(clipYOrigin!);
     }
     if (clipMask != null) {
-      buffer.writeUint32(clipMask);
+      buffer.writeUint32(clipMask!);
     }
     if (graphicsExposures != null) {
-      buffer.writeValueBool(graphicsExposures);
+      buffer.writeValueBool(graphicsExposures!);
     }
     if (subwindowMode != null) {
-      buffer.writeValueUint8(subwindowMode.index);
+      buffer.writeValueUint8(subwindowMode!.index);
     }
     if (polyEdge != null) {
-      buffer.writeValueUint8(polyEdge.index);
+      buffer.writeValueUint8(polyEdge!.index);
     }
     if (polyMode != null) {
-      buffer.writeValueUint8(polyMode.index);
+      buffer.writeValueUint8(polyMode!.index);
     }
     if (dither != null) {
-      buffer.writeAtom(dither);
+      buffer.writeAtom(dither!);
     }
     if (componentAlpha != null) {
-      buffer.writeValueBool(componentAlpha);
+      buffer.writeValueBool(componentAlpha!);
     }
   }
 
@@ -524,19 +524,19 @@ class X11RenderCreatePictureRequest extends X11Request {
 
 class X11RenderChangePictureRequest extends X11Request {
   final X11ResourceId picture;
-  final X11Repeat repeat;
-  final X11ResourceId alphaMap;
-  final int alphaXOrigin;
-  final int alphaYOrigin;
-  final int clipXOrigin;
-  final int clipYOrigin;
-  final int clipMask;
-  final bool graphicsExposures;
-  final X11SubwindowMode subwindowMode;
-  final X11PolyEdge polyEdge;
-  final X11PolyMode polyMode;
-  final X11Atom dither;
-  final bool componentAlpha;
+  final X11Repeat? repeat;
+  final X11ResourceId? alphaMap;
+  final int? alphaXOrigin;
+  final int? alphaYOrigin;
+  final int? clipXOrigin;
+  final int? clipYOrigin;
+  final int? clipMask;
+  final bool? graphicsExposures;
+  final X11SubwindowMode? subwindowMode;
+  final X11PolyEdge? polyEdge;
+  final X11PolyMode? polyMode;
+  final X11Atom? dither;
+  final bool? componentAlpha;
 
   X11RenderChangePictureRequest(this.picture,
       {this.repeat,
@@ -556,55 +556,55 @@ class X11RenderChangePictureRequest extends X11Request {
   factory X11RenderChangePictureRequest.fromBuffer(X11ReadBuffer buffer) {
     var picture = buffer.readResourceId();
     var valueMask = buffer.readUint32();
-    X11Repeat repeat;
+    X11Repeat? repeat;
     if ((valueMask & 0x0001) != 0) {
       repeat = X11Repeat.values[buffer.readValueUint8()];
     }
-    X11ResourceId alphaMap;
+    X11ResourceId? alphaMap;
     if ((valueMask & 0x0002) != 0) {
       alphaMap = buffer.readResourceId();
     }
-    int alphaXOrigin;
+    int? alphaXOrigin;
     if ((valueMask & 0x0004) != 0) {
       alphaXOrigin = buffer.readValueInt16();
     }
-    int alphaYOrigin;
+    int? alphaYOrigin;
     if ((valueMask & 0x0008) != 0) {
       alphaXOrigin = buffer.readValueInt16();
     }
-    int clipXOrigin;
+    int? clipXOrigin;
     if ((valueMask & 0x0010) != 0) {
       clipXOrigin = buffer.readValueInt16();
     }
-    int clipYOrigin;
+    int? clipYOrigin;
     if ((valueMask & 0x0020) != 0) {
       clipXOrigin = buffer.readValueInt16();
     }
-    int clipMask;
+    int? clipMask;
     if ((valueMask & 0x0040) != 0) {
       clipMask = buffer.readUint32();
     }
-    bool graphicsExposures;
+    bool? graphicsExposures;
     if ((valueMask & 0x0080) != 0) {
       graphicsExposures = buffer.readValueBool();
     }
-    X11SubwindowMode subwindowMode;
+    X11SubwindowMode? subwindowMode;
     if ((valueMask & 0x0100) != 0) {
       subwindowMode = X11SubwindowMode.values[buffer.readValueUint8()];
     }
-    X11PolyEdge polyEdge;
+    X11PolyEdge? polyEdge;
     if ((valueMask & 0x0200) != 0) {
       polyEdge = X11PolyEdge.values[buffer.readValueUint8()];
     }
-    X11PolyMode polyMode;
+    X11PolyMode? polyMode;
     if ((valueMask & 0x0400) != 0) {
       polyMode = X11PolyMode.values[buffer.readValueUint8()];
     }
-    X11Atom dither;
+    X11Atom? dither;
     if ((valueMask & 0x0800) != 0) {
       dither = buffer.readAtom();
     }
-    bool componentAlpha;
+    bool? componentAlpha;
     if ((valueMask & 0x1000) != 0) {
       componentAlpha = buffer.readValueBool();
     }
@@ -670,43 +670,43 @@ class X11RenderChangePictureRequest extends X11Request {
     }
     buffer.writeUint32(valueMask);
     if (repeat != null) {
-      buffer.writeValueUint8(repeat.index);
+      buffer.writeValueUint8(repeat!.index);
     }
     if (alphaMap != null) {
-      buffer.writeResourceId(alphaMap);
+      buffer.writeResourceId(alphaMap!);
     }
     if (alphaXOrigin != null) {
-      buffer.writeValueInt16(alphaXOrigin);
+      buffer.writeValueInt16(alphaXOrigin!);
     }
     if (alphaYOrigin != null) {
-      buffer.writeValueInt16(alphaYOrigin);
+      buffer.writeValueInt16(alphaYOrigin!);
     }
     if (clipXOrigin != null) {
-      buffer.writeValueInt16(clipXOrigin);
+      buffer.writeValueInt16(clipXOrigin!);
     }
     if (clipYOrigin != null) {
-      buffer.writeValueInt16(clipYOrigin);
+      buffer.writeValueInt16(clipYOrigin!);
     }
     if (clipMask != null) {
-      buffer.writeUint32(clipMask);
+      buffer.writeUint32(clipMask!);
     }
     if (graphicsExposures != null) {
-      buffer.writeValueBool(graphicsExposures);
+      buffer.writeValueBool(graphicsExposures!);
     }
     if (subwindowMode != null) {
-      buffer.writeValueUint8(subwindowMode.index);
+      buffer.writeValueUint8(subwindowMode!.index);
     }
     if (polyEdge != null) {
-      buffer.writeValueUint8(polyEdge.index);
+      buffer.writeValueUint8(polyEdge!.index);
     }
     if (polyMode != null) {
-      buffer.writeValueUint8(polyMode.index);
+      buffer.writeValueUint8(polyMode!.index);
     }
     if (dither != null) {
-      buffer.writeAtom(dither);
+      buffer.writeAtom(dither!);
     }
     if (componentAlpha != null) {
-      buffer.writeValueBool(componentAlpha);
+      buffer.writeValueBool(componentAlpha!);
     }
   }
 
@@ -1610,7 +1610,8 @@ class X11RenderCreateCursorRequest extends X11Request {
   final X11ResourceId sourcePicture;
   final X11Point hotspot;
 
-  X11RenderCreateCursorRequest(this.id, this.sourcePicture, {this.hotspot});
+  X11RenderCreateCursorRequest(this.id, this.sourcePicture,
+      {required this.hotspot});
 
   factory X11RenderCreateCursorRequest.fromBuffer(X11ReadBuffer buffer) {
     var id = buffer.readResourceId();

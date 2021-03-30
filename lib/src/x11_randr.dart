@@ -200,7 +200,7 @@ class X11RandrExtension extends X11Extension {
   /// Gets the value of the [property] of [output].
   Future<X11RandrGetOutputPropertyReply> getOutputProperty(
       X11ResourceId output, String property,
-      {String type,
+      {String? type,
       int longOffset = 0,
       int longLength = 4294967295,
       bool delete = false,
@@ -508,13 +508,13 @@ class X11RandrExtension extends X11Extension {
   /// Gets the value of the [property] of [provider].
   Future<X11RandrGetProviderPropertyReply> getProviderProperty(
       X11ResourceId provider, String property,
-      {String type,
+      {String? type,
       int longOffset = 0,
       int longLength = 4294967295,
       bool delete = false,
       bool pending = false}) async {
     var propertyAtom = await _client.internAtom(property);
-    var typeAtom = type != null ? await _client.internAtom(type) : 0;
+    var typeAtom = type != null ? await _client.internAtom(type) : X11Atom.None;
     var request = X11RandrGetProviderPropertyRequest(provider, propertyAtom,
         type: typeAtom,
         longOffset: longOffset,
@@ -568,7 +568,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+  X11Event? decodeEvent(int code, X11ReadBuffer buffer) {
     if (code == _firstEvent) {
       return X11RandrScreenChangeNotifyEvent.fromBuffer(_firstEvent, buffer);
     } else if (code == _firstEvent + 1) {
@@ -598,7 +598,7 @@ class X11RandrExtension extends X11Extension {
   }
 
   @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
     if (code == _firstError) {
       return X11RandrOutputError.fromBuffer(sequenceNumber, buffer);
     } else if (code == _firstError + 1) {

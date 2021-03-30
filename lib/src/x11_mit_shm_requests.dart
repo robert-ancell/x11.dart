@@ -198,7 +198,9 @@ class X11MitShmGetImageRequest extends X11Request {
   final int offset;
 
   X11MitShmGetImageRequest(this.drawable, this.area, this.shmseg,
-      {this.format, this.planeMask = 0xFFFFFFFF, this.offset});
+      {required this.format,
+      this.planeMask = 0xFFFFFFFF,
+      required this.offset});
 
   factory X11MitShmGetImageRequest.fromBuffer(X11ReadBuffer buffer) {
     var drawable = buffer.readResourceId();

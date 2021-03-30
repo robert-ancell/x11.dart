@@ -9,12 +9,13 @@ void main() async {
     await client.close();
     return;
   }
+  var randr = client.randr!;
 
-  var version = await client.randr.queryVersion();
+  var version = await randr.queryVersion();
   print('Server supports RANDR ${version.major}.${version.minor}');
 
   var root = client.screens[0].window;
-  var screenInfo = await client.randr.getScreenInfo(root);
+  var screenInfo = await randr.getScreenInfo(root);
   print('Supported rotations: ${screenInfo.rotations}');
   print('Current rotation: ${screenInfo.rotation}');
   print('Supported modes:');
@@ -26,14 +27,14 @@ void main() async {
           ' ${size.sizeInPixels.width}x${size.sizeInPixels.height} ${rate}Hz${isCurrent ? '*' : ''}');
     }
   }
-  var resources = await client.randr.getScreenResources(root);
+  var resources = await randr.getScreenResources(root);
   print('CRTCs:');
   for (var crtc in resources.crtcs) {
-    var info = await client.randr.getCrtcInfo(crtc);
+    var info = await randr.getCrtcInfo(crtc);
     if (info.mode != X11ResourceId.None) {
       print(
           '  ${info.area.x},${info.area.y} ${info.area.width}x${info.area.height}');
-      var transformReply = await client.randr.getCrtcTransform(crtc);
+      var transformReply = await randr.getCrtcTransform(crtc);
       if (transformReply.hasTransforms) {
         var t = transformReply.currentTransform;
         print(
@@ -47,11 +48,11 @@ void main() async {
   }
   print('Outputs:');
   for (var output in resources.outputs) {
-    var info = await client.randr.getOutputInfo(output);
+    var info = await randr.getOutputInfo(output);
     print('  ${info.name}');
-    var properties = await client.randr.listOutputProperties(output);
+    var properties = await randr.listOutputProperties(output);
     for (var property in properties) {
-      var valueReply = await client.randr.getOutputProperty(output, property);
+      var valueReply = await randr.getOutputProperty(output, property);
       var typeName = await client.getAtomName(valueReply.type);
       String value;
       if (typeName == 'ATOM') {

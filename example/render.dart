@@ -9,11 +9,12 @@ void main() async {
     await client.close();
     return;
   }
+  var render = client.render!;
 
-  var version = await client.render.queryVersion();
+  var version = await render.queryVersion();
   print('Server supports RENDER ${version.major}.${version.minor}');
 
-  var formatsReply = await client.render.queryPictFormats();
+  var formatsReply = await render.queryPictFormats();
   print('Formats:');
   for (var format in formatsReply.formats) {
     if (format.type == X11PictureType.indexed) {
@@ -39,7 +40,7 @@ void main() async {
     }
   }
 
-  var filters = await client.render.queryFilters(client.screens[0].window);
+  var filters = await render.queryFilters(client.screens[0].window);
   print('Filters: ${filters.filters.join(', ')}');
 
   await client.close();

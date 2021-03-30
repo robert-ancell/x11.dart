@@ -75,7 +75,7 @@ class X11MitShmExtension extends X11Extension {
   }
 
   @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+  X11Event? decodeEvent(int code, X11ReadBuffer buffer) {
     if (code == _firstEvent) {
       return X11MitShmCompletionEvent.fromBuffer(_firstEvent, buffer);
     } else {
@@ -84,7 +84,7 @@ class X11MitShmExtension extends X11Extension {
   }
 
   @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
     if (code == _firstError) {
       return X11BadSegmentError.fromBuffer(sequenceNumber, buffer);
     } else {

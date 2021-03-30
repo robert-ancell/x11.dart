@@ -199,21 +199,21 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
   final X11WindowClass windowClass;
   final int depth;
   final int visual;
-  final X11ResourceId backgroundPixmap;
-  final int backgroundPixel;
-  final X11ResourceId borderPixmap;
-  final int borderPixel;
-  final X11BitGravity bitGravity;
-  final X11WinGravity winGravity;
-  final X11BackingStore backingStore;
-  final int backingPlanes;
-  final int backingPixel;
-  final bool overrideRedirect;
-  final bool saveUnder;
-  final Set<X11EventType> events;
-  final Set<X11EventType> doNotPropagate;
-  final X11ResourceId colormap;
-  final X11ResourceId cursor;
+  final X11ResourceId? backgroundPixmap;
+  final int? backgroundPixel;
+  final X11ResourceId? borderPixmap;
+  final int? borderPixel;
+  final X11BitGravity? bitGravity;
+  final X11WinGravity? winGravity;
+  final X11BackingStore? backingStore;
+  final int? backingPlanes;
+  final int? backingPixel;
+  final bool? overrideRedirect;
+  final bool? saveUnder;
+  final Set<X11EventType>? events;
+  final Set<X11EventType>? doNotPropagate;
+  final X11ResourceId? colormap;
+  final X11ResourceId? cursor;
 
   X11ScreensaverSetAttributesRequest(this.drawable, this.geometry,
       {this.borderWidth = 0,
@@ -247,63 +247,63 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
     var depth = buffer.readUint8();
     var visual = buffer.readUint32();
     var valueMask = buffer.readUint32();
-    X11ResourceId backgroundPixmap;
+    X11ResourceId? backgroundPixmap;
     if ((valueMask & 0x0001) != 0) {
       backgroundPixmap = buffer.readResourceId();
     }
-    int backgroundPixel;
+    int? backgroundPixel;
     if ((valueMask & 0x0002) != 0) {
       backgroundPixel = buffer.readUint32();
     }
-    X11ResourceId borderPixmap;
+    X11ResourceId? borderPixmap;
     if ((valueMask & 0x0004) != 0) {
       borderPixmap = buffer.readResourceId();
     }
-    int borderPixel;
+    int? borderPixel;
     if ((valueMask & 0x0008) != 0) {
       borderPixel = buffer.readUint32();
     }
-    X11BitGravity bitGravity;
+    X11BitGravity? bitGravity;
     if ((valueMask & 0x0010) != 0) {
       bitGravity = X11BitGravity.values[buffer.readValueUint8()];
     }
-    X11WinGravity winGravity;
+    X11WinGravity? winGravity;
     if ((valueMask & 0x0020) != 0) {
       winGravity = X11WinGravity.values[buffer.readValueUint8()];
     }
-    X11BackingStore backingStore;
+    X11BackingStore? backingStore;
     if ((valueMask & 0x0040) != 0) {
       backingStore = X11BackingStore.values[buffer.readValueUint8()];
     }
-    int backingPlanes;
+    int? backingPlanes;
     if ((valueMask & 0x0080) != 0) {
       backingPlanes = buffer.readUint32();
     }
-    int backingPixel;
+    int? backingPixel;
     if ((valueMask & 0x0100) != 0) {
       backingPixel = buffer.readUint32();
     }
-    bool overrideRedirect;
+    bool? overrideRedirect;
     if ((valueMask & 0x0200) != 0) {
       overrideRedirect = buffer.readValueBool();
     }
-    bool saveUnder;
+    bool? saveUnder;
     if ((valueMask & 0x0400) != 0) {
       saveUnder = buffer.readValueBool();
     }
-    Set<X11EventType> events;
+    Set<X11EventType>? events;
     if ((valueMask & 0x0800) != 0) {
       events = _decodeEventMask(buffer.readUint32());
     }
-    Set<X11EventType> doNotPropagate;
+    Set<X11EventType>? doNotPropagate;
     if ((valueMask & 0x1000) != 0) {
       doNotPropagate = _decodeEventMask(buffer.readValueUint16());
     }
-    X11ResourceId colormap;
+    X11ResourceId? colormap;
     if ((valueMask & 0x2000) != 0) {
       colormap = buffer.readResourceId();
     }
-    X11ResourceId cursor;
+    X11ResourceId? cursor;
     if ((valueMask & 0x4000) != 0) {
       cursor = buffer.readResourceId();
     }
@@ -390,49 +390,49 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
     }
     buffer.writeUint32(valueMask);
     if (backgroundPixmap != null) {
-      buffer.writeResourceId(backgroundPixmap);
+      buffer.writeResourceId(backgroundPixmap!);
     }
     if (backgroundPixel != null) {
-      buffer.writeUint32(backgroundPixel);
+      buffer.writeUint32(backgroundPixel!);
     }
     if (borderPixmap != null) {
-      buffer.writeResourceId(borderPixmap);
+      buffer.writeResourceId(borderPixmap!);
     }
     if (borderPixel != null) {
-      buffer.writeUint32(borderPixel);
+      buffer.writeUint32(borderPixel!);
     }
     if (bitGravity != null) {
-      buffer.writeValueUint8(bitGravity.index);
+      buffer.writeValueUint8(bitGravity!.index);
     }
     if (winGravity != null) {
-      buffer.writeValueUint8(winGravity.index);
+      buffer.writeValueUint8(winGravity!.index);
     }
     if (backingStore != null) {
-      buffer.writeValueUint8(backingStore.index);
+      buffer.writeValueUint8(backingStore!.index);
     }
     if (backingPlanes != null) {
-      buffer.writeUint32(backingPlanes);
+      buffer.writeUint32(backingPlanes!);
     }
     if (backingPixel != null) {
-      buffer.writeUint32(backingPixel);
+      buffer.writeUint32(backingPixel!);
     }
     if (overrideRedirect != null) {
-      buffer.writeValueBool(overrideRedirect);
+      buffer.writeValueBool(overrideRedirect!);
     }
     if (saveUnder != null) {
-      buffer.writeValueBool(saveUnder);
+      buffer.writeValueBool(saveUnder!);
     }
     if (events != null) {
-      buffer.writeUint32(_encodeEventMask(events));
+      buffer.writeUint32(_encodeEventMask(events!));
     }
     if (doNotPropagate != null) {
-      buffer.writeUint32(_encodeEventMask(doNotPropagate));
+      buffer.writeUint32(_encodeEventMask(doNotPropagate!));
     }
     if (colormap != null) {
-      buffer.writeResourceId(colormap);
+      buffer.writeResourceId(colormap!);
     }
     if (cursor != null) {
-      buffer.writeResourceId(cursor);
+      buffer.writeResourceId(cursor!);
     }
   }
 

@@ -10,8 +10,9 @@ void main() async {
     await client.close();
     return;
   }
+  var xinput = client.xinput!;
 
-  var reply = await client.xinput.getExtensionVersion('');
+  var reply = await xinput.getExtensionVersion('');
   print('Server supports XInput ${reply.version.major}.${reply.version.minor}');
 
   if (!reply.present) {
@@ -20,12 +21,12 @@ void main() async {
     return;
   }
 
-  var devices = await client.xinput.listInputDevices();
+  var devices = await xinput.listInputDevices();
   print('Devices:');
   for (var device in devices) {
     print('  ${device.name}');
 
-    var infos = await client.xinput.xiQueryDevice(device.id);
+    var infos = await xinput.xiQueryDevice(device.id);
     for (var info in infos) {
       for (var c in info.classes) {
         if (c is X11DeviceClassKey) {
@@ -50,10 +51,9 @@ void main() async {
       }
     }
 
-    var properties = await client.xinput.listDeviceProperties(device.id);
+    var properties = await xinput.listDeviceProperties(device.id);
     for (var property in properties) {
-      var propertyReply =
-          await client.xinput.getDeviceProperty(device.id, property);
+      var propertyReply = await xinput.getDeviceProperty(device.id, property);
       var typeName = await client.getAtomName(propertyReply.type);
       String value;
       if (typeName == 'ATOM') {

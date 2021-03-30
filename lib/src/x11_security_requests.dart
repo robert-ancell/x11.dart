@@ -81,10 +81,10 @@ class X11SecurityQueryVersionReply extends X11Reply {
 class X11SecurityGenerateAuthorizationRequest extends X11Request {
   final String protocolName;
   final List<int> protocolData;
-  final int timeout;
-  final X11TrustLevel trustLevel;
-  final X11ResourceId group;
-  final Set<X11EventType> events;
+  final int? timeout;
+  final X11TrustLevel? trustLevel;
+  final X11ResourceId? group;
+  final Set<X11EventType>? events;
 
   X11SecurityGenerateAuthorizationRequest(this.protocolName, this.protocolData,
       {this.timeout, this.trustLevel, this.group, this.events});
@@ -98,19 +98,19 @@ class X11SecurityGenerateAuthorizationRequest extends X11Request {
     buffer.skip(pad(protocolNameLength));
     var protocolData = buffer.readListOfUint8(protocolDataLength);
     buffer.skip(pad(protocolDataLength));
-    int timeout;
+    int? timeout;
     if ((valueMask & 0x1) != 0) {
       timeout = buffer.readUint32();
     }
-    X11TrustLevel trustLevel;
+    X11TrustLevel? trustLevel;
     if ((valueMask & 0x2) != 0) {
       trustLevel = X11TrustLevel.values[buffer.readUint32()];
     }
-    X11ResourceId group;
+    X11ResourceId? group;
     if ((valueMask & 0x4) != 0) {
       group = buffer.readResourceId();
     }
-    Set<X11EventType> events;
+    Set<X11EventType>? events;
     if ((valueMask & 0x8) != 0) {
       events = _decodeEventMask(buffer.readUint32());
     }
@@ -143,16 +143,16 @@ class X11SecurityGenerateAuthorizationRequest extends X11Request {
     buffer.writeListOfUint8(protocolData);
     buffer.skip(pad(protocolData.length));
     if (timeout != null) {
-      buffer.writeUint32(timeout);
+      buffer.writeUint32(timeout!);
     }
     if (trustLevel != null) {
-      buffer.writeUint32(trustLevel.index);
+      buffer.writeUint32(trustLevel!.index);
     }
     if (group != null) {
-      buffer.writeResourceId(group);
+      buffer.writeResourceId(group!);
     }
     if (events != null) {
-      buffer.writeUint32(_encodeEventMask(events));
+      buffer.writeUint32(_encodeEventMask(events!));
     }
   }
 

@@ -55,7 +55,7 @@ class X11DamageExtension extends X11Extension {
   }
 
   @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+  X11Event? decodeEvent(int code, X11ReadBuffer buffer) {
     if (code == _firstEvent) {
       return X11DamageNotifyEvent.fromBuffer(_firstEvent, buffer);
     } else {
@@ -64,7 +64,7 @@ class X11DamageExtension extends X11Extension {
   }
 
   @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
     if (code == _firstError) {
       return X11DamageError.fromBuffer(sequenceNumber, buffer);
     } else {

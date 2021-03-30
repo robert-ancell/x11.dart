@@ -9,19 +9,20 @@ void main() async {
     await client.close();
     return;
   }
+  var dpms = client.dpms!;
 
-  var version = await client.dpms.getVersion();
+  var version = await dpms.getVersion();
   print('Server supports DPMS ${version.major}.${version.minor}');
 
-  var capable = await client.dpms.capable();
+  var capable = await dpms.capable();
   if (!capable) {
     print('X11 server not DPMS capable');
     await client.close();
     return;
   }
 
-  print(await client.dpms.getTimeouts());
-  print(await client.dpms.info());
+  print(await dpms.getTimeouts());
+  print(await dpms.info());
 
   await client.close();
 }

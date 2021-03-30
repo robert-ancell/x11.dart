@@ -13,7 +13,10 @@ class X11DamageNotifyEvent extends X11Event {
   final int timestamp;
 
   X11DamageNotifyEvent(this.firstEventCode, this.drawable, this.damage,
-      {this.level, this.area, this.geometry, this.timestamp = 0});
+      {required this.level,
+      required this.area,
+      required this.geometry,
+      this.timestamp = 0});
 
   factory X11DamageNotifyEvent.fromBuffer(
       int firstEventCode, X11ReadBuffer buffer) {

@@ -41,7 +41,7 @@ class _X11Client {
     var request = X11SetupRequest.fromBuffer(buffer);
     buffer.flush();
 
-    String failureReason;
+    String? failureReason;
 
     if (!(request.protocolVersion.major == 11 &&
         request.protocolVersion.minor == 0)) {
@@ -130,7 +130,7 @@ class _X11Client {
     sequenceNumber++;
 
     X11Request request;
-    X11Reply reply;
+    X11Reply? reply;
     if (opcode == 1) {
       var r = X11CreateWindowRequest.fromBuffer(requestBuffer);
       request = r;
@@ -465,6 +465,7 @@ class _X11Client {
     } else {
       // FIXME: Add UnknownRequest
       print('Unknown opcode $opcode');
+      return true;
     }
 
     print(request);
@@ -489,7 +490,7 @@ class _X11Client {
 
 class X11Server {
   int displayNumber;
-  ServerSocket _socket;
+  ServerSocket? _socket;
   final clients = <_X11Client>[];
 
   // FIXME: Common location
@@ -570,7 +571,7 @@ class X11Server {
     var socketAddress = InternetAddress('/tmp/.X11-unix/X$displayNumber',
         type: InternetAddressType.unix);
     _socket = await ServerSocket.bind(socketAddress, 0);
-    _socket.listen(_onConnect);
+    _socket?.listen(_onConnect);
   }
 
   X11Atom internAtom(String name, {bool onlyIfExists = false}) {

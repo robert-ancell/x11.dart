@@ -762,12 +762,12 @@ class X11ReparentNotifyEvent extends X11Event {
   final bool overrideRedirect;
 
   X11ReparentNotifyEvent(
-      {this.event,
-      this.window,
-      this.parent,
-      this.x,
-      this.y,
-      this.overrideRedirect});
+      {required this.event,
+      required this.window,
+      required this.parent,
+      required this.x,
+      required this.y,
+      required this.overrideRedirect});
 
   factory X11ReparentNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -810,7 +810,10 @@ class X11ConfigureNotifyEvent extends X11Event {
   final bool overrideRedirect;
 
   X11ConfigureNotifyEvent(this.window, this.geometry,
-      {this.event, this.aboveSibling, this.borderWidth, this.overrideRedirect});
+      {required this.event,
+      required this.aboveSibling,
+      required this.borderWidth,
+      required this.overrideRedirect});
 
   factory X11ConfigureNotifyEvent.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -858,11 +861,11 @@ class X11ConfigureRequestEvent extends X11Event {
   final int valueMask; // FIXME
 
   X11ConfigureRequestEvent(this.window, this.geometry,
-      {this.stackMode,
-      this.parent,
-      this.sibling,
-      this.borderWidth,
-      this.valueMask});
+      {required this.stackMode,
+      required this.parent,
+      required this.sibling,
+      required this.borderWidth,
+      required this.valueMask});
 
   factory X11ConfigureRequestEvent.fromBuffer(X11ReadBuffer buffer) {
     var stackMode = buffer.readUint8();

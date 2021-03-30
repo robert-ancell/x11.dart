@@ -9,8 +9,9 @@ void main() async {
     await client.close();
     return;
   }
+  var mitShm = client.mitShm!;
 
-  var reply = await client.mitShm.queryVersion();
+  var reply = await mitShm.queryVersion();
   print(
       'Server supports MIT-SHM ${reply.version.major}.${reply.version.minor}');
   print('  User ID: ${reply.uid}');

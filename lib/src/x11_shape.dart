@@ -96,7 +96,7 @@ class X11ShapeExtension extends X11Extension {
   }
 
   @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+  X11Event? decodeEvent(int code, X11ReadBuffer buffer) {
     if (code == _firstEvent) {
       return X11ShapeNotifyEvent.fromBuffer(_firstEvent, buffer);
     } else {

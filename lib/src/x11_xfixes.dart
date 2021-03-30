@@ -271,7 +271,7 @@ class X11XFixesExtension extends X11Extension {
   }
 
   @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+  X11Event? decodeEvent(int code, X11ReadBuffer buffer) {
     if (code == _firstEvent) {
       return X11XFixesSelectionNotifyEvent.fromBuffer(_firstEvent, buffer);
     } else if (code == _firstEvent + 1) {
@@ -282,7 +282,7 @@ class X11XFixesExtension extends X11Extension {
   }
 
   @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
     if (code == _firstError) {
       return X11RegionError.fromBuffer(sequenceNumber, buffer);
     } else if (code == _firstError + 1) {

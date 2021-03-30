@@ -555,9 +555,9 @@ class X11ValuatorInfo extends X11InputInfo {
 
 class X11RgbColorItem {
   final int pixel;
-  final int red;
-  final int green;
-  final int blue;
+  final int? red;
+  final int? green;
+  final int? blue;
 
   const X11RgbColorItem(this.pixel,
       {this.red = 0, this.green = 0, this.blue = 0});
@@ -627,8 +627,10 @@ class X11GlyphItemGlyphs extends X11GlyphItem {
 }
 
 class X11InputClassInfo {
-  int id; // FIXME: enum
-  int eventTypeCode;
+  final int id; // FIXME: enum
+  final int eventTypeCode;
+
+  const X11InputClassInfo(this.id, this.eventTypeCode);
 }
 
 class X11ModifierMap {
@@ -799,18 +801,18 @@ class X11RandrModeInfo {
   final Set<X11RandrModeFlag> modeFlags;
 
   const X11RandrModeInfo(
-      {this.id,
-      this.name,
-      this.sizeInPixels,
-      this.dotClock,
-      this.hSyncStart,
-      this.hSyncEnd,
-      this.hTotal,
-      this.hSkew,
-      this.vSyncStart,
-      this.vSyncEnd,
-      this.vTotal,
-      this.modeFlags});
+      {required this.id,
+      required this.name,
+      required this.sizeInPixels,
+      required this.dotClock,
+      required this.hSyncStart,
+      required this.hSyncEnd,
+      required this.hTotal,
+      required this.hSkew,
+      required this.vSyncStart,
+      required this.vSyncEnd,
+      required this.vTotal,
+      required this.modeFlags});
 
   @override
   String toString() =>
@@ -827,13 +829,13 @@ class X11RandrMonitorInfo {
   final List<X11ResourceId> outputs; // FIXME: or crtcs? spec is unclear
 
   const X11RandrMonitorInfo(
-      {this.name,
-      this.primary,
-      this.automatic,
-      this.location,
-      this.sizeInPixels,
-      this.sizeInMillimeters,
-      this.outputs});
+      {required this.name,
+      required this.primary,
+      required this.automatic,
+      required this.location,
+      required this.sizeInPixels,
+      required this.sizeInMillimeters,
+      required this.outputs});
 }
 
 class X11RandrScreenSize {

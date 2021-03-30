@@ -296,7 +296,8 @@ class X11XFixesCreateRegionFromWindowRequest extends X11Request {
   final X11ResourceId window;
   final X11ShapeKind kind;
 
-  X11XFixesCreateRegionFromWindowRequest(this.id, this.window, {this.kind});
+  X11XFixesCreateRegionFromWindowRequest(this.id, this.window,
+      {required this.kind});
 
   factory X11XFixesCreateRegionFromWindowRequest.fromBuffer(
       X11ReadBuffer buffer) {
@@ -637,7 +638,7 @@ class X11XFixesFetchRegionReply extends X11Reply {
   final X11Rectangle extents;
   final List<X11Rectangle> rectangles;
 
-  X11XFixesFetchRegionReply({this.extents, this.rectangles});
+  X11XFixesFetchRegionReply({required this.extents, required this.rectangles});
 
   static X11XFixesFetchRegionReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -886,11 +887,11 @@ class X11XFixesGetCursorImageAndNameReply extends X11Reply {
   final String name;
 
   X11XFixesGetCursorImageAndNameReply(this.size, this.data,
-      {this.location,
-      this.hotspot,
-      this.cursorSerial,
-      this.cursorAtom,
-      this.name});
+      {required this.location,
+      required this.hotspot,
+      required this.cursorSerial,
+      required this.cursorAtom,
+      required this.name});
 
   static X11XFixesGetCursorImageAndNameReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);

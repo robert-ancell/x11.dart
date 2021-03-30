@@ -82,11 +82,11 @@ class _RequestStreamHandler<T> extends _RequestHandler {
 }
 
 class X11Extension {
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+  X11Event? decodeEvent(int code, X11ReadBuffer buffer) {
     return null;
   }
 
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
     return null;
   }
 }
@@ -102,72 +102,72 @@ class X11Client {
   Stream<X11Event> get eventStream => _eventStreamController.stream;
 
   /// Composite extension, or null if it doesn't exist.
-  X11CompositeExtension get composite => _composite;
+  X11CompositeExtension? get composite => _composite;
 
   /// DAMAGE extension, or null if it doesn't exist.
-  X11DamageExtension get damage => _damage;
+  X11DamageExtension? get damage => _damage;
 
   /// DPMS extension, or null if it doesn't exist.
-  X11DpmsExtension get dpms => _dpms;
+  X11DpmsExtension? get dpms => _dpms;
 
   /// MIT-SCREEN-SAVER extension, or null if it doesn't exist.
-  X11MitScreenSaverExtension get mitScreenSaver => _mitScreenSaver;
+  X11MitScreenSaverExtension? get mitScreenSaver => _mitScreenSaver;
 
   /// MIT-SHM extension, or null if it doesn't exist.
-  X11MitShmExtension get mitShm => _mitShm;
+  X11MitShmExtension? get mitShm => _mitShm;
 
   /// RANDR extension, or null if it doesn't exist.
-  X11RandrExtension get randr => _randr;
+  X11RandrExtension? get randr => _randr;
 
   /// RENDER extension, or null if it doesn't exist.
-  X11RenderExtension get render => _render;
+  X11RenderExtension? get render => _render;
 
   /// SECURITY extension, or null if it doesn't exist.
-  X11SecurityExtension get security => _security;
+  X11SecurityExtension? get security => _security;
 
   /// SHAPE extension, or null if it doesn't exist.
-  X11ShapeExtension get shape => _shape;
+  X11ShapeExtension? get shape => _shape;
 
   /// SYNC extension, or null if it doesn't exist.
-  X11SyncExtension get sync => _sync;
+  X11SyncExtension? get sync => _sync;
 
   /// XFIXES extension, or null if it doesn't exist.
-  X11XFixesExtension get xfixes => _xfixes;
+  X11XFixesExtension? get xfixes => _xfixes;
 
   /// XInput extension, or null if it doesn't exist.
-  X11XInputExtension get xinput => _xinput;
+  X11XInputExtension? get xinput => _xinput;
 
   /// XKeyboard extension, or null if it doesn't exist.
-  X11XKeyboardExtension get xkeyboard => _xkeyboard;
+  X11XKeyboardExtension? get xkeyboard => _xkeyboard;
 
-  Socket _socket;
+  Socket? _socket;
   final _buffer = X11ReadBuffer();
   final _connectCompleter = Completer();
   int _sequenceNumber = 0;
   int _resourceIdBase = 0;
   int _maximumRequestLength = 0;
   int _resourceCount = 0;
-  List<X11Screen> _screens;
+  var _screens = <X11Screen>[];
   final _errorStreamController = StreamController<X11Error>();
   final _eventStreamController = StreamController<X11Event>();
   final _requests = <int, _RequestHandler>{};
 
-  final _atoms = <String, int>{};
-  final _atomNames = <int, String>{};
+  final _atoms = <String?, int>{};
+  final _atomNames = <int, String?>{};
 
-  X11CompositeExtension _composite;
-  X11DamageExtension _damage;
-  X11DpmsExtension _dpms;
-  X11MitScreenSaverExtension _mitScreenSaver;
-  X11MitShmExtension _mitShm;
-  X11RandrExtension _randr;
-  X11RenderExtension _render;
-  X11SecurityExtension _security;
-  X11ShapeExtension _shape;
-  X11SyncExtension _sync;
-  X11XFixesExtension _xfixes;
-  X11XInputExtension _xinput;
-  X11XKeyboardExtension _xkeyboard;
+  X11CompositeExtension? _composite;
+  X11DamageExtension? _damage;
+  X11DpmsExtension? _dpms;
+  X11MitScreenSaverExtension? _mitScreenSaver;
+  X11MitShmExtension? _mitShm;
+  X11RandrExtension? _randr;
+  X11RenderExtension? _render;
+  X11SecurityExtension? _security;
+  X11ShapeExtension? _shape;
+  X11SyncExtension? _sync;
+  X11XFixesExtension? _xfixes;
+  X11XInputExtension? _xinput;
+  X11XKeyboardExtension? _xkeyboard;
 
   /// Creates a new X client.
   /// Call [connect] or [connectToHost] to connect to an X server.
@@ -260,8 +260,8 @@ class X11Client {
       throw 'No DISPLAY set';
     }
 
-    String host;
-    int displayNumber;
+    String? host;
+    int? displayNumber;
     var dividerIndex = display.indexOf(':');
     if (dividerIndex >= 0) {
       host = display.substring(0, dividerIndex);
@@ -286,13 +286,13 @@ class X11Client {
     var socketAddress = InternetAddress('/tmp/.X11-unix/X$displayNumber',
         type: InternetAddressType.unix);
     _socket = await Socket.connect(socketAddress, 0);
-    _socket.listen(_processData);
+    _socket?.listen(_processData);
 
     var buffer = X11WriteBuffer();
     buffer.writeUint8(0x6c); // Little endian
     var request = X11SetupRequest();
     request.encode(buffer);
-    _socket.add(buffer.data);
+    _socket?.add(buffer.data);
 
     await _connectCompleter.future;
 
@@ -408,22 +408,22 @@ class X11Client {
       {X11WindowClass windowClass = X11WindowClass.copyFromParent,
       int visual = 0,
       int depth = 24,
-      X11ResourceId colormap,
-      X11ResourceId cursor,
-      Set<X11EventType> events,
-      Set<X11EventType> doNotPropagate,
+      X11ResourceId? colormap,
+      X11ResourceId? cursor,
+      Set<X11EventType>? events,
+      Set<X11EventType>? doNotPropagate,
       int borderWidth = 0,
-      X11ResourceId backgroundPixmap,
-      int backgroundPixel,
-      X11ResourceId borderPixmap,
-      int borderPixel,
-      X11BitGravity bitGravity,
-      X11WinGravity winGravity,
-      X11BackingStore backingStore,
-      int backingPlanes,
-      int backingPixel,
-      bool overrideRedirect,
-      bool saveUnder}) {
+      X11ResourceId? backgroundPixmap,
+      int? backgroundPixel,
+      X11ResourceId? borderPixmap,
+      int? borderPixel,
+      X11BitGravity? bitGravity,
+      X11WinGravity? winGravity,
+      X11BackingStore? backingStore,
+      int? backingPlanes,
+      int? backingPixel,
+      bool? overrideRedirect,
+      bool? saveUnder}) {
     var request = X11CreateWindowRequest(id, parent, geometry, depth,
         borderWidth: borderWidth,
         windowClass: windowClass,
@@ -449,22 +449,22 @@ class X11Client {
   /// Changes the attributes of [window].
   /// The attributes are the same as [createWindow].
   int changeWindowAttributes(X11ResourceId window,
-      {int borderWidth,
-      X11ResourceId backgroundPixmap,
-      int backgroundPixel,
-      X11ResourceId borderPixmap,
-      int borderPixel,
-      X11BitGravity bitGravity,
-      X11WinGravity winGravity,
-      X11BackingStore backingStore,
-      int backingPlanes,
-      int backingPixel,
-      bool overrideRedirect,
-      bool saveUnder,
-      Set<X11EventType> events,
-      Set<X11EventType> doNotPropagate,
-      X11ResourceId colormap,
-      X11ResourceId cursor}) {
+      {int? borderWidth,
+      X11ResourceId? backgroundPixmap,
+      int? backgroundPixel,
+      X11ResourceId? borderPixmap,
+      int? borderPixel,
+      X11BitGravity? bitGravity,
+      X11WinGravity? winGravity,
+      X11BackingStore? backingStore,
+      int? backingPlanes,
+      int? backingPixel,
+      bool? overrideRedirect,
+      bool? saveUnder,
+      Set<X11EventType>? events,
+      Set<X11EventType>? doNotPropagate,
+      X11ResourceId? colormap,
+      X11ResourceId? cursor}) {
     var request = X11ChangeWindowAttributesRequest(window,
         backgroundPixmap: backgroundPixmap,
         backgroundPixel: backgroundPixel,
@@ -555,13 +555,13 @@ class X11Client {
   ///
   /// The dimensions of the window are changed if one or more of [x], [y], [width] and [height] are set.
   int configureWindow(X11ResourceId window,
-      {int x,
-      int y,
-      int width,
-      int height,
-      int borderWidth,
-      X11ResourceId sibling,
-      X11StackMode stackMode}) {
+      {int? x,
+      int? y,
+      int? width,
+      int? height,
+      int? borderWidth,
+      X11ResourceId? sibling,
+      X11StackMode? stackMode}) {
     var request = X11ConfigureWindowRequest(window,
         x: x,
         y: y,
@@ -702,12 +702,12 @@ class X11Client {
   /// If [type] is not null, the property must match the requested type.
   /// If [delete] is true the property is removed.
   Future<X11GetPropertyReply> getProperty(X11ResourceId window, String property,
-      {String type,
+      {String? type,
       int longOffset = 0,
       int longLength = 4294967295,
       bool delete = false}) async {
     var propertyAtom = await internAtom(property);
-    var typeAtom = type != null ? await internAtom(type) : 0;
+    var typeAtom = type != null ? await internAtom(type) : X11Atom.None;
     var request = X11GetPropertyRequest(window, propertyAtom,
         type: typeAtom,
         longOffset: longOffset,
@@ -719,7 +719,7 @@ class X11Client {
   }
 
   /// Gets a string [property] on [window].
-  Future<String> getPropertyString(
+  Future<String?> getPropertyString(
       X11ResourceId window, String property) async {
     var reply = await getProperty(window, property, type: 'STRING');
     if (reply.format == 8) {
@@ -769,7 +769,7 @@ class X11Client {
   /// Requests that [selection] is conveted to [target] and a [SelectionNotify] event generated to [requestorWindow] with the result.
   Future<int> convertSelection(
       String selection, String target, X11ResourceId requestorWindow,
-      {String property, int time = 0}) async {
+      {String? property, int time = 0}) async {
     var selectionAtom = await internAtom(selection);
     var targetAtom = await internAtom(target);
     var propertyAtom = X11Atom.None;
@@ -1075,27 +1075,27 @@ class X11Client {
   /// Creates a graphics context with [id] for drawing on [drawable].
   /// When no longer required, the graphics context should be deleted with [freeGC].
   int createGC(X11ResourceId id, X11ResourceId drawable,
-      {X11GraphicsFunction function,
-      int planeMask,
-      int foreground,
-      int background,
-      int lineWidth,
-      X11LineStyle lineStyle,
-      X11CapStyle capStyle,
-      X11JoinStyle joinStyle,
-      X11FillStyle fillStyle,
-      X11FillRule fillRule,
-      int tile,
-      int stipple,
-      X11Point tileStippleOrigin,
-      X11ResourceId font,
-      X11SubwindowMode subwindowMode,
-      bool graphicsExposures,
-      X11Point clipOrigin,
-      int clipMask,
-      int dashOffset,
-      int dashes,
-      X11ArcMode arcMode}) {
+      {X11GraphicsFunction? function,
+      int? planeMask,
+      int? foreground,
+      int? background,
+      int? lineWidth,
+      X11LineStyle? lineStyle,
+      X11CapStyle? capStyle,
+      X11JoinStyle? joinStyle,
+      X11FillStyle? fillStyle,
+      X11FillRule? fillRule,
+      int? tile,
+      int? stipple,
+      X11Point? tileStippleOrigin,
+      X11ResourceId? font,
+      X11SubwindowMode? subwindowMode,
+      bool? graphicsExposures,
+      X11Point? clipOrigin,
+      int? clipMask,
+      int? dashOffset,
+      int? dashes,
+      X11ArcMode? arcMode}) {
     var request = X11CreateGCRequest(id, drawable,
         function: function,
         planeMask: planeMask,
@@ -1109,15 +1109,13 @@ class X11Client {
         fillRule: fillRule,
         tile: tile,
         stipple: stipple,
-        tileStippleXOrigin:
-            tileStippleOrigin != null ? tileStippleOrigin.x : null,
-        tileStippleYOrigin:
-            tileStippleOrigin != null ? tileStippleOrigin.y : null,
+        tileStippleXOrigin: tileStippleOrigin?.x,
+        tileStippleYOrigin: tileStippleOrigin?.y,
         font: font,
         subwindowMode: subwindowMode,
         graphicsExposures: graphicsExposures,
-        clipXOrigin: clipOrigin != null ? clipOrigin.x : null,
-        clipYOrigin: clipOrigin != null ? clipOrigin.y : null,
+        clipXOrigin: clipOrigin?.x,
+        clipYOrigin: clipOrigin?.y,
         clipMask: clipMask,
         dashOffset: dashOffset,
         dashes: dashes,
@@ -1129,27 +1127,27 @@ class X11Client {
   ///
   /// The properties are the same as in [createGC].
   int changeGC(X11ResourceId gc,
-      {X11GraphicsFunction function,
-      int planeMask,
-      int foreground,
-      int background,
-      int lineWidth,
-      X11LineStyle lineStyle,
-      X11CapStyle capStyle,
-      X11JoinStyle joinStyle,
-      X11FillStyle fillStyle,
-      X11FillRule fillRule,
-      int tile,
-      int stipple,
-      X11Point tileStippleOrigin,
-      X11ResourceId font,
-      X11SubwindowMode subwindowMode,
-      bool graphicsExposures,
-      X11Point clipOrigin,
-      int clipMask,
-      int dashOffset,
-      int dashes,
-      X11ArcMode arcMode}) {
+      {X11GraphicsFunction? function,
+      int? planeMask,
+      int? foreground,
+      int? background,
+      int? lineWidth,
+      X11LineStyle? lineStyle,
+      X11CapStyle? capStyle,
+      X11JoinStyle? joinStyle,
+      X11FillStyle? fillStyle,
+      X11FillRule? fillRule,
+      int? tile,
+      int? stipple,
+      X11Point? tileStippleOrigin,
+      X11ResourceId? font,
+      X11SubwindowMode? subwindowMode,
+      bool? graphicsExposures,
+      X11Point? clipOrigin,
+      int? clipMask,
+      int? dashOffset,
+      int? dashes,
+      X11ArcMode? arcMode}) {
     var request = X11ChangeGCRequest(gc,
         function: function,
         planeMask: planeMask,
@@ -1163,15 +1161,13 @@ class X11Client {
         fillRule: fillRule,
         tile: tile,
         stipple: stipple,
-        tileStippleXOrigin:
-            tileStippleOrigin != null ? tileStippleOrigin.x : null,
-        tileStippleYOrigin:
-            tileStippleOrigin != null ? tileStippleOrigin.y : null,
+        tileStippleXOrigin: tileStippleOrigin?.x,
+        tileStippleYOrigin: tileStippleOrigin?.y,
         font: font,
         subwindowMode: subwindowMode,
         graphicsExposures: graphicsExposures,
-        clipXOrigin: clipOrigin != null ? clipOrigin.x : null,
-        clipYOrigin: clipOrigin != null ? clipOrigin.y : null,
+        clipXOrigin: clipOrigin?.x,
+        clipYOrigin: clipOrigin?.y,
         clipMask: clipMask,
         dashOffset: dashOffset,
         dashes: dashes,
@@ -1601,14 +1597,14 @@ class X11Client {
 
   /// Changes settings for the keyboard.
   int changeKeyboardControl(
-      {int keyClickPercent,
-      int bellPercent,
-      int bellPitch,
-      int bellDuration,
-      int led,
-      int ledMode,
-      int key,
-      int autoRepeatMode}) {
+      {int? keyClickPercent,
+      int? bellPercent,
+      int? bellPitch,
+      int? bellDuration,
+      int? led,
+      int? ledMode,
+      int? key,
+      int? autoRepeatMode}) {
     var request = X11ChangeKeyboardControlRequest(
         keyClickPercent: keyClickPercent,
         bellPercent: bellPercent,
@@ -1643,7 +1639,7 @@ class X11Client {
   ///
   /// [acceleration] is the movement multiplier or null to leave unchanged.
   /// [threshold] is the number of pixels to move before acceleration begins. Setting [threshold] to -1 resets it to the default.
-  int changePointerControl({X11Fraction acceleration, int threshold}) {
+  int changePointerControl({X11Fraction? acceleration, int? threshold}) {
     var request = X11ChangePointerControlRequest(
         acceleration: acceleration, threshold: threshold);
     return sendRequest(105, request);
@@ -1661,8 +1657,8 @@ class X11Client {
   int setScreenSaver(
       {int timeout = -1,
       int interval = -1,
-      bool preferBlanking,
-      bool allowExposures}) {
+      bool? preferBlanking,
+      bool? allowExposures}) {
     var request = X11SetScreenSaverRequest(
         timeout: timeout,
         interval: interval,
@@ -1861,7 +1857,7 @@ class X11Client {
       var sequenceNumber = _buffer.readUint16();
       errorBuffer.addAll(_buffer.readListOfUint8(28));
 
-      X11Error error;
+      X11Error? error;
       if (code == 1) {
         error = X11RequestError.fromBuffer(sequenceNumber, errorBuffer);
       } else if (code == 2) {
@@ -1899,25 +1895,25 @@ class X11Client {
       }
 
       if (damage != null) {
-        error ??= damage.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= damage!.decodeError(code, sequenceNumber, errorBuffer);
       }
       if (mitShm != null) {
-        error ??= mitShm.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= mitShm!.decodeError(code, sequenceNumber, errorBuffer);
       }
       if (randr != null) {
-        error ??= randr.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= randr!.decodeError(code, sequenceNumber, errorBuffer);
       }
       if (render != null) {
-        error ??= render.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= render!.decodeError(code, sequenceNumber, errorBuffer);
       }
       if (security != null) {
-        error ??= security.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= security!.decodeError(code, sequenceNumber, errorBuffer);
       }
       if (xfixes != null) {
-        error ??= xfixes.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= xfixes!.decodeError(code, sequenceNumber, errorBuffer);
       }
       if (xinput != null) {
-        error ??= xinput.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= xinput!.decodeError(code, sequenceNumber, errorBuffer);
       }
       error ??= X11UnknownError.fromBuffer(code, sequenceNumber, errorBuffer);
 
@@ -1957,7 +1953,7 @@ class X11Client {
       for (var i = 0; i < 28; i++) {
         eventBuffer.add(_buffer.readUint8());
       }
-      X11Event event;
+      X11Event? event;
       if (code == 2) {
         event = X11KeyPressEvent.fromBuffer(eventBuffer);
       } else if (code == 3) {
@@ -2027,28 +2023,28 @@ class X11Client {
       }
 
       if (damage != null) {
-        event ??= damage.decodeEvent(code, eventBuffer);
+        event ??= damage!.decodeEvent(code, eventBuffer);
       }
       if (mitScreenSaver != null) {
-        event ??= mitScreenSaver.decodeEvent(code, eventBuffer);
+        event ??= mitScreenSaver!.decodeEvent(code, eventBuffer);
       }
       if (mitShm != null) {
-        event ??= mitShm.decodeEvent(code, eventBuffer);
+        event ??= mitShm!.decodeEvent(code, eventBuffer);
       }
       if (randr != null) {
-        event ??= randr.decodeEvent(code, eventBuffer);
+        event ??= randr!.decodeEvent(code, eventBuffer);
       }
       if (security != null) {
-        event ??= security.decodeEvent(code, eventBuffer);
+        event ??= security!.decodeEvent(code, eventBuffer);
       }
       if (shape != null) {
-        event ??= shape.decodeEvent(code, eventBuffer);
+        event ??= shape!.decodeEvent(code, eventBuffer);
       }
       if (xfixes != null) {
-        event ??= xfixes.decodeEvent(code, eventBuffer);
+        event ??= xfixes!.decodeEvent(code, eventBuffer);
       }
       if (xinput != null) {
-        event ??= xinput.decodeEvent(code, eventBuffer);
+        event ??= xinput!.decodeEvent(code, eventBuffer);
       }
       event ??= X11UnknownEvent.fromBuffer(code, eventBuffer);
 
@@ -2088,8 +2084,8 @@ class X11Client {
       headerBuffer.writeUint16(0);
       headerBuffer.writeUint32(length);
     }
-    _socket.add(headerBuffer.data);
-    _socket.add(buffer.data.sublist(1));
+    _socket?.add(headerBuffer.data);
+    _socket?.add(buffer.data.sublist(1));
 
     return _sequenceNumber;
   }
@@ -2113,7 +2109,7 @@ class X11Client {
   /// Closes the connection to the server.
   Future<void> close() async {
     if (_socket != null) {
-      await _socket.close();
+      await _socket!.close();
     }
   }
 }

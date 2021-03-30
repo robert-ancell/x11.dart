@@ -9,8 +9,9 @@ void main() async {
     await client.close();
     return;
   }
+  var xkeyboard = client.xkeyboard!;
 
-  var reply = await client.xkeyboard.useExtension();
+  var reply = await xkeyboard.useExtension();
   print(
       'Server supports XKeyboard ${reply.version.major}.${reply.version.minor}');
 

@@ -210,7 +210,7 @@ class X11XInputExtension extends X11Extension {
 
   Future<X11XInputGetDevicePropertyReply> getDeviceProperty(
       int deviceId, String property,
-      {String type,
+      {String? type,
       int longOffset = 0,
       int longLength = 4294967295,
       bool delete = false}) async {
@@ -353,7 +353,7 @@ class X11XInputExtension extends X11Extension {
   /// If [delete] is true the property is removed.
   Future<X11XInputXiGetPropertyReply> xiGetProperty(
       int deviceId, String property,
-      {String type,
+      {String? type,
       int longOffset = 0,
       int longLength = 4294967295,
       bool delete = false}) async {
@@ -370,7 +370,7 @@ class X11XInputExtension extends X11Extension {
   }
 
   @override
-  X11Event decodeEvent(int code, X11ReadBuffer buffer) {
+  X11Event? decodeEvent(int code, X11ReadBuffer buffer) {
     if (code == _firstEvent) {
       return X11XInputDeviceValuatorEvent.fromBuffer(_firstEvent, buffer);
     } else {
@@ -379,7 +379,7 @@ class X11XInputExtension extends X11Extension {
   }
 
   @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
     if (code == _firstError) {
       return X11DeviceError.fromBuffer(sequenceNumber, buffer);
     } else if (code == _firstError + 1) {

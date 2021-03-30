@@ -46,19 +46,19 @@ class X11RenderExtension extends X11Extension {
     X11ResourceId id,
     X11ResourceId drawable,
     X11ResourceId format, {
-    X11Repeat repeat,
-    X11ResourceId alphaMap,
-    X11Point alphaOrigin,
-    X11Point clipOrigin,
-    int clipMask,
-    bool graphicsExposures,
-    X11SubwindowMode subwindowMode,
-    X11PolyEdge polyEdge,
-    X11PolyMode polyMode,
-    String dither,
-    bool componentAlpha,
+    X11Repeat? repeat,
+    X11ResourceId? alphaMap,
+    X11Point? alphaOrigin,
+    X11Point? clipOrigin,
+    int? clipMask,
+    bool? graphicsExposures,
+    X11SubwindowMode? subwindowMode,
+    X11PolyEdge? polyEdge,
+    X11PolyMode? polyMode,
+    String? dither,
+    bool? componentAlpha,
   }) async {
-    X11Atom ditherAtom;
+    X11Atom? ditherAtom;
     if (dither != null) {
       ditherAtom = await _client.internAtom(dither);
     }
@@ -83,19 +83,19 @@ class X11RenderExtension extends X11Extension {
   /// The values are the same as [createPicture].
   Future<int> changePicture(
     X11ResourceId picture, {
-    X11Repeat repeat,
-    X11ResourceId alphaMap,
-    X11Point alphaOrigin,
-    X11Point clipOrigin,
-    int clipMask,
-    bool graphicsExposures,
-    X11SubwindowMode subwindowMode,
-    X11PolyEdge polyEdge,
-    X11PolyMode polyMode,
-    String dither,
-    bool componentAlpha,
+    X11Repeat? repeat,
+    X11ResourceId? alphaMap,
+    X11Point? alphaOrigin,
+    X11Point? clipOrigin,
+    int? clipMask,
+    bool? graphicsExposures,
+    X11SubwindowMode? subwindowMode,
+    X11PolyEdge? polyEdge,
+    X11PolyMode? polyMode,
+    String? dither,
+    bool? componentAlpha,
   }) async {
-    X11Atom ditherAtom;
+    X11Atom? ditherAtom;
     if (dither != null) {
       ditherAtom = await _client.internAtom(dither);
     }
@@ -382,7 +382,7 @@ class X11RenderExtension extends X11Extension {
   }
 
   @override
-  X11Error decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
     if (code == _firstError) {
       return X11PictFormatError.fromBuffer(sequenceNumber, buffer);
     } else if (code == _firstError + 1) {
