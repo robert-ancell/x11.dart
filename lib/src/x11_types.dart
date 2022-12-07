@@ -376,6 +376,9 @@ class X11Atom {
 
   @override
   String toString() => 'X11Atom($value)';
+
+  @override
+  bool operator ==(other) => other is X11Atom && other.value == value;
 }
 
 class X11CharacterInfo {

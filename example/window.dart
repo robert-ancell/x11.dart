@@ -4,7 +4,10 @@ void main() async {
   var client = X11Client();
   await client.connect();
 
-  client.eventStream.listen((event) {
+  var wmProtocolsAtom = await client.internAtom('WM_PROTOCOLS');
+  var wmDeleteWindowAtom = await client.internAtom('WM_DELETE_WINDOW');
+
+  client.eventStream.listen((event) async {
     if (event is X11KeyPressEvent) {
       print('KeyPress ${event.key}');
     } else if (event is X11KeyReleaseEvent) {
@@ -25,6 +28,12 @@ void main() async {
       print('FocusOut');
     } else if (event is X11ExposeEvent) {
       client.clearArea(event.window, event.area);
+    } else if (event is X11ClientMessageEvent) {
+      if (event.type == wmProtocolsAtom) {
+        if (X11Atom(event.data[0]) == wmDeleteWindowAtom) {
+          await client.close();
+        }
+      }
     }
   });
 
@@ -43,6 +52,12 @@ void main() async {
         X11EventType.focusChange
       },
       backgroundPixel: 0x00000000);
+
+  // Set window title.
   await client.changePropertyString(id, 'WM_NAME', 'x11.dart');
+
+  // Make able to detect when window is closed.
+  await client.changePropertyAtom(id, 'WM_PROTOCOLS', ['WM_DELETE_WINDOW']);
+
   client.mapWindow(id);
 }

@@ -662,10 +662,14 @@ class X11Client {
 
   /// Changes a [property] of [window] to [value].
   Future<int> changePropertyAtom(
-      X11ResourceId window, String property, String value,
+      X11ResourceId window, String property, List<String> value,
       {X11ChangePropertyMode mode = X11ChangePropertyMode.replace}) async {
-    var valueAtom = await internAtom(value);
-    return await changePropertyUint32(window, property, [valueAtom.value],
+    var valueAtoms = <int>[];
+    for (var name in value) {
+      var atom = await internAtom(name);
+      valueAtoms.add(atom.value);
+    }
+    return await changePropertyUint32(window, property, valueAtoms,
         type: 'ATOM', mode: mode);
   }
 
@@ -1946,7 +1950,8 @@ class X11Client {
         }
       }
     } else {
-      var code = reply;
+      //var fromSendEvent = reply & 0x80 != 0;
+      var code = reply & 0x7f;
       var eventBuffer = X11ReadBuffer();
       eventBuffer.add(_buffer.readUint8());
       _buffer.readUint16(); // FIXME(robert-ancell): sequenceNumber
@@ -2016,8 +2021,8 @@ class X11Client {
         event = X11SelectionNotifyEvent.fromBuffer(eventBuffer);
       } else if (code == 32) {
         event = X11ColormapNotifyEvent.fromBuffer(eventBuffer);
-        /*} else if (code == 33) {
-        event = X11ClientMessageEvent.fromBuffer(eventBuffer);*/
+      } else if (code == 33) {
+        event = X11ClientMessageEvent.fromBuffer(eventBuffer);
       } else if (code == 34) {
         event = X11MappingNotifyEvent.fromBuffer(eventBuffer);
       }

@@ -1165,20 +1165,42 @@ class X11ColormapNotifyEvent extends X11Event {
   }
 }
 
-/*class X11ClientMessageEvent extends X11Event {
+class X11ClientMessageEvent extends X11Event {
   final int format;
   final X11ResourceId window;
   final X11Atom type;
-  final ?ClientMessageData? data;
+  final List<int> data;
 
-  X11ClientMessageEvent(this.format, this.window, this.type, this.data);
+  X11ClientMessageEvent.uint8(this.window, this.type, this.data) : format = 8 {
+    assert(data.length == 20);
+  }
+
+  X11ClientMessageEvent.uint16(this.window, this.type, this.data)
+      : format = 16 {
+    assert(data.length == 10);
+  }
+
+  X11ClientMessageEvent.uint32(this.window, this.type, this.data)
+      : format = 32 {
+    assert(data.length == 5);
+  }
 
   factory X11ClientMessageEvent.fromBuffer(X11ReadBuffer buffer) {
     var format = buffer.readUint8();
     var window = buffer.readResourceId();
     var type = buffer.readAtom();
-    var data = buffer.read?ClientMessageData?();
-    return X11ClientMessageEvent(format, window, type, data);
+    if (format == 8) {
+      return X11ClientMessageEvent.uint8(
+          window, type, buffer.readListOfUint8(20));
+    } else if (format == 16) {
+      return X11ClientMessageEvent.uint16(
+          window, type, buffer.readListOfUint16(10));
+    } else if (format == 32) {
+      return X11ClientMessageEvent.uint32(
+          window, type, buffer.readListOfUint32(5));
+    } else {
+      throw Exception('Invalid ClientMessage format $format');
+    }
   }
 
   @override
@@ -1186,10 +1208,16 @@ class X11ColormapNotifyEvent extends X11Event {
     buffer.writeUint8(format);
     buffer.writeResourceId(window);
     buffer.writeAtom(type);
-    buffer.write?ClientMessageData?(data);
+    if (format == 8) {
+      buffer.writeListOfUint8(data);
+    } else if (format == 16) {
+      buffer.writeListOfUint16(data);
+    } else if (format == 32) {
+      buffer.writeListOfUint32(data);
+    }
     return 33;
   }
-}*/
+}
 
 class X11MappingNotifyEvent extends X11Event {
   final int request;
