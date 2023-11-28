@@ -34,9 +34,13 @@ class X11DamageNotifyEvent extends X11Event {
     var geometryHeight = buffer.readUint16();
     return X11DamageNotifyEvent(firstEventCode, drawable, damage,
         level: level,
-        area: X11Rectangle(areaX, areaY, areaWidth, areaHeight),
-        geometry:
-            X11Rectangle(geometryX, geometryY, geometryWidth, geometryHeight),
+        area: X11Rectangle(
+            x: areaX, y: areaY, width: areaWidth, height: areaHeight),
+        geometry: X11Rectangle(
+            x: geometryX,
+            y: geometryY,
+            width: geometryWidth,
+            height: geometryHeight),
         timestamp: timestamp);
   }
 

@@ -1270,7 +1270,7 @@ class X11RandrGetCrtcInfoReply extends X11Reply {
   X11RandrGetCrtcInfoReply(
       {this.status = X11RandrConfigStatus.success,
       this.timestamp = 0,
-      this.area = const X11Rectangle(0, 0, 0, 0),
+      this.area = const X11Rectangle(),
       this.mode = X11ResourceId.None,
       this.rotation = 0,
       this.rotations = 0,
@@ -1294,7 +1294,7 @@ class X11RandrGetCrtcInfoReply extends X11Reply {
     return X11RandrGetCrtcInfoReply(
         status: status,
         timestamp: timestamp,
-        area: X11Rectangle(x, y, width, height),
+        area: X11Rectangle(x: x, y: y, width: width, height: height),
         mode: mode,
         rotation: rotation,
         rotations: rotations,
@@ -1881,8 +1881,8 @@ class X11RandrGetPanningReply extends X11Reply {
 
   X11RandrGetPanningReply(
       {required this.status,
-      this.area = const X11Rectangle(0, 0, 0, 0),
-      this.trackArea = const X11Rectangle(0, 0, 0, 0),
+      this.area = const X11Rectangle(),
+      this.trackArea = const X11Rectangle(),
       required this.borderLeft,
       required this.borderTop,
       required this.borderRight,
@@ -1906,8 +1906,9 @@ class X11RandrGetPanningReply extends X11Reply {
     var borderBottom = buffer.readInt16();
     return X11RandrGetPanningReply(
         status: status,
-        area: X11Rectangle(left, top, width, height),
-        trackArea: X11Rectangle(trackLeft, trackTop, trackWidth, trackHeight),
+        area: X11Rectangle(x: left, y: top, width: width, height: height),
+        trackArea: X11Rectangle(
+            x: trackLeft, y: trackTop, width: trackWidth, height: trackHeight),
         borderLeft: borderLeft,
         borderTop: borderTop,
         borderRight: borderRight,
@@ -1949,8 +1950,8 @@ class X11RandrSetPanningRequest extends X11Request {
   final int timestamp;
 
   X11RandrSetPanningRequest(this.crtc,
-      {this.area = const X11Rectangle(0, 0, 0, 0),
-      this.trackArea = const X11Rectangle(0, 0, 0, 0),
+      {this.area = const X11Rectangle(),
+      this.trackArea = const X11Rectangle(),
       this.borderLeft = 0,
       this.borderTop = 0,
       this.borderRight = 0,
@@ -1973,8 +1974,9 @@ class X11RandrSetPanningRequest extends X11Request {
     var borderRight = buffer.readInt16();
     var borderBottom = buffer.readInt16();
     return X11RandrSetPanningRequest(crtc,
-        area: X11Rectangle(left, top, width, height),
-        trackArea: X11Rectangle(trackLeft, trackTop, trackWidth, trackHeight),
+        area: X11Rectangle(x: left, y: top, width: width, height: height),
+        trackArea: X11Rectangle(
+            x: trackLeft, y: trackTop, width: trackWidth, height: trackHeight),
         borderLeft: borderLeft,
         borderTop: borderTop,
         borderRight: borderRight,

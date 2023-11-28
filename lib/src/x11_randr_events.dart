@@ -104,7 +104,7 @@ class X11RandrCrtcChangeNotifyEvent extends X11Event {
       this.crtc = X11ResourceId.None,
       this.mode = X11ResourceId.None,
       this.rotation = const {X11RandrRotation.rotate0},
-      this.area = const X11Rectangle(0, 0, 0, 0),
+      this.area = const X11Rectangle(),
       this.timestamp = 0});
 
   factory X11RandrCrtcChangeNotifyEvent.fromBuffer(
@@ -124,7 +124,7 @@ class X11RandrCrtcChangeNotifyEvent extends X11Event {
         crtc: crtc,
         mode: mode,
         rotation: rotation,
-        area: X11Rectangle(x, y, width, height),
+        area: X11Rectangle(x: x, y: y, width: width, height: height),
         timestamp: timestamp);
   }
 

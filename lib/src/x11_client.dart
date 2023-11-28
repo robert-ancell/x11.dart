@@ -1025,7 +1025,7 @@ class X11Client {
   int warpPointer(X11Point destination,
       {X11ResourceId destinationWindow = X11ResourceId.None,
       X11ResourceId sourceWindow = X11ResourceId.None,
-      X11Rectangle source = const X11Rectangle(0, 0, 0, 0)}) {
+      X11Rectangle source = const X11Rectangle()}) {
     var request = X11WarpPointerRequest(destination,
         destinationWindow: destinationWindow,
         sourceWindow: sourceWindow,

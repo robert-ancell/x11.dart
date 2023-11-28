@@ -39,7 +39,7 @@ void main() async {
 
   var id = client.generateId();
   client.createWindow(
-      id, client.screens[0].window, X11Rectangle(0, 0, 400, 300),
+      id, client.screens[0].window, X11Rectangle(width: 400, height: 300),
       events: {
         X11EventType.keyPress,
         X11EventType.keyRelease,

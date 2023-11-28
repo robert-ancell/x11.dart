@@ -246,7 +246,7 @@ class X11XFixesCreateRegionRequest extends X11Request {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11XFixesCreateRegionRequest(id, rectangles);
   }
@@ -403,7 +403,7 @@ class X11XFixesSetRegionRequest extends X11Request {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11XFixesSetRegionRequest(region, rectangles);
   }
@@ -546,8 +546,8 @@ class X11XFixesInvertRegionRequest extends X11Request {
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     var region = buffer.readResourceId();
-    return X11XFixesInvertRegionRequest(
-        region, X11Rectangle(x, y, width, height), sourceRegion);
+    return X11XFixesInvertRegionRequest(region,
+        X11Rectangle(x: x, y: y, width: width, height: height), sourceRegion);
   }
 
   @override
@@ -646,7 +646,7 @@ class X11XFixesFetchRegionReply extends X11Reply {
     var y = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    var extents = X11Rectangle(x, y, width, height);
+    var extents = X11Rectangle(x: x, y: y, width: width, height: height);
     buffer.skip(16);
     var rectangles = <X11Rectangle>[];
     while (buffer.remaining > 0) {
@@ -654,7 +654,7 @@ class X11XFixesFetchRegionReply extends X11Reply {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11XFixesFetchRegionReply(extents: extents, rectangles: rectangles);
   }

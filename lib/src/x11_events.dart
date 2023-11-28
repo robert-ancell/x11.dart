@@ -501,7 +501,8 @@ class X11ExposeEvent extends X11Event {
     var height = buffer.readUint16();
     var count = buffer.readUint16();
     buffer.skip(2);
-    return X11ExposeEvent(window, X11Rectangle(x, y, width, height),
+    return X11ExposeEvent(
+        window, X11Rectangle(x: x, y: y, width: width, height: height),
         count: count);
   }
 
@@ -542,7 +543,10 @@ class X11GraphicsExposureEvent extends X11Event {
     var majorOpcode = buffer.readUint8();
     buffer.skip(3);
     return X11GraphicsExposureEvent(
-        drawable, X11Rectangle(x, y, width, height), majorOpcode, minorOpcode,
+        drawable,
+        X11Rectangle(x: x, y: y, width: width, height: height),
+        majorOpcode,
+        minorOpcode,
         count: count);
   }
 
@@ -635,7 +639,7 @@ class X11CreateNotifyEvent extends X11Event {
     var overrideRedirect = buffer.readBool();
     buffer.skip(1);
     return X11CreateNotifyEvent(
-        window, parent, X11Rectangle(x, y, width, height),
+        window, parent, X11Rectangle(x: x, y: y, width: width, height: height),
         borderWidth: borderWidth, overrideRedirect: overrideRedirect);
   }
 
@@ -827,7 +831,8 @@ class X11ConfigureNotifyEvent extends X11Event {
     var borderWidth = buffer.readUint16();
     var overrideRedirect = buffer.readBool();
     buffer.skip(1);
-    return X11ConfigureNotifyEvent(window, X11Rectangle(x, y, width, height),
+    return X11ConfigureNotifyEvent(
+        window, X11Rectangle(x: x, y: y, width: width, height: height),
         event: event,
         aboveSibling: aboveSibling,
         borderWidth: borderWidth,
@@ -878,7 +883,8 @@ class X11ConfigureRequestEvent extends X11Event {
     var height = buffer.readUint16();
     var borderWidth = buffer.readUint16();
     var valueMask = buffer.readUint16();
-    return X11ConfigureRequestEvent(window, X11Rectangle(x, y, width, height),
+    return X11ConfigureRequestEvent(
+        window, X11Rectangle(x: x, y: y, width: width, height: height),
         stackMode: stackMode,
         parent: parent,
         sibling: sibling,
@@ -1280,7 +1286,7 @@ class X11ShapeNotifyEvent extends X11Event {
   X11ShapeNotifyEvent(this.firstEventCode,
       {this.shapeKind = X11ShapeKind.bounding,
       this.affectedWindow = X11ResourceId.None,
-      this.extents = const X11Rectangle(0, 0, 0, 0),
+      this.extents = const X11Rectangle(),
       this.serverTime = 0,
       this.shaped = false});
 
@@ -1298,7 +1304,11 @@ class X11ShapeNotifyEvent extends X11Event {
     return X11ShapeNotifyEvent(firstEventCode,
         shapeKind: shapeKind,
         affectedWindow: affectedWindow,
-        extents: X11Rectangle(extentsX, extentsY, extentsWidth, extentsHeight),
+        extents: X11Rectangle(
+            x: extentsX,
+            y: extentsY,
+            width: extentsWidth,
+            height: extentsHeight),
         serverTime: serverTime,
         shaped: shaped);
   }

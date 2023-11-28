@@ -454,8 +454,8 @@ class X11CreateWindowRequest extends X11Request {
     if ((valueMask & 0x4000) != 0) {
       cursor = buffer.readResourceId();
     }
-    return X11CreateWindowRequest(
-        id, parent, X11Rectangle(x, y, width, height), depth,
+    return X11CreateWindowRequest(id, parent,
+        X11Rectangle(x: x, y: y, width: width, height: height), depth,
         windowClass: windowClass,
         visual: visual,
         borderWidth: borderWidth,
@@ -1329,7 +1329,10 @@ class X11GetGeometryReply extends X11Reply {
     var borderWidth = buffer.readUint16();
     buffer.skip(10);
     return X11GetGeometryReply(
-        root, X11Rectangle(x, y, width, height), depth, borderWidth);
+        root,
+        X11Rectangle(x: x, y: y, width: width, height: height),
+        depth,
+        borderWidth);
   }
 
   @override
@@ -2530,7 +2533,7 @@ class X11WarpPointerRequest extends X11Request {
   X11WarpPointerRequest(this.destination,
       {this.destinationWindow = X11ResourceId.None,
       this.sourceWindow = X11ResourceId.None,
-      this.source = const X11Rectangle(0, 0, 0, 0)});
+      this.source = const X11Rectangle()});
 
   factory X11WarpPointerRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -2545,7 +2548,8 @@ class X11WarpPointerRequest extends X11Request {
     return X11WarpPointerRequest(X11Point(destinationX, destinationY),
         destinationWindow: destinationWindow,
         sourceWindow: sourceWindow,
-        source: X11Rectangle(sourceX, sourceY, sourceWidth, sourceHeight));
+        source: X11Rectangle(
+            x: sourceX, y: sourceY, width: sourceWidth, height: sourceHeight));
   }
 
   @override
@@ -4111,7 +4115,7 @@ class X11SetClipRectanglesRequest extends X11Request {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11SetClipRectanglesRequest(gc, rectangles,
         clipOrigin: X11Point(clipXOrigin, clipYOrigin), ordering: ordering);
@@ -4171,7 +4175,8 @@ class X11ClearAreaRequest extends X11Request {
     var y = buffer.readInt16();
     var width = buffer.readUint16();
     var height = buffer.readUint16();
-    return X11ClearAreaRequest(window, X11Rectangle(x, y, width, height),
+    return X11ClearAreaRequest(
+        window, X11Rectangle(x: x, y: y, width: width, height: height),
         exposures: exposures);
   }
 
@@ -4215,7 +4220,7 @@ class X11CopyAreaRequest extends X11Request {
         sourceDrawable,
         destinationDrawable,
         gc,
-        X11Rectangle(sourceX, sourceY, width, height),
+        X11Rectangle(x: sourceX, y: sourceY, width: width, height: height),
         X11Point(destinationX, destinationY));
   }
 
@@ -4265,7 +4270,7 @@ class X11CopyPlaneRequest extends X11Request {
         sourceDrawable,
         destinationDrawable,
         gc,
-        X11Rectangle(sourceX, sourceY, width, height),
+        X11Rectangle(x: sourceX, y: sourceY, width: width, height: height),
         X11Point(destinationX, destinationY),
         bitPlane);
   }
@@ -4425,7 +4430,7 @@ class X11PolyRectangleRequest extends X11Request {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11PolyRectangleRequest(drawable, gc, rectangles);
   }
@@ -4556,7 +4561,7 @@ class X11PolyFillRectangleRequest extends X11Request {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11PolyFillRectangleRequest(drawable, gc, rectangles);
   }
@@ -4653,9 +4658,15 @@ class X11PutImageRequest extends X11Request {
     while (buffer.remaining > 0) {
       data.add(buffer.readUint8());
     }
-    return X11PutImageRequest(drawable, gc,
-        X11Rectangle(destinationX, destinationY, width, height), data,
-        format: format, depth: depth, leftPad: leftPad);
+    return X11PutImageRequest(
+        drawable,
+        gc,
+        X11Rectangle(
+            x: destinationX, y: destinationY, width: width, height: height),
+        data,
+        format: format,
+        depth: depth,
+        leftPad: leftPad);
   }
 
   @override
@@ -4698,7 +4709,8 @@ class X11GetImageRequest extends X11Request {
     var width = buffer.readUint16();
     var height = buffer.readUint16();
     var planeMask = buffer.readUint32();
-    return X11GetImageRequest(drawable, X11Rectangle(x, y, width, height),
+    return X11GetImageRequest(
+        drawable, X11Rectangle(x: x, y: y, width: width, height: height),
         format: format, planeMask: planeMask);
   }
 
@@ -7171,7 +7183,7 @@ class X11ShapeRectanglesRequest extends X11Request {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11ShapeRectanglesRequest(window, rectangles,
         operation: operation,
@@ -7356,8 +7368,8 @@ class X11ShapeQueryExtentsReply extends X11Reply {
   X11ShapeQueryExtentsReply(
       {this.boundingShaped = true,
       this.clipShaped = true,
-      this.boundingShapeExtents = const X11Rectangle(0, 0, 0, 0),
-      this.clipShapeExtents = const X11Rectangle(0, 0, 0, 0)});
+      this.boundingShapeExtents = const X11Rectangle(),
+      this.clipShapeExtents = const X11Rectangle()});
 
   static X11ShapeQueryExtentsReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -7376,12 +7388,15 @@ class X11ShapeQueryExtentsReply extends X11Reply {
         boundingShaped: boundingShaped,
         clipShaped: clipShaped,
         boundingShapeExtents: X11Rectangle(
-            boundingShapeExtentsX,
-            boundingShapeExtentsY,
-            boundingShapeExtentsWidth,
-            boundingShapeExtentsHeight),
-        clipShapeExtents: X11Rectangle(clipShapeExtentsX, clipShapeExtentsY,
-            clipShapeExtentsWidth, clipShapeExtentsHeight));
+            x: boundingShapeExtentsX,
+            y: boundingShapeExtentsY,
+            width: boundingShapeExtentsWidth,
+            height: boundingShapeExtentsHeight),
+        clipShapeExtents: X11Rectangle(
+            x: clipShapeExtentsX,
+            y: clipShapeExtentsY,
+            width: clipShapeExtentsWidth,
+            height: clipShapeExtentsHeight));
   }
 
   @override
@@ -7512,7 +7527,7 @@ class X11ShapeGetRectanglesReply extends X11Reply {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11ShapeGetRectanglesReply(rectangles, ordering: ordering);
   }

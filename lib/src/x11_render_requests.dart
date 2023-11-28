@@ -776,7 +776,7 @@ class X11RenderSetPictureClipRectanglesRequest extends X11Request {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11RenderSetPictureClipRectanglesRequest(picture, rectangles,
         clipOrigin: X11Point(clipXOrigin, clipYOrigin));
@@ -1226,7 +1226,8 @@ class X11RenderAddGlyphsRequest extends X11Request {
       var y = buffer.readInt16();
       var dx = buffer.readInt16();
       var dy = buffer.readInt16();
-      glyphs.add(X11GlyphInfo(ids[i], X11Rectangle(x, y, width, height),
+      glyphs.add(X11GlyphInfo(
+          ids[i], X11Rectangle(x: x, y: y, width: width, height: height),
           offset: X11Point(dx, dy)));
     }
     var data = buffer.readListOfUint8(buffer.remaining);
@@ -1576,7 +1577,7 @@ class X11RenderFillRectanglesRequest extends X11Request {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11RenderFillRectanglesRequest(destinationPicture, rectangles,
         op: op, color: X11Rgba(red, green, blue, alpha));

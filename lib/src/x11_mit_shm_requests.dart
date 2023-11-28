@@ -155,7 +155,7 @@ class X11MitShmPutImageRequest extends X11Request {
         drawable,
         shmseg,
         X11Size(totalWidth, totalHeight),
-        X11Rectangle(srcX, srcY, srcWidth, srcHeight),
+        X11Rectangle(x: srcX, y: srcY, width: srcWidth, height: srcHeight),
         X11Point(dstX, dstY),
         depth: depth,
         format: format,
@@ -213,8 +213,8 @@ class X11MitShmGetImageRequest extends X11Request {
     buffer.skip(3);
     var shmseg = buffer.readUint32();
     var offset = buffer.readUint32();
-    return X11MitShmGetImageRequest(
-        drawable, X11Rectangle(x, y, width, height), shmseg,
+    return X11MitShmGetImageRequest(drawable,
+        X11Rectangle(x: x, y: y, width: width, height: height), shmseg,
         planeMask: planeMask, format: format, offset: offset);
   }
 

@@ -860,10 +860,11 @@ class X11Rectangle {
   final int width;
   final int height;
 
-  const X11Rectangle(this.x, this.y, this.width, this.height);
+  const X11Rectangle({this.x = 0, this.y = 0, this.width = 0, this.height = 0});
 
   @override
-  String toString() => 'X11Rectangle($x, $y, $width, $height)';
+  String toString() =>
+      'X11Rectangle(x: $x, y: $y, width: $width, height: $height)';
 }
 
 class X11PictFormatInfo {

@@ -308,7 +308,7 @@ class X11ScreensaverSetAttributesRequest extends X11Request {
       cursor = buffer.readResourceId();
     }
     return X11ScreensaverSetAttributesRequest(
-        drawable, X11Rectangle(x, y, width, height),
+        drawable, X11Rectangle(x: x, y: y, width: width, height: height),
         borderWidth: borderWidth,
         windowClass: windowClass,
         depth: depth,

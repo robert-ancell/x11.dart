@@ -79,7 +79,7 @@ class X11ShapeRectanglesRequest extends X11Request {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11ShapeRectanglesRequest(window, rectangles,
         operation: operation,
@@ -264,8 +264,8 @@ class X11ShapeQueryExtentsReply extends X11Reply {
   X11ShapeQueryExtentsReply(
       {this.boundingShaped = true,
       this.clipShaped = true,
-      this.boundingShapeExtents = const X11Rectangle(0, 0, 0, 0),
-      this.clipShapeExtents = const X11Rectangle(0, 0, 0, 0)});
+      this.boundingShapeExtents = const X11Rectangle(),
+      this.clipShapeExtents = const X11Rectangle()});
 
   static X11ShapeQueryExtentsReply fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
@@ -284,12 +284,15 @@ class X11ShapeQueryExtentsReply extends X11Reply {
         boundingShaped: boundingShaped,
         clipShaped: clipShaped,
         boundingShapeExtents: X11Rectangle(
-            boundingShapeExtentsX,
-            boundingShapeExtentsY,
-            boundingShapeExtentsWidth,
-            boundingShapeExtentsHeight),
-        clipShapeExtents: X11Rectangle(clipShapeExtentsX, clipShapeExtentsY,
-            clipShapeExtentsWidth, clipShapeExtentsHeight));
+            x: boundingShapeExtentsX,
+            y: boundingShapeExtentsY,
+            width: boundingShapeExtentsWidth,
+            height: boundingShapeExtentsHeight),
+        clipShapeExtents: X11Rectangle(
+            x: clipShapeExtentsX,
+            y: clipShapeExtentsY,
+            width: clipShapeExtentsWidth,
+            height: clipShapeExtentsHeight));
   }
 
   @override
@@ -420,7 +423,7 @@ class X11ShapeGetRectanglesReply extends X11Reply {
       var y = buffer.readInt16();
       var width = buffer.readUint16();
       var height = buffer.readUint16();
-      rectangles.add(X11Rectangle(x, y, width, height));
+      rectangles.add(X11Rectangle(x: x, y: y, width: width, height: height));
     }
     return X11ShapeGetRectanglesReply(rectangles, ordering: ordering);
   }
