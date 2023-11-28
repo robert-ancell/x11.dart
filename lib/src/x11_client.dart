@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'x11_authority_file.dart';
 import 'x11_big_requests.dart';
 import 'x11_composite.dart';
 import 'x11_damage.dart';
@@ -289,11 +290,38 @@ class X11Client {
       throw "Invalid DISPLAY: '$display'";
     }
 
-    await connectToHost(host, displayNumber);
+    var authorityPath = Platform.environment['XAUTHORITY'];
+    if (authorityPath == null) {
+      var home = Platform.environment['HOME'];
+      if (home == null) {
+        throw 'Unable to determine HOME';
+      }
+
+      authorityPath = '$home/.Xauthority';
+    }
+    var authorityFile = await X11AuthorityFileLoader().load(authorityPath);
+    var records = authorityFile.records.where((r) =>
+        r.address.type == X11AuthorityAddressType.local &&
+        r.authorizationName == 'MIT-MAGIC-COOKIE-1');
+    var authorizationName = '';
+    var authorizationData = <int>[];
+    if (records.isNotEmpty) {
+      var record = records.first;
+      authorizationName = 'MIT-MAGIC-COOKIE-1';
+      authorizationData = record.authorizationData;
+    }
+
+    await connectToHost(host,
+        displayNumber: displayNumber,
+        authorizationName: authorizationName,
+        authorizationData: authorizationData);
   }
 
   /// Connects to the X server on [host] using [displayNumber].
-  Future<void> connectToHost(String host, int displayNumber) async {
+  Future<void> connectToHost(String host,
+      {int displayNumber = 0,
+      String authorizationName = '',
+      List<int> authorizationData = const []}) async {
     if (!(host == '' || host == 'localhost')) {
       throw 'Connecting to host $host not supported';
     }
@@ -305,7 +333,9 @@ class X11Client {
 
     var buffer = X11WriteBuffer();
     buffer.writeUint8(0x6c); // Little endian
-    var request = X11SetupRequest();
+    var request = X11SetupRequest(
+        authorizationName: authorizationName,
+        authorizationData: authorizationData);
     request.encode(buffer);
     _socket?.add(buffer.data);
 

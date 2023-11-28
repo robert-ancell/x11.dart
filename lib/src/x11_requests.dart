@@ -15,54 +15,52 @@ int pad(int length) {
 
 class X11SetupRequest {
   final X11Version protocolVersion;
-  final String authorizationProtocolName;
-  final List<int> authorizationProtocolData;
+  final String authorizationName;
+  final List<int> authorizationData;
 
   const X11SetupRequest(
       {this.protocolVersion = const X11Version(11, 0),
-      this.authorizationProtocolName = '',
-      this.authorizationProtocolData = const []});
+      this.authorizationName = '',
+      this.authorizationData = const []});
 
   factory X11SetupRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
     var protocolMajorVersion = buffer.readUint16();
     var protocolMinorVersion = buffer.readUint16();
-    var authorizationProtocolNameLength = buffer.readUint16();
-    var authorizationProtocolDataLength = buffer.readUint16();
-    var authorizationProtocolName =
-        buffer.readString8(authorizationProtocolNameLength);
-    buffer.skip(pad(authorizationProtocolNameLength));
-    var authorizationProtocolData = <int>[];
-    for (var i = 0; i < authorizationProtocolDataLength; i++) {
-      authorizationProtocolData.add(buffer.readUint8());
+    var authorizationNameLength = buffer.readUint16();
+    var authorizationDataLength = buffer.readUint16();
+    var authorizationName = buffer.readString8(authorizationNameLength);
+    buffer.skip(pad(authorizationNameLength));
+    var authorizationData = <int>[];
+    for (var i = 0; i < authorizationDataLength; i++) {
+      authorizationData.add(buffer.readUint8());
     }
-    buffer.skip(pad(authorizationProtocolDataLength));
+    buffer.skip(pad(authorizationDataLength));
     buffer.skip(2);
 
     return X11SetupRequest(
         protocolVersion: X11Version(protocolMajorVersion, protocolMinorVersion),
-        authorizationProtocolName: authorizationProtocolName,
-        authorizationProtocolData: authorizationProtocolData);
+        authorizationName: authorizationName,
+        authorizationData: authorizationData);
   }
 
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
     buffer.writeUint16(protocolVersion.major);
     buffer.writeUint16(protocolVersion.minor);
-    var authorizationProtocolNameLength =
-        buffer.getString8Length(authorizationProtocolName);
-    buffer.writeUint16(authorizationProtocolNameLength);
-    buffer.writeUint16(authorizationProtocolData.length);
+    var authorizationNameLength = buffer.getString8Length(authorizationName);
+    buffer.writeUint16(authorizationNameLength);
+    buffer.writeUint16(authorizationData.length);
     buffer.skip(2);
-    buffer.writeString8(authorizationProtocolName);
-    buffer.skip(pad(authorizationProtocolNameLength));
-    buffer.writeListOfUint8(authorizationProtocolData);
-    buffer.skip(pad(authorizationProtocolData.length));
+    buffer.writeString8(authorizationName);
+    buffer.skip(pad(authorizationNameLength));
+    buffer.writeListOfUint8(authorizationData);
+    buffer.skip(pad(authorizationData.length));
   }
 
   @override
   String toString() =>
-      "X11SetupRequest(protocolVersion = $protocolVersion, authorizationProtocolName: '$authorizationProtocolName', authorizationProtocolData: $authorizationProtocolData)";
+      "X11SetupRequest(protocolVersion = $protocolVersion, authorizationName: '$authorizationName', authorizationData: $authorizationData)";
 }
 
 class X11SetupFailedReply {
