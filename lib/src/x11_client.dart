@@ -262,15 +262,30 @@ class X11Client {
 
     String? host;
     int? displayNumber;
+    int? screen;
     var dividerIndex = display.indexOf(':');
     if (dividerIndex >= 0) {
       host = display.substring(0, dividerIndex);
       var displayNumberString = display.substring(dividerIndex + 1);
+
+      var screenDividerIndex = displayNumberString.indexOf('.');
+      if (screenDividerIndex >= 0) {
+        var screenString =
+            displayNumberString.substring(screenDividerIndex + 1);
+        displayNumberString =
+            displayNumberString.substring(0, screenDividerIndex);
+        if (RegExp(r'^[0-9]+$').hasMatch(screenString)) {
+          screen = int.parse(screenString);
+        }
+      } else {
+        screen = 0;
+      }
+
       if (RegExp(r'^[0-9]+$').hasMatch(displayNumberString)) {
         displayNumber = int.parse(displayNumberString);
       }
     }
-    if (host == null || displayNumber == null) {
+    if (host == null || displayNumber == null || screen == null) {
       throw "Invalid DISPLAY: '$display'";
     }
 
