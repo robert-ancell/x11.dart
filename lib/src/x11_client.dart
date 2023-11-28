@@ -290,6 +290,11 @@ class X11Client {
       throw "Invalid DISPLAY: '$display'";
     }
 
+    await connectToHost(host, displayNumber: displayNumber);
+  }
+
+  /// Connects to the X server on [host] using [displayNumber].
+  Future<void> connectToHost(String host, {int displayNumber = 0}) async {
     var authorityPath = Platform.environment['XAUTHORITY'];
     if (authorityPath == null) {
       var home = Platform.environment['HOME'];
@@ -300,35 +305,64 @@ class X11Client {
       authorityPath = '$home/.Xauthority';
     }
     var authorityFile = await X11AuthorityFileLoader().load(authorityPath);
-    var records = authorityFile.records.where((r) =>
-        r.address.type == X11AuthorityAddressType.local &&
-        r.authorizationName == 'MIT-MAGIC-COOKIE-1');
     var authorizationName = '';
     var authorizationData = <int>[];
-    if (records.isNotEmpty) {
-      var record = records.first;
-      authorizationName = 'MIT-MAGIC-COOKIE-1';
-      authorizationData = record.authorizationData;
+
+    InternetAddress socketAddress;
+    var port = 0;
+    if (host == '') {
+      socketAddress = InternetAddress('/tmp/.X11-unix/X$displayNumber',
+          type: InternetAddressType.unix);
+
+      var records = authorityFile.records.where((r) =>
+          r.address.type == X11AuthorityAddressType.local &&
+          r.authorizationName == 'MIT-MAGIC-COOKIE-1');
+      if (records.isNotEmpty) {
+        var record = records.first;
+        authorizationName = 'MIT-MAGIC-COOKIE-1';
+        authorizationData = record.authorizationData;
+      }
+    } else {
+      if (displayNumber > 63) {
+        throw 'Invalid display number $displayNumber';
+      }
+      port = displayNumber + 6000;
+      var addresses = await InternetAddress.lookup(host);
+      // FIXME: Support multiple addresses
+      socketAddress = addresses[0];
+
+      var addressType = {
+        InternetAddressType.IPv4: X11AuthorityAddressType.IPv4,
+        InternetAddressType.IPv6: X11AuthorityAddressType.IPv6
+      }[socketAddress.type];
+
+      bool authHostMatches(List<int> address, String host) {
+        var hostData = utf8.encode(host);
+        if (address.length != hostData.length) {
+          return false;
+        }
+        for (var i = 0; i < address.length; i++) {
+          if (address[i] != hostData[i]) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      // FIXME: Also match display?
+      var records = authorityFile.records.where((r) =>
+          (r.address.type == addressType ||
+              r.address.type == X11AuthorityAddressType.wild) &&
+          authHostMatches(r.address.address, host) &&
+          r.authorizationName == 'MIT-MAGIC-COOKIE-1');
+      if (records.isNotEmpty) {
+        var record = records.first;
+        authorizationName = 'MIT-MAGIC-COOKIE-1';
+        authorizationData = record.authorizationData;
+      }
     }
 
-    await connectToHost(host,
-        displayNumber: displayNumber,
-        authorizationName: authorizationName,
-        authorizationData: authorizationData);
-  }
-
-  /// Connects to the X server on [host] using [displayNumber].
-  Future<void> connectToHost(String host,
-      {int displayNumber = 0,
-      String authorizationName = '',
-      List<int> authorizationData = const []}) async {
-    if (!(host == '' || host == 'localhost')) {
-      throw 'Connecting to host $host not supported';
-    }
-
-    var socketAddress = InternetAddress('/tmp/.X11-unix/X$displayNumber',
-        type: InternetAddressType.unix);
-    _socket = await Socket.connect(socketAddress, 0);
+    _socket = await Socket.connect(socketAddress, port);
     _socket?.listen(_processData);
 
     var buffer = X11WriteBuffer();
