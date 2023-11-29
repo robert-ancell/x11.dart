@@ -298,13 +298,21 @@ class X11Client {
     var authorityPath = Platform.environment['XAUTHORITY'];
     if (authorityPath == null) {
       var home = Platform.environment['HOME'];
-      if (home == null) {
-        throw 'Unable to determine HOME';
+      if (home == null && Platform.isWindows) {
+        var username = Platform.environment['USERNAME'];
+        if (username != null) {
+          home = '/users/$username';
+        }
       }
 
-      authorityPath = '$home/.Xauthority';
+      if (home != null) {
+        authorityPath = '$home/.Xauthority';
+      }
     }
-    var authorityFile = await X11AuthorityFileLoader().load(authorityPath);
+    X11AuthorityFile? authorityFile;
+    if (authorityPath != null) {
+      authorityFile = await X11AuthorityFileLoader().load(authorityPath);
+    }
     var authorizationName = '';
     var authorizationData = <int>[];
 
@@ -314,9 +322,10 @@ class X11Client {
       socketAddress = InternetAddress('/tmp/.X11-unix/X$displayNumber',
           type: InternetAddressType.unix);
 
-      var records = authorityFile.records.where((r) =>
-          r.address.type == X11AuthorityAddressType.local &&
-          r.authorizationName == 'MIT-MAGIC-COOKIE-1');
+      var records = authorityFile?.records.where((r) =>
+              r.address.type == X11AuthorityAddressType.local &&
+              r.authorizationName == 'MIT-MAGIC-COOKIE-1') ??
+          [];
       if (records.isNotEmpty) {
         var record = records.first;
         authorizationName = 'MIT-MAGIC-COOKIE-1';
@@ -350,11 +359,12 @@ class X11Client {
       }
 
       // FIXME: Also match display?
-      var records = authorityFile.records.where((r) =>
-          (r.address.type == addressType ||
-              r.address.type == X11AuthorityAddressType.wild) &&
-          authHostMatches(r.address.address, host) &&
-          r.authorizationName == 'MIT-MAGIC-COOKIE-1');
+      var records = authorityFile?.records.where((r) =>
+              (r.address.type == addressType ||
+                  r.address.type == X11AuthorityAddressType.wild) &&
+              authHostMatches(r.address.address, host) &&
+              r.authorizationName == 'MIT-MAGIC-COOKIE-1') ??
+          [];
       if (records.isNotEmpty) {
         var record = records.first;
         authorizationName = 'MIT-MAGIC-COOKIE-1';
