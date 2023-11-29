@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+* Handle missing authority.
+* Use correct default authority location on Windows
+* Use named args for X11Rectangle
+
 ## 0.1.1
 
 * Support MIT-MAGIC-COOKIE-1 authorization
