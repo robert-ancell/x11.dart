@@ -598,15 +598,20 @@ class X11RandrExtension extends X11Extension {
   }
 
   @override
-  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, int majorOpcode,
+      int minorOpcode, X11ReadBuffer buffer) {
     if (code == _firstError) {
-      return X11RandrOutputError.fromBuffer(sequenceNumber, buffer);
+      return X11RandrOutputError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 1) {
-      return X11RandrCrtcError.fromBuffer(sequenceNumber, buffer);
+      return X11RandrCrtcError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 2) {
-      return X11RandrModeError.fromBuffer(sequenceNumber, buffer);
+      return X11RandrModeError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 3) {
-      return X11RandrProviderError.fromBuffer(sequenceNumber, buffer);
+      return X11RandrProviderError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else {
       return null;
     }

@@ -56,13 +56,14 @@ class X11SecurityExtension extends X11Extension {
   }
 
   @override
-  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, int majorOpcode,
+      int minorOpcode, X11ReadBuffer buffer) {
     if (code == _firstError) {
       return X11SecurityBadAuthorizationError.fromBuffer(
-          sequenceNumber, buffer);
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 1) {
       return X11SecurityBadAuthorizationProtocolError.fromBuffer(
-          sequenceNumber, buffer);
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else {
       return null;
     }

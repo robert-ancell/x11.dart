@@ -379,17 +379,23 @@ class X11XInputExtension extends X11Extension {
   }
 
   @override
-  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, int majorOpcode,
+      int minorOpcode, X11ReadBuffer buffer) {
     if (code == _firstError) {
-      return X11DeviceError.fromBuffer(sequenceNumber, buffer);
+      return X11DeviceError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 1) {
-      return X11EventError.fromBuffer(sequenceNumber, buffer);
+      return X11EventError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 2) {
-      return X11ModeError.fromBuffer(sequenceNumber, buffer);
+      return X11ModeError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 3) {
-      return X11DeviceBusyError.fromBuffer(sequenceNumber, buffer);
+      return X11DeviceBusyError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 4) {
-      return X11ClassError.fromBuffer(sequenceNumber, buffer);
+      return X11ClassError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else {
       return null;
     }

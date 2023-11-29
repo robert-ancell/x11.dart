@@ -87,7 +87,8 @@ class X11Extension {
     return null;
   }
 
-  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, int majorOpcode,
+      int minorOpcode, X11ReadBuffer buffer) {
     return null;
   }
 }
@@ -1948,67 +1949,95 @@ class X11Client {
       var errorBuffer = X11ReadBuffer();
       var code = _buffer.readUint8();
       var sequenceNumber = _buffer.readUint16();
-      errorBuffer.addAll(_buffer.readListOfUint8(28));
+      errorBuffer.addAll(_buffer.readListOfUint8(4));
+      var minorOpcode = _buffer.readUint16();
+      var majorOpcode = _buffer.readUint8();
+      errorBuffer.addAll(_buffer.readListOfUint8(21));
 
       X11Error? error;
       if (code == 1) {
-        error = X11RequestError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11RequestError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 2) {
-        error = X11ValueError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11ValueError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 3) {
-        error = X11WindowError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11WindowError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 4) {
-        error = X11PixmapError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11PixmapError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 5) {
-        error = X11AtomError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11AtomError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 6) {
-        error = X11CursorError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11CursorError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 7) {
-        error = X11FontError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11FontError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 8) {
-        error = X11MatchError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11MatchError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 9) {
-        error = X11DrawableError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11DrawableError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 10) {
-        error = X11AccessError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11AccessError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 11) {
-        error = X11AllocError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11AllocError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 12) {
-        error = X11ColormapError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11ColormapError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 13) {
-        error = X11GContextError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11GContextError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 14) {
-        error = X11IdChoiceError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11IdChoiceError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 15) {
-        error = X11NameError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11NameError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 16) {
-        error = X11LengthError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11LengthError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       } else if (code == 17) {
-        error = X11ImplementationError.fromBuffer(sequenceNumber, errorBuffer);
+        error = X11ImplementationError.fromBuffer(
+            sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       }
 
       if (damage != null) {
-        error ??= damage!.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= damage!.decodeError(
+            code, sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       }
       if (mitShm != null) {
-        error ??= mitShm!.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= mitShm!.decodeError(
+            code, sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       }
       if (randr != null) {
-        error ??= randr!.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= randr!.decodeError(
+            code, sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       }
       if (render != null) {
-        error ??= render!.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= render!.decodeError(
+            code, sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       }
       if (security != null) {
-        error ??= security!.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= security!.decodeError(
+            code, sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       }
       if (xfixes != null) {
-        error ??= xfixes!.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= xfixes!.decodeError(
+            code, sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       }
       if (xinput != null) {
-        error ??= xinput!.decodeError(code, sequenceNumber, errorBuffer);
+        error ??= xinput!.decodeError(
+            code, sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
       }
-      error ??= X11UnknownError.fromBuffer(code, sequenceNumber, errorBuffer);
+      error ??= X11UnknownError.fromBuffer(
+          code, sequenceNumber, majorOpcode, minorOpcode, errorBuffer);
 
       var handler = _requests[error.sequenceNumber];
       if (handler != null) {

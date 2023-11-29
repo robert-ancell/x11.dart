@@ -64,9 +64,11 @@ class X11DamageExtension extends X11Extension {
   }
 
   @override
-  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, int majorOpcode,
+      int minorOpcode, X11ReadBuffer buffer) {
     if (code == _firstError) {
-      return X11DamageError.fromBuffer(sequenceNumber, buffer);
+      return X11DamageError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else {
       return null;
     }

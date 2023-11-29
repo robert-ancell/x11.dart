@@ -382,17 +382,23 @@ class X11RenderExtension extends X11Extension {
   }
 
   @override
-  X11Error? decodeError(int code, int sequenceNumber, X11ReadBuffer buffer) {
+  X11Error? decodeError(int code, int sequenceNumber, int majorOpcode,
+      int minorOpcode, X11ReadBuffer buffer) {
     if (code == _firstError) {
-      return X11PictFormatError.fromBuffer(sequenceNumber, buffer);
+      return X11PictFormatError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 1) {
-      return X11PictureError.fromBuffer(sequenceNumber, buffer);
+      return X11PictureError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 1) {
-      return X11PictOpError.fromBuffer(sequenceNumber, buffer);
+      return X11PictOpError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 1) {
-      return X11GlyphSetError.fromBuffer(sequenceNumber, buffer);
+      return X11GlyphSetError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else if (code == _firstError + 1) {
-      return X11GlyphError.fromBuffer(sequenceNumber, buffer);
+      return X11GlyphError.fromBuffer(
+          sequenceNumber, majorOpcode, minorOpcode, buffer);
     } else {
       return null;
     }
