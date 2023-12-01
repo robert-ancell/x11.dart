@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+* Handle not being able to load authority file
+
 ## 0.1.2
 
 * Handle missing authority.
