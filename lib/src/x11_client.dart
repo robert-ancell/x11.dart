@@ -312,7 +312,11 @@ class X11Client {
     }
     X11AuthorityFile? authorityFile;
     if (authorityPath != null) {
-      authorityFile = await X11AuthorityFileLoader().load(authorityPath);
+      try {
+        authorityFile = await X11AuthorityFileLoader().load(authorityPath);
+      } on Exception catch (e) {
+        print('Failed to load authority: $e');
+      }
     }
     var authorizationName = '';
     var authorizationData = <int>[];
