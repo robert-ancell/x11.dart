@@ -6065,16 +6065,18 @@ class X11GetKeyboardMappingRequest extends X11Request {
 
   factory X11GetKeyboardMappingRequest.fromBuffer(X11ReadBuffer buffer) {
     buffer.skip(1);
-    var firstKeycode = buffer.readUint32();
+    var firstKeycode = buffer.readUint8();
     var count = buffer.readUint8();
+    buffer.skip(2);
     return X11GetKeyboardMappingRequest(firstKeycode, count);
   }
 
   @override
   void encode(X11WriteBuffer buffer) {
     buffer.skip(1);
-    buffer.writeUint32(firstKeycode);
+    buffer.writeUint8(firstKeycode);
     buffer.writeUint8(count);
+    buffer.skip(2);
   }
 
   @override
